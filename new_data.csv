@@ -1,0 +1,294 @@
+Player,Round ID,Date,Course,Weather Difficulty,Course Difficulty,Tournament,Benchmark,Shot,Hole,Score,Starting Distance,Starting Location,Ending Distance,Ending Location,Penalty,Starting SG,Ending SG,Strokes Gained
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,1,1,1,500,Tee,230,Fairway,No,4.71,3.59,0.12
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,2,1,2,230,Fairway,50,Fairway,No,3.59,2.70,-0.11
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,3,1,3,50,Fairway,8,Green,No,2.70,1.50,0.20
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,4,1,4,8,Green,0,Green,No,1.50,0.00,0.50
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,1,2,5,180,Tee,35,Green,No,3.16,2.04,0.12
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,2,2,6,35,Green,2,Green,No,2.04,1.04,0.00
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,3,2,7,2,Green,0,Green,No,1.00,0.00,0.00
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,1,3,9,440,Tee,145,Rough,Yes,4.33,3.33,-1.00
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,2,3,10,145,Rough,23,Rough,No,3.33,2.64,-0.31
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,3,3,11,23,Rough,4,Green,No,2.64,1.14,0.50
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,4,3,12,4,Green,0,Green,No,1.02,0.00,0.02
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,1,4,13,330,Tee,150,Fairway,No,4.03,3.08,-0.05
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,2,4,14,150,Fairway,43,Green,No,3.08,2.10,-0.02
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,3,4,15,43,Green,3,Green,No,2.10,1.05,0.05
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,4,4,16,3,Green,0,Green,No,1.00,0.00,0.00
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,1,5,17,460,Tee,180,Fairway,No,4.44,3.24,0.20
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,2,5,18,180,Fairway,12,Fairway,No,3.24,2.21,0.03
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,3,5,19,12,Fairway,4,Green,No,2.21,1.14,0.07
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,4,5,20,4,Green,0,Green,No,1.02,0.00,0.02
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,1,6,21,340,Tee,35,Sand,No,4.07,2.82,0.25
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,2,6,22,35,Sand,34,Green,No,2.82,2.04,-0.22
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,3,6,23,34,Green,4,Green,No,2.04,1.14,-0.10
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,4,6,24,4,Green,0,Green,No,1.02,0.00,0.02
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,1,7,25,550,Tee,260,Fairway,No,5.03,3.81,0.22
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,2,7,26,260,Fairway,34,Rough,No,3.81,2.78,0.03
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,3,7,27,34,Rough,28,Green,No,2.78,1.99,-0.21
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,4,7,28,28,Green,2,Green,No,1.99,1.04,-0.05
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,5,7,29,2,Green,0,Green,No,1.00,0.00,0.00
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,1,8,30,230,Tee,43,Green,No,3.33,2.10,0.23
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,2,8,31,43,Green,4,Green,No,2.10,1.14,-0.04
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,3,8,32,4,Green,1,Green,No,1.14,1.02,-0.88
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,4,8,33,1,Green,0,Green,No,1.00,0.00,0.00
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,1,9,34,420,Tee,120,Fairway,No,4.26,2.95,0.31
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,2,9,35,120,Fairway,32,Green,No,2.95,2.02,-0.07
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,3,9,36,32,Green,1,Green,No,2.02,1.02,0.00
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,4,9,37,1,Green,0,Green,No,1.00,0.00,0.00
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,1,10,38,440,Tee,130,Fairway,No,4.33,2.99,0.34
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,2,10,39,130,Fairway,8,Green,No,2.99,1.50,0.49
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,3,10,40,8,Green,0,Green,No,1.50,0.00,0.50
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,1,11,41,185,Tee,32,Green,No,3.18,2.02,0.16
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,2,11,42,32,Green,2,Green,No,2.02,1.04,-0.02
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,3,11,43,2,Green,0,Green,No,1.00,0.00,0.00
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,1,12,44,390,Tee,140,Fairway,No,4.21,3.03,0.18
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,2,12,45,140,Fairway,21,Green,No,3.03,1.91,0.12
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,3,12,46,21,Green,2,Green,No,1.91,1.04,-0.13
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,4,12,47,2,Green,0,Green,No,1.00,0.00,0.00
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,1,13,48,550,Tee,230,Fairway,No,5.03,3.59,0.44
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,2,13,49,230,Fairway,32,Green,No,3.59,2.02,0.57
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,3,13,50,32,Green,2,Green,No,2.02,1.04,-0.02
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,4,13,51,2,Green,0,Green,No,1.00,0.00,0.00
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,1,14,52,178,Tee,29,Green,No,3.15,2.00,0.15
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,2,14,53,29,Green,2,Green,No,2.00,1.04,-0.04
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,3,14,54,2,Green,0,Green,No,1.00,0.00,0.00
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,1,15,55,460,Tee,175,Recovery,No,4.44,4.05,-0.61
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,2,15,56,175,Recovery,23,Fairway,No,4.05,2.47,0.58
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,3,15,57,23,Fairway,12,Green,No,2.47,1.70,-0.23
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,4,15,58,12,Green,2,Green,No,1.70,1.04,-0.34
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,5,15,59,2,Green,0,Green,No,1.00,0.00,0.00
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,1,16,60,380,Tee,120,Fairway,No,4.19,2.95,0.24
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,2,16,61,120,Fairway,14,Green,No,2.95,1.76,0.19
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,3,16,62,14,Green,2,Green,No,1.76,1.04,-0.28
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,4,16,63,2,Green,0,Green,No,1.00,0.00,0.00
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,1,17,64,340,Tee,80,Fairway,No,4.07,2.82,0.25
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,2,17,65,80,Fairway,2,Green,No,2.82,1.04,0.78
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,3,17,66,2,Green,0,Green,No,1.00,0.00,0.00
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,1,18,67,550,Tee,230,Fairway,No,5.03,3.59,0.44
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,2,18,68,230,Fairway,23,Sand,No,3.59,2.63,-0.04
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,3,18,69,23,Sand,21,Green,No,2.63,1.91,-0.28
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,4,18,70,21,Green,2,Green,No,1.91,1.04,-0.13
+Adam,R1769787317558,2026-01-30,Gaston,Cold,Standard,Practice,Scratch Golfer,5,18,71,2,Green,0,Green,No,1.00,0.00,0.00
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,1,1,1,400,Tee,125,Fairway,No,4.23,2.97,0.26
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,2,1,2,125,Fairway,25,Rough,No,2.97,2.68,-0.71
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,3,1,3,25,Rough,5,Fairway,No,2.68,1.87,-0.19
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,4,1,4,5,Fairway,4,Green,No,1.87,1.14,-0.27
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,5,1,5,4,Green,0,Green,No,1.14,0.00,0.14
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,1,2,6,190,Tee,32,Green,No,3.20,2.02,0.18
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,2,2,7,32,Green,3,Green,No,2.02,1.05,-0.03
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,3,2,8,3,Green,0,Green,No,1.05,0.00,0.05
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,1,3,9,410,Tee,110,Rough,No,4.25,3.17,0.08
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,2,3,10,110,Rough,10,Green,No,3.17,1.63,0.54
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,3,3,11,10,Green,2,Green,No,1.63,1.04,-0.41
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,4,3,12,2,Green,0,Green,No,1.04,0.00,0.04
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,1,4,14,560,Tee,560,Tee,Yes,5.08,5.08,-2.00
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,2,4,15,560,Tee,250,Fairway,No,5.08,3.74,0.34
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,3,4,16,250,Fairway,12,Fairway,No,3.74,2.21,0.53
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,4,4,17,12,Fairway,6,Green,No,2.21,1.32,-0.11
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,5,4,18,6,Green,0,Green,No,1.32,0.00,0.32
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,1,5,19,340,Tee,100,Fairway,No,4.07,2.89,0.18
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,2,5,20,100,Fairway,15,Green,No,2.89,1.80,0.09
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,3,5,21,15,Green,1,Green,No,1.80,1.02,-0.22
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,4,5,22,1,Green,0,Green,No,1.02,0.00,0.02
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,1,6,23,450,Tee,140,Fairway,No,4.38,3.03,0.36
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,2,6,24,140,Fairway,22,Fairway,No,3.03,2.45,-0.42
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,3,6,25,22,Fairway,4,Fairway,No,2.45,1.75,-0.30
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,4,6,26,4,Fairway,0,Fairway,No,1.75,0.00,0.75
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,1,7,27,170,Tee,12,Sand,No,3.13,2.51,-0.38
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,2,7,28,12,Sand,5,Green,No,2.51,1.23,0.28
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,3,7,29,5,Green,1,Green,No,1.23,1.02,-0.79
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,4,7,30,1,Green,0,Green,No,1.02,0.00,0.02
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,1,8,31,540,Tee,220,Fairway,No,4.98,3.52,0.46
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,2,8,32,220,Fairway,35,Green,No,3.52,2.04,0.48
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,3,8,33,35,Green,2,Green,No,2.04,1.04,0.00
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,4,8,34,2,Green,0,Green,No,1.04,0.00,0.04
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,1,9,35,480,Tee,120,Fairway,No,4.56,2.95,0.61
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,2,9,36,120,Fairway,23,Rough,No,2.95,2.64,-0.69
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,3,9,37,23,Rough,6,Green,No,2.64,1.32,0.32
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,4,9,38,6,Green,1,Green,No,1.32,1.02,-0.70
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,5,9,39,1,Green,0,Green,No,1.02,0.00,0.02
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,1,10,40,378,Tee,160,Fairway,No,4.19,3.12,0.07
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,2,10,41,160,Fairway,4,Green,No,3.12,1.14,0.98
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,3,10,42,4,Green,0,Green,No,1.14,0.00,0.14
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,1,11,43,550,Tee,260,Fairway,No,5.03,3.81,0.22
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,2,11,44,260,Fairway,50,Fairway,No,3.81,2.70,0.11
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,3,11,45,50,Fairway,22,Green,No,2.70,1.92,-0.22
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,4,11,46,22,Green,2,Green,No,1.92,1.04,-0.12
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,5,11,47,2,Green,0,Green,No,1.04,0.00,0.04
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,1,12,48,320,Tee,110,Rough,No,3.98,3.17,-0.19
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,2,12,49,110,Rough,17,Green,No,3.17,1.83,0.34
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,3,12,50,17,Green,1,Green,No,1.83,1.02,-0.19
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,4,12,51,1,Green,0,Green,No,1.02,0.00,0.02
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,1,13,52,440,Tee,120,Sand,No,4.33,3.36,-0.03
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,2,13,53,120,Sand,50,Fairway,No,3.36,2.70,-0.34
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,3,13,54,50,Fairway,20,Green,No,2.70,1.90,-0.20
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,4,13,55,20,Green,2,Green,No,1.90,1.04,-0.14
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,5,13,56,2,Green,0,Green,No,1.04,0.00,0.04
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,1,14,57,178,Tee,21,Green,No,3.15,1.91,0.24
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,2,14,58,21,Green,2,Green,No,1.91,1.04,-0.13
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,3,14,59,2,Green,0,Green,No,1.04,0.00,0.04
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,1,15,60,450,Tee,189,Fairway,No,4.38,3.30,0.08
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,2,15,61,189,Fairway,29,Fairway,No,3.30,2.53,-0.23
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,3,15,62,29,Fairway,4,Fairway,No,2.53,1.75,-0.22
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,4,15,63,4,Fairway,1,Fairway,No,1.75,1.11,-0.36
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,5,15,64,1,Fairway,0,Fairway,No,1.11,0.00,0.11
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,1,16,65,175,Tee,14,Green,No,3.15,1.76,0.39
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,2,16,66,14,Green,1,Green,No,1.76,1.02,-0.26
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,3,16,67,1,Green,0,Green,No,1.02,0.00,0.02
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,1,17,69,410,Tee,139,Rough,Yes,4.25,3.30,-1.05
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,2,17,70,139,Rough,21,Rough,No,3.30,2.62,-0.32
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,3,17,71,21,Rough,5,Green,No,2.62,1.23,0.39
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,4,17,72,5,Green,0,Green,No,1.23,0.00,0.23
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,1,18,73,560,Tee,280,Fairway,No,5.08,3.93,0.15
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,2,18,74,280,Fairway,50,Fairway,No,3.93,2.70,0.23
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,3,18,75,50,Fairway,10,Green,No,2.70,1.63,0.07
+Adam,R1769823554309,2026-01-31,Skybrook,Cold,Standard,Practice,Scratch Golfer,4,18,76,10,Green,0,Green,No,1.63,0.00,0.63
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,1,1,1,500,Tee,230,Fairway,No,4.56,3.49,0.07
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,2,1,2,230,Fairway,50,Fairway,No,3.49,2.68,-0.19
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,3,1,3,50,Fairway,4,Green,No,2.68,1.13,0.55
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,4,1,4,4,Green,0,Green,No,1.13,0.00,0.13
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,1,2,5,180,Tee,35,Green,No,3.10,2.03,0.07
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,2,2,6,35,Green,6,Green,No,2.03,1.32,-0.29
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,3,2,7,6,Green,1,Green,No,1.32,1.01,-0.69
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,4,2,8,1,Green,0,Green,No,1.01,0.00,0.01
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,1,3,10,425,Tee,150,Rough,Yes,4.16,3.27,-1.11
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,2,3,11,150,Rough,35,Sand,No,3.27,2.79,-0.52
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,3,3,12,35,Sand,15,Green,No,2.79,1.79,0.00
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,4,3,13,15,Green,2,Green,No,1.79,1.03,-0.24
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,5,3,14,2,Green,0,Green,No,1.03,0.00,0.03
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,1,4,15,480,Tee,192,Sand,No,4.42,3.61,-0.19
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,2,4,16,192,Sand,20,Rough,No,3.61,2.59,0.02
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,3,4,17,20,Rough,8,Green,No,2.59,1.49,0.10
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,4,4,18,8,Green,1,Green,No,1.49,1.01,-0.52
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,5,4,19,1,Green,0,Green,No,1.01,0.00,0.01
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,1,5,20,330,Tee,25,Fairway,No,3.93,2.47,0.46
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,2,5,21,25,Fairway,6,Green,No,2.47,1.32,0.15
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,3,5,22,6,Green,0,Green,No,1.32,0.00,0.32
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,1,6,23,550,Tee,260,Fairway,No,4.87,3.69,0.18
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,2,6,24,260,Fairway,45,Green,No,3.69,2.11,0.58
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,3,6,25,45,Green,6,Green,No,2.11,1.32,-0.21
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,4,6,26,6,Green,0,Green,No,1.32,0.00,0.32
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,1,7,27,400,Tee,120,Recovery,No,4.11,3.87,-0.76
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,2,7,28,120,Recovery,50,Fairway,No,3.87,2.68,0.19
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,3,7,29,50,Fairway,15,Green,No,2.68,1.79,-0.11
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,4,7,30,15,Green,2,Green,No,1.79,1.03,-0.24
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,5,7,31,2,Green,0,Green,No,1.03,0.00,0.03
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,1,8,32,230,Tee,35,Green,No,3.27,2.03,0.25
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,2,8,33,35,Green,5,Green,No,2.03,1.22,-0.19
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,3,8,34,5,Green,0,Green,No,1.22,0.00,0.22
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,1,9,35,450,Tee,160,Fairway,No,4.26,3.05,0.21
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,2,9,36,160,Fairway,12,Rough,No,3.05,2.32,-0.27
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,3,9,37,12,Rough,6,Green,No,2.32,1.32,0.00
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,4,9,38,6,Green,0,Green,No,1.32,0.00,0.32
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,1,10,39,440,Tee,160,Rough,No,4.21,3.31,-0.10
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,2,10,40,160,Rough,36,Green,No,3.31,2.04,0.27
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,3,10,41,36,Green,6,Green,No,2.04,1.32,-0.28
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,4,10,42,6,Green,0,Green,No,1.32,0.00,0.32
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,1,11,43,175,Tee,12,Rough,No,3.08,2.32,-0.23
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,2,11,44,12,Rough,9,Green,No,2.32,1.58,-0.26
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,3,11,45,9,Green,1,Green,No,1.58,1.01,-0.43
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,4,11,46,1,Green,0,Green,No,1.01,0.00,0.01
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,1,12,47,420,Tee,140,Fairway,No,4.14,2.97,0.17
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,2,12,48,140,Fairway,12,Green,No,2.97,1.69,0.28
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,3,12,49,12,Green,0,Green,No,1.69,0.00,0.69
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,1,13,50,495,Tee,200,Fairway,No,4.52,3.28,0.25
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,2,13,51,200,Fairway,32,Green,No,3.28,2.00,0.28
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,3,13,52,32,Green,3,Green,No,2.00,1.04,-0.04
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,4,13,53,3,Green,0,Green,No,1.04,0.00,0.04
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,1,14,54,200,Tee,23,Green,No,3.18,1.91,0.27
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,2,14,55,23,Green,0,Green,No,1.91,0.00,0.91
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,1,15,57,450,Tee,180,Rough,Yes,4.26,3.40,-1.14
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,2,15,58,180,Rough,35,Green,No,3.40,2.03,0.37
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,3,15,59,35,Green,4,Green,No,2.03,1.13,-0.10
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,4,15,60,4,Green,0,Green,No,1.13,0.00,0.13
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,1,16,61,400,Tee,100,Rough,No,4.11,3.08,0.03
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,2,16,62,100,Rough,24,Green,No,3.08,1.92,0.16
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,3,16,63,24,Green,2,Green,No,1.92,1.03,-0.11
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,4,16,64,2,Green,0,Green,No,1.03,0.00,0.03
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,1,17,65,330,Tee,125,Fairway,No,3.93,2.92,0.01
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,2,17,66,125,Fairway,2,Green,No,2.92,1.03,0.89
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,3,17,67,2,Green,0,Green,No,1.03,0.00,0.03
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,1,18,68,500,Tee,220,Rough,No,4.56,3.65,-0.09
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,2,18,69,220,Rough,22,Fairway,No,3.65,2.44,0.21
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,3,18,70,22,Fairway,6,Green,No,2.44,1.32,0.12
+Joe,R1770606097458,2026-02-09,Gaston,Cold,Standard,Practice,College Golfer,4,18,71,6,Green,0,Green,No,1.32,0.00,0.32
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,1,1,1,362,Tee,70,Recovery,No,4.04,3.88,-0.84
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,2,1,2,70,Recovery,12,Fairway,No,3.88,2.19,0.69
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,3,1,3,12,Fairway,4,Green,No,2.19,1.13,0.06
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,4,1,4,4,Green,0,Green,No,1.13,0.00,0.13
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,1,2,5,445,Tee,142,Rough,No,4.23,3.24,0.00
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,2,2,6,142,Rough,8,Sand,No,3.24,2.43,-0.19
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,3,2,7,8,Sand,9,Green,No,2.43,1.58,-0.15
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,4,2,8,9,Green,1,Green,No,1.58,1.01,-0.43
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,5,2,9,1,Green,0,Green,No,1.01,0.00,0.01
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,1,3,10,185,Tee,8,Rough,No,3.13,2.11,0.02
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,2,3,11,8,Rough,7,Green,No,2.11,1.41,-0.30
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,3,3,12,7,Green,2,Green,No,1.41,1.03,-0.62
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,4,3,13,2,Green,0,Green,No,1.03,0.00,0.03
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,1,4,14,486,Tee,210,Recovery,No,4.46,4.03,-0.57
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,2,4,15,210,Recovery,125,Fairway,No,4.03,2.92,0.11
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,3,4,16,125,Fairway,5,Fairway,No,2.92,1.86,0.06
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,4,4,17,5,Fairway,3,Green,No,1.86,1.04,-0.18
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,5,4,18,3,Green,0,Green,No,1.04,0.00,0.04
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,1,5,19,381,Tee,111,Rough,No,4.08,3.11,-0.03
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,2,5,20,111,Rough,7,Sand,No,3.11,2.42,-0.31
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,3,5,21,7,Sand,15,Green,No,2.42,1.79,-0.37
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,4,5,22,15,Green,2,Green,No,1.79,1.03,-0.24
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,5,5,23,2,Green,0,Green,No,1.03,0.00,0.03
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,1,6,24,204,Tee,30,Rough,No,3.19,2.71,-0.52
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,2,6,25,30,Rough,19,Green,No,2.71,1.86,-0.15
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,3,6,26,19,Green,3,Green,No,1.86,1.04,-0.18
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,4,6,27,3,Green,0,Green,No,1.04,0.00,0.04
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,1,7,28,387,Tee,110,Recovery,No,4.09,3.88,-0.79
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,2,7,29,110,Recovery,10,Fairway,No,3.88,2.14,0.74
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,3,7,30,10,Fairway,3,Green,No,2.14,1.04,0.10
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,4,7,31,3,Green,0,Green,No,1.04,0.00,0.04
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,1,8,32,534,Tee,205,Fairway,No,4.78,3.31,0.47
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,2,8,33,205,Fairway,50,Green,No,3.31,2.14,0.17
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,3,8,34,50,Green,7,Green,No,2.14,1.41,-0.27
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,4,8,35,7,Green,0,Green,No,1.41,0.00,0.41
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,1,9,36,332,Tee,80,Recovery,No,3.94,3.87,-0.93
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,2,9,37,80,Recovery,16,Rough,No,3.87,2.45,0.42
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,3,9,38,16,Rough,4,Green,No,2.45,1.13,0.32
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,4,9,39,4,Green,0,Green,No,1.13,0.00,0.13
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,1,10,40,488,Tee,142,Fairway,No,4.48,2.98,0.50
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,2,10,41,142,Fairway,45,Green,No,2.98,2.11,-0.13
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,3,10,42,45,Green,7,Green,No,2.11,1.41,-0.30
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,4,10,43,7,Green,1,Green,No,1.41,1.01,-0.60
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,5,10,44,1,Green,0,Green,No,1.01,0.00,0.01
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,1,11,45,438,Tee,150,Recovery,No,4.20,3.92,-0.72
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,2,11,46,150,Recovery,88,Fairway,No,3.92,2.81,0.11
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,3,11,47,88,Fairway,8,Fairway,No,2.81,2.06,-0.25
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,4,11,48,8,Fairway,4,Fairway,No,2.06,1.74,-0.68
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,5,11,49,4,Fairway,3,Green,No,1.74,1.04,-0.30
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,6,11,50,3,Green,2,Green,No,1.04,1.03,-0.99
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,7,11,51,2,Green,0,Green,No,1.03,0.00,0.03
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,1,12,52,202,Tee,8,Green,No,3.19,1.49,0.69
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,2,12,53,8,Green,0,Green,No,1.49,0.00,0.49
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,1,13,54,366,Tee,120,Recovery,No,4.04,3.87,-0.83
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,2,13,55,120,Recovery,22,Green,No,3.87,1.90,0.97
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,3,13,56,22,Green,1,Green,No,1.90,1.01,-0.11
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,4,13,57,1,Green,0,Green,No,1.01,0.00,0.01
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,1,14,58,374,Tee,170,Fairway,No,4.07,3.10,-0.03
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,2,14,59,170,Fairway,40,Green,No,3.10,2.07,0.03
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,3,14,60,40,Green,4,Green,No,2.07,1.13,-0.06
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,4,14,61,4,Green,0,Green,No,1.13,0.00,0.13
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,1,15,62,392,Tee,160,Recovery,No,4.10,3.92,-0.82
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,2,15,63,160,Recovery,70,Fairway,No,3.92,2.76,0.16
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,3,15,64,70,Fairway,38,Green,No,2.76,2.06,-0.30
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,4,15,65,38,Green,3,Green,No,2.06,1.04,0.02
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,5,15,66,3,Green,0,Green,No,1.04,0.00,0.04
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,1,16,67,182,Tee,12,Sand,No,3.11,2.48,-0.37
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,2,16,68,12,Sand,8,Recovery,No,2.48,2.91,-1.43
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,3,16,69,8,Recovery,6,Rough,No,2.91,1.91,0.00
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,4,16,70,6,Rough,12,Green,No,1.91,1.69,-0.78
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,5,16,71,12,Green,1,Green,No,1.69,1.01,-0.32
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,6,16,72,1,Green,0,Green,No,1.01,0.00,0.01
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,1,17,73,483,Tee,148,Fairway,No,4.44,3.00,0.44
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,2,17,74,148,Fairway,7,Rough,No,3.00,2.01,-0.01
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,3,17,75,7,Rough,5,Green,No,2.01,1.22,-0.21
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,4,17,76,5,Green,0,Green,No,1.22,0.00,0.22
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,1,18,77,401,Tee,88,Fairway,No,4.11,2.81,0.30
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,2,18,78,88,Fairway,35,Green,No,2.81,2.03,-0.22
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,3,18,79,35,Green,3,Green,No,2.03,1.04,-0.01
+Adam,R1770751524999,2023-08-18,Pine Island,Normal,Standard,City AM,College Golfer,4,18,80,3,Green,0,Green,No,1.04,0.00,0.04
