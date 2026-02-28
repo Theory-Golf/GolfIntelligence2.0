@@ -17,6 +17,7 @@ function App() {
     isLoading, 
     error, 
     lastUpdated,
+    filterOptions,
     cascadingFilterOptions,
     filters,
     setFilters,
@@ -76,7 +77,8 @@ function App() {
       {!isLoading && !error && (
         <FilterBar 
           filters={filters}
-          options={cascadingFilterOptions}
+          options={filterOptions}
+          validOptions={cascadingFilterOptions}
           onFilterChange={setFilters}
           onClear={clearFilters}
           isCollapsed={sidebarCollapsed}

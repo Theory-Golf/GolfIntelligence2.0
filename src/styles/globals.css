@@ -916,6 +916,20 @@ a:hover {
   color: var(--chalk);
 }
 
+/* Disabled filter options (gray out) */
+.filter-option.is-disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.filter-option.is-disabled .filter-option-text {
+  color: var(--ash);
+}
+
+.filter-option.is-disabled input[type="checkbox"] {
+  cursor: not-allowed;
+}
+
 .btn-clear {
   font-family: var(--font-mono);
   font-size: 10px;

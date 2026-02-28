@@ -8,13 +8,14 @@ import type { FilterState, FilterOptions } from '../types/golf';
 interface FilterBarProps {
   filters: FilterState;
   options: FilterOptions;
+  validOptions: FilterOptions;
   onFilterChange: (filters: FilterState) => void;
   onClear: () => void;
   isCollapsed?: boolean;
   onToggleCollapse?: () => void;
 }
 
-export function FilterBar({ filters, options, onFilterChange, onClear, isCollapsed = false, onToggleCollapse }: FilterBarProps) {
+export function FilterBar({ filters, options, validOptions, onFilterChange, onClear, isCollapsed = false, onToggleCollapse }: FilterBarProps) {
   const handleToggle = () => {
     if (onToggleCollapse) {
       onToggleCollapse();
@@ -56,24 +57,28 @@ export function FilterBar({ filters, options, onFilterChange, onClear, isCollaps
               label="Player"
               selected={filters.players}
               available={options.players}
+              valid={validOptions.players}
               onChange={(val) => handleMultiSelect('players', val)}
             />
             <FilterMultiSelect
               label="Course"
               selected={filters.courses}
               available={options.courses}
+              valid={validOptions.courses}
               onChange={(val) => handleMultiSelect('courses', val)}
             />
             <FilterMultiSelect
               label="Tournament"
               selected={filters.tournaments}
               available={options.tournaments}
+              valid={validOptions.tournaments}
               onChange={(val) => handleMultiSelect('tournaments', val)}
             />
             <FilterMultiSelect
               label="Date"
               selected={filters.dates}
               available={options.dates}
+              valid={validOptions.dates}
               onChange={(val) => handleMultiSelect('dates', val)}
             />
             
@@ -93,10 +98,11 @@ interface FilterMultiSelectProps {
   label: string;
   selected: string[];
   available: string[];
+  valid: string[];
   onChange: (value: string) => void;
 }
 
-function FilterMultiSelect({ label, selected, available, onChange }: FilterMultiSelectProps) {
+function FilterMultiSelect({ label, selected, available, valid, onChange }: FilterMultiSelectProps) {
   if (available.length === 0) return null;
   
   const isActive = selected.length > 0;
@@ -107,16 +113,20 @@ function FilterMultiSelect({ label, selected, available, onChange }: FilterMulti
         {label} {isActive && <span className="filter-count">({selected.length})</span>}
       </div>
       <div className="filter-options">
-        {available.map(option => (
-          <label key={option} className="filter-option">
-            <input
-              type="checkbox"
-              checked={selected.includes(option)}
-              onChange={() => onChange(option)}
-            />
-            <span className="filter-option-text">{option}</span>
-          </label>
-        ))}
+        {available.map(option => {
+          const isValid = valid.includes(option);
+          return (
+            <label key={option} className={`filter-option ${!isValid ? 'is-disabled' : ''}`}>
+              <input
+                type="checkbox"
+                checked={selected.includes(option)}
+                disabled={!isValid}
+                onChange={() => onChange(option)}
+              />
+              <span className="filter-option-text">{option}</span>
+            </label>
+          );
+        })}
       </div>
     </div>
   );

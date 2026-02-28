@@ -131,6 +131,9 @@ export function useGolfData(): UseGolfDataResult {
   }, [rawShots]);
 
   // Compute cascading filter options based on current selections
+  // Bidirectional cascading: selecting items in one category filters options in all other categories
+  // OR within each category: selecting multiple players shows rounds for ANY of those players
+  // AND across categories: dates AND courses must both match
   const cascadingFilterOptions = useMemo<FilterOptions>(() => {
     if (processedShots.length === 0) {
       return {
@@ -141,33 +144,78 @@ export function useGolfData(): UseGolfDataResult {
       };
     }
 
-    // Start with all shots and apply each filter to determine available options for others
-    let availableShots = processedShots;
-
-    // If players are selected, filter to those players first
-    if (filters.players.length > 0) {
-      availableShots = availableShots.filter(s => filters.players.includes(s.Player));
+    // If no filters selected, show all options
+    const hasAnyFilters = filters.players.length > 0 || filters.courses.length > 0 || filters.tournaments.length > 0 || filters.dates.length > 0;
+    if (!hasAnyFilters) {
+      return {
+        players: [...new Set(processedShots.map(s => s.Player))].sort(),
+        courses: [...new Set(processedShots.map(s => s.Course))].sort(),
+        tournaments: [...new Set(processedShots.map(s => s.Tournament))].sort(),
+        dates: [...new Set(processedShots.map(s => s.Date))].sort(),
+      };
     }
-    // If courses are selected, filter to those courses
+
+    // For each category, calculate valid options by applying ALL other filters (NOT the current category)
+    // This allows selecting multiple within each category while cascading to others
+    
+    // Valid players: filter by courses, tournaments, dates (NOT by selected players)
+    let playerFiltered = processedShots;
     if (filters.courses.length > 0) {
-      availableShots = availableShots.filter(s => filters.courses.includes(s.Course));
+      playerFiltered = playerFiltered.filter(s => filters.courses.includes(s.Course));
     }
-    // If tournaments are selected, filter to those tournaments
     if (filters.tournaments.length > 0) {
-      availableShots = availableShots.filter(s => filters.tournaments.includes(s.Tournament));
+      playerFiltered = playerFiltered.filter(s => filters.tournaments.includes(s.Tournament));
     }
-    // If dates are selected, filter to those dates
     if (filters.dates.length > 0) {
-      availableShots = availableShots.filter(s => filters.dates.includes(s.Date));
+      playerFiltered = playerFiltered.filter(s => filters.dates.includes(s.Date));
     }
+    const validPlayers = [...new Set(playerFiltered.map(s => s.Player))].sort();
 
-    // Get unique values from filtered shots
-    const players = [...new Set(availableShots.map(s => s.Player))].sort();
-    const courses = [...new Set(availableShots.map(s => s.Course))].sort();
-    const tournaments = [...new Set(availableShots.map(s => s.Tournament))].sort();
-    const dates = [...new Set(availableShots.map(s => s.Date))].sort();
+    // Valid courses: filter by players, tournaments, dates (NOT by selected courses)
+    let courseFiltered = processedShots;
+    if (filters.players.length > 0) {
+      courseFiltered = courseFiltered.filter(s => filters.players.includes(s.Player));
+    }
+    if (filters.tournaments.length > 0) {
+      courseFiltered = courseFiltered.filter(s => filters.tournaments.includes(s.Tournament));
+    }
+    if (filters.dates.length > 0) {
+      courseFiltered = courseFiltered.filter(s => filters.dates.includes(s.Date));
+    }
+    const validCourses = [...new Set(courseFiltered.map(s => s.Course))].sort();
 
-    return { players, courses, tournaments, dates };
+    // Valid tournaments: filter by players, courses, dates (NOT by selected tournaments)
+    let tournamentFiltered = processedShots;
+    if (filters.players.length > 0) {
+      tournamentFiltered = tournamentFiltered.filter(s => filters.players.includes(s.Player));
+    }
+    if (filters.courses.length > 0) {
+      tournamentFiltered = tournamentFiltered.filter(s => filters.courses.includes(s.Course));
+    }
+    if (filters.dates.length > 0) {
+      tournamentFiltered = tournamentFiltered.filter(s => filters.dates.includes(s.Date));
+    }
+    const validTournaments = [...new Set(tournamentFiltered.map(s => s.Tournament))].sort();
+
+    // Valid dates: filter by players, courses, tournaments (NOT by selected dates)
+    let dateFiltered = processedShots;
+    if (filters.players.length > 0) {
+      dateFiltered = dateFiltered.filter(s => filters.players.includes(s.Player));
+    }
+    if (filters.courses.length > 0) {
+      dateFiltered = dateFiltered.filter(s => filters.courses.includes(s.Course));
+    }
+    if (filters.tournaments.length > 0) {
+      dateFiltered = dateFiltered.filter(s => filters.tournaments.includes(s.Tournament));
+    }
+    const validDates = [...new Set(dateFiltered.map(s => s.Date))].sort();
+
+    return { 
+      players: validPlayers, 
+      courses: validCourses, 
+      tournaments: validTournaments, 
+      dates: validDates 
+    };
   }, [processedShots, filters]);
 
   // Filter shots based on selected filters
