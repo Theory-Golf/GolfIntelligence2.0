@@ -11,18 +11,16 @@ export interface RawShot {
   'Weather Difficulty': string;
   'Course Difficulty': string;
   Tournament: string;
-  Benchmark: string;
   Shot: number;
   Hole: number;
   Score: number;
   'Starting Distance': number;
-  'Starting Location': string;
+  'Starting Lie': string;
   'Ending Distance': number;
-  'Ending Location': string;
+  'Ending Lie': string;
   Penalty: string;
-  'Starting SG': number;
-  'Ending SG': number;
-  'Strokes Gained': number;
+  'Did not Hit Driver': string;
+  'Putt Result': string;
 }
 
 // Shot type classification

@@ -74,7 +74,7 @@ export function useGolfData(): UseGolfDataResult {
                 if (typeof value === 'string') {
                   const trimmed = value.trim();
                   // Convert numeric fields
-                  if (['Shot', 'Hole', 'Score', 'Starting Distance', 'Ending Distance', 'Starting SG', 'Ending SG', 'Strokes Gained'].includes(key)) {
+                  if (['Shot', 'Hole', 'Score', 'Starting Distance', 'Ending Distance'].includes(key)) {
                     cleaned[key] = parseFloat(trimmed) as never;
                   } else {
                     cleaned[key] = trimmed as never;

@@ -28,7 +28,7 @@ export function calculateHolePar(startingDistance: number): number {
  * - Putt: Starting location = Green
  */
 export function classifyShotType(shot: RawShot, holePar: number): ShotType {
-  const { 'Starting Location': startLoc, 'Starting Distance': startDist } = shot;
+  const { 'Starting Lie': startLoc, 'Starting Distance': startDist } = shot;
   
   // Putt: Starting location = Green
   if (startLoc === 'Green') {
@@ -93,9 +93,9 @@ export function processShots(rawShots: RawShot[], benchmark: BenchmarkType = 'pg
     const calculatedSG = calculateStrokesGained(
       benchmark,
       shot['Starting Distance'],
-      shot['Starting Location'],
+      shot['Starting Lie'],
       shot['Ending Distance'],
-      shot['Ending Location']
+      shot['Ending Lie']
     );
     
     return {
@@ -146,7 +146,7 @@ export function calculateTiger5Metrics(shots: ProcessedShot[]): Tiger5Metrics {
     // Fairway tracking: Drive (shot 1 on par 4/5) that ended in Fairway
     if (shot.shotType === 'Drive' && shot.holePar >= 4) {
       fairwaysTotal++;
-      if (shot['Ending Location'] === 'Fairway') {
+      if (shot['Ending Lie'] === 'Fairway') {
         fairwaysHit++;
       }
     }
@@ -154,7 +154,7 @@ export function calculateTiger5Metrics(shots: ProcessedShot[]): Tiger5Metrics {
     // GIR tracking: Approach shot that ended on green
     if (shot.shotType === 'Approach') {
       girTotal++;
-      if (shot['Ending Location'] === 'Green') {
+      if (shot['Ending Lie'] === 'Green') {
         gir++;
       }
     }
@@ -217,11 +217,11 @@ export function getRoundSummaries(shots: ProcessedShot[]): RoundSummary[] {
     
     // Count fairways
     const drives = roundShots.filter(s => s.shotType === 'Drive' && s.holePar >= 4);
-    const fairwaysHit = drives.filter(s => s['Ending Location'] === 'Fairway').length;
+    const fairwaysHit = drives.filter(s => s['Ending Lie'] === 'Fairway').length;
     
     // Count GIR
     const approaches = roundShots.filter(s => s.shotType === 'Approach');
-    const gir = approaches.filter(s => s['Ending Location'] === 'Green').length;
+    const gir = approaches.filter(s => s['Ending Lie'] === 'Green').length;
     
     // Count penalties
     const penalties = roundShots.filter(s => s.Penalty === 'Yes').length;
