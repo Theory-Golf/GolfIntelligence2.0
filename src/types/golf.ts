@@ -42,6 +42,20 @@ export interface ShotCategory {
   avgStrokesGained: number;
 }
 
+// Shot category type for trend chart (consistent with existing shot types)
+export type SGShotCategory = 'Driving' | 'Approach' | 'Short Game' | 'Putting';
+
+// Round-level SG data for trend chart
+export interface SGRoundData {
+  roundId: string;
+  roundNumber: number;
+  date: string;
+  course: string;
+  strokesGained: number;
+  shotCount: number;
+  avgStrokesGained: number;
+}
+
 // Round-level summary
 export interface RoundSummary {
   roundId: string;
@@ -81,6 +95,26 @@ export interface HoleScore {
   par: number;
   score: number;
   shots: ProcessedShot[];
+}
+
+// Driving metrics for the Driving Tab
+export interface DrivingMetrics {
+  totalDrives: number;
+  fairwaysHit: number;
+  fairwayPct: number;
+  drivingSG: number;
+  avgDrivingSG: number;
+  drivingDistance75th: number;  // 75th percentile of |Starting Distance - Ending Distance| for all drives
+  totalPenalties: number;
+  obPenalties: number;
+  otherPenalties: number;
+  penaltyRate: number;  // (OB × 2 + Other × 1) / Total drives (as percentage)
+  sgPenalties: number;  // Total SG for drives with a penalty shot
+  // Fairway % by driver type
+  fairwayPctDriver: number;  // % FW when Did not hit driver = No
+  fairwayPctNonDriver: number;  // % FW when Did not hit driver = Yes
+  // % of drives with SG > 0
+  positiveSGPct: number;
 }
 
 // Strokes Gained Separator by distance category
@@ -249,4 +283,116 @@ export interface FilterOptions {
   courses: string[];
   tournaments: string[];
   dates: string[];
+}
+
+// Drive Ending Location types for Driving Analysis
+export type DriveEndingLocationType = 'Fairway' | 'Rough' | 'Recovery' | 'Sand' | 'Green' | 'Tee' | 'Out of Bounds' | 'Water' | 'Penalty Area' | 'Other';
+
+export interface DriveEndingLocationData {
+  location: DriveEndingLocationType;
+  count: number;
+  percentage: number;
+  strokesGained: number;
+  avgStrokesGained: number;
+}
+
+// Drive distance range for analysis
+export interface DriveDistanceRange {
+  label: string;
+  minDistance: number;
+  maxDistance: number;
+  count: number;
+  percentage: number;
+  strokesGained: number;
+  avgStrokesGained: number;
+  scoreDifferential: number;
+}
+
+// Complete driving analysis data
+export interface DrivingAnalysis {
+  endingLocations: DriveEndingLocationData[];
+  distanceRanges: DriveDistanceRange[];
+}
+
+// Problem Drive Metrics - for the Problem Drive Section
+export interface ProblemDriveMetrics {
+  // Total drives
+  totalDrives: number;
+  
+  // Penalties breakdown
+  totalPenalties: number;
+  obPenalties: number;
+  standardPenalties: number;
+  penaltyPct: number;
+  penaltySG: number;
+  obPenaltyPct: number;
+  obPenaltySG: number;
+  standardPenaltyPct: number;
+  standardPenaltySG: number;
+  
+  // Obstruction breakdown (sand + recovery)
+  obstructionCount: number;
+  obstructionPct: number;
+  obstructionSG: number;
+  
+  // Sand breakdown
+  sandCount: number;
+  sandPct: number;
+  sandSG: number;
+  
+  // Recovery breakdown
+  recoveryCount: number;
+  recoveryPct: number;
+  recoverySG: number;
+}
+
+// Approach distance bucket metrics for Approach by Distance section
+export interface ApproachDistanceBucket {
+  label: string;
+  description: string;
+  minDistance: number;
+  maxDistance: number;
+  totalShots: number;
+  strokesGained: number;
+  avgStrokesGained: number;
+  greenHits: number;
+  greenHitPct: number;
+  proximity: number;  // Always in feet (converted from yards for non-green shots)
+  proximityOnGreen: number;
+}
+
+// Approach metrics for the Approach Tab
+export interface ApproachMetrics {
+  // Total approach shots
+  totalApproaches: number;
+  // Strokes Gained - Approach
+  approachSG: number;
+  avgApproachSG: number;
+  // % of approaches with SG > 0
+  positiveSGPct: number;
+  positiveSGCount: number;
+  // Green Hit % - % of approaches ending on Green
+  greenHitPct: number;
+  greenHits: number;
+  // Green Hit % by starting lie (Fairway, Rough)
+  greenHitPctFairway: number;
+  greenHitsFairway: number;
+  totalApproachesFairway: number;
+  greenHitPctRough: number;
+  greenHitsRough: number;
+  totalApproachesRough: number;
+  // Proximity < 150 - average proximity for approaches <= 150 yards
+  proximityUnder150: number;
+  proximityUnder150Count: number;
+  // Proximity < 150 on Green - average proximity for approaches <= 150 yards that ended on green
+  proximityUnder150OnGreen: number;
+  proximityUnder150OnGreenCount: number;
+  // % of approaches ending on green within 20 feet
+  within20FeetPct: number;
+  within20FeetCount: number;
+  // Additional breakdown by distance
+  approachesOver150: number;
+  approachesUnder150: number;
+  greenHitPctOver150: number;
+  greenHitPctUnder150: number;
 }

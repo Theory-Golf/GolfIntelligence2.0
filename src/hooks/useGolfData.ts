@@ -4,9 +4,9 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import Papa from 'papaparse';
-import type { RawShot, ProcessedShot, Tiger5Metrics, RoundSummary, FilterState, FilterOptions } from '../types/golf';
+import type { RawShot, ProcessedShot, Tiger5Metrics, RoundSummary, FilterState, FilterOptions, DrivingMetrics, DrivingAnalysis, ApproachMetrics, ApproachDistanceBucket } from '../types/golf';
 import type { BenchmarkType } from '../data/benchmarks';
-import { processShots, calculateTiger5Metrics, getRoundSummaries } from '../utils/calculations';
+import { processShots, calculateTiger5Metrics, getRoundSummaries, calculateDrivingMetrics, calculateDrivingAnalysis, calculateApproachMetrics, calculateApproachByDistance } from '../utils/calculations';
 
 // Google Sheet CSV URL - published to web
 const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ6xTTDWTSzaRvoiACi2PT-l7uqvwcZwdlIZsCGunz-8t-227TBihATnDfUoi5VzDqhOIGcAbJViw9O/pub?output=csv';
@@ -16,6 +16,10 @@ interface UseGolfDataResult {
   processedShots: ProcessedShot[];
   filteredShots: ProcessedShot[];
   tiger5Metrics: Tiger5Metrics;
+  drivingMetrics: DrivingMetrics;
+  drivingAnalysis: DrivingAnalysis;
+  approachMetrics: ApproachMetrics;
+  approachByDistance: ApproachDistanceBucket[];
   roundSummaries: RoundSummary[];
   filterOptions: FilterOptions;
   cascadingFilterOptions: FilterOptions;
@@ -39,7 +43,7 @@ const initialFilters: FilterState = {
 export function useGolfData(): UseGolfDataResult {
   const [rawShots, setRawShots] = useState<RawShot[]>([]);
   const [filters, setFilters] = useState<FilterState>(initialFilters);
-  const [benchmark, setBenchmark] = useState<BenchmarkType>('pgaTour');
+  const [benchmark, setBenchmark] = useState<BenchmarkType>('eliteCollege');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
@@ -238,6 +242,26 @@ export function useGolfData(): UseGolfDataResult {
     return calculateTiger5Metrics(filteredShots);
   }, [filteredShots, benchmark]);
 
+  // Calculate driving metrics from filtered shots
+  const drivingMetrics = useMemo(() => {
+    return calculateDrivingMetrics(filteredShots);
+  }, [filteredShots]);
+
+  // Calculate driving analysis from filtered shots
+  const drivingAnalysis = useMemo(() => {
+    return calculateDrivingAnalysis(filteredShots);
+  }, [filteredShots]);
+
+  // Calculate approach metrics from filtered shots
+  const approachMetrics = useMemo(() => {
+    return calculateApproachMetrics(filteredShots);
+  }, [filteredShots]);
+
+  // Calculate approach by distance from filtered shots
+  const approachByDistance = useMemo(() => {
+    return calculateApproachByDistance(filteredShots);
+  }, [filteredShots]);
+
   // Get round summaries from filtered shots
   const roundSummaries = useMemo(() => {
     return getRoundSummaries(filteredShots);
@@ -253,6 +277,10 @@ export function useGolfData(): UseGolfDataResult {
     processedShots,
     filteredShots,
     tiger5Metrics,
+    drivingMetrics,
+    drivingAnalysis,
+    approachMetrics,
+    approachByDistance,
     roundSummaries,
     filterOptions,
     cascadingFilterOptions,

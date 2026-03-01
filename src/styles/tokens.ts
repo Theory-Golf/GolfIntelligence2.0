@@ -117,13 +117,29 @@ export const layout = {
 // ── Helper Functions ──────────────────────────────────────
 
 /**
- * Get stroke gained color based on value
+ * Get stroke gained color based on value (for aggregate/total SG values)
  */
 export function getStrokeGainedColor(value: number): string {
   if (value >= 1.0) return colors.sgStrong;
   if (value >= 0.3) return colors.sgGain;
   if (value > -0.3) return colors.sgNeutral;
   if (value > -1.0) return colors.sgLoss;
+  return colors.sgWeak;
+}
+
+/**
+ * Get stroke gained color for individual shots (tighter thresholds)
+ * - SG > 0.25: Strong (green)
+ * - SG > 0 and <= 0.25: Gain (mint)
+ * - SG = 0: Neutral (gray)
+ * - SG < 0 and >= -0.25: Loss (amber)
+ * - SG < -0.25: Weak (red)
+ */
+export function getShotSGColor(value: number): string {
+  if (value > 0.25) return colors.sgStrong;
+  if (value > 0) return colors.sgGain;
+  if (value === 0) return colors.sgNeutral;
+  if (value >= -0.25) return colors.sgLoss;
   return colors.sgWeak;
 }
 

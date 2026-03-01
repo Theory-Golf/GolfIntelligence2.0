@@ -3,7 +3,7 @@
  * Based on your shot classification rules
  */
 
-import type { RawShot, ProcessedShot, ShotType, ShotCategory, Tiger5Metrics, RoundSummary, Tiger5Fail, HoleScore, RootCauseMetrics, Tiger5FailDetail, Tiger5FailDetails, RootCauseByFailTypeList, RootCauseByFailType, Tiger5TrendDataPoint, SGSeparator } from '../types/golf';
+import type { RawShot, ProcessedShot, ShotType, ShotCategory, Tiger5Metrics, RoundSummary, Tiger5Fail, HoleScore, RootCauseMetrics, Tiger5FailDetail, Tiger5FailDetails, RootCauseByFailTypeList, RootCauseByFailType, Tiger5TrendDataPoint, SGSeparator, SGShotCategory, SGRoundData, DrivingMetrics, DriveEndingLocationData, DriveDistanceRange, DrivingAnalysis, DriveEndingLocationType, ProblemDriveMetrics, ApproachMetrics, ApproachDistanceBucket } from '../types/golf';
 import type { BenchmarkType } from '../data/benchmarks';
 import { calculateStrokesGained } from '../data/benchmarks';
 
@@ -845,12 +845,15 @@ export function processShots(rawShots: RawShot[], benchmark: BenchmarkType = 'pg
     const holePar = holePars.get(roundHoleKey) || 4;
     
     // Calculate SG using benchmark
+    // Pass penalty flag: shot.Penalty === 'Yes' means this shot resulted in a penalty
+    const isPenalty = shot.Penalty === 'Yes';
     const calculatedSG = calculateStrokesGained(
       benchmark,
       shot['Starting Distance'],
       shot['Starting Lie'],
       shot['Ending Distance'],
-      shot['Ending Lie']
+      shot['Ending Lie'],
+      isPenalty
     );
     
     return {
@@ -1127,35 +1130,35 @@ export function calculateSGSeparators(shots: ProcessedShot[]): SGSeparator[] {
   const drivingShots = shots.filter(s => s.shotType === 'Drive');
   const drivingSG = drivingShots.reduce((sum, s) => sum + s.calculatedStrokesGained, 0);
   
-  // SG Short shots 0-35 yards - Starting distance 0-35 yards (excluding drives)
+  // SG Short shots 0-35 yards - Shot type Short Game + Starting distance 0-35 yards
   const shortShots0to35 = shots.filter(s => {
-    if (s.shotType === 'Drive') return false;
+    if (s.shotType !== 'Short Game') return false;
     const startDist = s['Starting Distance'];
     return startDist >= 0 && startDist <= 35;
   });
   const shortShots0to35SG = shortShots0to35.reduce((sum, s) => sum + s.calculatedStrokesGained, 0);
   
-  // SG Short Approach 100-150 - Starting distance 100-150 yards
+  // SG Short Approach 100-150 - Shot type Approach + Starting distance 100-150 yards
   const shortApproach100to150 = shots.filter(s => {
+    if (s.shotType !== 'Approach') return false;
     const startDist = s['Starting Distance'];
     return startDist >= 100 && startDist <= 150;
   });
   const shortApproach100to150SG = shortApproach100to150.reduce((sum, s) => sum + s.calculatedStrokesGained, 0);
   
-  // SG Distance Wedges 50-100 - Starting distance 50-100 yards
+  // SG Distance Wedges 50-100 - Shot type Approach + Starting distance 50-100 yards
   const distanceWedges50to100 = shots.filter(s => {
+    if (s.shotType !== 'Approach') return false;
     const startDist = s['Starting Distance'];
     return startDist >= 50 && startDist <= 100;
   });
   const distanceWedges50to100SG = distanceWedges50to100.reduce((sum, s) => sum + s.calculatedStrokesGained, 0);
   
-  // SG Putting 5-12 feet - Putts from 5-12 feet (60-144 inches)
-  // The data uses starting distance in the same units - for putting, it's measured in inches
-  // 5 feet = 60 inches, 12 feet = 144 inches
+  // SG Putting 5-12 feet - Putts from 5-12 feet
   const putting5to12 = shots.filter(s => {
     if (s.shotType !== 'Putt') return false;
     const startDist = s['Starting Distance'];
-    return startDist >= 60 && startDist <= 144;
+    return startDist >= 5 && startDist <= 12;
   });
   const putting5to12SG = putting5to12.reduce((sum, s) => sum + s.calculatedStrokesGained, 0);
   
@@ -1198,4 +1201,706 @@ export function calculateSGSeparators(shots: ProcessedShot[]): SGSeparator[] {
   ];
   
   return separators;
+}
+
+/**
+ * Calculate moving average for a series of values
+ * @param values - Array of numeric values
+ * @param window - Window size for moving average
+ * @returns Array with moving average values (null for first window-1 elements)
+ */
+export function calculateMovingAverage(values: number[], window: number): (number | null)[] {
+  if (values.length === 0 || window <= 0) {
+    return [];
+  }
+  
+  const result: (number | null)[] = [];
+  
+  for (let i = 0; i < values.length; i++) {
+    if (i < window - 1) {
+      // Not enough data points for a full window
+      result.push(null);
+    } else {
+      // Calculate average of last 'window' values
+      let sum = 0;
+      for (let j = 0; j < window; j++) {
+        sum += values[i - j];
+      }
+      result.push(sum / window);
+    }
+  }
+  
+  return result;
+}
+
+/**
+ * Map shot category string to internal shot types
+ */
+function getShotTypesForCategory(category: SGShotCategory): ShotType[] {
+  switch (category) {
+    case 'Driving':
+      return ['Drive'];
+    case 'Approach':
+      return ['Approach'];
+    case 'Short Game':
+      return ['Short Game'];
+    case 'Putting':
+      return ['Putt'];
+    default:
+      return [];
+  }
+}
+
+/**
+ * Check if a shot is Out of Bounds (OB)
+ * OB: Ending lie and distance is the same as starting lie and distance AND shot has a penalty
+ */
+export function isOutOfBounds(shot: ProcessedShot): boolean {
+  if (shot.Penalty !== 'Yes') {
+    return false;
+  }
+  return shot['Starting Lie'] === shot['Ending Lie'] && 
+         shot['Starting Distance'] === shot['Ending Distance'];
+}
+
+/**
+ * Calculate 75th percentile of an array of numbers
+ */
+function calculate75thPercentile(values: number[]): number {
+  if (values.length === 0) return 0;
+  
+  const sorted = [...values].sort((a, b) => a - b);
+  const index = Math.ceil(sorted.length * 0.75) - 1;
+  return sorted[Math.max(0, index)];
+}
+
+/**
+ * Calculate driving metrics from processed shots
+ * - Penalty Rate: Total penalties / Total drives (as percentage)
+ * - OB penalties count as 2 strokes for the rate display, but count as 1 for the ratio
+ */
+export function calculateDrivingMetrics(shots: ProcessedShot[]): DrivingMetrics {
+  // Filter to only drives
+  const drives = shots.filter(s => s.shotType === 'Drive');
+  
+  if (drives.length === 0) {
+    return {
+      totalDrives: 0,
+      fairwaysHit: 0,
+      fairwayPct: 0,
+      drivingSG: 0,
+      avgDrivingSG: 0,
+      drivingDistance75th: 0,
+      totalPenalties: 0,
+      obPenalties: 0,
+      otherPenalties: 0,
+      penaltyRate: 0,
+      sgPenalties: 0,
+      fairwayPctDriver: 0,
+      fairwayPctNonDriver: 0,
+      positiveSGPct: 0,
+    };
+  }
+  
+  // Calculate fairways (drives that ended in Fairway)
+  const fairwaysHit = drives.filter(d => d['Ending Lie'] === 'Fairway').length;
+  const fairwayPct = (fairwaysHit / drives.length) * 100;
+  
+  // Calculate fairway % by driver type
+  // Driver: Did not hit driver = No (or empty/undefined)
+  // Non-Driver: Did not hit driver = Yes
+  const driverDrives = drives.filter(d => d['Did not Hit Driver'] !== 'Yes');
+  const nonDriverDrives = drives.filter(d => d['Did not Hit Driver'] === 'Yes');
+  
+  const driverFairways = driverDrives.filter(d => d['Ending Lie'] === 'Fairway').length;
+  const nonDriverFairways = nonDriverDrives.filter(d => d['Ending Lie'] === 'Fairway').length;
+  
+  const fairwayPctDriver = driverDrives.length > 0 ? (driverFairways / driverDrives.length) * 100 : 0;
+  const fairwayPctNonDriver = nonDriverDrives.length > 0 ? (nonDriverFairways / nonDriverDrives.length) * 100 : 0;
+  
+  // Calculate driving SG
+  const drivingSG = drives.reduce((sum, d) => sum + d.calculatedStrokesGained, 0);
+  const avgDrivingSG = drivingSG / drives.length;
+  
+  // Calculate 75th percentile of driving distances
+  // For each drive, calculate the absolute difference between starting and ending distance
+  const drivingDistances = drives
+    .map(d => Math.abs(d['Starting Distance'] - d['Ending Distance']))
+    .filter(d => d > 0); // Filter out drives where distance didn't change (likely penalties)
+  const drivingDistance75th = calculate75thPercentile(drivingDistances);
+  
+  // Calculate penalties
+  let totalPenalties = 0;
+  let obPenalties = 0;
+  let otherPenalties = 0;
+  let sgPenalties = 0; // Total SG for drives with a penalty shot
+  
+  drives.forEach(drive => {
+    if (drive.Penalty === 'Yes') {
+      totalPenalties++;
+      sgPenalties += drive.calculatedStrokesGained;
+      if (isOutOfBounds(drive)) {
+        obPenalties++;
+      } else {
+        otherPenalties++;
+      }
+    }
+  });
+  
+  // Penalty rate: (OB penalties × 2 + Other penalties × 1) / Total drives (as percentage)
+  const weightedPenalties = (obPenalties * 2) + (otherPenalties * 1);
+  const penaltyRate = (weightedPenalties / drives.length) * 100;
+  
+  // Calculate % of drives with SG > 0
+  const positiveDrives = drives.filter(d => d.calculatedStrokesGained > 0).length;
+  const positiveSGPct = (positiveDrives / drives.length) * 100;
+
+  return {
+    totalDrives: drives.length,
+    fairwaysHit,
+    fairwayPct,
+    drivingSG,
+    avgDrivingSG,
+    drivingDistance75th,
+    totalPenalties,
+    obPenalties,
+    otherPenalties,
+    penaltyRate,
+    sgPenalties,
+    fairwayPctDriver,
+    fairwayPctNonDriver,
+    positiveSGPct,
+  };
+}
+
+/**
+ * Get strokes gained data by round for a specific shot category
+ * @param shots - Processed shots
+ * @param category - Shot category (Driving, Approach, Short Game, Putting)
+ * @returns Array of round-level SG data sorted by date
+ */
+export function getRoundSGByShotType(shots: ProcessedShot[], category: SGShotCategory): SGRoundData[] {
+  const shotTypes = getShotTypesForCategory(category);
+  
+  // Filter shots by category
+  const filteredShots = shots.filter(s => shotTypes.includes(s.shotType));
+  
+  // Group by round
+  const roundMap = new Map<string, ProcessedShot[]>();
+  
+  filteredShots.forEach(shot => {
+    const roundId = shot['Round ID'];
+    if (!roundMap.has(roundId)) {
+      roundMap.set(roundId, []);
+    }
+    roundMap.get(roundId)!.push(shot);
+  });
+  
+  // Convert to array and sort by date
+  const roundData: SGRoundData[] = [];
+  
+  roundMap.forEach((roundShots, roundId) => {
+    if (roundShots.length === 0) return;
+    
+    const firstShot = roundShots[0];
+    const totalSG = roundShots.reduce((sum, s) => sum + s.calculatedStrokesGained, 0);
+    
+    roundData.push({
+      roundId,
+      roundNumber: 0, // Will be assigned after sorting
+      date: firstShot.Date,
+      course: firstShot.Course,
+      strokesGained: totalSG,
+      shotCount: roundShots.length,
+      avgStrokesGained: totalSG / roundShots.length,
+    });
+  });
+  
+  // Sort by date ascending
+  roundData.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  
+  // Assign round numbers
+  roundData.forEach((data, index) => {
+    data.roundNumber = index + 1;
+  });
+  
+  return roundData;
+}
+
+/**
+ * Normalize ending lie to standard categories
+ * Maps various possible ending lie values to our defined categories
+ */
+function normalizeEndingLie(endingLie: string): DriveEndingLocationType {
+  const lie = endingLie?.trim() || '';
+  
+  if (lie === 'Fairway') return 'Fairway';
+  if (lie === 'Rough') return 'Rough';
+  if (lie === 'Sand') return 'Sand';
+  if (lie === 'Green') return 'Green';
+  if (lie === 'Tee') return 'Other';
+  if (lie === 'Recovery') return 'Other';
+  
+  // Check for OB (Out of Bounds)
+  if (lie.toLowerCase().includes('out') || lie.toLowerCase().includes('ob')) {
+    return 'Out of Bounds';
+  }
+  
+  // Check for water/hazard
+  if (lie.toLowerCase().includes('water') || lie.toLowerCase().includes('hazard') || lie.toLowerCase().includes('penalty')) {
+    return 'Water';
+  }
+  
+  return 'Other';
+}
+
+/**
+ * Calculate drive ending location breakdown
+ * Returns data for donut chart showing percentage of drives by ending location
+ */
+export function calculateDriveEndingLocations(shots: ProcessedShot[]): DriveEndingLocationData[] {
+  const drives = shots.filter(s => s.shotType === 'Drive');
+  
+  if (drives.length === 0) {
+    return [];
+  }
+  
+  // Count drives by ending location
+  const locationCounts = new Map<DriveEndingLocationType, { count: number; sgTotal: number }>();
+  
+  drives.forEach(drive => {
+    const normalizedLocation = normalizeEndingLie(drive['Ending Lie']);
+    const current = locationCounts.get(normalizedLocation) || { count: 0, sgTotal: 0 };
+    locationCounts.set(normalizedLocation, {
+      count: current.count + 1,
+      sgTotal: current.sgTotal + drive.calculatedStrokesGained
+    });
+  });
+  
+  // Convert to array with percentages
+  const result: DriveEndingLocationData[] = [];
+  
+  locationCounts.forEach((data, location) => {
+    result.push({
+      location,
+      count: data.count,
+      percentage: (data.count / drives.length) * 100,
+      strokesGained: data.sgTotal,
+      avgStrokesGained: data.count > 0 ? data.sgTotal / data.count : 0,
+    });
+  });
+  
+  // Sort by count descending
+  result.sort((a, b) => b.count - a.count);
+  
+  return result;
+}
+
+/**
+ * Calculate drive distance analysis by distance ranges
+ * Returns data for bar/line chart showing SG and score differential by distance
+ */
+export function calculateDriveDistanceAnalysis(shots: ProcessedShot[]): DriveDistanceRange[] {
+  const drives = shots.filter(s => s.shotType === 'Drive');
+  
+  if (drives.length === 0) {
+    return [];
+  }
+  
+  // Define distance ranges (in yards)
+  const distanceRanges = [
+    { label: '< 200', minDistance: 0, maxDistance: 200 },
+    { label: '200-225', minDistance: 200, maxDistance: 225 },
+    { label: '225-250', minDistance: 225, maxDistance: 250 },
+    { label: '250-275', minDistance: 250, maxDistance: 275 },
+    { label: '275-300', minDistance: 275, maxDistance: 300 },
+    { label: '300+', minDistance: 300, maxDistance: 9999 },
+  ];
+  
+  // Calculate drive distance for each drive
+  const drivesWithDistance = drives.map(drive => {
+    const distance = Math.abs(drive['Starting Distance'] - drive['Ending Distance']);
+    return {
+      ...drive,
+      driveDistance: distance
+    };
+  });
+  
+  // Calculate metrics for each distance range
+  const result: DriveDistanceRange[] = distanceRanges.map(range => {
+    const rangeDrives = drivesWithDistance.filter(
+      d => d.driveDistance > range.minDistance && d.driveDistance <= range.maxDistance
+    );
+    
+    const count = rangeDrives.length;
+    const sgTotal = count > 0 ? rangeDrives.reduce((sum, d) => sum + d.calculatedStrokesGained, 0) : 0;
+    
+    // Calculate score differential for this range
+    // Score differential = average score on holes with drives in this range vs par
+    // For simplicity, we'll use SG as a proxy (negative SG = worse than benchmark)
+    // Higher positive SG = better performance
+    const avgSG = count > 0 ? sgTotal / count : 0;
+    
+    return {
+      label: range.label,
+      minDistance: range.minDistance,
+      maxDistance: range.maxDistance,
+      count,
+      percentage: (count / drives.length) * 100,
+      strokesGained: sgTotal,
+      avgStrokesGained: avgSG,
+      // Score differential is approximated from SG (positive SG = better than average = lower score)
+      // Using negative of SG since lower scores are better
+      scoreDifferential: -avgSG,
+    };
+  });
+  
+  // Filter out ranges with no data
+  return result.filter(r => r.count > 0);
+}
+
+/**
+ * Calculate complete driving analysis
+ */
+export function calculateDrivingAnalysis(shots: ProcessedShot[]): DrivingAnalysis {
+  return {
+    endingLocations: calculateDriveEndingLocations(shots),
+    distanceRanges: calculateDriveDistanceAnalysis(shots),
+  };
+}
+
+/**
+ * Calculate Problem Drive metrics - penalties and obstruction breakdown
+ * - Penalties: Total, OB, Standard (non-OB)
+ * - Obstruction: drives ending in Sand or Recovery
+ */
+export function calculateProblemDriveMetrics(shots: ProcessedShot[]): ProblemDriveMetrics {
+  // Default return if no shots
+  const defaultMetrics: ProblemDriveMetrics = {
+    totalDrives: 0,
+    totalPenalties: 0,
+    obPenalties: 0,
+    standardPenalties: 0,
+    penaltyPct: 0,
+    penaltySG: 0,
+    obPenaltyPct: 0,
+    obPenaltySG: 0,
+    standardPenaltyPct: 0,
+    standardPenaltySG: 0,
+    obstructionCount: 0,
+    obstructionPct: 0,
+    obstructionSG: 0,
+    sandCount: 0,
+    sandPct: 0,
+    sandSG: 0,
+    recoveryCount: 0,
+    recoveryPct: 0,
+    recoverySG: 0,
+  };
+
+  // Get all drives
+  const drives = shots.filter(s => s.shotType === 'Drive');
+
+  if (drives.length === 0) {
+    return defaultMetrics;
+  }
+
+  // Initialize counters
+  let totalPenalties = 0;
+  let obPenalties = 0;
+  let standardPenalties = 0;
+  let penaltySG = 0;
+  let obPenaltySG = 0;
+  let standardPenaltySG = 0;
+
+  let sandCount = 0;
+  let sandSG = 0;
+  let recoveryCount = 0;
+  let recoverySG = 0;
+
+  // Process each drive
+  drives.forEach(drive => {
+    // Check for penalties
+    if (drive.Penalty === 'Yes') {
+      totalPenalties++;
+      penaltySG += drive.calculatedStrokesGained;
+
+      // Check if OB
+      if (isOutOfBounds(drive)) {
+        obPenalties++;
+        obPenaltySG += drive.calculatedStrokesGained;
+      } else {
+        standardPenalties++;
+        standardPenaltySG += drive.calculatedStrokesGained;
+      }
+    }
+
+    // Check for Sand
+    if (drive['Ending Lie'] === 'Sand') {
+      sandCount++;
+      sandSG += drive.calculatedStrokesGained;
+    }
+
+    // Check for Recovery (drive ending in recovery lie)
+    if (drive['Ending Lie'] === 'Recovery') {
+      recoveryCount++;
+      recoverySG += drive.calculatedStrokesGained;
+    }
+  });
+
+  // Calculate obstruction (sand + recovery)
+  const obstructionCount = sandCount + recoveryCount;
+  const obstructionSG = sandSG + recoverySG;
+
+  // Calculate percentages
+  const penaltyPct = (totalPenalties / drives.length) * 100;
+  const obPenaltyPct = (obPenalties / drives.length) * 100;
+  const standardPenaltyPct = (standardPenalties / drives.length) * 100;
+  const obstructionPct = (obstructionCount / drives.length) * 100;
+  const sandPct = (sandCount / drives.length) * 100;
+  const recoveryPct = (recoveryCount / drives.length) * 100;
+
+  return {
+    totalDrives: drives.length,
+    totalPenalties,
+    obPenalties,
+    standardPenalties,
+    penaltyPct,
+    penaltySG,
+    obPenaltyPct,
+    obPenaltySG,
+    standardPenaltyPct,
+    standardPenaltySG,
+    obstructionCount,
+    obstructionPct,
+    obstructionSG,
+    sandCount,
+    sandPct,
+    sandSG,
+    recoveryCount,
+    recoveryPct,
+    recoverySG,
+  };
+}
+
+/**
+ * Calculate Approach metrics
+ * - Total SG Approach
+ * - Green Hit % = % of Approach shots with ending lie = Green
+ * - Proximity < 150 = average proximity of approach shots <= 150 yards
+ */
+export function calculateApproachMetrics(shots: ProcessedShot[]): ApproachMetrics {
+  // Filter to only approach shots
+  const approaches = shots.filter(s => s.shotType === 'Approach');
+  
+  if (approaches.length === 0) {
+    return {
+      totalApproaches: 0,
+      approachSG: 0,
+      avgApproachSG: 0,
+      positiveSGPct: 0,
+      positiveSGCount: 0,
+      greenHitPct: 0,
+      greenHits: 0,
+      greenHitPctFairway: 0,
+      greenHitsFairway: 0,
+      totalApproachesFairway: 0,
+      greenHitPctRough: 0,
+      greenHitsRough: 0,
+      totalApproachesRough: 0,
+      proximityUnder150: 0,
+      proximityUnder150Count: 0,
+      proximityUnder150OnGreen: 0,
+      proximityUnder150OnGreenCount: 0,
+      within20FeetPct: 0,
+      within20FeetCount: 0,
+      approachesOver150: 0,
+      approachesUnder150: 0,
+      greenHitPctOver150: 0,
+      greenHitPctUnder150: 0,
+    };
+  }
+  
+  // Total SG - Approach
+  const approachSG = approaches.reduce((sum, s) => sum + s.calculatedStrokesGained, 0);
+  const avgApproachSG = approachSG / approaches.length;
+  
+  // % of approaches with SG > 0
+  const positiveSGCount = approaches.filter(s => s.calculatedStrokesGained > 0).length;
+  const positiveSGPct = (positiveSGCount / approaches.length) * 100;
+  
+  // Green Hit % - approaches ending on Green
+  const greenHits = approaches.filter(s => s['Ending Lie'] === 'Green').length;
+  const greenHitPct = (greenHits / approaches.length) * 100;
+  
+  // Green Hit % by starting lie (Fairway, Rough)
+  const approachesFairway = approaches.filter(s => s['Starting Lie'] === 'Fairway');
+  const approachesRough = approaches.filter(s => s['Starting Lie'] === 'Rough');
+  
+  const greenHitsFairway = approachesFairway.filter(s => s['Ending Lie'] === 'Green').length;
+  const greenHitsRough = approachesRough.filter(s => s['Ending Lie'] === 'Green').length;
+  
+  const totalApproachesFairway = approachesFairway.length;
+  const totalApproachesRough = approachesRough.length;
+  
+  const greenHitPctFairway = totalApproachesFairway > 0 
+    ? (greenHitsFairway / totalApproachesFairway) * 100 
+    : 0;
+  
+  const greenHitPctRough = totalApproachesRough > 0 
+    ? (greenHitsRough / totalApproachesRough) * 100 
+    : 0;
+  
+  // Proximity < 150 - average proximity for approaches <= 150 yards
+  // Proximity = ending distance from hole (Ending Distance)
+  // Note: For shots NOT on green, ending distance is in YARDS and needs to be converted to FEET (x3)
+  // For shots on green, ending distance is already in FEET
+  const approachesUnder150 = approaches.filter(s => s['Starting Distance'] <= 150);
+  const approachesOver150 = approaches.filter(s => s['Starting Distance'] > 150);
+  
+  const proximityUnder150Count = approachesUnder150.length;
+  // Convert yards to feet for shots not on green
+  const proximityUnder150 = proximityUnder150Count > 0 
+    ? approachesUnder150.reduce((sum, s) => {
+        const endingDist = s['Ending Distance'];
+        // If not on green, distance is in yards - convert to feet
+        const distInFeet = s['Ending Lie'] === 'Green' ? endingDist : endingDist * 3;
+        return sum + distInFeet;
+      }, 0) / proximityUnder150Count 
+    : 0;
+  
+  // Proximity < 150 on Green - average proximity for approaches <= 150 yards that ended on green
+  const approachesUnder150OnGreen = approachesUnder150.filter(s => s['Ending Lie'] === 'Green');
+  const proximityUnder150OnGreenCount = approachesUnder150OnGreen.length;
+  // For green shots, ending distance is already in feet
+  const proximityUnder150OnGreen = proximityUnder150OnGreenCount > 0 
+    ? approachesUnder150OnGreen.reduce((sum, s) => sum + s['Ending Distance'], 0) / proximityUnder150OnGreenCount 
+    : 0;
+  
+  // Within 20 feet - % of approaches ending on the green within 20 feet of the hole
+  // Only include shots that end on the green (already in feet)
+  const within20FeetOnGreen = approaches.filter(s => s['Ending Lie'] === 'Green' && s['Ending Distance'] <= 20);
+  const within20FeetCount = within20FeetOnGreen.length;
+  const within20FeetPct = (within20FeetCount / approaches.length) * 100;
+  
+  // Green hit % by distance
+  const greenHitsUnder150 = approachesUnder150.filter(s => s['Ending Lie'] === 'Green').length;
+  const greenHitsOver150 = approachesOver150.filter(s => s['Ending Lie'] === 'Green').length;
+  
+  const greenHitPctUnder150 = approachesUnder150.length > 0 
+    ? (greenHitsUnder150 / approachesUnder150.length) * 100 
+    : 0;
+  
+  const greenHitPctOver150 = approachesOver150.length > 0 
+    ? (greenHitsOver150 / approachesOver150.length) * 100 
+    : 0;
+  
+  return {
+    totalApproaches: approaches.length,
+    approachSG,
+    avgApproachSG,
+    positiveSGPct,
+    positiveSGCount,
+    greenHitPct,
+    greenHits,
+    greenHitPctFairway,
+    greenHitsFairway,
+    totalApproachesFairway,
+    greenHitPctRough,
+    greenHitsRough,
+    totalApproachesRough,
+    proximityUnder150,
+    proximityUnder150Count,
+    proximityUnder150OnGreen,
+    proximityUnder150OnGreenCount,
+    within20FeetPct,
+    within20FeetCount,
+    approachesOver150: approachesOver150.length,
+    approachesUnder150: approachesUnder150.length,
+    greenHitPctOver150,
+    greenHitPctUnder150,
+  };
+}
+
+/**
+ * Calculate Approach by Distance metrics
+ * - Filter to approach shots from Tee and Fairway only
+ * - Group by distance buckets
+ * - Calculate SG, Green %, and Proximity for each bucket
+ * 
+ * Distance buckets:
+ * - 51-100 yards: Distance Wedges
+ * - 101-150 yards: Short Approach
+ * - 151-200 yards: Medium Approach
+ * - 201-225 yards: Long Approach
+ */
+export function calculateApproachByDistance(shots: ProcessedShot[]): ApproachDistanceBucket[] {
+  // Filter to approach shots from Tee and Fairway only
+  const approachShots = shots.filter(s => 
+    s.shotType === 'Approach' && 
+    (s['Starting Lie'] === 'Tee' || s['Starting Lie'] === 'Fairway')
+  );
+  
+  // Define distance buckets
+  const buckets = [
+    { label: 'Distance Wedges', description: '51-100 yards', minDistance: 51, maxDistance: 100 },
+    { label: 'Short Approach', description: '101-150 yards', minDistance: 101, maxDistance: 150 },
+    { label: 'Medium Approach', description: '151-200 yards', minDistance: 151, maxDistance: 200 },
+    { label: 'Long Approach', description: '201-225 yards', minDistance: 201, maxDistance: 225 },
+  ];
+  
+  // Calculate metrics for each bucket
+  const results: ApproachDistanceBucket[] = buckets.map(bucket => {
+    const bucketShots = approachShots.filter(s => 
+      s['Starting Distance'] >= bucket.minDistance && 
+      s['Starting Distance'] <= bucket.maxDistance
+    );
+    
+    const totalShots = bucketShots.length;
+    
+    // Calculate SG
+    const strokesGained = totalShots > 0 
+      ? bucketShots.reduce((sum, s) => sum + s.calculatedStrokesGained, 0)
+      : 0;
+    const avgStrokesGained = totalShots > 0 ? strokesGained / totalShots : 0;
+    
+    // Calculate Green Hit %
+    const greenHits = bucketShots.filter(s => s['Ending Lie'] === 'Green').length;
+    const greenHitPct = totalShots > 0 ? (greenHits / totalShots) * 100 : 0;
+    
+    // Calculate Proximity
+    // Shots on green: ending distance is already in feet
+    // Shots not on green: ending distance is in yards, convert to feet (×3)
+    const proximity = totalShots > 0 
+      ? bucketShots.reduce((sum, s) => {
+          const endingDist = s['Ending Distance'];
+          // If not on green, distance is in yards - convert to feet
+          const distInFeet = s['Ending Lie'] === 'Green' ? endingDist : endingDist * 3;
+          return sum + distInFeet;
+        }, 0) / totalShots
+      : 0;
+    
+    // Proximity on green only
+    const greenShots = bucketShots.filter(s => s['Ending Lie'] === 'Green');
+    const proximityOnGreen = greenShots.length > 0 
+      ? greenShots.reduce((sum, s) => sum + s['Ending Distance'], 0) / greenShots.length
+      : 0;
+    
+    return {
+      label: bucket.label,
+      description: bucket.description,
+      minDistance: bucket.minDistance,
+      maxDistance: bucket.maxDistance,
+      totalShots,
+      strokesGained,
+      avgStrokesGained,
+      greenHits,
+      greenHitPct,
+      proximity,
+      proximityOnGreen,
+    };
+  });
+  
+  // Filter out buckets with no shots
+  return results.filter(b => b.totalShots > 0);
 }

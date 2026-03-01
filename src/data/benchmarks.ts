@@ -155,20 +155,26 @@ export function lookupExpectedStrokes(
 /**
  * Calculate Strokes Gained for a single shot
  * SG = Expected from Start - (1 + Expected from End)
+ * For penalty shots: SG = Expected from Start - (2 + Expected from End)
+ * The extra "-1" accounts for the penalty stroke
  */
 export function calculateStrokesGained(
   benchmark: BenchmarkType,
   startDistance: number,
   startLocation: string,
   endDistance: number,
-  endLocation: string
+  endLocation: string,
+  isPenalty: boolean = false
 ): number {
   const expectedStart = lookupExpectedStrokes(benchmark, startDistance, startLocation);
   const expectedEnd = lookupExpectedStrokes(benchmark, endDistance, endLocation);
   
-  // SG = Expected from start position - (1 + expected from end position)
-  // The "1" represents the stroke just taken
-  return expectedStart - (1 + expectedEnd);
+  // For penalty shots, subtract an extra stroke (penalty stroke)
+  const penaltyAdjustment = isPenalty ? 1 : 0;
+  
+  // SG = Expected from start position - (1 + expected from end position + penalty adjustment)
+  // The "1" represents the stroke just taken, penaltyAdjustment accounts for penalty strokes
+  return expectedStart - (1 + expectedEnd + penaltyAdjustment);
 }
 
 /**
