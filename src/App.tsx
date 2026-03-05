@@ -3640,9 +3640,9 @@ function ScoringView({ metrics, birdieAndBogeyMetrics }: { metrics: ScoringMetri
       {/* Birdie and Bogey Breakdown Section */}
       <h4 style={{ marginBottom: '16px', color: 'var(--ash)', marginTop: '32px' }}>Birdie and Bogey Breakdown</h4>
 
-      {/* Bogey Rate Bar Chart */}
+      {/* Bogey Rate Stacked Bar Chart */}
       <div style={{ marginBottom: '24px' }}>
-        <h5 style={{ marginBottom: '12px', color: 'var(--ash)', fontSize: '14px' }}>Bogey Rate by Par</h5>
+        <h5 style={{ marginBottom: '12px', color: 'var(--ash)', fontSize: '14px' }}>Bogey & Double Bogey+ Rate by Par</h5>
         <div style={{ background: 'var(--charcoal)', padding: '16px', borderRadius: '4px' }}>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={bogeyRates} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
@@ -3652,14 +3652,83 @@ function ScoringView({ metrics, birdieAndBogeyMetrics }: { metrics: ScoringMetri
               <Tooltip 
                 contentStyle={{ background: 'var(--court)', border: '1px solid var(--scarlet)', borderRadius: '4px' }}
                 labelStyle={{ color: 'var(--chalk)' }}
-                formatter={(value: number) => [`${value.toFixed(1)}%`, 'Bogey Rate']}
+                formatter={(value: number, name: string) => [`${value.toFixed(1)}%`, name === 'bogeyRate' ? 'Bogey' : 'Double Bogey+']}
               />
-              <Bar dataKey="bogeyRate" fill="#F59520" name="Bogey Rate" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="bogeyRate" stackId="a" fill="#F59520" name="Bogey" radius={[4, 0, 0, 4]} />
+              <Bar dataKey="doubleBogeyPlusRate" stackId="a" fill="#E8202A" name="Double Bogey+" radius={[0, 4, 4, 0]} />
+              <Legend 
+                formatter={(value) => <span style={{ color: 'var(--ash)', fontSize: '11px' }}>{value}</span>}
+              />
             </BarChart>
           </ResponsiveContainer>
           <p style={{ fontSize: '11px', color: 'var(--ash)', marginTop: '8px' }}>
-            {totalBogeys} total bogeys across {bogeyRates[0].totalHoles} holes
+            {totalBogeys} total bogeys, {totalDoubleBogeyPlus} double bogey+ across {bogeyRates[0].totalHoles} holes
           </p>
+        </div>
+      </div>
+
+      {/* Bogey and Double Bogey+ Root Cause Charts - Side by Side */}
+      <div style={{ display: 'flex', gap: '16px', marginBottom: '24px' }}>
+        {/* Bogey Root Cause Chart */}
+        <div style={{ flex: 1 }}>
+          <h5 style={{ marginBottom: '12px', color: 'var(--ash)', fontSize: '14px' }}>Bogey Root Cause ({totalBogeys} holes)</h5>
+          <div style={{ background: 'var(--charcoal)', padding: '16px', borderRadius: '4px' }}>
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart 
+                data={[
+                  { name: 'Penalties', count: bogeyRootCause.penalties },
+                  { name: 'Driving', count: bogeyRootCause.driving },
+                  { name: 'Approach', count: bogeyRootCause.approach },
+                  { name: 'Lag Putts', count: bogeyRootCause.lagPutts },
+                  { name: 'Makeable Putts', count: bogeyRootCause.makeablePutts },
+                  { name: 'Short Game', count: bogeyRootCause.shortGame },
+                  { name: 'Recovery', count: bogeyRootCause.recovery },
+                ]} 
+                layout="vertical"
+                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--dark)" />
+                <XAxis type="number" stroke="var(--ash)" fontSize={11} />
+                <YAxis dataKey="name" type="category" stroke="var(--ash)" fontSize={10} width={80} />
+                <Tooltip 
+                  contentStyle={{ background: 'var(--court)', border: '1px solid var(--scarlet)', borderRadius: '4px' }}
+                  labelStyle={{ color: 'var(--chalk)' }}
+                />
+                <Bar dataKey="count" fill="#F59520" name="Count" radius={[0, 4, 4, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Double Bogey+ Root Cause Chart */}
+        <div style={{ flex: 1 }}>
+          <h5 style={{ marginBottom: '12px', color: 'var(--ash)', fontSize: '14px' }}>Double Bogey+ Root Cause ({totalDoubleBogeyPlus} holes)</h5>
+          <div style={{ background: 'var(--charcoal)', padding: '16px', borderRadius: '4px' }}>
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart 
+                data={[
+                  { name: 'Penalties', count: doubleBogeyPlusRootCause.penalties },
+                  { name: 'Driving', count: doubleBogeyPlusRootCause.driving },
+                  { name: 'Approach', count: doubleBogeyPlusRootCause.approach },
+                  { name: 'Lag Putts', count: doubleBogeyPlusRootCause.lagPutts },
+                  { name: 'Makeable Putts', count: doubleBogeyPlusRootCause.makeablePutts },
+                  { name: 'Short Game', count: doubleBogeyPlusRootCause.shortGame },
+                  { name: 'Recovery', count: doubleBogeyPlusRootCause.recovery },
+                ]} 
+                layout="vertical"
+                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--dark)" />
+                <XAxis type="number" stroke="var(--ash)" fontSize={11} />
+                <YAxis dataKey="name" type="category" stroke="var(--ash)" fontSize={10} width={80} />
+                <Tooltip 
+                  contentStyle={{ background: 'var(--court)', border: '1px solid var(--scarlet)', borderRadius: '4px' }}
+                  labelStyle={{ color: 'var(--chalk)' }}
+                />
+                <Bar dataKey="count" fill="#E8202A" name="Count" radius={[0, 4, 4, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       </div>
 
@@ -3696,68 +3765,6 @@ function ScoringView({ metrics, birdieAndBogeyMetrics }: { metrics: ScoringMetri
               </div>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Bogey Root Cause Chart */}
-      <div style={{ marginBottom: '24px' }}>
-        <h5 style={{ marginBottom: '12px', color: 'var(--ash)', fontSize: '14px' }}>Bogey Root Cause ({totalBogeys} holes)</h5>
-        <div style={{ background: 'var(--charcoal)', padding: '16px', borderRadius: '4px' }}>
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart 
-              data={[
-                { name: 'Penalties', count: bogeyRootCause.penalties },
-                { name: 'Driving', count: bogeyRootCause.driving },
-                { name: 'Approach', count: bogeyRootCause.approach },
-                { name: 'Lag Putts', count: bogeyRootCause.lagPutts },
-                { name: 'Makeable Putts', count: bogeyRootCause.makeablePutts },
-                { name: 'Short Game', count: bogeyRootCause.shortGame },
-                { name: 'Recovery', count: bogeyRootCause.recovery },
-              ]} 
-              layout="vertical"
-              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--dark)" />
-              <XAxis type="number" stroke="var(--ash)" fontSize={11} />
-              <YAxis dataKey="name" type="category" stroke="var(--ash)" fontSize={10} width={80} />
-              <Tooltip 
-                contentStyle={{ background: 'var(--court)', border: '1px solid var(--scarlet)', borderRadius: '4px' }}
-                labelStyle={{ color: 'var(--chalk)' }}
-              />
-              <Bar dataKey="count" fill="#F59520" name="Count" radius={[0, 4, 4, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* Double Bogey+ Root Cause Chart */}
-      <div style={{ marginBottom: '24px' }}>
-        <h5 style={{ marginBottom: '12px', color: 'var(--ash)', fontSize: '14px' }}>Double Bogey+ Root Cause ({totalDoubleBogeyPlus} holes)</h5>
-        <div style={{ background: 'var(--charcoal)', padding: '16px', borderRadius: '4px' }}>
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart 
-              data={[
-                { name: 'Penalties', count: doubleBogeyPlusRootCause.penalties },
-                { name: 'Driving', count: doubleBogeyPlusRootCause.driving },
-                { name: 'Approach', count: doubleBogeyPlusRootCause.approach },
-                { name: 'Lag Putts', count: doubleBogeyPlusRootCause.lagPutts },
-                { name: 'Makeable Putts', count: doubleBogeyPlusRootCause.makeablePutts },
-                { name: 'Short Game', count: doubleBogeyPlusRootCause.shortGame },
-                { name: 'Recovery', count: doubleBogeyPlusRootCause.recovery },
-              ]} 
-              layout="vertical"
-              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--dark)" />
-              <XAxis type="number" stroke="var(--ash)" fontSize={11} />
-              <YAxis dataKey="name" type="category" stroke="var(--ash)" fontSize={10} width={80} />
-              <Tooltip 
-                contentStyle={{ background: 'var(--court)', border: '1px solid var(--scarlet)', borderRadius: '4px' }}
-                labelStyle={{ color: 'var(--chalk)' }}
-              />
-              <Bar dataKey="count" fill="#E8202A" name="Count" radius={[0, 4, 4, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
         </div>
       </div>
     </div>

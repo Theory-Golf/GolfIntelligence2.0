@@ -2751,29 +2751,33 @@ function isTiger5FailHole(hole: HoleScore, shots: ProcessedShot[]): boolean {
  */
 export function calculateBogeyRates(_shots: ProcessedShot[], holeScores: HoleScore[]): BogeyRateByPar[] {
   const bogeyRates: BogeyRateByPar[] = [
-    { par: 0, label: 'Overall', totalHoles: 0, bogeyCount: 0, bogeyRate: 0 },
-    { par: 3, label: 'Par 3', totalHoles: 0, bogeyCount: 0, bogeyRate: 0 },
-    { par: 4, label: 'Par 4', totalHoles: 0, bogeyCount: 0, bogeyRate: 0 },
-    { par: 5, label: 'Par 5', totalHoles: 0, bogeyCount: 0, bogeyRate: 0 },
+    { par: 0, label: 'Overall', totalHoles: 0, bogeyCount: 0, bogeyRate: 0, doubleBogeyPlusCount: 0, doubleBogeyPlusRate: 0 },
+    { par: 3, label: 'Par 3', totalHoles: 0, bogeyCount: 0, bogeyRate: 0, doubleBogeyPlusCount: 0, doubleBogeyPlusRate: 0 },
+    { par: 4, label: 'Par 4', totalHoles: 0, bogeyCount: 0, bogeyRate: 0, doubleBogeyPlusCount: 0, doubleBogeyPlusRate: 0 },
+    { par: 5, label: 'Par 5', totalHoles: 0, bogeyCount: 0, bogeyRate: 0, doubleBogeyPlusCount: 0, doubleBogeyPlusRate: 0 },
   ];
   
   holeScores.forEach(hole => {
     const isBogey = hole.score === hole.par + 1;
+    const isDoubleBogeyPlus = hole.score >= hole.par + 2;
     
     // Update overall
     bogeyRates[0].totalHoles++;
     if (isBogey) bogeyRates[0].bogeyCount++;
+    if (isDoubleBogeyPlus) bogeyRates[0].doubleBogeyPlusCount++;
     
     // Update by par
     const parIndex = hole.par === 3 ? 1 : hole.par === 4 ? 2 : 3;
     bogeyRates[parIndex].totalHoles++;
     if (isBogey) bogeyRates[parIndex].bogeyCount++;
+    if (isDoubleBogeyPlus) bogeyRates[parIndex].doubleBogeyPlusCount++;
   });
   
   // Calculate percentages
   bogeyRates.forEach(rate => {
     if (rate.totalHoles > 0) {
       rate.bogeyRate = (rate.bogeyCount / rate.totalHoles) * 100;
+      rate.doubleBogeyPlusRate = (rate.doubleBogeyPlusCount / rate.totalHoles) * 100;
     }
   });
   

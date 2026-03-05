@@ -567,6 +567,8 @@ export interface BogeyRateByPar {
   totalHoles: number;
   bogeyCount: number;
   bogeyRate: number;
+  doubleBogeyPlusCount: number;
+  doubleBogeyPlusRate: number;
 }
 
 // Birdie Opportunity metrics
