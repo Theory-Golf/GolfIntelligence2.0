@@ -4448,6 +4448,65 @@ function PlayerPathView({ drivers: _drivers, playerPathMetrics, performanceDrive
     }
   };
   
+  // Get SG value from a driver for sorting purposes
+  const getDriverSG = (driver: { code: string; data: any }): number => {
+    if (!driver.data) return 0;
+    const { code, data } = driver;
+    
+    // Driving drivers: D1-D5 - use sgImpact
+    if (code.startsWith('D')) {
+      return data.sgImpact ?? 0;
+    }
+    
+    // Approach drivers: A1-A4 - sum of all band sgTotal values
+    if (code.startsWith('A') && data.bands) {
+      return data.bands.reduce((sum: number, band: any) => sum + (band.sgTotal ?? 0), 0);
+    }
+    
+    // Putting - Lag: L1-L3 - use sgImpact
+    if (code === 'L1-L3') {
+      return data.sgImpact ?? 0;
+    }
+    
+    // Putting - Makeable: M1 - average of bucket avgSG (weighted by totalPutts)
+    if (code === 'M1' && data.buckets) {
+      const totalPutts = data.buckets.reduce((sum: number, b: any) => sum + (b.totalPutts ?? 0), 0);
+      if (totalPutts === 0) return 0;
+      const totalSG = data.buckets.reduce((sum: number, b: any) => sum + ((b.avgSG ?? 0) * (b.totalPutts ?? 0)), 0);
+      return totalSG / totalPutts;
+    }
+    
+    // Putting - Primary Loss: M2 - use primaryLossSG
+    if (code === 'M2') {
+      return data.primaryLossSG ?? 0;
+    }
+    
+    // Short Game drivers: S1-S3
+    if (code.startsWith('S')) {
+      // S3 has direct sgImpact
+      if (code === 'S3') {
+        return data.sgImpact ?? 0;
+      }
+      // S1 and S2 - calculate from lieMetrics or distanceMetrics
+      if (data.lieMetrics) {
+        // Calculate weighted SG from lie metrics
+        const totalShots = data.lieMetrics.reduce((sum: number, m: any) => sum + (m.totalShots ?? 0), 0);
+        if (totalShots === 0) return 0;
+        // Estimate SG based on proximity rate (lower rate = negative SG)
+        const avgProximityRate = data.lieMetrics.reduce((sum: number, m: any) => sum + ((m.proximityRate ?? 0) * (m.totalShots ?? 0)), 0) / totalShots;
+        // Assume baseline 50% proximity rate = 0 SG, below is negative
+        return (avgProximityRate - 50) * 0.1;
+      }
+      if (data.distanceMetrics) {
+        const totalShots = data.distanceMetrics.reduce((sum: number, m: any) => sum + (m.totalShots ?? 0), 0);
+        if (totalShots === 0) return 0;
+        const avgProximityRate = data.distanceMetrics.reduce((sum: number, m: any) => sum + ((m.proximityRate ?? 0) * (m.totalShots ?? 0)), 0) / totalShots;
+        return (avgProximityRate - 50) * 0.1;
+      }
+    }
+    
+    return 0;
+  };
 
   
   // Get drivers for all segments
@@ -4503,16 +4562,6 @@ function PlayerPathView({ drivers: _drivers, playerPathMetrics, performanceDrive
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ 
-              fontSize: '12px', 
-              fontWeight: 700, 
-              color: 'var(--chalk)',
-              background: 'var(--obsidian)',
-              padding: '4px 8px',
-              borderRadius: '4px',
-            }}>
-              {code}
-            </span>
             <span style={{ color: 'var(--chalk)', fontWeight: 600, fontSize: '14px' }}>{data.name}</span>
           </div>
           <span style={{ 
@@ -4905,7 +4954,12 @@ function PlayerPathView({ drivers: _drivers, playerPathMetrics, performanceDrive
           {/* Driver Cards - Only shown when section is expanded */}
           {expandedSections[segment] && (
             <div style={{ marginTop: '16px' }}>
-              {allSegmentDrivers[segment].map(driver => renderDriverCard(driver))}
+              {/* Sort drivers by SG lowest to highest */}
+              {allSegmentDrivers[segment]
+                .slice()
+                .sort((a, b) => getDriverSG(a) - getDriverSG(b))
+                .map(driver => renderDriverCard(driver))
+              }
               
               {allSegmentDrivers[segment].filter(d => d.data).length === 0 && (
                 <div style={{ textAlign: 'center', padding: '16px', color: 'var(--ash)' }}>
