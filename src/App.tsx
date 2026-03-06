@@ -4422,7 +4422,20 @@ function ShortGameHeatMapSection({ data }: { data: ShortGameHeatMapData }) {
  * Player Path View - Performance Drivers by Segment
  */
 function PlayerPathView({ drivers: _drivers, playerPathMetrics, performanceDriversV2 }: { drivers: PerformanceDriversResult; playerPathMetrics: PlayerPathMetrics; performanceDriversV2: PerformanceDriversResultV2 }) {
-  const [activeSegment, setActiveSegment] = useState<'Driving' | 'Approach' | 'Putting' | 'Short Game'>('Driving');
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
+    'Driving': true,
+    'Approach': true,
+    'Putting': true,
+    'Short Game': true,
+  });
+  
+  // Toggle section expansion
+  const toggleSection = (segment: string) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [segment]: !prev[segment]
+    }));
+  };
   
   // Get severity color
   const getSeverityColor = (severity: string): string => {
@@ -4435,55 +4448,40 @@ function PlayerPathView({ drivers: _drivers, playerPathMetrics, performanceDrive
     }
   };
   
-  // Get segment icon
-  const getSegmentIcon = (segment: string): string => {
-    switch (segment) {
-      case 'Driving': return '🚗';
-      case 'Approach': return '🎯';
-      case 'Short Game': return '🏌️';
-      case 'Putting': return '⛳';
-      default: return '📈';
-    }
-  };
+
   
-  // Get drivers for current segment
-  const getSegmentDrivers = () => {
+  // Get drivers for all segments
+  const getAllSegmentDrivers = () => {
     const { driving, approach, putting, shortGame } = playerPathMetrics;
     
-    switch (activeSegment) {
-      case 'Driving':
-        return [
-          { code: 'D1', data: driving.d1 },
-          { code: 'D2', data: driving.d2 },
-          { code: 'D3', data: driving.d3 },
-          { code: 'D4', data: driving.d4 },
-          { code: 'D5', data: driving.d5 },
-        ];
-      case 'Approach':
-        return [
-          { code: 'A1', data: approach.a1 },
-          { code: 'A2', data: approach.a2 },
-          { code: 'A3', data: approach.a3 },
-          { code: 'A4', data: approach.a4 },
-        ];
-      case 'Putting':
-        return [
-          { code: 'L1-L3', data: putting.lag },
-          { code: 'M1', data: putting.m1 },
-          { code: 'M2', data: putting.m2 },
-        ];
-      case 'Short Game':
-        return [
-          { code: 'S1', data: shortGame.s1 },
-          { code: 'S2', data: shortGame.s2 },
-          { code: 'S3', data: shortGame.s3 },
-        ];
-      default:
-        return [];
-    }
+    return {
+      'Driving': [
+        { code: 'D1', data: driving.d1 },
+        { code: 'D2', data: driving.d2 },
+        { code: 'D3', data: driving.d3 },
+        { code: 'D4', data: driving.d4 },
+        { code: 'D5', data: driving.d5 },
+      ],
+      'Approach': [
+        { code: 'A1', data: approach.a1 },
+        { code: 'A2', data: approach.a2 },
+        { code: 'A3', data: approach.a3 },
+        { code: 'A4', data: approach.a4 },
+      ],
+      'Putting': [
+        { code: 'L1-L3', data: putting.lag },
+        { code: 'M1', data: putting.m1 },
+        { code: 'M2', data: putting.m2 },
+      ],
+      'Short Game': [
+        { code: 'S1', data: shortGame.s1 },
+        { code: 'S2', data: shortGame.s2 },
+        { code: 'S3', data: shortGame.s3 },
+      ],
+    };
   };
   
-  const segmentDrivers = getSegmentDrivers();
+  const allSegmentDrivers = getAllSegmentDrivers();
   
   // Render driver card based on driver type
   const renderDriverCard = (driver: { code: string; data: any }) => {
@@ -4744,17 +4742,7 @@ function PlayerPathView({ drivers: _drivers, playerPathMetrics, performanceDrive
     }
   };
   
-  // Get category icon
-  const getCategoryIcon = (category: string): string => {
-    switch (category) {
-      case 'Driving': return '🚗';
-      case 'Approach': return '🎯';
-      case 'Lag Putting': return '⛳';
-      case 'Makeable Putts': return '🎱';
-      case 'Short Game': return '🏌️';
-      default: return '📊';
-    }
-  };
+
   
   const top5Drivers = performanceDriversV2.drivers;
   
@@ -4804,7 +4792,7 @@ function PlayerPathView({ drivers: _drivers, playerPathMetrics, performanceDrive
             
             {/* Category */}
             <div style={{ fontSize: '11px', color: 'var(--ash)', marginBottom: '4px' }}>
-              {getCategoryIcon(driver.category)} {driver.category}
+              {driver.category}
             </div>
             
             {/* Label */}
@@ -4823,7 +4811,7 @@ function PlayerPathView({ drivers: _drivers, playerPathMetrics, performanceDrive
             {/* Cascade Note */}
             {driver.cascadeNote && (
               <div style={{ marginTop: '8px', padding: '6px', background: 'var(--obsidian)', borderRadius: '4px', fontSize: '10px', color: 'var(--cement)', fontStyle: 'italic' }}>
-                💡 {driver.cascadeNote}
+                {driver.cascadeNote}
               </div>
             )}
             
@@ -4884,48 +4872,50 @@ function PlayerPathView({ drivers: _drivers, playerPathMetrics, performanceDrive
         </div>
       </div>
       
-      {/* Segment Tabs */}
-      <div style={{ 
-        display: 'flex', 
-        gap: '4px', 
-        marginBottom: '24px',
-        borderBottom: '1px solid var(--ash)',
-        paddingBottom: '8px',
-      }}>
-        {(['Driving', 'Approach', 'Putting', 'Short Game'] as const).map(segment => (
+
+      
+      
+      {/* Segment Sections - Collapsible */}
+      {(['Driving', 'Approach', 'Putting', 'Short Game'] as const).map(segment => (
+        <div key={segment} style={{ marginBottom: '24px' }}>
+          {/* Section Header - Clickable to expand/collapse */}
           <button
-            key={segment}
-            onClick={() => setActiveSegment(segment)}
+            onClick={() => toggleSection(segment)}
             style={{
-              background: activeSegment === segment ? 'var(--charcoal)' : 'transparent',
-              border: 'none',
-              borderRadius: '4px 4px 0 0',
-              padding: '10px 16px',
-              cursor: 'pointer',
-              color: activeSegment === segment ? 'var(--chalk)' : 'var(--ash)',
-              fontWeight: activeSegment === segment ? 600 : 400,
-              fontSize: '13px',
               display: 'flex',
               alignItems: 'center',
-              gap: '6px',
+              justifyContent: 'space-between',
+              width: '100%',
+              padding: '12px 16px',
+              background: 'var(--charcoal)',
+              border: '1px solid var(--ash)',
+              borderRadius: '4px',
+              color: 'var(--chalk)',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: 600,
             }}
           >
-            <span>{getSegmentIcon(segment)}</span>
             <span>{segment}</span>
+            <span style={{ fontSize: '12px', color: 'var(--ash)' }}>
+              {expandedSections[segment] ? '▲' : '▼'}
+            </span>
           </button>
-        ))}
-      </div>
-      
-      {/* Driver Cards */}
-      <div>
-        {segmentDrivers.map(driver => renderDriverCard(driver))}
-        
-        {segmentDrivers.filter(d => d.data).length === 0 && (
-          <div style={{ textAlign: 'center', padding: '32px', color: 'var(--ash)' }}>
-            <p>No driver data available for this segment.</p>
-          </div>
-        )}
-      </div>
+          
+          {/* Driver Cards - Only shown when section is expanded */}
+          {expandedSections[segment] && (
+            <div style={{ marginTop: '16px' }}>
+              {allSegmentDrivers[segment].map(driver => renderDriverCard(driver))}
+              
+              {allSegmentDrivers[segment].filter(d => d.data).length === 0 && (
+                <div style={{ textAlign: 'center', padding: '16px', color: 'var(--ash)' }}>
+                  <p>No driver data available for this segment.</p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      ))}
     </div>
   );
 }
