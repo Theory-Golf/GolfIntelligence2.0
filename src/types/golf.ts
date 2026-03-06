@@ -266,7 +266,6 @@ export const TABS: Tab[] = [
   { id: 'approach', label: 'Approach', path: '/approach' },
   { id: 'shortgame', label: 'Short Game', path: '/short-game' },
   { id: 'putting', label: 'Putting', path: '/putting' },
-  { id: 'mental', label: 'Mental', path: '/mental' },
   { id: 'path', label: 'Player Path', path: '/player-path' },
   { id: 'coaching', label: 'Coaching', path: '/coaching' },
 ];
