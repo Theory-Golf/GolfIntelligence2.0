@@ -4420,7 +4420,7 @@ function ShortGameHeatMapSection({ data }: { data: ShortGameHeatMapData }) {
  * Player Path View - Top 5 Performance Drivers
  */
 function PlayerPathView({ drivers }: { drivers: PerformanceDriversResult }) {
-  const { drivers: performanceDrivers, totalRounds } = drivers;
+  const { drivers: performanceDrivers } = drivers;
   
   // Get segment icon
   const getSegmentIcon = (segment: string): string => {
