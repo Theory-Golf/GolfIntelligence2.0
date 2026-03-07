@@ -1006,3 +1006,54 @@ export interface PerformanceDriversResultV2 {
   totalRounds: number;
   calculatedAt: Date;
 }
+
+// ============================================
+// Coach Table - Per Player Metrics Pivot Table
+// ============================================
+
+export interface CoachTablePlayerMetrics {
+  player: string;
+  // Basic stats
+  totalRounds: number;
+  avgScore: number;
+  
+  // Tiger 5 fails
+  totalT5Fails: number;
+  threePutts: number;
+  doubleBogey: number;
+  par5Bogey: number;
+  missedGreen: number;
+  bogeyApproach: number;
+  
+  // Mental metrics
+  bounceBackPct: number;
+  dropOffPct: number;
+  gasPedalPct: number;
+  bogeyTrainPct: number;
+  
+  // Strokes gained
+  totalStrokesGained: number;
+  
+  // Driving
+  sgDriving: number;
+  penaltyRate: number;
+  
+  // Approach
+  sgApproach: number;
+  
+  // GIR
+  girPct: number;
+  
+  // Putting
+  sgPutting: number;
+  sg5to12Ft: number;
+  poorLagPuttPct: number;
+  
+  // Short Game
+  sgShortGame: number;
+}
+
+export interface CoachTableMetrics {
+  players: CoachTablePlayerMetrics[];
+  calculatedAt: Date;
+}

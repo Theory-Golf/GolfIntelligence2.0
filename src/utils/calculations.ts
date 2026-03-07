@@ -3,7 +3,7 @@
  * Based on your shot classification rules
  */
 
-import type { RawShot, ProcessedShot, ShotType, ShotCategory, Tiger5Metrics, RoundSummary, Tiger5Fail, HoleScore, RootCauseMetrics, Tiger5FailDetail, Tiger5FailDetails, RootCauseByFailTypeList, RootCauseByFailType, Tiger5TrendDataPoint, SGSeparator, SGShotCategory, SGRoundData, DrivingMetrics, DriveEndingLocationData, DriveDistanceRange, DrivingAnalysis, DriveEndingLocationType, ProblemDriveMetrics, ApproachMetrics, ApproachDistanceBucket, ApproachHeatMapCell, ApproachHeatMapData, PuttingMetrics, PuttingDistanceBucket, LagPuttingMetrics, LagDistanceDistribution, ScoringMetrics, ParScoringMetrics, HoleOutcomeData, HoleOutcome, MentalMetrics, BogeyRateByPar, BirdieOpportunityMetrics, ScoringRootCause, BirdieAndBogeyMetrics, ShortGameMetrics, ShortGameHeatMapCell, ShortGameHeatMapData } from '../types/golf';
+import type { RawShot, ProcessedShot, ShotType, ShotCategory, Tiger5Metrics, RoundSummary, Tiger5Fail, HoleScore, RootCauseMetrics, Tiger5FailDetail, Tiger5FailDetails, RootCauseByFailTypeList, RootCauseByFailType, Tiger5TrendDataPoint, SGSeparator, SGShotCategory, SGRoundData, DrivingMetrics, DriveEndingLocationData, DriveDistanceRange, DrivingAnalysis, DriveEndingLocationType, ProblemDriveMetrics, ApproachMetrics, ApproachDistanceBucket, ApproachHeatMapCell, ApproachHeatMapData, PuttingMetrics, PuttingDistanceBucket, LagPuttingMetrics, LagDistanceDistribution, ScoringMetrics, ParScoringMetrics, HoleOutcomeData, HoleOutcome, MentalMetrics, BogeyRateByPar, BirdieOpportunityMetrics, ScoringRootCause, BirdieAndBogeyMetrics, ShortGameMetrics, ShortGameHeatMapCell, ShortGameHeatMapData, CoachTableMetrics, CoachTablePlayerMetrics } from '../types/golf';
 import type { BenchmarkType } from '../data/benchmarks';
 import { calculateStrokesGained } from '../data/benchmarks';
 
@@ -3239,5 +3239,94 @@ export function calculateShortGameHeatMapData(shots: ProcessedShot[], totalRound
     distanceBuckets: distanceBuckets.map(b => b.label),
     lies,
     totalRounds,
+  };
+}
+
+// ============================================
+// Coach Table - Per Player Metrics Pivot Table
+// ============================================
+
+/**
+ * Calculate Coach Table metrics - aggregates all metrics per player
+ * This is essentially a pivot table with players as rows and metrics as columns
+ */
+export function calculateCoachTableMetrics(
+  processedShots: ProcessedShot[],
+  benchmark: BenchmarkType
+): CoachTableMetrics {
+  if (processedShots.length === 0) {
+    return { players: [], calculatedAt: new Date() };
+  }
+
+  // Get all unique players
+  const players = [...new Set(processedShots.map(s => s.Player))].sort();
+
+  const playerMetrics: CoachTablePlayerMetrics[] = players.map(player => {
+    // Filter shots for this player
+    const playerShots = processedShots.filter(s => s.Player === player);
+    
+    if (playerShots.length === 0) {
+      return null;
+    }
+
+    // Calculate all metrics for this player using existing functions
+    const tiger5Metrics = calculateTiger5Metrics(playerShots);
+    const drivingMetrics = calculateDrivingMetrics(playerShots);
+    const approachMetrics = calculateApproachMetrics(playerShots);
+    const puttingMetrics = calculatePuttingMetrics(playerShots);
+    const shortGameMetrics = calculateShortGameMetrics(playerShots);
+    const mentalMetrics = calculateMentalMetrics(playerShots, benchmark);
+
+    // Calculate Poor Lag Putt %
+    const poorLagPuttPct = puttingMetrics.totalLagPutts > 0 
+      ? (puttingMetrics.poorLagCount / puttingMetrics.totalLagPutts) * 100 
+      : 0;
+
+    return {
+      player,
+      // Basic stats
+      totalRounds: tiger5Metrics.totalRounds,
+      avgScore: tiger5Metrics.avgScore,
+      
+      // Tiger 5 fails
+      totalT5Fails: tiger5Metrics.tiger5Fails.totalFails,
+      threePutts: tiger5Metrics.tiger5Fails.threePutts,
+      doubleBogey: tiger5Metrics.tiger5Fails.doubleBogey,
+      par5Bogey: tiger5Metrics.tiger5Fails.bogeyOnPar5,
+      missedGreen: tiger5Metrics.tiger5Fails.missedGreen,
+      bogeyApproach: tiger5Metrics.tiger5Fails.bogeyApproach,
+      
+      // Mental metrics
+      bounceBackPct: mentalMetrics.bounceBackPct,
+      dropOffPct: mentalMetrics.dropOffPct,
+      gasPedalPct: mentalMetrics.gasPedalPct,
+      bogeyTrainPct: mentalMetrics.bogeyTrainPct,
+      
+      // Strokes gained
+      totalStrokesGained: tiger5Metrics.totalStrokesGained,
+      
+      // Driving
+      sgDriving: drivingMetrics.drivingSG,
+      penaltyRate: drivingMetrics.penaltyRate,
+      
+      // Approach
+      sgApproach: approachMetrics.approachSG,
+      
+      // GIR
+      girPct: tiger5Metrics.girPct,
+      
+      // Putting
+      sgPutting: puttingMetrics.totalSGPutting,
+      sg5to12Ft: puttingMetrics.totalSG5to12Ft,
+      poorLagPuttPct,
+      
+      // Short Game
+      sgShortGame: shortGameMetrics.shortGameSG,
+    };
+  }).filter((m): m is CoachTablePlayerMetrics => m !== null);
+
+  return {
+    players: playerMetrics,
+    calculatedAt: new Date(),
   };
 }
