@@ -3718,13 +3718,23 @@ function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: { metric
                 {/* Center text showing total holes */}
                 <text
                   x="50%"
-                  y="50%"
+                  y="46%"
                   textAnchor="middle"
                   dominantBaseline="middle"
                   fill="var(--chalk)"
                   style={{ fontSize: '24px', fontWeight: 'bold' }}
                 >
                   {totalHoles}
+                </text>
+                <text
+                  x="50%"
+                  y="58%"
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  fill="var(--ash)"
+                  style={{ fontSize: '11px' }}
+                >
+                  holes
                 </text>
                 <Tooltip content={<DonutTooltip />} />
                 <Legend 
@@ -3765,32 +3775,6 @@ function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: { metric
           </div>
         </div>
       )}
-      <div style={{ marginBottom: '24px' }}>
-        <h5 style={{ marginBottom: '12px', color: 'var(--ash)', fontSize: '14px' }}>Bogey & Double Bogey+ Rate by Par</h5>
-        <div style={{ background: 'var(--charcoal)', padding: '16px', borderRadius: '4px' }}>
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={bogeyRates} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--dark)" />
-              <XAxis dataKey="label" stroke="var(--ash)" fontSize={11} />
-              <YAxis stroke="var(--ash)" fontSize={11} unit="%" />
-              <Tooltip 
-                contentStyle={{ background: 'var(--court)', border: '1px solid var(--scarlet)', borderRadius: '4px' }}
-                labelStyle={{ color: 'var(--chalk)' }}
-                formatter={(value: number, name: string) => [`${value.toFixed(1)}%`, name === 'bogeyRate' ? 'Bogey' : 'Double Bogey+']}
-              />
-              <Bar dataKey="bogeyRate" stackId="a" fill="#F59520" name="Bogey" radius={[4, 0, 0, 4]} />
-              <Bar dataKey="doubleBogeyPlusRate" stackId="a" fill="#E8202A" name="Double Bogey+" radius={[0, 4, 4, 0]} />
-              <Legend 
-                formatter={(value) => <span style={{ color: 'var(--ash)', fontSize: '11px' }}>{value}</span>}
-              />
-            </BarChart>
-          </ResponsiveContainer>
-          <p style={{ fontSize: '11px', color: 'var(--ash)', marginTop: '8px' }}>
-            {totalBogeys} total bogeys, {totalDoubleBogeyPlus} double bogey+ across {bogeyRates[0].totalHoles} holes
-          </p>
-        </div>
-      </div>
-
       {/* Bogey and Double Bogey+ Root Cause Charts - Side by Side */}
       <div style={{ display: 'flex', gap: '16px', marginBottom: '24px' }}>
         {/* Bogey Root Cause Chart */}
