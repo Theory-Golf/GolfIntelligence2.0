@@ -214,6 +214,68 @@
   margin: 0 0 8px;
 }
 
+/* ── THE LOOP STRIP ───────────────────────────────────────── */
+.loop-strip {
+  margin-top: 48px;
+  padding: 32px 0;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.loop-steps {
+  display: flex;
+  align-items: flex-start;
+}
+
+.loop-step {
+  flex: 1;
+}
+
+.loop-step-num {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  color: var(--color-accent);
+  display: block;
+  margin-bottom: 8px;
+}
+
+.loop-step-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text);
+  margin-bottom: 6px;
+}
+
+.loop-step-body {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-muted);
+  line-height: 1.55;
+}
+
+.loop-arrow {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--color-border);
+  padding: 0 20px;
+  padding-top: 26px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 560px) {
+  .loop-steps {
+    flex-direction: column;
+    gap: 24px;
+  }
+  .loop-arrow {
+    display: none;
+  }
+}
+
 /* ── COMING SOON BADGE ────────────────────────────────────── */
 .coming-soon {
   display: inline-block;
