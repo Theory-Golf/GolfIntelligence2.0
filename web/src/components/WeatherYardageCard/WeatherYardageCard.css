@@ -6,24 +6,24 @@
 
 /* ── PRINT: Show card only, hide wizard ────────────────────── */
 @media print {
-  /* Hide everything except the print preview */
-  body > * { display: none !important; }
-
-  /* Show Next.js root and page structure needed for the card */
-  body #__next,
-  body main,
-  body [data-nextjs-scroll-focus-boundary] {
-    display: block !important;
+  /*
+   * Visibility trick: hide the entire page body, then make only
+   * the print preview visible. Child visibility:visible overrides
+   * parent visibility:hidden — no !important wars needed.
+   */
+  body {
+    visibility: hidden;
   }
 
-  /* Hide all page chrome */
-  nav, footer, .page-hero, .wyc-wizard, .wyc-preview-label {
-    display: none !important;
-  }
-
-  /* Show only the print preview */
   #wyc-print-preview {
-    display: block !important;
+    visibility: visible;
+    position: fixed;
+    top: 0;
+    left: 0;
+  }
+
+  .yc-card {
+    visibility: visible;
   }
 
   /* Force light theme for print card regardless of site theme */
