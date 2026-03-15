@@ -93,6 +93,453 @@
   line-height: 1.6;
 }
 
+/* ── RESOURCE GRID ────────────────────────────────────────── */
+.resource-section {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px 80px;
+}
+
+.resource-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1px;
+  background: var(--color-border);
+  border: 1px solid var(--color-border);
+  margin-top: 16px;
+}
+
+.resource-card {
+  background: var(--color-card);
+  padding: 28px 24px;
+  text-decoration: none;
+  display: block;
+  transition: background var(--transition-fast);
+}
+
+.resource-card:hover {
+  background: var(--color-surface);
+}
+
+.resource-card:hover .resource-card-arrow {
+  color: var(--color-accent);
+  transform: translateX(4px);
+}
+
+.resource-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.resource-card-arrow {
+  color: var(--color-muted);
+  font-size: 16px;
+  transition: color var(--transition-fast), transform var(--transition-fast);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.resource-card-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--color-text);
+  margin-bottom: 8px;
+}
+
+.resource-card-body {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-muted);
+  line-height: 1.6;
+}
+
+/* ── WEATHER YARDAGE CARD WIZARD ──────────────────────────── */
+.wyc-wizard {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+}
+
+/* Step progress indicator */
+.wyc-progress {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 32px;
+}
+
+.wyc-progress-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.wyc-progress-step:last-child {
+  flex: 0;
+}
+
+.wyc-step-bubble {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-muted);
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+}
+
+.wyc-step-bubble.is-active {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: #fff;
+}
+
+.wyc-step-bubble.is-done {
+  border-color: var(--color-accent);
+  background: var(--color-accent-wash);
+  color: var(--color-accent-pop);
+}
+
+.wyc-step-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+
+.wyc-step-label.is-active {
+  color: var(--color-text);
+}
+
+.wyc-step-connector {
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+  margin: 0 8px;
+}
+
+.wyc-step-connector.is-done {
+  background: var(--color-accent-hover);
+}
+
+/* Wizard card */
+.wyc-card {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  padding: 32px 28px;
+}
+
+/* Step content */
+.wyc-step-content {
+  min-height: 280px;
+}
+
+.wyc-step-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 28px;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  color: var(--color-text);
+  margin-bottom: 8px;
+}
+
+.wyc-step-desc {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-muted);
+  line-height: 1.6;
+  margin-bottom: 24px;
+  max-width: 480px;
+}
+
+/* Form fields */
+.wyc-field-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.wyc-4col {
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+}
+
+.wyc-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.wyc-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.wyc-optional {
+  color: var(--ash);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+}
+
+.wyc-input {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  padding: 10px 12px;
+  width: 100%;
+  min-height: 44px;
+  transition: border-color var(--transition-fast);
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.wyc-input:focus {
+  border-color: var(--color-accent);
+}
+
+.wyc-input:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.wyc-input option {
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+/* Buttons */
+.wyc-btn-primary {
+  background: var(--color-accent);
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 12px 24px;
+  border: none;
+  cursor: pointer;
+  min-height: 44px;
+  transition: background var(--transition-fast);
+}
+
+.wyc-btn-primary:hover:not(:disabled) {
+  background: var(--color-accent-hover);
+}
+
+.wyc-btn-primary:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.wyc-btn-back {
+  background: transparent;
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 12px 0;
+  border: none;
+  cursor: pointer;
+  min-height: 44px;
+  transition: color var(--transition-fast);
+}
+
+.wyc-btn-back:hover {
+  color: var(--color-text);
+}
+
+.wyc-error {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-accent);
+  margin-top: 12px;
+  letter-spacing: 0.05em;
+}
+
+/* Weather preview grid */
+.wyc-weather-preview {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--color-border);
+}
+
+.wyc-preview-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.wyc-wx-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--color-border);
+  border: 1px solid var(--color-border);
+  margin-top: 12px;
+}
+
+.wyc-wx-cell {
+  background: var(--color-surface);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.wyc-wx-val {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  color: var(--color-text);
+  font-weight: 400;
+}
+
+.wyc-wx-key {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+/* My Bag grid */
+.wyc-bag-header {
+  display: grid;
+  grid-template-columns: 1fr 120px;
+  gap: 8px;
+  padding: 0 0 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 4px;
+}
+
+.wyc-bag-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.wyc-club-row {
+  display: grid;
+  grid-template-columns: 1fr 120px;
+  gap: 8px;
+}
+
+.wyc-club-select {
+  cursor: pointer;
+}
+
+.wyc-dist-input {
+  text-align: right;
+}
+
+/* Wedge grid */
+.wyc-wedge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.wyc-wedge-block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.wyc-wedge-name {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 20px;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.wyc-wedge-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Step complete */
+.wyc-step-complete {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+  padding: 24px 0;
+}
+
+.wyc-complete-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+/* Wizard nav bar */
+.wyc-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-border);
+}
+
+/* Back link on tool sub-pages */
+.resource-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  text-decoration: none;
+  margin-bottom: 24px;
+  transition: color var(--transition-fast);
+}
+
+.resource-back-link:hover {
+  color: var(--color-accent);
+}
+
 /* ── COMING SOON BADGE ────────────────────────────────────── */
 .coming-soon {
   display: inline-block;
