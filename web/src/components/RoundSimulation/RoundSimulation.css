@@ -1,0 +1,1038 @@
+/* ================================================================
+   Theory Golf — Round Simulation
+   Component-scoped styles. All colors reference design tokens.
+   Prefix: .rs-
+   ================================================================ */
+
+/* ── WRAPPER ───────────────────────────────────────────────────── */
+.rs-wrapper {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 0 20px 64px;
+}
+
+/* ── TOP NAV ───────────────────────────────────────────────────── */
+.rs-top-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.rs-back-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  min-height: 44px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  background: transparent;
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.rs-back-btn:hover {
+  color: var(--color-text);
+  border-color: var(--color-muted);
+}
+
+.rs-hole-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+/* ── PROGRESS BAR ──────────────────────────────────────────────── */
+.rs-progress-track {
+  height: 2px;
+  background: var(--color-border);
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+
+.rs-progress-fill {
+  height: 100%;
+  background: var(--color-accent);
+  transition: width 300ms ease;
+}
+
+/* ── CARDS ─────────────────────────────────────────────────────── */
+.rs-card {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  padding: 24px;
+  margin-bottom: 16px;
+}
+
+.rs-card-title {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* ── DISTANCE DISPLAY ──────────────────────────────────────────── */
+.rs-distance-block {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.rs-distance-value {
+  font-family: var(--font-display);
+  font-size: 80px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--color-text);
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  display: block;
+}
+
+.rs-distance-unit {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  display: block;
+  margin-top: 4px;
+}
+
+.rs-expected-putts {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* ── CONDITIONS ROW ────────────────────────────────────────────── */
+.rs-conditions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+}
+
+.rs-condition {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rs-condition-icon {
+  font-size: 14px;
+  color: var(--color-accent);
+}
+
+.rs-condition-text {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-text);
+  font-weight: 500;
+}
+
+.rs-condition-divider {
+  width: 1px;
+  height: 16px;
+  background: var(--color-border);
+}
+
+/* ── TOGGLE ROW (read assessment) ──────────────────────────────── */
+.rs-toggle-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.rs-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.rs-toggle-label {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-text);
+  font-weight: 500;
+}
+
+.rs-toggle-group {
+  display: flex;
+  gap: 6px;
+}
+
+.rs-toggle-btn {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  padding: 8px 14px;
+  min-height: 44px;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.rs-toggle-btn.is-correct {
+  background: var(--color-card);
+  border-color: var(--under);
+  color: var(--under);
+}
+
+.rs-toggle-btn.is-incorrect {
+  background: var(--color-card);
+  border-color: var(--bogey);
+  color: var(--bogey);
+}
+
+/* ── RESULT GRID (first putt) ──────────────────────────────────── */
+.rs-result-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rs-result-row {
+  display: flex;
+  gap: 6px;
+}
+
+.rs-result-btn {
+  flex: 1;
+  padding: 14px 8px;
+  min-height: 44px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  background: transparent;
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.rs-result-btn:hover {
+  border-color: var(--color-muted);
+  color: var(--color-text);
+}
+
+.rs-result-btn.is-made {
+  background: var(--under);
+  border-color: var(--under);
+  color: var(--color-bg);
+  font-weight: 600;
+}
+
+/* ── MISS NOTICE ───────────────────────────────────────────────── */
+.rs-miss-notice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--color-card);
+  border: 1px solid var(--bogey);
+  margin-bottom: 16px;
+}
+
+.rs-miss-notice-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.rs-miss-notice-value {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--bogey);
+  font-weight: 600;
+}
+
+/* ── SECOND PUTT DISTANCE GRID ─────────────────────────────────── */
+.rs-distance-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.rs-dist-btn {
+  padding: 13px 6px;
+  min-height: 44px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  background: transparent;
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.rs-dist-btn.is-selected {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+}
+
+/* ── SECOND PUTT RESULT BUTTONS ─────────────────────────────────── */
+.rs-make-row {
+  display: flex;
+  gap: 10px;
+}
+
+.rs-make-btn {
+  flex: 1;
+  padding: 18px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.rs-make-btn.is-made {
+  background: var(--under);
+  color: var(--color-bg);
+}
+
+.rs-make-btn.is-missed {
+  background: transparent;
+  border: 1px solid var(--bogey);
+  color: var(--bogey);
+}
+
+.rs-make-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* ── HINT TEXT ─────────────────────────────────────────────────── */
+.rs-hint {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  text-align: center;
+  margin-top: 12px;
+}
+
+/* ── PRIMARY / SECONDARY BUTTONS ────────────────────────────────── */
+.rs-primary-btn {
+  width: 100%;
+  padding: 16px 32px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #fff;
+  background: var(--color-accent);
+  border: none;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+  margin-top: 8px;
+}
+
+.rs-primary-btn:hover {
+  background: var(--color-accent-hover);
+}
+
+.rs-primary-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.rs-secondary-btn {
+  width: 100%;
+  padding: 14px 32px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  background: transparent;
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  margin-top: 10px;
+}
+
+.rs-secondary-btn:hover {
+  color: var(--color-text);
+  border-color: var(--color-muted);
+}
+
+/* ── WELCOME SCREEN ────────────────────────────────────────────── */
+.rs-welcome {
+  text-align: center;
+  padding-top: 8px;
+}
+
+.rs-welcome-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin-bottom: 16px;
+}
+
+.rs-welcome-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(36px, 10vw, 56px);
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  color: var(--color-text);
+  line-height: 1;
+  margin-bottom: 24px;
+}
+
+.rs-dist-table {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.rs-dist-chip {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  padding: 5px 10px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+}
+
+.rs-dist-chip strong {
+  color: var(--color-text);
+  font-weight: 400;
+}
+
+/* ── TREND CARD ────────────────────────────────────────────────── */
+.rs-trend-card {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  padding: 20px;
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.rs-trend-card-title {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  margin-bottom: 16px;
+}
+
+.rs-trend-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--color-border);
+  font-family: var(--font-body);
+  font-size: 13px;
+}
+
+.rs-trend-row:last-child {
+  border-bottom: none;
+}
+
+.rs-trend-label {
+  color: var(--color-muted);
+}
+
+.rs-sg-positive { color: var(--under); }
+.rs-sg-negative { color: var(--bogey); }
+
+/* ── SVG TREND CHART ───────────────────────────────────────────── */
+.rs-chart-wrapper {
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+/* ── SETUP SCREEN ──────────────────────────────────────────────── */
+.rs-text-input {
+  width: 100%;
+  padding: 13px 16px;
+  font-family: var(--font-body);
+  font-size: 16px; /* 16px min prevents iOS auto-zoom on focus */
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color var(--transition-fast);
+}
+
+.rs-text-input:focus {
+  border-color: var(--color-muted);
+}
+
+.rs-putter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.rs-putter-chip {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  padding: 7px 12px;
+  min-height: 44px;
+  color: var(--color-muted);
+  background: transparent;
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.rs-putter-chip.is-selected {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+}
+
+.rs-marking-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.rs-marking-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 12px;
+  color: var(--color-muted);
+  background: transparent;
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.rs-marking-btn.is-selected {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+}
+
+.rs-marking-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.rs-setup-desc {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-muted);
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+/* ── SUMMARY SCREEN ────────────────────────────────────────────── */
+.rs-summary-header {
+  text-align: center;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.rs-summary-date {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  margin-bottom: 8px;
+}
+
+.rs-summary-meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.rs-summary-putter {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-text);
+  font-weight: 500;
+}
+
+.rs-summary-badge {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  padding: 3px 8px;
+}
+
+/* Tab nav */
+.rs-tab-nav {
+  display: flex;
+  gap: 1px;
+  background: var(--color-border);
+  margin-bottom: 20px;
+}
+
+.rs-tab-btn {
+  flex: 1;
+  padding: 10px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  background: var(--color-card);
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.rs-tab-btn.is-active {
+  color: var(--color-text);
+  background: var(--color-surface);
+}
+
+/* SG hero card */
+.rs-sg-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 28px 24px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-top: 3px solid var(--color-border);
+  margin-bottom: 16px;
+}
+
+.rs-sg-hero.is-positive {
+  border-top-color: var(--under);
+}
+
+.rs-sg-hero.is-negative {
+  border-top-color: var(--bogey);
+}
+
+.rs-sg-hero-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  margin-bottom: 8px;
+}
+
+.rs-sg-hero-value {
+  font-family: var(--font-display);
+  font-size: 60px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.rs-sg-hero-sub {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  margin-top: 10px;
+}
+
+/* Stat row (1-putts, 2-putts, 3-putts, total) */
+.rs-stat-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--color-border);
+  margin-bottom: 16px;
+  border: 1px solid var(--color-border);
+}
+
+.rs-stat-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 8px;
+  background: var(--color-card);
+}
+
+.rs-stat-value {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--color-text);
+  text-transform: uppercase;
+}
+
+.rs-stat-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  margin-top: 4px;
+}
+
+/* SG bucket list */
+.rs-bucket-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: var(--color-border);
+  border: 1px solid var(--color-border);
+}
+
+.rs-bucket-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  background: var(--color-card);
+}
+
+.rs-bucket-name {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-text);
+  font-weight: 500;
+}
+
+.rs-bucket-count {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  margin-top: 2px;
+}
+
+.rs-bucket-sg {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+/* Read accuracy */
+.rs-accuracy-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.rs-accuracy-item {
+  text-align: center;
+}
+
+.rs-accuracy-pct {
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--color-text);
+}
+
+.rs-accuracy-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  margin-bottom: 8px;
+}
+
+.rs-accuracy-bar {
+  height: 3px;
+  background: var(--color-border);
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.rs-accuracy-fill {
+  height: 100%;
+  background: var(--under);
+  transition: width 500ms ease;
+}
+
+/* Balance indicator */
+.rs-balance-track {
+  position: relative;
+  height: 8px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  margin-bottom: 8px;
+}
+
+.rs-balance-ideal {
+  position: absolute;
+  left: 35%;
+  right: 35%;
+  top: 0;
+  bottom: 0;
+  background: var(--color-border);
+}
+
+.rs-balance-marker {
+  position: absolute;
+  top: -4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  border: 2px solid var(--color-card);
+}
+
+.rs-balance-labels {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.rs-balance-status {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-align: center;
+  margin-top: 8px;
+}
+
+.rs-tendency-stats {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-top: 16px;
+}
+
+.rs-tendency-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.rs-tendency-count {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--color-text);
+}
+
+.rs-tendency-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.rs-tendency-tip {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--color-muted);
+  text-align: center;
+  margin-top: 16px;
+  padding: 12px 14px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  line-height: 1.6;
+}
+
+/* Trend compare table */
+.rs-compare-table {
+  display: flex;
+  flex-direction: column;
+}
+
+.rs-compare-header {
+  display: grid;
+  grid-template-columns: 1.4fr 0.9fr 0.9fr 1.1fr;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--color-border);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.rs-compare-row {
+  display: grid;
+  grid-template-columns: 1.4fr 0.9fr 0.9fr 1.1fr;
+  gap: 8px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-border);
+  font-family: var(--font-body);
+  font-size: 13px;
+  align-items: center;
+}
+
+.rs-compare-row:last-child {
+  border-bottom: none;
+}
+
+.rs-metric-name {
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.rs-trend-indicator {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.rs-trend-note {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--color-muted);
+  text-align: center;
+  margin-top: 16px;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+/* ── HISTORY SCREEN ────────────────────────────────────────────── */
+.rs-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: var(--color-border);
+  border: 1px solid var(--color-border);
+  margin-top: 16px;
+}
+
+.rs-history-card {
+  background: var(--color-card);
+  padding: 16px;
+}
+
+.rs-history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.rs-history-date {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--color-text);
+}
+
+.rs-history-sg {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.rs-history-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.rs-history-putter {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--color-muted);
+}
+
+.rs-history-badge {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  padding: 2px 6px;
+}
+
+.rs-history-stats {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
+}
+
+.rs-history-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.rs-history-stat-value {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--color-text);
+}
+
+.rs-history-stat-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  margin-top: 2px;
+}

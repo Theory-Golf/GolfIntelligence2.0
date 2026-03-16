@@ -176,6 +176,107 @@ export const ACTIVITIES = [
     ],
   },
 
+  // ── WEDGE ─────────────────────────────────────────────────────────
+
+  {
+    id: 'wedge-combine',
+    name: 'Wedge Combine',
+    category: 'wedge',
+    type: 'skill_assessment',
+    description:
+      'Trackman-powered benchmark assessment: player hits a set number of shots at fixed distances within the 50–100 yard range. Scored on proximity, carry accuracy, and dispersion. Results are comparable across sessions to track improvement over time.',
+    connected_drivers: [
+      {
+        driver_id: 'A1',
+        connection:
+          'Measures GIR rate in the 50–100y band — flags below 90% threshold',
+      },
+      {
+        driver_id: 'A2',
+        connection:
+          'Scores proximity rate — flags if less than 40% of shots finish inside 15 feet',
+      },
+      {
+        driver_id: 'A4',
+        connection:
+          'Identifies if 50–100y is the distance band black hole absorbing most approach SG losses',
+      },
+    ],
+  },
+
+  {
+    id: 'wedge-standard',
+    name: 'Wedge Standard',
+    category: 'wedge',
+    type: 'skill_assessment',
+    description:
+      "An adaptive Trackman assessment that adjusts difficulty based on the player's current skill level. Targets shift as performance improves, ensuring the scoring challenge stays meaningful regardless of where the player is in their development. The standard rises with you.",
+    connected_drivers: [
+      {
+        driver_id: 'A1',
+        connection:
+          "Continuously benchmarks GIR rate at the player's true skill ceiling, not a fixed bar",
+      },
+      {
+        driver_id: 'A2',
+        connection:
+          'Proximity targets adapt — prevents players from gaming a static standard',
+      },
+      {
+        driver_id: 'A4',
+        connection:
+          'Adaptive difficulty exposes the distance band black hole more reliably than fixed tests',
+      },
+    ],
+  },
+
+  {
+    id: 'spin-loft-drill',
+    name: 'Spin Loft Drill',
+    category: 'wedge',
+    type: 'skill_development',
+    description:
+      'Isolated skill work using Trackman to train dynamic loft and angle of attack. Player works on delivery conditions to optimize spin and control. Focused on building the ball-striking fundamentals that produce repeatable wedge distances.',
+    connected_drivers: [
+      {
+        driver_id: 'A2',
+        connection:
+          'Improving spin loft control directly improves proximity outcomes in the 50–100y scoring zone',
+      },
+      {
+        driver_id: 'A3',
+        connection:
+          'Targets the lie-based performance gap — rough often worsens spin loft delivery',
+      },
+    ],
+  },
+
+  {
+    id: 'club-speed-drill',
+    name: 'Club Speed Drill',
+    category: 'wedge',
+    type: 'skill_development',
+    description:
+      "Structured practice using Trackman to map club speed to carry distance across the wedge set. Player builds an accurate internal distance model for each club — the foundation of reliable distance control.",
+    connected_drivers: [
+      {
+        driver_id: 'A1',
+        connection:
+          'Eliminates distance miscalculation as a cause of GIR misses in the 50–100y band',
+      },
+      {
+        driver_id: 'A2',
+        connection:
+          "Directly improves proximity by calibrating the player's distance model",
+      },
+      {
+        driver_id: 'A4',
+        connection:
+          'Reduces the chance of 50–100y being a scoring black hole due to distance errors',
+      },
+    ],
+  },
+
   // ── APPROACH ─────────────────────────────────────────────────────────
 
   {

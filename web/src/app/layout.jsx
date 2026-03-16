@@ -3,6 +3,11 @@ import '../styles/tokens.css';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+};
+
 export const metadata = {
   title: {
     default: 'theory.golf',

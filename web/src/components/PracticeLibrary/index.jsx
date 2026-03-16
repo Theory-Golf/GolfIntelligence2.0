@@ -1,15 +1,26 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import Link from 'next/link';
 import { ACTIVITIES, CATEGORIES, TYPES } from '@/data/practiceActivities';
 import './PracticeLibrary.css';
 
 /**
- * All Performance Driver IDs available for demo toggling.
- * Putting segment: M1, M2, L1, L2, L3
- * Additional segments will extend this list as activities are added.
+ * Map activity IDs to their interactive tool routes.
+ * As each activity page is built, add its route here.
  */
-const ALL_DRIVER_IDS = ['M1', 'M2', 'L1', 'L2', 'L3'];
+const ACTIVITY_ROUTES = {
+  'round-simulation': '/player-path/round-simulation',
+  'wedge-standard': '/player-path/wedge-standard',
+};
+
+/**
+ * All Performance Driver IDs available for demo toggling.
+ * Putting: M1, M2, L1, L2, L3
+ * Wedge: A1, A2, A3, A4
+ * Additional segments extend this list as activities are added.
+ */
+const ALL_DRIVER_IDS = ['M1', 'M2', 'L1', 'L2', 'L3', 'A1', 'A2', 'A3', 'A4'];
 
 export default function PracticeLibrary() {
   const [activeCategory, setActiveCategory] = useState('all');
@@ -168,17 +179,19 @@ function ActivityCard({ activity, flaggedDrivers, variant }) {
   const isRelevant = variant === 'relevant';
   const isDimmed = variant === 'dimmed';
   const isAssessment = activity.type === 'skill_assessment';
+  const route = ACTIVITY_ROUTES[activity.id];
 
   const cardClass = [
     'pl-card',
     isRelevant ? 'is-relevant' : '',
     isDimmed ? 'is-dimmed' : '',
+    route ? 'is-linkable' : '',
   ]
     .filter(Boolean)
     .join(' ');
 
-  return (
-    <div className={cardClass}>
+  const cardContent = (
+    <>
       {/* Name + type badge */}
       <div className="pl-card-header">
         <span className="pl-card-name">{activity.name}</span>
@@ -190,7 +203,7 @@ function ActivityCard({ activity, flaggedDrivers, variant }) {
       {/* Description */}
       <p className="pl-card-description">{activity.description}</p>
 
-      {/* Connected drivers */}
+      {/* Connected drivers + launch arrow */}
       <div className="pl-card-drivers">
         <span className="pl-card-drivers-label">Drivers</span>
         {activity.connected_drivers.map((cd) => {
@@ -205,10 +218,19 @@ function ActivityCard({ activity, flaggedDrivers, variant }) {
             </span>
           );
         })}
-        {isRelevant && (
-          <span className="pl-relevant-badge">Recommended</span>
-        )}
+        {isRelevant && <span className="pl-relevant-badge">Recommended</span>}
+        {route && <span className="pl-card-launch">Launch →</span>}
       </div>
-    </div>
+    </>
   );
+
+  if (route) {
+    return (
+      <Link href={route} className={cardClass} style={{ textDecoration: 'none' }}>
+        {cardContent}
+      </Link>
+    );
+  }
+
+  return <div className={cardClass}>{cardContent}</div>;
 }

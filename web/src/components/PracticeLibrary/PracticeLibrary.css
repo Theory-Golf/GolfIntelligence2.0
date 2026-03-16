@@ -315,6 +315,32 @@
   margin-left: auto;
 }
 
+/* Launch arrow — shown on cards that have an activity page */
+.pl-card-launch {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  margin-left: auto;
+  transition: color var(--transition-fast), transform var(--transition-fast);
+}
+
+/* Linkable card hover state */
+.pl-card.is-linkable {
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.pl-card.is-linkable:hover {
+  background: var(--color-surface);
+}
+
+.pl-card.is-linkable:hover .pl-card-launch {
+  color: var(--color-accent);
+  transform: translateX(3px);
+}
+
 /* ── EMPTY STATE ───────────────────────────────────────────────── */
 .pl-empty {
   padding: 48px 24px;

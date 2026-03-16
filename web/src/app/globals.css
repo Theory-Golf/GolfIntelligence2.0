@@ -1195,8 +1195,15 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   padding: 8px 16px;
+  min-height: 44px;
   cursor: pointer;
   transition: border-color 0.15s, color 0.15s;
+}
+
+/* Card preview scroll wrapper — prevents card from breaking layout on mobile */
+.syc-preview-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .syc-print-btn:hover {
@@ -1211,5 +1218,34 @@
 
   .syc-wedge-grid {
     grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* ── GLOBAL MOBILE BREAKPOINTS ────────────────────────────── */
+@media (max-width: 640px) {
+  /* Reduce hero vertical padding on phones */
+  .page-hero {
+    padding: 48px 20px;
+    min-height: auto;
+  }
+
+  /* Feature grid → single column */
+  .feature-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Resource grid → single column */
+  .resource-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Resource section side padding */
+  .resource-section {
+    padding: 0 16px 60px;
+  }
+
+  /* Practice Library grid → single column (PracticeLibrary.css also has this) */
+  .pl-grid {
+    grid-template-columns: 1fr;
   }
 }
