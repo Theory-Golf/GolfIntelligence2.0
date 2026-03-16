@@ -175,6 +175,86 @@ export const ACTIVITIES = [
       },
     ],
   },
+
+  // ── APPROACH ─────────────────────────────────────────────────────────
+
+  {
+    id: 'approach-combine',
+    name: 'Approach Combine',
+    category: 'approach',
+    type: 'skill_assessment',
+    description:
+      'Trackman-powered benchmark assessment across the 100–200 yard range. Player hits shots at multiple fixed distance targets and is scored on GIR rate, proximity, and dispersion by band. Results are comparable across sessions to track improvement over time.',
+    connected_drivers: [
+      {
+        driver_id: 'A1',
+        connection:
+          'Measures GIR rate per distance band (100–150y, 150–200y) against thresholds',
+      },
+      {
+        driver_id: 'A2',
+        connection:
+          'Scores proximity rate in scoring zones — flags underperformance vs targets',
+      },
+      {
+        driver_id: 'A4',
+        connection:
+          'Identifies the distance band black hole accounting for the greatest share of approach SG losses',
+      },
+    ],
+  },
+
+  {
+    id: 'line-test',
+    name: 'Line Test',
+    category: 'approach',
+    type: 'skill_assessment',
+    description:
+      'Player sets alignment aids to establish a clear target line and works on consistently starting the ball on that line from approach distances. Builds directional discipline and reduces dispersion from 100–200 yards.',
+    connected_drivers: [
+      {
+        driver_id: 'A1',
+        connection:
+          'Reduces directional misses — directly improves GIR rate across approach bands',
+      },
+      {
+        driver_id: 'A2',
+        connection:
+          'Tighter dispersion means more shots finishing in proximity target windows',
+      },
+      {
+        driver_id: 'A3',
+        connection:
+          'Lie-based gap often worsened by direction error — line work helps from rough as well',
+      },
+    ],
+  },
+
+  {
+    id: 'face-to-path-drill',
+    name: 'Face to Path Drill',
+    category: 'approach',
+    type: 'skill_development',
+    description:
+      'Isolated skill work on club face alignment relative to swing path at impact. Using Trackman data, the player identifies their face-to-path relationship and works to bring it within a playable range — reducing dispersion and shot shape variation.',
+    connected_drivers: [
+      {
+        driver_id: 'A1',
+        connection:
+          'Face-to-path misalignment is a primary cause of GIR misses — correcting it raises GIR rate',
+      },
+      {
+        driver_id: 'A3',
+        connection:
+          'Rough shots punish face-to-path errors more severely — improvement reduces the lie-based gap',
+      },
+      {
+        driver_id: 'A4',
+        connection:
+          'If one distance band is a black hole, face-to-path issues often explain the dispersion causing it',
+      },
+    ],
+  },
 ];
 
 /**
