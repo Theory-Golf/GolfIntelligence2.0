@@ -15,7 +15,8 @@ export default function Footer() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          gap: '16px',
+          flexWrap: 'wrap',
+          gap: '8px',
         }}
       >
         <span

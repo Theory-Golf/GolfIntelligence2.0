@@ -1213,3 +1213,32 @@
     grid-template-columns: 1fr 1fr;
   }
 }
+
+/* ── GLOBAL MOBILE BREAKPOINTS ────────────────────────────── */
+@media (max-width: 640px) {
+  /* Reduce hero vertical padding on phones */
+  .page-hero {
+    padding: 48px 20px;
+    min-height: auto;
+  }
+
+  /* Feature grid → single column */
+  .feature-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Resource grid → single column */
+  .resource-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Resource section side padding */
+  .resource-section {
+    padding: 0 16px 60px;
+  }
+
+  /* Practice Library grid → single column (PracticeLibrary.css also has this) */
+  .pl-grid {
+    grid-template-columns: 1fr;
+  }
+}
