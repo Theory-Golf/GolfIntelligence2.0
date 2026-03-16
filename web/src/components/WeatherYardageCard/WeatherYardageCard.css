@@ -1,0 +1,364 @@
+/* =============================================================
+   WeatherYardageCard — Print Styles
+   The wizard UI uses tokens.css variables (dark theme by default).
+   The printable card always renders on white paper.
+   ============================================================= */
+
+/* ── PRINT: Show card only, hide wizard ────────────────────── */
+@media print {
+  /*
+   * Visibility trick: hide the entire page body, then make only
+   * the print preview visible. Child visibility:visible overrides
+   * parent visibility:hidden — no !important wars needed.
+   */
+  body {
+    visibility: hidden;
+  }
+
+  #wyc-print-preview {
+    visibility: visible;
+    position: fixed;
+    top: 0;
+    left: 0;
+  }
+
+  .yc-card {
+    visibility: visible;
+  }
+
+  /* Force light theme for print card regardless of site theme */
+  .yc-print-page {
+    background: white !important;
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 0.25in !important;
+    padding: 0.25in !important;
+    page-break-inside: avoid;
+  }
+
+  .yc-card {
+    background: #FFFEF8 !important;
+    border: 1px solid #333 !important;
+    color: #1A1A1A !important;
+    width: 4in !important;
+    min-height: 6.5in !important;
+    font-size: 7.5pt !important;
+  }
+
+  /* Preserve cell background colors on print */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  @page {
+    size: letter landscape;
+    margin: 0.25in;
+  }
+}
+
+/* ── SCREEN: Preview label (hidden during print) ───────────── */
+.wyc-preview-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  text-align: center;
+  margin-bottom: 20px;
+  margin-top: 48px;
+}
+
+/* ── PRINT PAGE layout (screen preview) ────────────────────── */
+.yc-print-page {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  padding: 24px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  overflow-x: auto;
+  justify-content: center;
+}
+
+/* ── CARD BASE ──────────────────────────────────────────────── */
+.yc-card {
+  width: 320px;
+  min-width: 300px;
+  background: #FFFEF8;
+  border: 1px solid #2A2A2A;
+  color: #1A1A1A;
+  font-family: 'Barlow', sans-serif;
+  font-size: 9px;
+  line-height: 1.4;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+/* ── CARD HEADER ────────────────────────────────────────────── */
+.yc-header {
+  background: #1A2E1F;
+  color: #F7F3E9;
+  padding: 8px 10px;
+  border-bottom: 2px solid #B8952A;
+}
+
+.yc-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 3px;
+}
+
+.yc-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #F7F3E9;
+}
+
+.yc-course {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  color: #B8952A;
+  text-align: right;
+}
+
+.yc-header-meta {
+  display: flex;
+  gap: 12px;
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  color: #A8C8B0;
+  margin-bottom: 6px;
+}
+
+.yc-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.yc-pill {
+  font-family: 'DM Mono', monospace;
+  font-size: 7px;
+  padding: 2px 6px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #D0E8D8;
+  letter-spacing: 0.05em;
+}
+
+.yc-pill-hi {
+  background: rgba(184, 149, 42, 0.2);
+  border-color: #B8952A;
+  color: #D4AF50;
+}
+
+/* ── CARD BODY (2-column) ───────────────────────────────────── */
+.yc-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  border-bottom: 1px solid #D0C8B8;
+  flex: 1;
+}
+
+.yc-section {
+  padding: 6px 7px;
+}
+
+.yc-section:first-child {
+  border-right: 1px solid #D0C8B8;
+}
+
+.yc-section-head {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: #3D2A00;
+  background: #F0E8C8;
+  padding: 2px 4px;
+  margin-bottom: 4px;
+  margin-left: -7px;
+  margin-right: -7px;
+}
+
+/* ── SHARED TABLE STYLES ────────────────────────────────────── */
+.yc-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 7.5px;
+}
+
+.yc-table th {
+  font-family: 'DM Mono', monospace;
+  font-size: 7px;
+  font-weight: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #6B5A3E;
+  border-bottom: 1px solid #D0C8B8;
+  padding: 2px 3px;
+  text-align: right;
+}
+
+.yc-table th:first-child {
+  text-align: left;
+}
+
+.yc-table td {
+  padding: 1.5px 3px;
+  border-bottom: 1px solid #EDE8DC;
+  vertical-align: middle;
+}
+
+.yc-club-name {
+  font-family: 'Barlow', sans-serif;
+  font-weight: 600;
+  font-size: 8px;
+  color: #1A2E1F;
+}
+
+.yc-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 7.5px;
+  text-align: right;
+  color: #3A3A3A;
+}
+
+.yc-adj {
+  font-weight: bold;
+  color: #1A2E1F;
+}
+
+.yc-dsp {
+  color: #7A5500;
+}
+
+/* ── WEDGE TABLE ────────────────────────────────────────────── */
+.yc-wedge-cell {
+  font-family: 'DM Mono', monospace;
+  font-size: 7px;
+  text-align: center;
+  color: #5A4A30;
+}
+
+.yc-wedge-full td {
+  background: #F5EAB8;
+}
+
+/* ── WIND TABLE ─────────────────────────────────────────────── */
+.yc-wind-section {
+  padding: 6px 7px;
+  border-bottom: 1px solid #D0C8B8;
+}
+
+.yc-wind-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 7.5px;
+}
+
+.yc-wind-table th,
+.yc-wind-table td {
+  padding: 2px 3px;
+  text-align: center;
+  border: 1px solid #D0C8B8;
+}
+
+.yc-wind-group-row th {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 7px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 2px;
+}
+
+.yc-wind-head-red {
+  background: #5A1A1A;
+  color: #F5C8C8;
+}
+
+.yc-wind-head-blue {
+  background: #1A3A5A;
+  color: #C8D8F5;
+}
+
+.yc-wind-speed-row th {
+  font-family: 'DM Mono', monospace;
+  font-size: 7px;
+  color: #6B5A3E;
+  background: #F0E8C8;
+}
+
+.yc-wind-range-th {
+  text-align: left !important;
+}
+
+.yc-wind-range {
+  font-family: 'DM Mono', monospace;
+  font-size: 7px;
+  text-align: left;
+  color: #3A3A3A;
+  white-space: nowrap;
+}
+
+.yc-wind-cell {
+  font-family: 'DM Mono', monospace;
+  font-size: 7.5px;
+}
+
+.yc-wind-head-cell {
+  background: rgba(90, 26, 26, 0.08);
+  color: #5A1A1A;
+}
+
+.yc-wind-tail-cell {
+  background: rgba(26, 58, 90, 0.08);
+  color: #1A3A5A;
+}
+
+.yc-wind-fcst {
+  background: #F5EAB8 !important;
+  font-weight: bold;
+  color: #3D2A00 !important;
+}
+
+/* ── CARD FOOTER ────────────────────────────────────────────── */
+.yc-footer {
+  padding: 5px 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'DM Mono', monospace;
+  font-size: 6.5px;
+  color: #6B5A3E;
+  background: #F5F0E8;
+  gap: 8px;
+}
+
+.yc-footer-legend {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.yc-legend-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-left: 4px;
+}
+
+.yc-dot-red   { background: #8B2020; }
+.yc-dot-blue  { background: #2A5B9A; }
+.yc-dot-gold  { background: #B8952A; }
