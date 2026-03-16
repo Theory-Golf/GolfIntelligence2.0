@@ -457,7 +457,9 @@ export default function StandardYardageCard() {
       {cardData && (
         <div ref={previewRef} style={{ marginTop: 48 }}>
           <p className="wyc-preview-label">Card Preview — Ready to Print</p>
-          <YardageCardOutput data={cardData} courseName={courseName} cardDate={cardDate} />
+          <div className="syc-preview-scroll">
+            <YardageCardOutput data={cardData} courseName={courseName} cardDate={cardDate} />
+          </div>
           <button className="wyc-btn-primary" style={{ marginTop: 16, display: 'block' }} onClick={() => window.print()}>
             Print Card
           </button>

@@ -24,6 +24,7 @@
   align-items: center;
   gap: 6px;
   padding: 8px 12px;
+  min-height: 44px;
   font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.12em;
@@ -182,6 +183,7 @@
   letter-spacing: 0.10em;
   text-transform: uppercase;
   padding: 8px 14px;
+  min-height: 44px;
   background: transparent;
   border: 1px solid var(--color-border);
   color: var(--color-muted);
@@ -216,6 +218,7 @@
 .rs-result-btn {
   flex: 1;
   padding: 14px 8px;
+  min-height: 44px;
   font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.08em;
@@ -277,6 +280,7 @@
 
 .rs-dist-btn {
   padding: 13px 6px;
+  min-height: 44px;
   font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.08em;
@@ -510,6 +514,7 @@
   letter-spacing: 0.10em;
   text-transform: uppercase;
   padding: 7px 12px;
+  min-height: 44px;
   color: var(--color-muted);
   background: transparent;
   border: 1px solid var(--color-border);
