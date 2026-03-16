@@ -11,6 +11,7 @@ import './PracticeLibrary.css';
  */
 const ACTIVITY_ROUTES = {
   'round-simulation': '/player-path/round-simulation',
+  'wedge-standard': '/player-path/wedge-standard',
 };
 
 /**
