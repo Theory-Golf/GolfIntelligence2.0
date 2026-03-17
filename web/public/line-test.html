@@ -1,0 +1,1622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Line Test | Theory Golf</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    /* ── TOKENS ─────────────────────────────────────────────── */
+    :root {
+      --bg:           #0C0C0C;
+      --surface:      #141414;
+      --card:         #1E1E1E;
+      --border:       #2A2A2A;
+      --text:         #F2F0EE;
+      --muted:        #8A8580;
+      --secondary:    #C4BFB8;
+      --accent:       #E8202A;
+      --accent-dim:   #9B1520;
+      --accent-wash:  #1F0507;
+      --positive:     #00C07A;
+      --warning:      #F59520;
+      --gold:         #D4B843;
+      --font-display: 'Barlow Condensed', sans-serif;
+      --font-body:    'Barlow', sans-serif;
+      --font-mono:    'DM Mono', monospace;
+      --radius:       2px;
+      --ease:         200ms ease;
+    }
+
+    /* ── RESET ──────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-body);
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--text);
+      background: var(--bg);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 0 16px 100px;
+    }
+
+    /* ── HEADER ─────────────────────────────────────────────── */
+    .header {
+      padding: 28px 0 20px;
+      text-align: center;
+    }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: .3em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    .header h1 {
+      font-family: var(--font-display);
+      font-size: 40px;
+      font-weight: 800;
+      letter-spacing: .03em;
+      text-transform: uppercase;
+      line-height: 1;
+    }
+    .header .sub {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: .1em;
+      margin-top: 6px;
+    }
+
+    /* ── NAV ────────────────────────────────────────────────── */
+    .nav-tabs {
+      display: flex;
+      background: var(--card);
+      border: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+    .nav-tab {
+      flex: 1;
+      padding: 13px 6px;
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      position: relative;
+      transition: color var(--ease);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .nav-tab::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 0; height: 2px;
+      background: var(--accent);
+      transition: width var(--ease);
+    }
+    .nav-tab.active { color: var(--text); }
+    .nav-tab.active::after { width: 60%; }
+
+    /* ── SECTION VISIBILITY ─────────────────────────────────── */
+    .section { display: none; }
+    .section.active { display: block; }
+
+    /* ── CARDS ──────────────────────────────────────────────── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+    .card-header {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .card-header h2 {
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--text);
+    }
+    .card-body { padding: 20px; }
+
+    /* ── INFO BOX ───────────────────────────────────────────── */
+    .info-box {
+      padding: 14px 16px;
+      background: var(--surface);
+      border-left: 2px solid var(--accent);
+      margin-bottom: 20px;
+    }
+    .info-box h4 {
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--text);
+      margin-bottom: 5px;
+    }
+    .info-box p {
+      font-size: 13px;
+      color: var(--secondary);
+      line-height: 1.6;
+    }
+
+    /* ── SETUP ──────────────────────────────────────────────── */
+    .setup-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .club-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .club-input-group label {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      text-align: center;
+      margin-bottom: 6px;
+    }
+    .club-input {
+      width: 100%;
+      padding: 12px 6px;
+      font-family: var(--font-display);
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      text-align: center;
+      transition: border-color var(--ease);
+      -webkit-appearance: none;
+    }
+    .club-input:focus { outline: none; border-color: var(--accent); }
+
+    /* ── BUTTONS ────────────────────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 15px 20px;
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+      min-height: 50px;
+      transition: all var(--ease);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:active { background: var(--accent-dim); }
+    .btn-secondary { background: var(--surface); color: var(--secondary); border: 1px solid var(--border); }
+    .btn-secondary:active { background: var(--border); }
+    .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+    .btn-ghost:active { background: var(--surface); }
+
+    /* ── SHOT ENTRY ─────────────────────────────────────────── */
+    .shot-progress {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .shot-count {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 700;
+    }
+    .club-badge {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      padding: 6px 14px;
+      background: var(--accent-wash);
+      border: 1px solid var(--accent-dim);
+    }
+    .progress-bar {
+      height: 3px;
+      background: var(--border);
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      transition: width 300ms ease;
+    }
+    .input-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      text-align: center;
+      margin-bottom: 14px;
+    }
+
+    /* Direction — big touch targets */
+    .direction-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .dir-btn {
+      padding: 20px;
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: var(--surface);
+      border: 2px solid var(--border);
+      cursor: pointer;
+      transition: all var(--ease);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .dir-btn.active {
+      color: var(--text);
+      border-color: var(--accent);
+      background: var(--accent-wash);
+    }
+
+    /* Distance input */
+    .dist-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .dist-input {
+      width: 116px;
+      padding: 16px 10px;
+      font-family: var(--font-display);
+      font-size: 40px;
+      font-weight: 800;
+      color: var(--text);
+      background: var(--surface);
+      border: 2px solid var(--border);
+      text-align: center;
+      transition: border-color var(--ease);
+      -webkit-appearance: none;
+    }
+    .dist-input:focus { outline: none; border-color: var(--accent); }
+    .dist-unit {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    /* Quick-entry numpad */
+    .numpad {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+    .np-btn {
+      padding: 14px 4px;
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 700;
+      text-align: center;
+      color: var(--secondary);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all var(--ease);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .np-btn:active { background: var(--border); color: var(--text); }
+
+    /* ── SHOT LOG (during test) ─────────────────────────────── */
+    .shot-list { max-height: 280px; overflow-y: auto; }
+    .shot-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 11px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      margin-bottom: 4px;
+    }
+    .shot-row.dropped { opacity: 0.4; }
+    .shot-meta { display: flex; align-items: center; gap: 10px; }
+    .shot-n {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--muted);
+      width: 20px;
+    }
+    .shot-club {
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .shot-val {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .shot-dir {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--muted);
+      margin-left: 4px;
+    }
+    .dropped-tag {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--warning);
+      letter-spacing: .06em;
+    }
+    .shot-row.dropped .shot-val {
+      text-decoration: line-through;
+      color: var(--muted);
+    }
+
+    .total-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 20px;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .total-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .total-value {
+      font-family: var(--font-display);
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--positive);
+    }
+
+    .action-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    /* ── SUMMARY GRID ───────────────────────────────────────── */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+    .sum-cell {
+      background: var(--card);
+      padding: 18px 10px;
+      text-align: center;
+    }
+    .sum-label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .sum-val {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--text);
+    }
+    .sum-val.c-accent  { color: var(--accent); }
+    .sum-val.c-positive{ color: var(--positive); }
+    .sum-val.c-gold    { color: var(--gold); }
+    .sum-unit {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    /* ── TREND CHART ────────────────────────────────────────── */
+    .chart-wrap {
+      width: 100%;
+      height: 220px;
+      position: relative;
+    }
+    .chart-wrap svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+    .chart-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 180px;
+      gap: 10px;
+    }
+    .chart-empty-icon { font-size: 36px; opacity: 0.2; }
+    .chart-empty p {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: .05em;
+    }
+
+    .chart-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      padding: 12px 20px;
+      border-top: 1px solid var(--border);
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--muted);
+    }
+    .l-dot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .l-line { width: 16px; height: 2px; flex-shrink: 0; }
+
+    /* Trend stat grid */
+    .trend-stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+    .ts-cell {
+      background: var(--card);
+      padding: 16px;
+    }
+    .ts-label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .ts-val {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text);
+    }
+    .ts-sub {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+    .improving { color: var(--positive); }
+    .worsening { color: var(--accent); }
+    .stable    { color: var(--muted); }
+
+    /* ── HISTORY ────────────────────────────────────────────── */
+    .hist-item {
+      padding: 14px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: border-color var(--ease);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .hist-item:active { border-color: var(--muted); }
+    .hist-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .hist-date {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .hist-score {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 800;
+    }
+    .pb-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      background: var(--gold);
+      color: #000;
+      font-family: var(--font-display);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+    .hist-bot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .hist-clubs {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .del-btn {
+      padding: 4px 10px;
+      font-family: var(--font-display);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: transparent;
+      border: 1px solid var(--accent-dim);
+      cursor: pointer;
+      transition: all var(--ease);
+    }
+    .del-btn:active { background: var(--accent-wash); }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px 20px;
+    }
+    .empty-icon { font-size: 40px; opacity: 0.2; margin-bottom: 14px; }
+    .empty-state p {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    /* ── BENCHMARKS ─────────────────────────────────────────── */
+    .bm-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid transparent;
+      margin-bottom: 6px;
+      transition: all var(--ease);
+    }
+    .bm-row.is-current {
+      border-left-color: var(--accent);
+      background: var(--accent-wash);
+    }
+    .bm-level {
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .bm-desc {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .bm-range {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--secondary);
+      text-align: right;
+      white-space: nowrap;
+    }
+    .bm-row.is-current .bm-range { color: var(--accent); }
+
+    /* ── MODAL ──────────────────────────────────────────────── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.78);
+      z-index: 200;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-bottom: none;
+      width: 100%;
+      max-width: 520px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .modal-head {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-head h3 {
+      font-family: var(--font-display);
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+    .modal-x {
+      width: 36px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 20px;
+      cursor: pointer;
+      transition: all var(--ease);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .modal-x:active { background: var(--border); color: var(--text); }
+    .modal-body { padding: 20px; }
+    .modal-foot {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .modal-foot.single { grid-template-columns: 1fr; }
+
+    /* Final score display */
+    .final-block {
+      text-align: center;
+      padding: 28px 20px 16px;
+    }
+    .final-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: .25em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .final-score {
+      font-family: var(--font-display);
+      font-size: 76px;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .final-unit {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .pb-block {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 14px;
+      padding: 8px 20px;
+      background: var(--gold);
+      color: #000;
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+    .bm-result {
+      margin-top: 16px;
+      padding: 12px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--secondary);
+    }
+
+    /* ── RESPONSIVE ─────────────────────────────────────────── */
+    @media (max-width: 360px) {
+      .club-grid { grid-template-columns: repeat(2, 1fr); }
+      .summary-grid { grid-template-columns: 1fr 1fr; }
+      .summary-grid .sum-cell:last-child { display: none; }
+      .final-score { font-size: 56px; }
+    }
+    @media (min-width: 521px) {
+      .modal-overlay { align-items: center; padding: 20px; }
+      .modal { border-bottom: 1px solid var(--border); }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <header class="header">
+    <p class="eyebrow">Theory Golf</p>
+    <h1>Line Test</h1>
+    <p class="sub">Zambri Directional Accuracy</p>
+  </header>
+
+  <!-- NAV -->
+  <nav class="nav-tabs">
+    <button class="nav-tab active" data-tab="test">Test</button>
+    <button class="nav-tab" data-tab="trends">Trends</button>
+    <button class="nav-tab" data-tab="history">History</button>
+    <button class="nav-tab" data-tab="benchmarks">Benchmarks</button>
+  </nav>
+
+  <!-- ══════════════════════════════════════════════════════════
+       TEST SECTION
+  ══════════════════════════════════════════════════════════ -->
+  <section id="test-section" class="section active">
+
+    <!-- Setup view -->
+    <div id="setup-view">
+      <div class="card">
+        <div class="card-header"><h2>Session Setup</h2></div>
+        <div class="card-body">
+          <div class="info-box">
+            <h4>About the Line Test</h4>
+            <p>Hit 20 shots — 5 per club. Record how many yards each shot misses left or right of your target line. Final score = sum of the best 18 shots. Lower is better.</p>
+          </div>
+          <p class="setup-label">Select 4 Clubs</p>
+          <div class="club-grid">
+            <div class="club-input-group">
+              <label>Club 1</label>
+              <input type="text" class="club-input" id="club1" value="PW" maxlength="6">
+            </div>
+            <div class="club-input-group">
+              <label>Club 2</label>
+              <input type="text" class="club-input" id="club2" value="9i" maxlength="6">
+            </div>
+            <div class="club-input-group">
+              <label>Club 3</label>
+              <input type="text" class="club-input" id="club3" value="7i" maxlength="6">
+            </div>
+            <div class="club-input-group">
+              <label>Club 4</label>
+              <input type="text" class="club-input" id="club4" value="5i" maxlength="6">
+            </div>
+          </div>
+          <button class="btn btn-primary" id="start-btn">Begin Line Test</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active test view -->
+    <div id="active-view" style="display:none">
+      <div class="card">
+        <div class="card-header"><h2>Shot Entry</h2></div>
+        <div class="card-body">
+          <div class="shot-progress">
+            <div class="shot-count">Shot <span id="shot-num">1</span> / 20</div>
+            <div class="club-badge" id="cur-club">PW</div>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+          </div>
+
+          <p class="input-label">Yards off the target line</p>
+
+          <div class="direction-row">
+            <button class="dir-btn active" id="dir-left">← Left</button>
+            <button class="dir-btn" id="dir-right">Right →</button>
+          </div>
+
+          <div class="dist-row">
+            <input type="number" class="dist-input" id="dist-input"
+                   value="0" min="0" max="99" step="0.5"
+                   inputmode="decimal" pattern="[0-9]*">
+            <span class="dist-unit">yds</span>
+          </div>
+
+          <div class="numpad">
+            <button class="np-btn" data-v="0">0</button>
+            <button class="np-btn" data-v="1">1</button>
+            <button class="np-btn" data-v="2">2</button>
+            <button class="np-btn" data-v="3">3</button>
+            <button class="np-btn" data-v="4">4</button>
+            <button class="np-btn" data-v="5">5</button>
+            <button class="np-btn" data-v="6">6</button>
+            <button class="np-btn" data-v="8">8</button>
+            <button class="np-btn" data-v="10">10</button>
+            <button class="np-btn" data-v="12">12</button>
+          </div>
+
+          <button class="btn btn-primary" id="record-btn">Record Shot</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h2>Shots Recorded</h2></div>
+        <div class="shot-list" id="shot-list"></div>
+        <div class="total-bar">
+          <span class="total-label">Running Total (Best 18)</span>
+          <span class="total-value" id="running-total">0 yds</span>
+        </div>
+      </div>
+
+      <div class="action-row">
+        <button class="btn btn-ghost" id="undo-btn">Undo Last</button>
+        <button class="btn btn-secondary" id="cancel-btn">Cancel</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════════
+       TRENDS SECTION
+  ══════════════════════════════════════════════════════════ -->
+  <section id="trends-section" class="section">
+
+    <!-- Summary stats strip -->
+    <div class="summary-grid">
+      <div class="sum-cell">
+        <div class="sum-label">Personal Best</div>
+        <div class="sum-val c-gold" id="t-pb">—</div>
+      </div>
+      <div class="sum-cell">
+        <div class="sum-label">Last 5 Avg</div>
+        <div class="sum-val" id="t-avg">—</div>
+      </div>
+      <div class="sum-cell">
+        <div class="sum-label">Sessions</div>
+        <div class="sum-val c-accent" id="t-count">0</div>
+      </div>
+    </div>
+
+    <!-- Chart card -->
+    <div class="card">
+      <div class="card-header"><h2>Score Trend</h2></div>
+      <div class="card-body" style="padding:16px 12px 0">
+        <div class="chart-wrap" id="chart-wrap">
+          <!-- SVG injected by JS -->
+        </div>
+      </div>
+      <div class="chart-legend">
+        <div class="legend-item">
+          <div class="l-dot" style="background:var(--accent)"></div>
+          Score
+        </div>
+        <div class="legend-item">
+          <div class="l-line" style="background:var(--gold)"></div>
+          Personal Best
+        </div>
+        <div class="legend-item">
+          <div class="l-line" style="background:var(--muted);opacity:.6"></div>
+          3-Session Avg
+        </div>
+      </div>
+    </div>
+
+    <!-- Trend stat cells -->
+    <div class="trend-stats">
+      <div class="ts-cell">
+        <div class="ts-label">Trend (Last 3 vs Prior 3)</div>
+        <div class="ts-val" id="ts-trend">—</div>
+        <div class="ts-sub" id="ts-trend-sub">Need 3+ sessions</div>
+      </div>
+      <div class="ts-cell">
+        <div class="ts-label">Current Level</div>
+        <div class="ts-val" id="ts-level">—</div>
+        <div class="ts-sub" id="ts-level-sub">—</div>
+      </div>
+      <div class="ts-cell">
+        <div class="ts-label">Best Streak</div>
+        <div class="ts-val" id="ts-streak">—</div>
+        <div class="ts-sub">Consecutive improvements</div>
+      </div>
+      <div class="ts-cell">
+        <div class="ts-label">All-time Avg</div>
+        <div class="ts-val" id="ts-all-avg">—</div>
+        <div class="ts-sub">Across all sessions</div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════════
+       HISTORY SECTION
+  ══════════════════════════════════════════════════════════ -->
+  <section id="history-section" class="section">
+    <div class="card">
+      <div class="card-header"><h2>Session Log</h2></div>
+      <div class="card-body" id="history-list">
+        <!-- rendered by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════════
+       BENCHMARKS SECTION
+  ══════════════════════════════════════════════════════════ -->
+  <section id="benchmarks-section" class="section">
+    <div class="card">
+      <div class="card-header"><h2>Performance Benchmarks</h2></div>
+      <div class="card-body">
+        <div class="info-box" style="margin-bottom:20px">
+          <p>Based on USC golf program data and elite amateur testing. Lower scores indicate better directional accuracy. Your current level is highlighted based on your personal best.</p>
+        </div>
+        <div id="benchmark-list"></div>
+      </div>
+    </div>
+  </section>
+
+</div><!-- /container -->
+
+
+<!-- ════════════════════════════════════════════════════════════
+     SESSION COMPLETE MODAL
+════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="complete-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Test Complete</h3>
+      <button class="modal-x" id="x-complete">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="final-block">
+        <div class="final-eyebrow">Final Score</div>
+        <div class="final-score" id="final-score-val">0</div>
+        <div class="final-unit">total yards · best 18 of 20 shots</div>
+        <div id="pb-reveal" style="display:none">
+          <div class="pb-block">★ New Personal Best</div>
+        </div>
+        <div class="bm-result" id="final-bm-label"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" id="view-details-btn">View Details</button>
+      <button class="btn btn-primary" id="save-btn">Save Session</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     SESSION DETAILS MODAL
+════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="details-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Session Details</h3>
+      <button class="modal-x" id="x-details">×</button>
+    </div>
+    <div class="modal-body" id="details-body"></div>
+    <div class="modal-foot single">
+      <button class="btn btn-secondary" id="close-details-btn">Close</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+/* ============================================================
+   DATA
+============================================================ */
+const BENCHMARKS = [
+  { level: 'Tour Level',       min: 0,   max: 36,  desc: 'PGA / LPGA Tour caliber',   color: '#00C07A' },
+  { level: 'Elite Amateur',    min: 36,  max: 54,  desc: 'Scratch to +handicap',       color: '#52D9A0' },
+  { level: 'Low Single Digit', min: 54,  max: 72,  desc: '1–5 handicap range',         color: '#C4BFB8' },
+  { level: 'Single Digit',     min: 72,  max: 90,  desc: '6–9 handicap range',         color: '#F59520' },
+  { level: 'Mid Handicap',     min: 90,  max: 120, desc: '10–15 handicap range',       color: '#E8202A' },
+  { level: 'Higher Handicap',  min: 120, max: 999, desc: '16+ handicap',               color: '#9B1520' },
+];
+
+/* ============================================================
+   STATE
+============================================================ */
+const state = {
+  sessions: [],   // { date, score, clubs, shots[] }
+  current:  null, // { clubs[], shots[] }
+};
+
+/* ============================================================
+   PERSISTENCE
+============================================================ */
+function loadData() {
+  try {
+    const raw = localStorage.getItem('lt_v2');
+    if (raw) state.sessions = JSON.parse(raw);
+  } catch(e) { state.sessions = []; }
+}
+function saveData() {
+  localStorage.setItem('lt_v2', JSON.stringify(state.sessions));
+}
+
+/* ============================================================
+   CALCULATIONS
+============================================================ */
+function best18(shots) {
+  if (shots.length < 18) return null;
+  return [...shots].map(s => s.distance).sort((a,b) => a-b).slice(0,18).reduce((s,d) => s+d, 0);
+}
+
+function droppedIdx(shots) {
+  if (shots.length < 20) return [];
+  return shots.map((s,i) => ({i, d: s.distance}))
+    .sort((a,b) => b.d - a.d).slice(0,2).map(x => x.i);
+}
+
+function bmFor(score) {
+  return BENCHMARKS.find(b => score >= b.min && score < b.max) || BENCHMARKS[BENCHMARKS.length-1];
+}
+
+function pb() {
+  if (!state.sessions.length) return null;
+  return Math.min(...state.sessions.map(s => s.score));
+}
+
+function last5Avg() {
+  if (!state.sessions.length) return null;
+  const r = state.sessions.slice(-5);
+  return r.reduce((s, x) => s + x.score, 0) / r.length;
+}
+
+function allTimeAvg() {
+  if (!state.sessions.length) return null;
+  return state.sessions.reduce((s, x) => s + x.score, 0) / state.sessions.length;
+}
+
+function trendDir() {
+  if (state.sessions.length < 3) return null;
+  const sc = state.sessions.map(s => s.score);
+  const recent = sc.slice(-3).reduce((a,b) => a+b, 0) / 3;
+  const prior  = sc.slice(-6, -3);
+  if (!prior.length) return null;
+  const priorAvg = prior.reduce((a,b) => a+b, 0) / prior.length;
+  const delta = recent - priorAvg;
+  if (Math.abs(delta) < 1) return { dir: 'stable', delta };
+  return { dir: delta < 0 ? 'improving' : 'worsening', delta };
+}
+
+function bestStreak() {
+  if (state.sessions.length < 2) return 0;
+  const sc = state.sessions.map(s => s.score);
+  let best = 0, cur = 0;
+  for (let i = 1; i < sc.length; i++) {
+    if (sc[i] < sc[i-1]) { cur++; best = Math.max(best, cur); }
+    else cur = 0;
+  }
+  return best;
+}
+
+/* ============================================================
+   TREND CHART  (SVG)
+============================================================ */
+function renderChart() {
+  const wrap = document.getElementById('chart-wrap');
+  if (!wrap) return;
+
+  if (state.sessions.length < 2) {
+    wrap.innerHTML = `
+      <div class="chart-empty">
+        <div class="chart-empty-icon">📈</div>
+        <p>Complete at least 2 sessions to see your trend</p>
+      </div>`;
+    return;
+  }
+
+  // Coordinate system
+  const PAD = { top: 14, right: 18, bottom: 32, left: 40 };
+  const CW  = 420; // logical width
+  const CH  = 220; // logical height
+  const IW  = CW - PAD.left - PAD.right;
+  const IH  = CH - PAD.top  - PAD.bottom;
+
+  const scores = state.sessions.map(s => s.score);
+  const n      = scores.length;
+  const rawMax = Math.max(...scores);
+  const rawMin = Math.min(...scores);
+  const yMax   = Math.ceil( (rawMax + 12) / 10) * 10;
+  const yMin   = Math.max(0, Math.floor((rawMin - 12) / 10) * 10);
+  const yRange = yMax - yMin;
+
+  const sx = i => PAD.left + (i / (n - 1)) * IW;
+  const sy = v => PAD.top  + IH - ((v - yMin) / yRange) * IH;
+
+  const pts     = scores.map((s, i) => [sx(i), sy(s)]);
+  const pbScore = Math.min(...scores);
+  const pbY     = sy(pbScore);
+
+  // 3-session rolling average
+  const rolling = scores.map((_, i) => {
+    if (i < 2) return null;
+    return (scores[i] + scores[i-1] + scores[i-2]) / 3;
+  });
+  const rollPts = rolling
+    .map((v, i) => v !== null ? [sx(i), sy(v)] : null)
+    .filter(Boolean);
+
+  // Y grid
+  const step = yRange <= 60 ? 10 : 20;
+  const gridLines = [];
+  for (let v = yMin; v <= yMax; v += step) {
+    const y = sy(v);
+    gridLines.push(`
+      <line x1="${PAD.left}" y1="${y.toFixed(1)}"
+            x2="${PAD.left + IW}" y2="${y.toFixed(1)}"
+            stroke="#2A2A2A" stroke-width="1"/>
+      <text x="${PAD.left - 6}" y="${(y + 4).toFixed(1)}"
+            font-family="DM Mono,monospace" font-size="9"
+            fill="#8A8580" text-anchor="end">${v}</text>`);
+  }
+
+  // Benchmark zone bands
+  const bands = BENCHMARKS.map(b => {
+    const bTop    = sy(Math.min(b.max >= 999 ? yMax + 50 : b.max, yMax));
+    const bBottom = sy(Math.max(b.min, yMin));
+    const h = bBottom - bTop;
+    if (h <= 0) return '';
+    return `<rect x="${PAD.left}" y="${bTop.toFixed(1)}"
+                  width="${IW}" height="${h.toFixed(1)}"
+                  fill="${b.color}" opacity="0.05"/>`;
+  }).join('');
+
+  // Score path + area fill
+  const linePath = pts.map((p, i) =>
+    `${i === 0 ? 'M' : 'L'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ');
+  const areaPath = linePath +
+    ` L${pts[n-1][0].toFixed(1)},${(PAD.top + IH).toFixed(1)}` +
+    ` L${pts[0][0].toFixed(1)},${(PAD.top + IH).toFixed(1)} Z`;
+
+  // Rolling avg line
+  let rollLine = '';
+  if (rollPts.length >= 2) {
+    const rp = rollPts.map((p, i) =>
+      `${i === 0 ? 'M' : 'L'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ');
+    rollLine = `<path d="${rp}" fill="none" stroke="#8A8580"
+                     stroke-width="1.5" stroke-dasharray="4 3" opacity="0.55"/>`;
+  }
+
+  // PB horizontal line
+  const pbLine = `
+    <line x1="${PAD.left}" y1="${pbY.toFixed(1)}"
+          x2="${(PAD.left + IW).toFixed(1)}" y2="${pbY.toFixed(1)}"
+          stroke="#D4B843" stroke-width="1.5" stroke-dasharray="6 3" opacity="0.85"/>`;
+
+  // Dots
+  const dots = pts.map(([x, y], i) => {
+    const isP = scores[i] === pbScore;
+    const isL = i === n - 1;
+    return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}"
+                    r="${isP ? 5 : isL ? 4 : 3}"
+                    fill="${isP ? '#D4B843' : isL ? '#E8202A' : '#F2F0EE'}"
+                    stroke="${isP ? '#000' : isL ? '#FF3D47' : '#1E1E1E'}"
+                    stroke-width="${isP ? 1.5 : 1}"/>`;
+  }).join('');
+
+  // X-axis date labels
+  const labelStep = Math.max(1, Math.ceil(n / 8));
+  const xLabels = scores.map((_, i) => {
+    if (i % labelStep !== 0 && i !== n - 1) return '';
+    const d   = new Date(state.sessions[i].date);
+    const lbl = `${d.getMonth()+1}/${d.getDate()}`;
+    return `<text x="${sx(i).toFixed(1)}" y="${(PAD.top + IH + 20).toFixed(1)}"
+                  font-family="DM Mono,monospace" font-size="9"
+                  fill="#8A8580" text-anchor="middle">${lbl}</text>`;
+  }).join('');
+
+  wrap.innerHTML = `
+    <svg viewBox="0 0 ${CW} ${CH}" preserveAspectRatio="xMidYMid meet"
+         style="overflow:visible;display:block;width:100%;height:100%">
+      <defs>
+        <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stop-color="#E8202A" stop-opacity="0.22"/>
+          <stop offset="100%" stop-color="#E8202A" stop-opacity="0.02"/>
+        </linearGradient>
+        <clipPath id="innerClip">
+          <rect x="${PAD.left}" y="${PAD.top}" width="${IW}" height="${IH}"/>
+        </clipPath>
+      </defs>
+
+      <g clip-path="url(#innerClip)">
+        ${bands}
+        <path d="${areaPath}" fill="url(#areaGrad)"/>
+        ${pbLine}
+        ${rollLine}
+        <path d="${linePath}" fill="none" stroke="#E8202A" stroke-width="2" stroke-linejoin="round"/>
+      </g>
+
+      ${gridLines.join('')}
+      ${dots}
+      ${xLabels}
+    </svg>`;
+}
+
+/* ============================================================
+   RENDER — TRENDS TAB
+============================================================ */
+function renderTrends() {
+  const pbVal  = pb();
+  const avgVal = last5Avg();
+
+  document.getElementById('t-pb').innerHTML =
+    pbVal  !== null ? `${pbVal.toFixed(1)}<span class="sum-unit"> yds</span>` : '—';
+  document.getElementById('t-avg').innerHTML =
+    avgVal !== null ? `${avgVal.toFixed(1)}<span class="sum-unit"> yds</span>` : '—';
+  document.getElementById('t-count').textContent = state.sessions.length;
+
+  // Trend direction
+  const trend   = trendDir();
+  const tEl     = document.getElementById('ts-trend');
+  const tSubEl  = document.getElementById('ts-trend-sub');
+  if (trend) {
+    const arrow = trend.dir === 'improving' ? '↓' : trend.dir === 'worsening' ? '↑' : '→';
+    tEl.textContent = `${arrow} ${Math.abs(trend.delta).toFixed(1)} yds`;
+    tEl.className   = `ts-val ${trend.dir}`;
+    tSubEl.textContent = trend.dir === 'improving'  ? 'Improving (last 3 vs prior 3)'
+                       : trend.dir === 'worsening' ? 'Worsening (last 3 vs prior 3)'
+                       : 'Stable';
+  } else {
+    tEl.textContent   = '—';
+    tSubEl.textContent = 'Need 3+ sessions';
+  }
+
+  // Current benchmark level
+  const lvlEl    = document.getElementById('ts-level');
+  const lvlSubEl = document.getElementById('ts-level-sub');
+  if (pbVal !== null) {
+    const bm = bmFor(pbVal);
+    lvlEl.textContent    = bm.level;
+    lvlSubEl.textContent = `PB: ${pbVal.toFixed(1)} yds`;
+  } else {
+    lvlEl.textContent    = '—';
+    lvlSubEl.textContent = 'No sessions yet';
+  }
+
+  // Best streak
+  document.getElementById('ts-streak').textContent =
+    bestStreak() > 0 ? `${bestStreak()} in a row` : '—';
+
+  // All-time average
+  const allAvg = allTimeAvg();
+  document.getElementById('ts-all-avg').innerHTML = allAvg !== null
+    ? `${allAvg.toFixed(1)}<span style="font-size:12px;color:var(--muted)"> yds</span>`
+    : '—';
+
+  renderChart();
+}
+
+/* ============================================================
+   RENDER — HISTORY
+============================================================ */
+function renderHistory() {
+  const el  = document.getElementById('history-list');
+  const pbV = pb();
+
+  if (!state.sessions.length) {
+    el.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">📊</div>
+        <p>No sessions recorded yet.<br>Complete a Line Test to see your history.</p>
+      </div>`;
+    return;
+  }
+
+  el.innerHTML = [...state.sessions].reverse().map((s, ri) => {
+    const origIdx = state.sessions.length - 1 - ri;
+    const isPB    = s.score === pbV;
+    const d       = new Date(s.date);
+    const dateStr = d.toLocaleDateString('en-US', {
+      month: 'short', day: 'numeric', year: 'numeric',
+      hour: '2-digit', minute: '2-digit',
+    });
+    return `
+      <div class="hist-item" data-idx="${origIdx}">
+        <div class="hist-top">
+          <span class="hist-date">${dateStr}</span>
+          <span class="hist-score">
+            ${s.score.toFixed(1)} yds
+            ${isPB ? '<span class="pb-badge">PB</span>' : ''}
+          </span>
+        </div>
+        <div class="hist-bot">
+          <span class="hist-clubs">${s.clubs.join(' · ')}</span>
+          <button class="del-btn" data-del="${origIdx}">Delete</button>
+        </div>
+      </div>`;
+  }).join('');
+
+  el.querySelectorAll('.hist-item').forEach(item => {
+    item.addEventListener('click', e => {
+      if (e.target.classList.contains('del-btn')) {
+        e.stopPropagation();
+        if (confirm('Delete this session?')) {
+          state.sessions.splice(parseInt(e.target.dataset.del), 1);
+          saveData();
+          renderHistory();
+          renderTrends();
+          renderBenchmarks();
+        }
+      } else {
+        showDetails(state.sessions[parseInt(item.dataset.idx)]);
+      }
+    });
+  });
+}
+
+/* ============================================================
+   RENDER — BENCHMARKS
+============================================================ */
+function renderBenchmarks() {
+  const pbV    = pb();
+  const curBm  = pbV !== null ? bmFor(pbV) : null;
+  document.getElementById('benchmark-list').innerHTML = BENCHMARKS.map(b => {
+    const isCur = curBm && b.level === curBm.level;
+    const range = b.max >= 999 ? `${b.min}+` : `${b.min}–${b.max}`;
+    return `
+      <div class="bm-row ${isCur ? 'is-current' : ''}">
+        <div>
+          <div class="bm-level">${b.level}</div>
+          <div class="bm-desc">${b.desc}</div>
+        </div>
+        <div class="bm-range">${range} yds</div>
+      </div>`;
+  }).join('');
+}
+
+/* ============================================================
+   SESSION DETAILS MODAL
+============================================================ */
+function showDetails(session) {
+  const dropped = droppedIdx(session.shots);
+  const d = new Date(session.date);
+
+  document.getElementById('details-body').innerHTML = `
+    <div class="final-block" style="padding:20px 0 16px">
+      <div class="final-eyebrow">Final Score</div>
+      <div class="final-score" style="font-size:56px">${session.score.toFixed(1)}</div>
+      <div class="final-unit">${d.toLocaleDateString('en-US', {
+        weekday:'long', month:'long', day:'numeric', year:'numeric'
+      })}</div>
+    </div>
+    <div class="shot-list" style="max-height:320px">
+      ${session.shots.map((s, i) => {
+        const isD = dropped.includes(i);
+        return `
+          <div class="shot-row ${isD ? 'dropped' : ''}">
+            <div class="shot-meta">
+              <span class="shot-n">${i+1}</span>
+              <span class="shot-club">${s.club}</span>
+            </div>
+            <div>
+              <span class="shot-val">${s.distance.toFixed(1)}</span>
+              <span class="shot-dir">${s.direction}</span>
+              ${isD ? '<span class="dropped-tag"> dropped</span>' : ''}
+            </div>
+          </div>`;
+      }).join('')}
+    </div>`;
+
+  document.getElementById('details-modal').classList.add('open');
+}
+
+/* ============================================================
+   ACTIVE TEST UI
+============================================================ */
+function updateTestUI() {
+  if (!state.current) return;
+  const n = state.current.shots.length;
+  document.getElementById('shot-num').textContent   = Math.min(n + 1, 20);
+  document.getElementById('progress-fill').style.width = `${(n / 20) * 100}%`;
+  document.getElementById('cur-club').textContent   = state.current.clubs[n % 4];
+}
+
+function renderShotList() {
+  if (!state.current) return;
+  const dropped = state.current.shots.length >= 20
+    ? droppedIdx(state.current.shots) : [];
+
+  document.getElementById('shot-list').innerHTML =
+    [...state.current.shots].reverse().map((s, ri) => {
+      const i   = state.current.shots.length - 1 - ri;
+      const isD = dropped.includes(i);
+      return `
+        <div class="shot-row ${isD ? 'dropped' : ''}">
+          <div class="shot-meta">
+            <span class="shot-n">${i+1}</span>
+            <span class="shot-club">${s.club}</span>
+          </div>
+          <div>
+            <span class="shot-val">${s.distance.toFixed(1)}</span>
+            <span class="shot-dir">${s.direction}</span>
+            ${isD ? '<span class="dropped-tag"> dropped</span>' : ''}
+          </div>
+        </div>`;
+    }).join('');
+
+  const total = state.current.shots.length >= 18
+    ? best18(state.current.shots)
+    : state.current.shots.reduce((s, x) => s + x.distance, 0);
+  document.getElementById('running-total').textContent = `${total.toFixed(1)} yds`;
+}
+
+function completeTest() {
+  const score = best18(state.current.shots);
+  const pbV   = pb();
+  const isPB  = pbV === null || score < pbV;
+  const bm    = bmFor(score);
+
+  document.getElementById('final-score-val').textContent   = score.toFixed(1);
+  document.getElementById('pb-reveal').style.display       = isPB ? 'block' : 'none';
+  document.getElementById('final-bm-label').textContent    = `${bm.level} — ${bm.desc}`;
+  document.getElementById('complete-modal').classList.add('open');
+}
+
+/* ============================================================
+   EVENT WIRING
+============================================================ */
+
+// Nav tabs
+document.querySelectorAll('.nav-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById(`${tab.dataset.tab}-section`).classList.add('active');
+    if (tab.dataset.tab === 'trends')     renderTrends();
+    if (tab.dataset.tab === 'history')    renderHistory();
+    if (tab.dataset.tab === 'benchmarks') renderBenchmarks();
+  });
+});
+
+// Start test
+document.getElementById('start-btn').addEventListener('click', () => {
+  const clubs = ['club1','club2','club3','club4'].map(id => {
+    const defaults = { club1:'PW', club2:'9i', club3:'7i', club4:'5i' };
+    return document.getElementById(id).value.trim() || defaults[id];
+  });
+  state.current = { clubs, shots: [] };
+  document.getElementById('setup-view').style.display  = 'none';
+  document.getElementById('active-view').style.display = 'block';
+  updateTestUI();
+});
+
+// Direction buttons
+document.getElementById('dir-left').addEventListener('click', () => {
+  document.getElementById('dir-left').classList.add('active');
+  document.getElementById('dir-right').classList.remove('active');
+});
+document.getElementById('dir-right').addEventListener('click', () => {
+  document.getElementById('dir-right').classList.add('active');
+  document.getElementById('dir-left').classList.remove('active');
+});
+
+// Numpad
+document.querySelectorAll('.np-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.getElementById('dist-input').value = btn.dataset.v;
+  });
+});
+
+// Record shot
+document.getElementById('record-btn').addEventListener('click', () => {
+  if (!state.current || state.current.shots.length >= 20) return;
+  const dist  = parseFloat(document.getElementById('dist-input').value) || 0;
+  const dir   = document.getElementById('dir-left').classList.contains('active') ? 'L' : 'R';
+  const club  = state.current.clubs[state.current.shots.length % 4];
+  state.current.shots.push({ distance: dist, direction: dir, club });
+  document.getElementById('dist-input').value = '0';
+  renderShotList();
+  if (state.current.shots.length >= 20) completeTest();
+  else updateTestUI();
+});
+
+// Undo
+document.getElementById('undo-btn').addEventListener('click', () => {
+  if (!state.current || !state.current.shots.length) return;
+  state.current.shots.pop();
+  renderShotList();
+  updateTestUI();
+});
+
+// Cancel
+document.getElementById('cancel-btn').addEventListener('click', () => {
+  if (confirm('Cancel this test? All shots will be lost.')) {
+    state.current = null;
+    document.getElementById('active-view').style.display = 'none';
+    document.getElementById('setup-view').style.display  = 'block';
+    document.getElementById('shot-list').innerHTML       = '';
+    document.getElementById('running-total').textContent = '0 yds';
+  }
+});
+
+// Complete modal
+document.getElementById('x-complete').addEventListener('click', () => {
+  document.getElementById('complete-modal').classList.remove('open');
+});
+
+document.getElementById('view-details-btn').addEventListener('click', () => {
+  document.getElementById('complete-modal').classList.remove('open');
+  showDetails({
+    date:  new Date().toISOString(),
+    score: best18(state.current.shots),
+    clubs: state.current.clubs,
+    shots: [...state.current.shots],
+  });
+});
+
+document.getElementById('save-btn').addEventListener('click', () => {
+  state.sessions.push({
+    date:  new Date().toISOString(),
+    score: best18(state.current.shots),
+    clubs: state.current.clubs,
+    shots: [...state.current.shots],
+  });
+  saveData();
+  state.current = null;
+  document.getElementById('complete-modal').classList.remove('open');
+  document.getElementById('active-view').style.display = 'none';
+  document.getElementById('setup-view').style.display  = 'block';
+  document.getElementById('shot-list').innerHTML       = '';
+  document.getElementById('running-total').textContent = '0 yds';
+});
+
+// Details modal
+document.getElementById('x-details').addEventListener('click', () => {
+  document.getElementById('details-modal').classList.remove('open');
+});
+document.getElementById('close-details-btn').addEventListener('click', () => {
+  document.getElementById('details-modal').classList.remove('open');
+});
+
+/* ============================================================
+   INIT
+============================================================ */
+loadData();
+renderBenchmarks();
+</script>
+</body>
+</html>
