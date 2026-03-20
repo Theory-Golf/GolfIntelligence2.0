@@ -12,7 +12,7 @@ import { calculatePlayerPathMetrics, calculatePerformanceDriversV2 } from './pla
 import { calculateCoachTableMetrics } from './calculations';
 
 // Google Sheet CSV URL - published to web
-const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ6xTTDWTSzaRvoiACi2PT-l7uqvwcZwdlIZsCGunz-8t-227TBihATnDfUoi5VzDqhOIGcAbJViw9O/pub?output=csv';
+const GOOGLE_SHEET_CSV_URL = process.env.NEXT_PUBLIC_GOLF_DATA_URL!;
 
 interface UseGolfDataResult {
   rawShots: RawShot[];
