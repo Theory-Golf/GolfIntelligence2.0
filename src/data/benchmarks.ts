@@ -38,14 +38,20 @@ function parseBenchmarkCsv(csv: string): BenchmarkLookup {
   for (const line of lines.slice(headerIdx + 1)) {
     const parts = line.split(',');
     if (parts.length < 6) continue;
-    const [dist, tee, fairway, rough, sand, recovery, putt] = parts.map(Number);
+    const [dist, tee, fairway, rough, sand, recovery] = parts.map(Number);
+    // Parse putt separately: empty cells become Number('') = 0 which is a valid distance,
+    // so we must check whether the cell was actually present and non-empty.
+    const puttRaw = parts[6];
+    const putt = puttRaw !== undefined && puttRaw.trim() !== '' ? Number(puttRaw) : undefined;
     if (isNaN(dist)) continue;
     lookup.tee[dist]      = tee;
     lookup.fairway[dist]  = fairway;
     lookup.rough[dist]    = rough;
     lookup.sand[dist]     = sand;
     lookup.recovery[dist] = recovery;
-    lookup.putt[dist]     = isNaN(putt) ? 0 : putt;
+    if (putt !== undefined && !isNaN(putt)) {
+      lookup.putt[dist] = putt;
+    }
   }
   return lookup;
 }
@@ -65,7 +71,13 @@ function lookupBenchmark(lookup: BenchmarkLookup, distance: number, location: st
     case 'Sand':     return lookup.sand[d]     ?? 0;
     case 'Recovery': return lookup.recovery[d] ?? 0;
     case 'Green':
-    case 'Putt':     return lookup.putt[d]     ?? 0;
+    case 'Putt': {
+      // Putt benchmark is in feet and only populated for 0–120 ft (data stops at row 120).
+      // Clamp to 120 so distances > 120 ft use the plateau value (~1.99 expected putts)
+      // instead of returning 0 (which would massively inflate strokes gained).
+      const puttDist = Math.min(d, 120);
+      return lookup.putt[puttDist] ?? 1.99;
+    }
     default:         return lookup.fairway[d]  ?? 0;
   }
 }
