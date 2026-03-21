@@ -10,7 +10,7 @@ import {
   isInsideGreen,
   computeOptimalAim,
 } from '@/utils/aimOptimizer';
-import './ApproachAimOptimizer.css';
+
 
 const W = 500;
 const H = 500;

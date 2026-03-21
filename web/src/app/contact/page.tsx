@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
 
 export default function ContactPage() {
   const [form, setForm] = useState({
@@ -78,148 +79,88 @@ export default function ContactPage() {
     }
   }
 
+  const inputClasses =
+    'w-full bg-surface border border-border text-foreground font-mono text-sm px-3 py-2.5 min-h-11 outline-none transition-colors focus:border-primary';
+
   return (
-    <div className="page-hero">
-      <div className="page-hero-inner">
-        <p className="eyebrow" style={{ marginBottom: '20px' }}>
-          Get in touch
-        </p>
-
-        <h1 className="display-heading">
-          <span style={{ color: 'var(--color-accent)' }}>Contact</span>
+    <section className="px-6 pt-20 pb-20">
+      <div className="max-w-lg mx-auto">
+        <p className="eyebrow mb-5">Get in touch</p>
+        <h1 className="font-display font-extrabold text-[clamp(40px,7vw,72px)] leading-[0.9] tracking-tight uppercase text-foreground">
+          <span className="text-primary">Contact</span>
         </h1>
-
-        <p className="display-sub">
-          Interested in bringing theory.golf to your program? Reach out — we'd
+        <p className="font-body text-base text-muted-foreground mt-5 leading-relaxed">
+          Interested in bringing theory.golf to your program? Reach out — we&apos;d
           love to walk you through what the platform can do for your team.
         </p>
 
         {submitted ? (
-          <div style={{ marginTop: '40px', maxWidth: '480px' }}>
-            <p
-              style={{
-                color: 'var(--color-accent)',
-                fontFamily: 'var(--font-mono)',
-                fontSize: '12px',
-                letterSpacing: '0.15em',
-                textTransform: 'uppercase',
-                marginBottom: '12px',
-              }}
-            >
+          <div className="mt-10">
+            <p className="text-primary font-mono text-xs tracking-[0.15em] uppercase mb-3">
               Message sent
             </p>
-            <p style={{ color: 'var(--color-text)', lineHeight: '1.6' }}>
-              Thanks for reaching out. We'll be in touch shortly.
+            <p className="text-foreground leading-relaxed">
+              Thanks for reaching out. We&apos;ll be in touch shortly.
             </p>
           </div>
         ) : (
-          <form
-            onSubmit={handleSubmit}
-            noValidate
-            style={{ marginTop: '40px', maxWidth: '480px', width: '100%' }}
-          >
-            <div className="wyc-field">
-              <label className="wyc-label" htmlFor="name">
+          <form onSubmit={handleSubmit} noValidate className="mt-10 flex flex-col gap-5">
+            <div className="flex flex-col gap-1.5">
+              <label className="font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground" htmlFor="name">
                 Name
               </label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                className="wyc-input"
-                value={form.name}
-                onChange={handleChange}
-                placeholder="Your name"
-                autoComplete="name"
-              />
-              {errors.name && <p className="wyc-error">{errors.name}</p>}
+              <input id="name" name="name" type="text" className={inputClasses} value={form.name} onChange={handleChange} placeholder="Your name" autoComplete="name" />
+              {errors.name && <p className="font-mono text-[11px] text-primary tracking-[0.05em] mt-1">{errors.name}</p>}
             </div>
 
-            <div className="wyc-field">
-              <label className="wyc-label" htmlFor="email">
+            <div className="flex flex-col gap-1.5">
+              <label className="font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground" htmlFor="email">
                 Email
               </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                className="wyc-input"
-                value={form.email}
-                onChange={handleChange}
-                placeholder="you@example.com"
-                autoComplete="email"
-              />
-              {errors.email && <p className="wyc-error">{errors.email}</p>}
+              <input id="email" name="email" type="email" className={inputClasses} value={form.email} onChange={handleChange} placeholder="you@example.com" autoComplete="email" />
+              {errors.email && <p className="font-mono text-[11px] text-primary tracking-[0.05em] mt-1">{errors.email}</p>}
             </div>
 
-            <div className="wyc-field">
-              <label className="wyc-label" htmlFor="phone">
-                Cell Phone{' '}
-                <span className="wyc-optional">(optional)</span>
+            <div className="flex flex-col gap-1.5">
+              <label className="font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground" htmlFor="phone">
+                Cell Phone <span className="text-ash text-[9px] tracking-[0.1em]">(optional)</span>
               </label>
-              <input
-                id="phone"
-                name="phone"
-                type="tel"
-                className="wyc-input"
-                value={form.phone}
-                onChange={handleChange}
-                placeholder="(555) 000-0000"
-                autoComplete="tel"
-              />
+              <input id="phone" name="phone" type="tel" className={inputClasses} value={form.phone} onChange={handleChange} placeholder="(555) 000-0000" autoComplete="tel" />
             </div>
 
-            <div className="wyc-field">
-              <label className="wyc-label" htmlFor="organization">
-                Organization / Program{' '}
-                <span className="wyc-optional">(optional)</span>
+            <div className="flex flex-col gap-1.5">
+              <label className="font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground" htmlFor="organization">
+                Organization / Program <span className="text-ash text-[9px] tracking-[0.1em]">(optional)</span>
               </label>
-              <input
-                id="organization"
-                name="organization"
-                type="text"
-                className="wyc-input"
-                value={form.organization}
-                onChange={handleChange}
-                placeholder="University golf program, club, etc."
-                autoComplete="organization"
-              />
+              <input id="organization" name="organization" type="text" className={inputClasses} value={form.organization} onChange={handleChange} placeholder="University golf program, club, etc." autoComplete="organization" />
             </div>
 
-            <div className="wyc-field">
-              <label className="wyc-label" htmlFor="message">
+            <div className="flex flex-col gap-1.5">
+              <label className="font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground" htmlFor="message">
                 Message
               </label>
               <textarea
                 id="message"
                 name="message"
-                className="wyc-input"
+                className={`${inputClasses} resize-y min-h-[120px]`}
                 value={form.message}
                 onChange={handleChange}
                 placeholder="Tell us about your program and what you're looking for..."
                 rows={5}
-                style={{ resize: 'vertical', minHeight: '120px' }}
               />
-              {errors.message && <p className="wyc-error">{errors.message}</p>}
+              {errors.message && <p className="font-mono text-[11px] text-primary tracking-[0.05em] mt-1">{errors.message}</p>}
             </div>
 
             {submitError && (
-              <p className="wyc-error" style={{ marginBottom: '12px' }}>
-                {submitError}
-              </p>
+              <p className="font-mono text-[11px] text-primary tracking-[0.05em]">{submitError}</p>
             )}
 
-            <button
-              type="submit"
-              className="wyc-btn-primary"
-              disabled={loading}
-              style={{ width: '100%' }}
-            >
+            <Button type="submit" disabled={loading} className="w-full">
               {loading ? 'Sending...' : 'Send Message'}
-            </button>
+            </Button>
           </form>
         )}
       </div>
-    </div>
+    </section>
   );
 }

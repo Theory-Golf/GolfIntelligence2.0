@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
 import WedgeStandard from '@/components/WedgeStandard';
 
 export const metadata = {
@@ -10,28 +11,22 @@ export const metadata = {
 export default function WedgeStandardPage() {
   return (
     <>
-      <div className="page-hero" style={{ paddingBottom: 48, minHeight: 'auto' }}>
-        <div className="page-hero-inner">
-          <Link href="/player-path" className="resource-back-link">
-            ← PlayerPath
+      <section className="px-6 pt-16 pb-8">
+        <div className="max-w-3xl mx-auto">
+          <Link href="/player-path" className="inline-flex items-center gap-2 font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground no-underline mb-6 hover:text-primary transition-colors">
+            <ArrowLeft className="size-3" /> PlayerPath
           </Link>
-
-          <p className="eyebrow" style={{ marginBottom: '20px' }}>
-            Assessment · Wedge
-          </p>
-
-          <h1 className="display-heading">
-            Wedge
-            <span style={{ color: 'var(--color-accent)' }}>Standard</span>
+          <p className="eyebrow mb-5">Assessment &middot; Wedge</p>
+          <h1 className="font-display font-extrabold text-[clamp(32px,6vw,64px)] leading-[0.9] tracking-tight uppercase text-foreground">
+            Wedge<span className="text-primary">Standard</span>
           </h1>
-
-          <p className="display-sub">
+          <p className="font-body text-base text-muted-foreground mt-5 max-w-lg leading-relaxed">
             An adaptive assessment that adjusts difficulty as your performance
             improves. Scored on proximity, carry accuracy, and dispersion.
             The standard rises with you.
           </p>
         </div>
-      </div>
+      </section>
 
       <WedgeStandard />
     </>

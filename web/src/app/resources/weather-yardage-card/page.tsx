@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
 import WeatherYardageCard from '@/components/WeatherYardageCard';
 
 export const metadata = {
@@ -10,26 +11,22 @@ export const metadata = {
 export default function WeatherYardageCardPage() {
   return (
     <>
-      <div className="page-hero" style={{ paddingBottom: 32, minHeight: 'auto' }}>
-        <div className="page-hero-inner">
-          <Link href="/resources" className="resource-back-link">
-            ← Resources
+      <section className="px-6 pt-16 pb-8">
+        <div className="max-w-3xl mx-auto">
+          <Link href="/resources" className="inline-flex items-center gap-2 font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground no-underline mb-6 hover:text-primary transition-colors">
+            <ArrowLeft className="size-3" /> Resources
           </Link>
-          <p className="eyebrow" style={{ marginBottom: '16px' }}>
-            Tool
-          </p>
-          <h1 className="display-heading">
-            Weather{' '}
-            <span style={{ color: 'var(--color-accent)' }}>Yardage</span>{' '}
-            Card
+          <p className="eyebrow mb-4">Tool</p>
+          <h1 className="font-display font-extrabold text-[clamp(32px,6vw,64px)] leading-[0.9] tracking-tight uppercase text-foreground">
+            Weather <span className="text-primary">Yardage</span> Card
           </h1>
-          <p className="display-sub">
+          <p className="font-body text-base text-muted-foreground mt-5 max-w-lg leading-relaxed">
             Enter your round details to generate a weather-adjusted yardage card.
             Fetches live forecast data for your course and calculates how temperature,
             altitude, humidity, and wind affect each club in your bag.
           </p>
         </div>
-      </div>
+      </section>
 
       <WeatherYardageCard />
     </>

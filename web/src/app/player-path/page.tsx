@@ -9,26 +9,21 @@ export default function PlayerPathPage() {
   return (
     <>
       {/* ── Hero ─────────────────────────────────────────────── */}
-      <div className="page-hero" style={{ paddingBottom: 48, minHeight: 'auto' }}>
-        <div className="page-hero-inner">
-          <p className="eyebrow" style={{ marginBottom: '20px' }}>
-            Development
-          </p>
-
-          <h1 className="display-heading">
-            Player
-            <span style={{ color: 'var(--color-accent)' }}>Path</span>
+      <section className="px-6 pt-20 pb-12">
+        <div className="max-w-5xl mx-auto">
+          <p className="eyebrow mb-5">Development</p>
+          <h1 className="font-display font-extrabold text-[clamp(40px,7vw,80px)] leading-[0.9] tracking-tight uppercase text-foreground">
+            Player<span className="text-primary">Path</span>
           </h1>
-
-          <p className="display-sub">
+          <p className="font-body text-base text-muted-foreground mt-5 max-w-lg leading-relaxed">
             Every player has a highest-leverage area. PlayerPath surfaces it —
             quantifying exactly which part of the game is costing the most strokes
             and mapping a clear development priority.
           </p>
         </div>
-      </div>
+      </section>
 
-      {/* ── Practice Activity Library ─────────────────────────── */}
+      {/* ── Practice Activity Library ────────────────────────── */}
       <PracticeLibrary />
     </>
   );

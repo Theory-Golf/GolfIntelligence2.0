@@ -1,84 +1,48 @@
-// ============================================================
-//  THEORY GOLF — ThemeToggle
-//  src/components/ThemeToggle.jsx
-//
-//  Drop this anywhere in your nav. It:
-//    • Reads the saved preference from localStorage on mount
-//    • Falls back to dark (your default) if nothing is saved
-//    • Writes to localStorage on every toggle
-//    • Applies data-theme="light" to <html> — tokens.css does
-//      the rest automatically
-// ============================================================
-'use client'; // Required if you're using Next.js App Router
+'use client';
+
 import { useEffect, useState } from 'react';
+import { Sun, Moon } from 'lucide-react';
+
 export default function ThemeToggle() {
-const [isLight, setIsLight] = useState(false);
-// On mount — read saved preference
-useEffect(() => {
-const saved = localStorage.getItem('tg-theme');
-if (saved === 'light') {
-setIsLight(true);
-document.documentElement.setAttribute('data-theme', 'light');
+  const [isLight, setIsLight] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('tg-theme');
+    if (saved === 'light') {
+      setIsLight(true);
+      document.documentElement.setAttribute('data-theme', 'light');
     }
   }, []);
-const toggle = () => {
-const next = !isLight;
-setIsLight(next);
-if (next) {
-document.documentElement.setAttribute('data-theme', 'light');
-localStorage.setItem('tg-theme', 'light');
+
+  const toggle = () => {
+    const next = !isLight;
+    setIsLight(next);
+    if (next) {
+      document.documentElement.setAttribute('data-theme', 'light');
+      localStorage.setItem('tg-theme', 'light');
     } else {
-document.documentElement.removeAttribute('data-theme');
-localStorage.setItem('tg-theme', 'dark');
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('tg-theme', 'dark');
     }
   };
-return (
-<button
-onClick={toggle}
-aria-label={isLight ? 'Switch to dark theme' : 'Switch to light theme'}
-title={isLight ? 'Switch to dark theme' : 'Switch to light theme'}
-style={{
-display: 'flex',
-alignItems: 'center',
-gap: '8px',
-background: 'none',
-border: 'none',
-cursor: 'pointer',
-padding: '4px',
-color: 'var(--color-muted)',
-      }}
->
-{/* Sun / Moon icon */}
-<span style={{ fontSize: '14px', lineHeight: 1 }}>
-{isLight ? '☀︎' : '☾'}
-</span>
-{/* Toggle track */}
-<span
-style={{
-position: 'relative',
-display: 'inline-block',
-width: '36px',
-height: '20px',
-background: isLight ? 'var(--color-accent-wash)' : 'var(--pitch)',
-border: '1px solid var(--color-border)',
-borderRadius: '10px',
-transition: 'background 250ms ease, border-color 250ms ease',
-        }}
->
-{/* Thumb */}
-<span
-style={{
-position: 'absolute',
-top: '2px',
-left: isLight ? '16px' : '2px',
-width: '14px',
-height: '14px',
-borderRadius: '50%',
-background: 'var(--color-accent)',
-transition: 'left 250ms ease',
-          }}
-/>
-</span>
-</button>
+
+  return (
+    <button
+      onClick={toggle}
+      aria-label={isLight ? 'Switch to dark theme' : 'Switch to light theme'}
+      title={isLight ? 'Switch to dark theme' : 'Switch to light theme'}
+      className="flex items-center gap-2 bg-transparent border-none cursor-pointer p-1 text-muted-foreground hover:text-foreground transition-colors"
+    >
+      {isLight ? <Sun className="size-3.5" /> : <Moon className="size-3.5" />}
+      <span
+        className="relative inline-block w-9 h-5 rounded-full border border-border transition-all duration-250"
+        style={{ background: isLight ? 'var(--accent)' : 'var(--pitch)' }}
+      >
+        <span
+          className="absolute top-0.5 w-3.5 h-3.5 rounded-full bg-primary transition-all duration-250"
+          style={{ left: isLight ? '16px' : '2px' }}
+        />
+      </span>
+    </button>
   );
 }
