@@ -1249,3 +1249,157 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ── HOMEPAGE HERO VARIANT ────────────────────────────────── */
+.page-hero--home {
+  min-height: auto;
+  padding-top: 96px;
+  padding-bottom: 80px;
+  align-items: flex-start;
+}
+
+/* ── HOME PROBLEM SECTION ─────────────────────────────────── */
+.home-problem {
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  padding: 64px 24px;
+}
+
+.home-problem-inner {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.home-problem-copy {
+  font-family: var(--font-display);
+  font-size: clamp(18px, 2.8vw, 28px);
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: var(--color-text);
+  margin-bottom: 20px;
+}
+
+.home-problem-sub {
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--color-muted);
+  line-height: 1.7;
+  max-width: 520px;
+}
+
+/* ── HOME PILLAR SECTION ──────────────────────────────────── */
+.home-pillars {
+  padding: 80px 24px;
+}
+
+.home-pillars-inner {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.home-pillar-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  border: 1px solid var(--color-border);
+  background: var(--color-border);
+  margin-top: 32px;
+}
+
+.home-pillar-card {
+  background: var(--color-card);
+  padding: 36px 28px;
+  display: flex;
+  flex-direction: column;
+}
+
+.home-pillar-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(28px, 4vw, 44px);
+  line-height: 0.9;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  color: var(--color-text);
+  margin: 16px 0 20px;
+}
+
+.home-pillar-body {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-muted);
+  line-height: 1.65;
+}
+
+.home-pillar-standard {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin-top: auto;
+  padding-top: 24px;
+}
+
+@media (max-width: 640px) {
+  .home-pillar-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── HOME TIGER 5 STRIP ───────────────────────────────────── */
+.home-tiger {
+  border-top: 1px solid var(--color-border);
+  padding: 64px 24px 80px;
+  background: var(--color-surface);
+}
+
+.home-tiger-inner {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.home-tiger-grid {
+  border: 1px solid var(--color-border);
+  margin: 24px 0 28px;
+}
+
+.home-tiger-item {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.home-tiger-item:last-child {
+  border-bottom: none;
+}
+
+.home-tiger-num {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--color-accent);
+  flex-shrink: 0;
+  width: 24px;
+}
+
+.home-tiger-label {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 18px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--color-text);
+}
+
+.home-tiger-sub {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-muted);
+  line-height: 1.7;
+  max-width: 480px;
+}
