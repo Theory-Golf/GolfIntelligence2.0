@@ -354,17 +354,9 @@
    LEGACY COMPATIBILITY — Dashboard & tool CSS variable aliases
    These map the old --color-* names to the new system so existing
    dashboard.css and component CSS files continue to work.
+   Uses var() references so values resolve correctly in both themes.
    ================================================================ */
 :root {
-  --color-surface: var(--surface);
-  --color-card: var(--card);
-  --color-border: var(--border-color);
-  --color-muted: var(--ash);
-  --color-accent: var(--primary);
-  --color-secondary: var(--cement);
-}
-
-[data-theme="light"] {
   --color-surface: var(--surface);
   --color-card: var(--card);
   --color-border: var(--border-color);

@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import { Sun, Moon } from 'lucide-react';
+import { LS_THEME } from '@/lib/constants';
 
 export default function ThemeToggle() {
   const [isLight, setIsLight] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem('tg-theme');
+    const saved = localStorage.getItem(LS_THEME);
     if (saved === 'light') {
       setIsLight(true);
       document.documentElement.setAttribute('data-theme', 'light');
@@ -19,10 +20,10 @@ export default function ThemeToggle() {
     setIsLight(next);
     if (next) {
       document.documentElement.setAttribute('data-theme', 'light');
-      localStorage.setItem('tg-theme', 'light');
+      localStorage.setItem(LS_THEME, 'light');
     } else {
       document.documentElement.removeAttribute('data-theme');
-      localStorage.setItem('tg-theme', 'dark');
+      localStorage.setItem(LS_THEME, 'dark');
     }
   };
 

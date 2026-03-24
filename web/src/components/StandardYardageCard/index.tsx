@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -11,29 +10,107 @@ import {
   windAdjustment,
   tempAdjustment,
 } from '@/utils/ballistics';
+import { LS_CLUBS, LS_WEDGES } from '@/lib/constants';
 import './StandardYardageCard.css';
 
-const LS_CLUBS  = 'yc4_clubs';
-const LS_WEDGES = 'yc4_wedges';
+/* ── Shared types ──────────────────────────────────────────────────────────── */
+
+interface Club {
+  id: string;
+  dist: number;
+}
+
+interface WedgeSwings {
+  half: number;
+  three: number;
+  full: number;
+}
+
+type WedgeMap = Record<string, WedgeSwings>;
+
+interface ActiveClub {
+  name: string;
+  std: number;
+  adj: number;
+}
+
+interface Bucket {
+  range: string;
+  mid: number;
+}
+
+interface WedgeCell {
+  text: string;
+  best: boolean;
+  empty: boolean;
+}
+
+interface WedgeRow {
+  yds: number;
+  cells: WedgeCell[];
+}
+
+interface TempCell {
+  t: number;
+  delta: number;
+  anchor: boolean;
+}
+
+interface TempRow {
+  range: string;
+  cells: TempCell[];
+}
+
+interface WindCell {
+  mph: number;
+  head: boolean;
+  delta: number;
+}
+
+interface WindRow {
+  range: string;
+  cells: WindCell[];
+}
+
+interface Pill {
+  text: string;
+}
+
+interface CardData {
+  active: ActiveClub[];
+  buckets: Bucket[];
+  pills: Pill[];
+  wedgeRows: WedgeRow[];
+  tempRows: TempRow[];
+  windRows: WindRow[];
+}
+
+interface ComputeInput {
+  clubs: Club[];
+  wedges: WedgeMap;
+  altitude: number;
+  homeAlt: number;
+  humidity: number;
+}
 
 function todayStr() {
   return new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 }
 
-function defaultWedges() {
+function defaultWedges(): WedgeMap {
   return Object.fromEntries(
     WEDGE_DEFS.map((w) => [w.id, { half: w.halfDef, three: w.threeDef, full: w.fullDef }])
-  );
+  ) as WedgeMap;
 }
 
-function loadLS(key, fallback) {
+function loadLS<T>(key: string, fallback: T): T {
   if (typeof window === 'undefined') return fallback;
-  try { const r = localStorage.getItem(key); return r ? JSON.parse(r) : fallback; }
+  try { const r = localStorage.getItem(key); return r ? JSON.parse(r) as T : fallback; }
   catch { return fallback; }
 }
 
 // Signed format: +5, −3, 0
-function fmtDelta(n) {
+function fmtDelta(n: number): string {
   const v = Math.round(n);
   if (v > 0) return `+${v}`;
   if (v < 0) return `−${Math.abs(v)}`;
@@ -41,14 +118,14 @@ function fmtDelta(n) {
 }
 
 // ── Card HTML generator (returns JSX-ready data structures) ──────────────────
-function computeCardData(state) {
+function computeCardData(state: ComputeInput): CardData | null {
   const { clubs, wedges, altitude, homeAlt, humidity } = state;
 
   // Active clubs sorted by distance desc
-  const active = clubs
-    .filter((c) => c.id !== '' && c.dist > 0)
-    .map((c) => {
-      const opt = CLUB_OPTIONS.find((o) => o.id === c.id);
+  const active: ActiveClub[] = clubs
+    .filter((c: Club) => c.id !== '' && c.dist > 0)
+    .map((c: Club) => {
+      const opt = CLUB_OPTIONS.find((o: { id: string }) => o.id === c.id);
       const adj = roundToFive(
         c.dist +
         altitudeAdjustment(altitude, homeAlt, c.dist) +
@@ -56,12 +133,12 @@ function computeCardData(state) {
       );
       return { name: opt?.name ?? c.id, std: c.dist, adj };
     })
-    .sort((a, b) => b.adj - a.adj);
+    .sort((a: ActiveClub, b: ActiveClub) => b.adj - a.adj);
 
   if (!active.length) return null;
 
   // Distance buckets (pairs)
-  const buckets = [];
+  const buckets: Bucket[] = [];
   for (let i = 0; i < active.length; i += 2) {
     const a = active[i];
     const b = active[i + 1];
@@ -74,15 +151,15 @@ function computeCardData(state) {
   // Condition pills
   const altDelta = altitude - homeAlt;
   const altPct   = Math.round(altDelta * 0.116);
-  const pills = [
+  const pills: Pill[] = [
     { text: 'Std = 70°F baseline' },
     { text: `${altitude >= 1000 ? (altitude / 1000).toFixed(1) + 'k' : altitude} ft alt` },
     altDelta !== 0 ? { text: `${altDelta > 0 ? '+' : ''}${altPct}% alt adj` } : null,
     { text: `${humidity}% RH` },
-  ].filter(Boolean);
+  ].filter((p): p is Pill => p !== null);
 
   // Wedge matrix rows
-  const wedgeYards = new Set();
+  const wedgeYards = new Set<number>();
   WEDGE_DEFS.forEach((wd) => {
     const v = wedges[wd.id];
     if (!v) return;
@@ -90,11 +167,11 @@ function computeCardData(state) {
     if (v.three) wedgeYards.add(v.three);
     if (v.half)  wedgeYards.add(v.half);
   });
-  const wedgeRows = [...wedgeYards].sort((a, b) => b - a).map((yds) => {
-    const cells = WEDGE_DEFS.map((wd) => {
+  const wedgeRows: WedgeRow[] = [...wedgeYards].sort((a: number, b: number) => b - a).map((yds: number) => {
+    const cells: WedgeCell[] = WEDGE_DEFS.map((wd) => {
       const v = wedges[wd.id];
       if (!v) return { text: '·', best: false, empty: true };
-      const matches = [];
+      const matches: string[] = [];
       if (v.full  === yds) matches.push('Full');
       if (v.three === yds) matches.push('¾');
       if (v.half  === yds) matches.push('½');
@@ -105,10 +182,10 @@ function computeCardData(state) {
   });
 
   // Temperature columns
-  const tempCols = [30, 40, 50, 60, 70, 80, 90, 100];
-  const tempRows = buckets.map((bk) => ({
+  const tempCols: number[] = [30, 40, 50, 60, 70, 80, 90, 100];
+  const tempRows: TempRow[] = buckets.map((bk: Bucket) => ({
     range: bk.range,
-    cells: tempCols.map((t) => {
+    cells: tempCols.map((t: number) => {
       // tempAdjustment gives how much farther the ball goes at that temp vs 70°F
       // Negate for "plays like" perspective: cold = positive (takes more club)
       const delta = Math.round(-tempAdjustment(t) * (bk.mid / bk.mid)); // scalar per yard then multiply
@@ -124,7 +201,7 @@ function computeCardData(state) {
   }));
 
   // Wind rows
-  const WIND_COLS = [
+  const WIND_COLS: { mph: number; head: boolean }[] = [
     { mph: 15, head: true },
     { mph: 10, head: true },
     { mph:  5, head: true },
@@ -132,9 +209,9 @@ function computeCardData(state) {
     { mph: 10, head: false },
     { mph: 15, head: false },
   ];
-  const windRows = buckets.map((bk) => ({
+  const windRows: WindRow[] = buckets.map((bk: Bucket) => ({
     range: bk.range,
-    cells: WIND_COLS.map((col) => ({
+    cells: WIND_COLS.map((col: { mph: number; head: boolean }) => ({
       ...col,
       delta: Math.round(windAdjustment(bk.mid, col.mph, col.head)),
     })),
@@ -144,10 +221,16 @@ function computeCardData(state) {
 }
 
 // ── Rendered card component ──────────────────────────────────────────────────
-function YardageCardOutput({ data, courseName, cardDate }) {
+interface YardageCardOutputProps {
+  data: CardData | null;
+  courseName: string;
+  cardDate: string;
+}
+
+function YardageCardOutput({ data, courseName, cardDate }: YardageCardOutputProps) {
   if (!data) return null;
   const { active, wedgeRows, tempRows, windRows, pills } = data;
-  const TEMP_COLS = [30, 40, 50, 60, 70, 80, 90, 100];
+  const TEMP_COLS: number[] = [30, 40, 50, 60, 70, 80, 90, 100];
 
   return (
     <div className="syc-card" id="syc-print-preview">
@@ -158,7 +241,7 @@ function YardageCardOutput({ data, courseName, cardDate }) {
           <div className="syc-card-meta">{courseName || 'Course'}{cardDate ? `  ·  ${cardDate}` : ''}</div>
         </div>
         <div className="syc-pills">
-          {pills.map((p, i) => (
+          {pills.map((p: Pill, i: number) => (
             <span key={i} className="syc-pill">{p.text}</span>
           ))}
         </div>
@@ -179,7 +262,7 @@ function YardageCardOutput({ data, courseName, cardDate }) {
                 </tr>
               </thead>
               <tbody>
-                {active.map((c, i) => (
+                {active.map((c: ActiveClub, i: number) => (
                   <tr key={i}>
                     <td className="syc-td syc-td-club">{c.name}</td>
                     <td className="syc-td syc-td-num">{c.std}</td>
@@ -203,10 +286,10 @@ function YardageCardOutput({ data, courseName, cardDate }) {
                 </tr>
               </thead>
               <tbody>
-                {wedgeRows.length > 0 ? wedgeRows.map((row, i) => (
+                {wedgeRows.length > 0 ? wedgeRows.map((row: WedgeRow, i: number) => (
                   <tr key={i}>
                     <td className="syc-td syc-td-yds">{row.yds}</td>
-                    {row.cells.map((cell, j) => (
+                    {row.cells.map((cell: WedgeCell, j: number) => (
                       <td key={j} className={`syc-td syc-td-center${cell.best ? ' syc-td-best' : ''}${cell.empty ? ' syc-td-empty' : ''}`}>
                         {cell.text}
                       </td>
@@ -227,16 +310,16 @@ function YardageCardOutput({ data, courseName, cardDate }) {
             <thead>
               <tr>
                 <th className="syc-th syc-th-left syc-th-bucket">Yds</th>
-                {TEMP_COLS.map((t) => (
+                {TEMP_COLS.map((t: number) => (
                   <th key={t} className={`syc-th${t === 70 ? ' syc-th-anchor' : ' syc-th-temp'}`}>{t}°</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {tempRows.map((row, i) => (
+              {tempRows.map((row: TempRow, i: number) => (
                 <tr key={i}>
                   <td className="syc-td syc-td-bucket">{row.range}</td>
-                  {row.cells.map((cell, j) => (
+                  {row.cells.map((cell: TempCell, j: number) => (
                     <td key={j} className={`syc-td syc-td-center${cell.anchor ? ' syc-td-anchor' : cell.delta > 0 ? ' syc-td-cold' : ' syc-td-warm'}`}>
                       {cell.anchor ? '0' : fmtDelta(cell.delta)}
                     </td>
@@ -265,10 +348,10 @@ function YardageCardOutput({ data, courseName, cardDate }) {
               </tr>
             </thead>
             <tbody>
-              {windRows.map((row, i) => (
+              {windRows.map((row: WindRow, i: number) => (
                 <tr key={i}>
                   <td className="syc-td syc-td-bucket">{row.range}</td>
-                  {row.cells.map((cell, j) => (
+                  {row.cells.map((cell: WindCell, j: number) => (
                     <td key={j} className={`syc-td syc-td-center${cell.head ? ' syc-td-head' : ' syc-td-tail'}`}>
                       {fmtDelta(cell.delta)}
                     </td>
@@ -296,16 +379,16 @@ function YardageCardOutput({ data, courseName, cardDate }) {
 
 // ── Main component ───────────────────────────────────────────────────────────
 export default function StandardYardageCard() {
-  const [clubs,      setClubs]      = useState(DEFAULT_CLUBS);
-  const [wedges,     setWedges]     = useState(defaultWedges);
+  const [clubs,      setClubs]      = useState<Club[]>(DEFAULT_CLUBS);
+  const [wedges,     setWedges]     = useState<WedgeMap>(defaultWedges);
   const [altitude,   setAltitude]   = useState(0);
   const [homeAlt,    setHomeAlt]    = useState(0);
   const [humidity,   setHumidity]   = useState(50);
   const [courseName, setCourseName] = useState('');
   const [cardDate,   setCardDate]   = useState(todayStr);
-  const [cardData,   setCardData]   = useState(null);
+  const [cardData,   setCardData]   = useState<CardData | null>(null);
   const [error,      setError]      = useState('');
-  const previewRef = useRef(null);
+  const previewRef = useRef<HTMLDivElement>(null);
 
   // Hydrate from shared localStorage on mount
   useEffect(() => {
@@ -317,7 +400,7 @@ export default function StandardYardageCard() {
   useEffect(() => { localStorage.setItem(LS_CLUBS,  JSON.stringify(clubs));  }, [clubs]);
   useEffect(() => { localStorage.setItem(LS_WEDGES, JSON.stringify(wedges)); }, [wedges]);
 
-  function handleClubChange(idx, field, value) {
+  function handleClubChange(idx: number, field: string, value: string) {
     setClubs(prev => prev.map((c, i) => {
       if (i !== idx) return c;
       if (field === 'id') {
@@ -328,7 +411,7 @@ export default function StandardYardageCard() {
     }));
   }
 
-  function handleWedgeChange(id, swing, value) {
+  function handleWedgeChange(id: string, swing: keyof WedgeSwings, value: string) {
     setWedges(prev => ({
       ...prev,
       [id]: { ...prev[id], [swing]: parseInt(value, 10) || 0 },
@@ -392,11 +475,11 @@ export default function StandardYardageCard() {
                 <div key={wd.id} className="syc-wedge-block">
                   <div className="syc-wedge-name">{wd.name}</div>
                   <div className="syc-wedge-inputs">
-                    {[
-                      { swing: 'half',  label: '½' },
-                      { swing: 'three', label: '¾' },
-                      { swing: 'full',  label: 'Full' },
-                    ].map(({ swing, label }) => (
+                    {([
+                      { swing: 'half' as keyof WedgeSwings,  label: '½' },
+                      { swing: 'three' as keyof WedgeSwings, label: '¾' },
+                      { swing: 'full' as keyof WedgeSwings,  label: 'Full' },
+                    ] as const).map(({ swing, label }) => (
                       <div key={swing} className="wyc-field">
                         <label className="wyc-label" htmlFor={`w_${wd.id}_${swing}`}>{label}</label>
                         <input

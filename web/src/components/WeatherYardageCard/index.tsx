@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -8,24 +7,26 @@ import StepMyBag, { DEFAULT_CLUBS } from './StepMyBag';
 import StepWedges, { WEDGE_DEFS } from './StepWedges';
 import StepComplete from './StepComplete';
 import YardageCardPrint from './YardageCardPrint';
-import { fetchAllWeatherData } from '@/utils/weatherApi';
+import { fetchAllWeatherData, RoundWeatherData } from '@/utils/weatherApi';
+import { LS_CLUBS, LS_WEDGES, LS_HOME_ZIP } from '@/lib/constants';
 import './WeatherYardageCard.css';
 
-const LS_CLUBS  = 'yc4_clubs';
-const LS_WEDGES = 'yc4_wedges';
-const LS_HOME   = 'yc4_homezip';
-
-function todayStr() {
+function todayStr(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-function defaultWedges() {
+type ClubEntry = { id: string; dist: number };
+type WedgeDistances = { half: number; three: number; full: number };
+type WedgeMap = Record<string, WedgeDistances>;
+type FetchStatus = 'idle' | 'loading' | 'success' | 'error';
+
+function defaultWedges(): WedgeMap {
   return Object.fromEntries(
     WEDGE_DEFS.map((w) => [w.id, { half: w.halfDef, three: w.threeDef, full: w.fullDef }])
   );
 }
 
-function loadFromLS(key, fallback) {
+function loadFromLS<T>(key: string, fallback: T): T {
   if (typeof window === 'undefined') return fallback;
   try {
     const raw = localStorage.getItem(key);
@@ -44,25 +45,25 @@ export default function WeatherYardageCard() {
   const [roundDate, setRoundDate] = useState(todayStr());
   const [teeTime, setTeeTime] = useState('08:00');
   const [courseName, setCourseName] = useState('');
-  const [fetchStatus, setFetchStatus] = useState('idle'); // idle | loading | success | error
-  const [wx, setWx] = useState(null);
+  const [fetchStatus, setFetchStatus] = useState<FetchStatus>('idle');
+  const [wx, setWx] = useState<RoundWeatherData | null>(null);
 
   // Step 2
-  const [clubs, setClubs] = useState(DEFAULT_CLUBS);
+  const [clubs, setClubs] = useState<ClubEntry[]>(DEFAULT_CLUBS);
 
   // Step 3
-  const [wedges, setWedges] = useState(defaultWedges);
+  const [wedges, setWedges] = useState<WedgeMap>(defaultWedges);
 
   // Hydrate from localStorage on mount
   useEffect(() => {
-    setHomeZip(localStorage.getItem(LS_HOME) || '');
+    setHomeZip(localStorage.getItem(LS_HOME_ZIP) || '');
     setClubs(loadFromLS(LS_CLUBS, DEFAULT_CLUBS));
     setWedges(loadFromLS(LS_WEDGES, defaultWedges()));
   }, []);
 
   // Persist to localStorage
   useEffect(() => {
-    if (homeZip) localStorage.setItem(LS_HOME, homeZip);
+    if (homeZip) localStorage.setItem(LS_HOME_ZIP, homeZip);
   }, [homeZip]);
 
   useEffect(() => {
@@ -73,26 +74,26 @@ export default function WeatherYardageCard() {
     localStorage.setItem(LS_WEDGES, JSON.stringify(wedges));
   }, [wedges]);
 
-  async function handleFetch() {
+  async function handleFetch(): Promise<void> {
     setFetchStatus('loading');
     try {
       const data = await fetchAllWeatherData(courseZip, homeZip, roundDate, teeTime);
       setWx(data);
       if (!courseName && data.courseName) setCourseName(data.courseName);
       setFetchStatus('success');
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Weather fetch error:', err);
       setFetchStatus('error');
     }
   }
 
-  function canAdvance() {
+  function canAdvance(): boolean {
     if (step === 1) return fetchStatus === 'success';
     if (step === 2) return clubs.some((c) => c.id !== '' && c.dist > 0);
     return true;
   }
 
-  function nextLabel() {
+  function nextLabel(): string {
     if (step === 1) return 'Next: My Bag';
     if (step === 2) return 'Next: Wedge Distances';
     if (step === 3) return 'Generate Card';

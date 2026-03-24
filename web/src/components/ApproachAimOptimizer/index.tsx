@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
@@ -11,13 +10,34 @@ import {
   computeOptimalAim,
 } from '@/utils/aimOptimizer';
 
+interface AimState {
+  skill: string;
+  dist: number;
+  tiltDeg: number;
+  gw: number;
+  gd: number;
+  pinFront: number;
+  pinEdge: number;
+  pinSide: string;
+  sliderBias: number;
+}
+
+interface OptResult {
+  ax: number;
+  ay: number;
+  gir: number;
+  inside15: number;
+  proximity: number;
+  hazard: number;
+  score: number;
+}
 
 const W = 500;
 const H = 500;
 
-function ryd(v) { return Math.round(v); }
+function ryd(v: number): number { return Math.round(v); }
 
-function getPinYd(state) {
+function getPinYd(state: AimState): { x: number; y: number; normX: number } {
   const pf = Math.min(state.pinFront, state.gd);
   const pe = Math.min(state.pinEdge, state.gw);
   const normX = state.pinSide === 'left' ? pe / state.gw : 1 - pe / state.gw;
@@ -28,21 +48,21 @@ function getPinYd(state) {
   };
 }
 
-function getScale(gw, gd) {
+function getScale(gw: number, gd: number): number {
   const m = 80;
   return Math.min((W - m * 2) / (gw + 20), (H - m * 2) / (gd + 20));
 }
 
-function yd2px(yx, yy, sc) {
+function yd2px(yx: number, yy: number, sc: number): { x: number; y: number } {
   return { x: W / 2 + yx * sc, y: H / 2 - yy * sc };
 }
 
 // ── Canvas drawing ────────────────────────────────────────────
-function drawGreen(canvas, state, hazards, isDark, opt) {
-  const ctx = canvas.getContext('2d');
+function drawGreen(canvas: HTMLCanvasElement, state: AimState, hazards: Set<string>, isDark: boolean, opt: OptResult | null): void {
+  const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
   ctx.clearRect(0, 0, W, H);
 
-  const profile = SKILLS[state.skill];
+  const profile = (SKILLS as Record<string, { latPct: number; depPct: number }>)[state.skill];
   const sc = getScale(state.gw, state.gd);
   const sig1LatPx = state.dist * profile.latPct / 2 * sc;
   const sig1DepPx = state.dist * profile.depPct / 2 * sc;
@@ -217,20 +237,20 @@ function drawGreen(canvas, state, hazards, isDark, opt) {
 
 // ── Component ─────────────────────────────────────────────────
 export default function ApproachAimOptimizer() {
-  const canvasRef = useRef(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const [skill, setSkillState] = useState('elite');
-  const [dist, setDist] = useState(100);
-  const [tiltDeg, setTiltDeg] = useState(20);
-  const [gw, setGw] = useState(30);
-  const [gd, setGd] = useState(25);
-  const [pinFront, setPinFront] = useState(12);
-  const [pinEdge, setPinEdge] = useState(8);
-  const [pinSide, setPinSide] = useState('left');
-  const [sliderBias, setSliderBias] = useState(0);
-  const [hazards, setHazards] = useState(() => new Set(['bunker-front']));
-  const [isDark, setIsDark] = useState(true);
-  const [stats, setStats] = useState(null);
+  const [skill, setSkillState] = useState<string>('elite');
+  const [dist, setDist] = useState<number>(100);
+  const [tiltDeg, setTiltDeg] = useState<number>(20);
+  const [gw, setGw] = useState<number>(30);
+  const [gd, setGd] = useState<number>(25);
+  const [pinFront, setPinFront] = useState<number>(12);
+  const [pinEdge, setPinEdge] = useState<number>(8);
+  const [pinSide, setPinSide] = useState<string>('left');
+  const [sliderBias, setSliderBias] = useState<number>(0);
+  const [hazards, setHazards] = useState<Set<string>>(() => new Set(['bunker-front']));
+  const [isDark, setIsDark] = useState<boolean>(true);
+  const [stats, setStats] = useState<OptResult | null>(null);
 
   // Track theme changes via MutationObserver
   useEffect(() => {
@@ -243,26 +263,26 @@ export default function ApproachAimOptimizer() {
     return () => obs.disconnect();
   }, []);
 
-  const state = { skill, dist, tiltDeg, gw, gd, pinFront, pinEdge, pinSide, sliderBias };
+  const state: AimState = { skill, dist, tiltDeg, gw, gd, pinFront, pinEdge, pinSide, sliderBias };
 
   // Recompute + redraw whenever anything changes
   useEffect(() => {
-    const opt = computeOptimalAim(state, hazards, 1500);
+    const opt = computeOptimalAim(state, hazards, 1500) as OptResult | null;
     setStats(opt);
     const canvas = canvasRef.current;
     if (canvas) drawGreen(canvas, state, hazards, isDark, opt);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [skill, dist, tiltDeg, gw, gd, pinFront, pinEdge, pinSide, sliderBias, hazards, isDark]);
 
-  function toggleHazard(key) {
-    setHazards(prev => {
+  function toggleHazard(key: string): void {
+    setHazards((prev: Set<string>) => {
       const next = new Set(prev);
       if (next.has(key)) next.delete(key); else next.add(key);
       return next;
     });
   }
 
-  const profile = SKILLS[skill];
+  const profile = (SKILLS as Record<string, { latPct: number; depPct: number }>)[skill];
   const bw = bimodalWeight(dist);
 
   // Pin position validation
@@ -270,7 +290,7 @@ export default function ApproachAimOptimizer() {
   const pinEdgeWarn = pinEdge > gw;
 
   // Aim offset label
-  function aimLabel() {
+  function aimLabel(): string {
     if (!stats) return '—';
     const pinYd = getPinYd(state);
     const dx = stats.ax - pinYd.x;
@@ -455,7 +475,7 @@ export default function ApproachAimOptimizer() {
                 </button>
               ))}
             </div>
-            <p className="aao-shape-hint">{SHAPE_LABELS[String(sliderBias)]}</p>
+            <p className="aao-shape-hint">{(SHAPE_LABELS as Record<string, string>)[String(sliderBias)]}</p>
           </div>
         </div>
 

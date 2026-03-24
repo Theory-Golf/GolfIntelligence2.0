@@ -1,11 +1,85 @@
-// @ts-nocheck
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
+import { LS_PUTTING_SESSIONS, LS_PUTTING_PUTTERS } from '@/lib/constants';
 import './RoundSimulation.css';
 
+// ── Types ────────────────────────────────────────────────────────
+interface PuttSetup {
+  distance: number;
+  slope: string;
+  break: string;
+}
+
+interface PuttResult extends PuttSetup {
+  speedCorrect: boolean;
+  lineCorrect: boolean;
+  firstPuttResult: string | null;
+  secondPuttDistance: string | null;
+  secondPuttMade: boolean | null;
+}
+
+interface CurrentResult {
+  speedCorrect: boolean;
+  lineCorrect: boolean;
+  firstPuttResult: string | null;
+  secondPuttDistance: string | null;
+  secondPuttMade: boolean | null;
+}
+
+interface SessionStats {
+  onePutts: number;
+  twoPutts: number;
+  threePutts: number;
+  totalPutts: number;
+  speedCorrect: number;
+  lineCorrect: number;
+  strokesGained: number;
+  bucketStrokesGained: Record<string, { sg: number; count: number }>;
+  scoringSG: number;
+  speedBalance: number;
+  dirBalance: number;
+  speedMisses: { fast: number; slow: number };
+  dirMisses: { left: number; right: number };
+  missCount: number;
+  directionBalance?: number;
+}
+
+interface SavedSession {
+  id: number;
+  date: string;
+  putter: string;
+  ballMarking: string;
+  stats: SessionStats;
+}
+
+interface SessionSetup {
+  putter: string;
+  ballMarking: string;
+}
+
+interface Trends {
+  avgSG: number;
+  avgSpeed: number;
+  avgDir: number;
+  avgScoringSG: number;
+  count: number;
+}
+
+interface TrendResult {
+  symbol: string;
+  cls: string;
+}
+
+interface DistanceBucket {
+  name: string;
+  min: number;
+  max: number;
+  key: string;
+}
+
 // ── PGA Tour expected putts (Mark Broadie research) ─────────────
-const EXPECTED_PUTTS_TABLE = {
+const EXPECTED_PUTTS_TABLE: Record<number, number> = {
   2: 1.01, 3: 1.04, 4: 1.12, 5: 1.23, 6: 1.30, 7: 1.39, 8: 1.46, 9: 1.53,
   10: 1.61, 11: 1.65, 12: 1.69, 13: 1.72, 14: 1.75, 15: 1.78, 16: 1.80, 17: 1.82,
   18: 1.84, 19: 1.86, 20: 1.87, 21: 1.89, 22: 1.90, 23: 1.91, 24: 1.92, 25: 1.93,
@@ -16,7 +90,7 @@ const EXPECTED_PUTTS_TABLE = {
   57: 2.24, 58: 2.25, 59: 2.26, 60: 2.27,
 };
 
-function getExpectedPutts(feet) {
+function getExpectedPutts(feet: number): number {
   if (feet <= 2) return 1.01;
   if (feet >= 60) return 2.27;
   return EXPECTED_PUTTS_TABLE[feet] || (1.01 + (feet - 2) * 0.022);
@@ -43,7 +117,7 @@ const DIST_DISPLAY = [
   { label: '40+ ft',   count: 1 },
 ];
 
-const DISTANCE_BUCKETS = [
+const DISTANCE_BUCKETS: DistanceBucket[] = [
   { name: 'Short (< 5 ft)',    min: 0,  max: 5,   key: 'short' },
   { name: 'Scoring (5–10 ft)', min: 5,  max: 10,  key: 'scoring' },
   { name: 'Mid (10–20 ft)',    min: 10, max: 20,  key: 'mid' },
@@ -69,8 +143,8 @@ const FIRST_PUTT_RESULTS = [
 const SECOND_PUTT_DISTANCES = ['Tap In', '3 ft', '4 ft', '5 ft', '6 ft', '7 ft', '8 ft', '> 9 ft'];
 
 // ── Session generator ────────────────────────────────────────────
-function generateSession() {
-  const putts = [];
+function generateSession(): PuttSetup[] {
+  const putts: PuttSetup[] = [];
   PUTT_DISTRIBUTION.forEach(({ minFeet, maxFeet, count }) => {
     for (let i = 0; i < count; i++) {
       const distance = Math.floor(Math.random() * (maxFeet - minFeet + 1)) + minFeet;
@@ -90,7 +164,7 @@ function generateSession() {
 }
 
 // ── Ball marking SVG icons ───────────────────────────────────────
-function BallMarkingIcon({ type, size = 32 }) {
+function BallMarkingIcon({ type, size = 32 }: { type: string; size?: number }) {
   const stroke = 'currentColor';
   const sw = '1.5';
   if (type === 'line') return (
@@ -124,7 +198,7 @@ function BallMarkingIcon({ type, size = 32 }) {
 }
 
 // ── SG Trend Chart (SVG sparkline) ───────────────────────────────
-function SGTrendChart({ sessions, height = 100 }) {
+function SGTrendChart({ sessions, height = 100 }: { sessions: SavedSession[]; height?: number }) {
   const data = [...sessions].reverse().slice(-10); // oldest first, max 10
   if (data.length < 2) return null;
 
@@ -139,8 +213,8 @@ function SGTrendChart({ sessions, height = 100 }) {
   const innerW = W - PAD.left - PAD.right;
   const innerH = H - PAD.top - PAD.bottom;
 
-  const xScale = (i) => PAD.left + (i / (data.length - 1)) * innerW;
-  const yScale = (v) => PAD.top + ((maxSG - v) / range) * innerH;
+  const xScale = (i: number): number => PAD.left + (i / (data.length - 1)) * innerW;
+  const yScale = (v: number): number => PAD.top + ((maxSG - v) / range) * innerH;
   const zeroY = yScale(0);
 
   const points = sgValues.map((v, i) => `${xScale(i)},${yScale(v)}`).join(' ');
@@ -218,41 +292,41 @@ function SGTrendChart({ sessions, height = 100 }) {
 
 // ── Main component ───────────────────────────────────────────────
 export default function RoundSimulation() {
-  const [screen, setScreen] = useState('welcome');
-  const [session, setSession] = useState([]);
-  const [currentHole, setCurrentHole] = useState(0);
-  const [results, setResults] = useState([]);
-  const [currentResult, setCurrentResult] = useState({
+  const [screen, setScreen] = useState<string>('welcome');
+  const [session, setSession] = useState<PuttSetup[]>([]);
+  const [currentHole, setCurrentHole] = useState<number>(0);
+  const [results, setResults] = useState<PuttResult[]>([]);
+  const [currentResult, setCurrentResult] = useState<CurrentResult>({
     speedCorrect: true,
     lineCorrect: true,
     firstPuttResult: null,
     secondPuttDistance: null,
     secondPuttMade: null,
   });
-  const [pastSessions, setPastSessions] = useState([]);
-  const [summaryTab, setSummaryTab] = useState('overview');
-  const [sessionSetup, setSessionSetup] = useState({ putter: '', ballMarking: 'none' });
-  const [savedPutters, setSavedPutters] = useState([]);
+  const [pastSessions, setPastSessions] = useState<SavedSession[]>([]);
+  const [summaryTab, setSummaryTab] = useState<string>('overview');
+  const [sessionSetup, setSessionSetup] = useState<SessionSetup>({ putter: '', ballMarking: 'none' });
+  const [savedPutters, setSavedPutters] = useState<string[]>([]);
 
   // Load persisted data
   useEffect(() => {
     try {
-      const sessions = localStorage.getItem('putting-sessions');
+      const sessions = localStorage.getItem(LS_PUTTING_SESSIONS);
       if (sessions) setPastSessions(JSON.parse(sessions));
-      const putters = localStorage.getItem('putting-putters');
+      const putters = localStorage.getItem(LS_PUTTING_PUTTERS);
       if (putters) setSavedPutters(JSON.parse(putters));
     } catch (_) {}
   }, []);
 
-  function savePutter(name) {
+  function savePutter(name: string): void {
     if (name && !savedPutters.includes(name)) {
       const updated = [...savedPutters, name].slice(0, 10);
       setSavedPutters(updated);
-      try { localStorage.setItem('putting-putters', JSON.stringify(updated)); } catch (_) {}
+      try { localStorage.setItem(LS_PUTTING_PUTTERS, JSON.stringify(updated)); } catch (_) {}
     }
   }
 
-  function saveSession(sessionStats) {
+  function saveSession(sessionStats: SessionStats): void {
     const newSession = {
       id: Date.now(),
       date: new Date().toISOString(),
@@ -262,7 +336,7 @@ export default function RoundSimulation() {
     };
     const updated = [newSession, ...pastSessions].slice(0, 50);
     setPastSessions(updated);
-    try { localStorage.setItem('putting-sessions', JSON.stringify(updated)); } catch (_) {}
+    try { localStorage.setItem(LS_PUTTING_SESSIONS, JSON.stringify(updated)); } catch (_) {}
   }
 
   function startSession() {
@@ -300,7 +374,7 @@ export default function RoundSimulation() {
     }
   }
 
-  function handleFirstPutt(result) {
+  function handleFirstPutt(result: string): void {
     setCurrentResult((prev) => ({ ...prev, firstPuttResult: result }));
     if (result === 'Made') {
       const finalResult = { ...currentResult, firstPuttResult: result, secondPuttDistance: null, secondPuttMade: true };
@@ -316,7 +390,7 @@ export default function RoundSimulation() {
     }
   }
 
-  function handleSecondPutt(made) {
+  function handleSecondPutt(made: boolean): void {
     const finalResult = { ...currentResult, secondPuttMade: made };
     const newResults = [...results, { ...session[currentHole], ...finalResult }];
     setResults(newResults);
@@ -343,7 +417,7 @@ export default function RoundSimulation() {
 
     let totalExpected = 0;
     let totalActual = 0;
-    const bucketSG = { short: { e: 0, a: 0 }, scoring: { e: 0, a: 0 }, mid: { e: 0, a: 0 }, lag: { e: 0, a: 0 } };
+    const bucketSG: Record<string, { e: number; a: number }> = { short: { e: 0, a: 0 }, scoring: { e: 0, a: 0 }, mid: { e: 0, a: 0 }, lag: { e: 0, a: 0 } };
 
     results.forEach((r) => {
       const expected = getExpectedPutts(r.distance);
@@ -359,9 +433,9 @@ export default function RoundSimulation() {
 
     const strokesGained = totalExpected - totalActual;
 
-    const bucketStrokesGained = {};
-    DISTANCE_BUCKETS.forEach(({ key, min, max }) => {
-      const count = results.filter((r) => r.distance >= min && r.distance < max).length;
+    const bucketStrokesGained: Record<string, { sg: number; count: number }> = {};
+    DISTANCE_BUCKETS.forEach(({ key, min, max }: DistanceBucket) => {
+      const count = results.filter((r: PuttResult) => r.distance >= min && r.distance < max).length;
       bucketStrokesGained[key] = { sg: bucketSG[key].e - bucketSG[key].a, count };
     });
 
@@ -369,8 +443,8 @@ export default function RoundSimulation() {
     const speedMisses = { fast: 0, slow: 0 };
     const dirMisses = { left: 0, right: 0 };
 
-    misses.forEach((m) => {
-      const r = m.firstPuttResult.toLowerCase();
+    misses.forEach((m: PuttResult) => {
+      const r = (m.firstPuttResult ?? '').toLowerCase();
       if (r.includes('fast')) speedMisses.fast++;
       if (r.includes('slow')) speedMisses.slow++;
       if (r.includes('left')) dirMisses.left++;
@@ -402,7 +476,7 @@ export default function RoundSimulation() {
   const trends = useMemo(() => {
     if (pastSessions.length < 2) return null;
     const recent = pastSessions.slice(0, 5);
-    const avg = (fn) => recent.reduce((s, sess) => s + (fn(sess) || 0), 0) / recent.length;
+    const avg = (fn: (sess: SavedSession) => number): number => recent.reduce((s: number, sess: SavedSession) => s + (fn(sess) || 0), 0) / recent.length;
     return {
       avgSG: avg((s) => s.stats?.strokesGained),
       avgSpeed: avg((s) => s.stats?.speedBalance ?? 50),
@@ -412,7 +486,7 @@ export default function RoundSimulation() {
     };
   }, [pastSessions]);
 
-  function getTrend(current, average, type) {
+  function getTrend(current: number, average: number, type: string): TrendResult {
     if (type === 'balance') {
       const diff = Math.abs(average - 50) - Math.abs(current - 50);
       if (Math.abs(diff) < 3) return { symbol: '—', cls: '' };
@@ -423,7 +497,7 @@ export default function RoundSimulation() {
     return diff > 0 ? { symbol: '↑', cls: 'rs-sg-positive' } : { symbol: '↓', cls: 'rs-sg-negative' };
   }
 
-  function getBallMarkingLabel(id) {
+  function getBallMarkingLabel(id: string): string {
     return BALL_MARKING_OPTIONS.find((o) => o.id === id)?.label ?? 'None';
   }
 
@@ -441,7 +515,7 @@ export default function RoundSimulation() {
     );
   }
 
-  function BalanceIndicator({ value, leftLabel, rightLabel }) {
+  function BalanceIndicator({ value, leftLabel, rightLabel }: { value: number; leftLabel: string; rightLabel: string }) {
     const deviation = Math.abs(value - 50);
     const isGood = deviation <= 15;
     const isFair = deviation <= 30;
@@ -492,14 +566,14 @@ export default function RoundSimulation() {
               </div>
               <div className="rs-trend-row">
                 <span className="rs-trend-label">Avg Strokes Gained</span>
-                <span className={trends?.avgSG >= 0 ? 'rs-sg-positive' : 'rs-sg-negative'}>
-                  {trends?.avgSG >= 0 ? '+' : ''}{trends?.avgSG.toFixed(2)}
+                <span className={(trends?.avgSG ?? 0) >= 0 ? 'rs-sg-positive' : 'rs-sg-negative'}>
+                  {(trends?.avgSG ?? 0) >= 0 ? '+' : ''}{(trends?.avgSG ?? 0).toFixed(2)}
                 </span>
               </div>
               <div className="rs-trend-row">
                 <span className="rs-trend-label">Avg SG (5–10 ft)</span>
-                <span className={trends?.avgScoringSG >= 0 ? 'rs-sg-positive' : 'rs-sg-negative'}>
-                  {trends?.avgScoringSG >= 0 ? '+' : ''}{trends?.avgScoringSG.toFixed(2)}
+                <span className={(trends?.avgScoringSG ?? 0) >= 0 ? 'rs-sg-positive' : 'rs-sg-negative'}>
+                  {(trends?.avgScoringSG ?? 0) >= 0 ? '+' : ''}{(trends?.avgScoringSG ?? 0).toFixed(2)}
                 </span>
               </div>
               <div className="rs-trend-row">
@@ -706,22 +780,22 @@ export default function RoundSimulation() {
         <div className="rs-card">
           <div className="rs-card-title">Read Assessment</div>
           <div className="rs-toggle-section">
-            {[
-              { key: 'speedCorrect', label: 'Speed Read' },
-              { key: 'lineCorrect',  label: 'Line Read' },
-            ].map(({ key, label }) => (
+            {([
+              { key: 'speedCorrect' as const, label: 'Speed Read' },
+              { key: 'lineCorrect' as const,  label: 'Line Read' },
+            ] as const).map(({ key, label }) => (
               <div key={key} className="rs-toggle-row">
                 <span className="rs-toggle-label">{label}</span>
                 <div className="rs-toggle-group">
                   <button
                     className={`rs-toggle-btn${currentResult[key] === true ? ' is-correct' : ''}`}
-                    onClick={() => setCurrentResult((p) => ({ ...p, [key]: true }))}
+                    onClick={() => setCurrentResult((p: CurrentResult) => ({ ...p, [key]: true }))}
                   >
                     Correct
                   </button>
                   <button
                     className={`rs-toggle-btn${currentResult[key] === false ? ' is-incorrect' : ''}`}
-                    onClick={() => setCurrentResult((p) => ({ ...p, [key]: false }))}
+                    onClick={() => setCurrentResult((p: CurrentResult) => ({ ...p, [key]: false }))}
                   >
                     Incorrect
                   </button>
@@ -857,7 +931,7 @@ export default function RoundSimulation() {
                 { v: stats?.totalPutts, l: 'Total', cls: '' },
                 { v: stats?.onePutts,   l: '1-Putts', cls: 'rs-sg-positive' },
                 { v: stats?.twoPutts,   l: '2-Putts', cls: '' },
-                { v: stats?.threePutts, l: '3-Putts', cls: stats?.threePutts > 0 ? 'rs-sg-negative' : '' },
+                { v: stats?.threePutts, l: '3-Putts', cls: (stats?.threePutts ?? 0) > 0 ? 'rs-sg-negative' : '' },
               ].map(({ v, l, cls }) => (
                 <div key={l} className="rs-stat-cell">
                   <span className={`rs-stat-value ${cls}`}>{v}</span>
@@ -893,8 +967,8 @@ export default function RoundSimulation() {
               <div className="rs-card-title">Read Accuracy</div>
               <div className="rs-accuracy-grid">
                 {[
-                  { pct: (stats?.speedCorrect / 18) * 100, label: 'Speed' },
-                  { pct: (stats?.lineCorrect  / 18) * 100, label: 'Line' },
+                  { pct: ((stats?.speedCorrect ?? 0) / 18) * 100, label: 'Speed' },
+                  { pct: ((stats?.lineCorrect ?? 0)  / 18) * 100, label: 'Line' },
                 ].map(({ pct, label }) => (
                   <div key={label} className="rs-accuracy-item">
                     <div className="rs-accuracy-label">{label}</div>
@@ -911,7 +985,7 @@ export default function RoundSimulation() {
 
         {summaryTab === 'tendencies' && (
           <>
-            {stats?.missCount > 0 ? (
+            {stats != null && stats.missCount > 0 ? (
               <>
                 <div className="rs-card">
                   <div className="rs-card-title">Speed Control</div>

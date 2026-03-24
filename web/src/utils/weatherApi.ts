@@ -5,12 +5,31 @@
  * Both APIs are free with no API key required.
  */
 
+export interface GeoLocation {
+  lat: number;
+  lng: number;
+  name: string;
+}
+
+export interface WeatherData {
+  tempF: number;
+  humidity: number;
+  windMph: number;
+  windDeg: number;
+}
+
+export interface RoundWeatherData extends WeatherData {
+  windDirText: string;
+  altFt: number;
+  homeAltFt: number;
+  windColMph: number;
+  courseName: string;
+}
+
 /**
  * Convert wind direction in degrees to compass abbreviation.
- * @param {number} deg - 0–360°
- * @returns {string} e.g. 'N', 'NE', 'ESE'
  */
-export function degToCompass(deg) {
+export function degToCompass(deg: number): string {
   const dirs = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
   const idx = Math.round(deg / 22.5) % 16;
   return dirs[idx];
@@ -18,10 +37,8 @@ export function degToCompass(deg) {
 
 /**
  * Geocode a US ZIP code to latitude/longitude using Nominatim.
- * @param {string} zip - 5-digit US ZIP code
- * @returns {Promise<{lat: number, lng: number, name: string}>}
  */
-export async function zipToLatLng(zip) {
+export async function zipToLatLng(zip: string): Promise<GeoLocation> {
   const url = `https://nominatim.openstreetmap.org/search?postalcode=${zip}&country=US&format=json&limit=1`;
   const res = await fetch(url, {
     headers: { 'Accept-Language': 'en', 'User-Agent': 'theory.golf/1.0' },
@@ -38,11 +55,8 @@ export async function zipToLatLng(zip) {
 
 /**
  * Get elevation in feet at a lat/lng using Open-Meteo.
- * @param {number} lat
- * @param {number} lng
- * @returns {Promise<number>} Elevation in feet
  */
-export async function getElevation(lat, lng) {
+export async function getElevation(lat: number, lng: number): Promise<number> {
   const url = `https://api.open-meteo.com/v1/elevation?latitude=${lat}&longitude=${lng}`;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Elevation fetch failed (${res.status})`);
@@ -53,13 +67,8 @@ export async function getElevation(lat, lng) {
 
 /**
  * Get hourly weather forecast from Open-Meteo at a specific date/hour.
- * @param {number} lat
- * @param {number} lng
- * @param {string} date - 'YYYY-MM-DD'
- * @param {number} hour - 0–23
- * @returns {Promise<{tempF: number, humidity: number, windMph: number, windDeg: number}>}
  */
-export async function getWeatherAtTime(lat, lng, date, hour) {
+export async function getWeatherAtTime(lat: number, lng: number, date: string, hour: number): Promise<WeatherData> {
   const url =
     `https://api.open-meteo.com/v1/forecast` +
     `?latitude=${lat}&longitude=${lng}` +
@@ -86,17 +95,13 @@ export async function getWeatherAtTime(lat, lng, date, hour) {
 
 /**
  * Orchestrate all weather data fetches for a round.
- * @param {string} courseZip
- * @param {string} homeZip - optional; defaults to courseZip if empty
- * @param {string} date - 'YYYY-MM-DD'
- * @param {string} teeTime - 'HH:MM'
- * @returns {Promise<{
- *   tempF: number, humidity: number, windMph: number, windDeg: number,
- *   windDirText: string, altFt: number, homeAltFt: number, windColMph: number,
- *   courseName: string
- * }>}
  */
-export async function fetchAllWeatherData(courseZip, homeZip, date, teeTime) {
+export async function fetchAllWeatherData(
+  courseZip: string,
+  homeZip: string,
+  date: string,
+  teeTime: string,
+): Promise<RoundWeatherData> {
   const hour = parseInt(teeTime.split(':')[0], 10);
 
   // Course location

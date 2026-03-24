@@ -1,16 +1,16 @@
-// @ts-nocheck
 'use client';
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { ACTIVITIES, CATEGORIES, TYPES } from '@/data/practiceActivities';
+import type { Activity } from '@/data/practiceActivities';
 import './PracticeLibrary.css';
 
 /**
  * Map activity IDs to their interactive tool routes.
  * As each activity page is built, add its route here.
  */
-const ACTIVITY_ROUTES = {
+const ACTIVITY_ROUTES: Record<string, string> = {
   'round-simulation': '/player-path/round-simulation',
   'wedge-standard': '/player-path/wedge-standard',
 };
@@ -26,10 +26,10 @@ const ALL_DRIVER_IDS = ['M1', 'M2', 'L1', 'L2', 'L3', 'A1', 'A2', 'A3', 'A4'];
 export default function PracticeLibrary() {
   const [activeCategory, setActiveCategory] = useState('all');
   const [activeType, setActiveType] = useState('all');
-  const [flaggedDrivers, setFlaggedDrivers] = useState([]);
+  const [flaggedDrivers, setFlaggedDrivers] = useState<string[]>([]);
 
   // Toggle a driver chip on/off
-  function toggleDriver(id) {
+  function toggleDriver(id: string) {
     setFlaggedDrivers((prev) =>
       prev.includes(id) ? prev.filter((d) => d !== id) : [...prev, id]
     );
@@ -175,7 +175,13 @@ export default function PracticeLibrary() {
 
 // ── Activity Card ──────────────────────────────────────────────────
 
-function ActivityCard({ activity, flaggedDrivers, variant }) {
+interface ActivityCardProps {
+  activity: Activity;
+  flaggedDrivers: string[];
+  variant: 'relevant' | 'dimmed' | 'normal';
+}
+
+function ActivityCard({ activity, flaggedDrivers, variant }: ActivityCardProps) {
   const flaggedSet = new Set(flaggedDrivers);
   const isRelevant = variant === 'relevant';
   const isDimmed = variant === 'dimmed';

@@ -1,19 +1,33 @@
 /**
  * Theory Golf — Practice Activity Library
  * Single source of truth for all PlayerPath practice activities.
- *
- * Data model:
- *   id               — unique slug
- *   name             — display name
- *   category         — 'putting' | 'wedge' | 'approach' | 'short_game' | 'driving'
- *   type             — 'skill_assessment' | 'skill_development'
- *   description      — prose description of the activity
- *   connected_drivers — array of { driver_id, connection }
- *     driver_id  — Performance Driver code (e.g. 'M1', 'L2')
- *     connection — how this activity addresses that specific driver
  */
 
-export const CATEGORIES = [
+export interface ConnectedDriver {
+  driver_id: string;
+  connection: string;
+}
+
+export interface Activity {
+  id: string;
+  name: string;
+  category: 'putting' | 'wedge' | 'approach' | 'short_game' | 'driving';
+  type: 'skill_assessment' | 'skill_development';
+  description: string;
+  connected_drivers: ConnectedDriver[];
+}
+
+export interface CategoryOption {
+  id: string;
+  label: string;
+}
+
+export interface TypeOption {
+  id: string;
+  label: string;
+}
+
+export const CATEGORIES: CategoryOption[] = [
   { id: 'all',        label: 'All' },
   { id: 'putting',    label: 'Putting' },
   { id: 'wedge',      label: 'Wedge' },
@@ -22,13 +36,13 @@ export const CATEGORIES = [
   { id: 'driving',    label: 'Driving' },
 ];
 
-export const TYPES = [
+export const TYPES: TypeOption[] = [
   { id: 'all',               label: 'All' },
   { id: 'skill_assessment',  label: 'Assessment' },
   { id: 'skill_development', label: 'Development' },
 ];
 
-export const ACTIVITIES = [
+export const ACTIVITIES: Activity[] = [
   // ── PUTTING ──────────────────────────────────────────────────────────
 
   {
@@ -359,11 +373,10 @@ export const ACTIVITIES = [
 ];
 
 /**
- * getActivitiesForDrivers(flaggedDriverIds: string[]) → Activity[]
  * Returns activities that connect to at least one of the provided driver IDs.
  * Used by the intelligence layer to surface relevant practice for a player's flagged drivers.
  */
-export function getActivitiesForDrivers(flaggedDriverIds) {
+export function getActivitiesForDrivers(flaggedDriverIds: string[]): Activity[] {
   if (!flaggedDriverIds || flaggedDriverIds.length === 0) return [];
   const ids = new Set(flaggedDriverIds);
   return ACTIVITIES.filter((activity) =>
