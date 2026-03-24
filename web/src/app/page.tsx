@@ -10,8 +10,8 @@ const TIGER_5 = [
   { num: '01', label: 'Par-5 Bogeys', icon: TrendingDown },
   { num: '02', label: 'Doubles & Worse', icon: AlertTriangle },
   { num: '03', label: 'Three-Putts', icon: Target },
-  { num: '04', label: 'Bogeys from 9-Iron or Less', icon: Crosshair },
-  { num: '05', label: 'Penalty Strokes', icon: AlertTriangle },
+  { num: '04', label: 'Bogeys from 125 Yards or Less', icon: Crosshair },
+  { num: '05', label: 'Missed Easy Up & Downs', icon: Crosshair },
 ];
 
 export default function HomePage() {
@@ -60,8 +60,8 @@ export default function HomePage() {
           </div>
           <p className="font-body text-[15px] text-muted-foreground leading-relaxed">
             Most programs have more data than they know what to do with.
-            They don&apos;t have a system that turns that data into a decision
-            every Monday morning. Theory Golf changes that — three
+            They don&apos;t have a system that turns that data into a clear
+            decision after every round. Theory Golf changes that — three
             interlocking tools that move from diagnosis to action.
           </p>
         </div>
@@ -84,7 +84,7 @@ export default function HomePage() {
               </h2>
               <p className="font-body text-sm text-muted-foreground leading-relaxed mb-3">
                 Five failure categories — Par-5 Bogeys, Doubles & Worse,
-                Three-Putts, Bogeys from 9-iron or less, Penalty Strokes —
+                Three-Putts, Bogeys from 125 yards or less, Missed Easy Up &amp; Downs —
                 account for the majority of scoring damage in any round.
                 Tiger 5 is your landing view every time.
               </p>
