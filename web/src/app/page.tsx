@@ -20,22 +20,22 @@ export default function HomePage() {
       {/* ── HERO ─────────────────────────────────────────────── */}
       <section className="px-6 pt-24 pb-20 md:pt-32 md:pb-28">
         <div className="max-w-5xl mx-auto">
-          <p className="eyebrow mb-5">theory.golf</p>
+          <p className="eyebrow mb-5"><span className="text-foreground">theory</span>.golf</p>
           <h1 className="font-display font-extrabold text-[clamp(48px,8vw,96px)] leading-[0.9] tracking-tight uppercase text-foreground">
-            Not More Data.<br />
-            <span className="text-primary">Better Answers.</span>
+            Intelligence Layer of<br />
+            <span className="text-primary">Competitive Golf</span>
           </h1>
           <p className="font-body text-base text-muted-foreground mt-6 max-w-lg leading-relaxed">
             A golf intelligence platform built for college programs. Know why
-            scores happened, which players to develop first, and exactly what
-            to work on.
+            scores happened, identify exactly what to work on, and monitor
+            practice progress as it translates to lower scores.
           </p>
           <div className="flex gap-3 mt-8">
             <Link
               href="/golf-intelligence"
               className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-display font-bold text-xs tracking-[0.15em] uppercase px-6 py-3 h-11 hover:bg-scarlet-dim transition-colors no-underline"
             >
-              View Dashboard <ArrowRight className="size-3.5" />
+              View Golf Intelligence <ArrowRight className="size-3.5" />
             </Link>
             <Link
               href="/contact"
