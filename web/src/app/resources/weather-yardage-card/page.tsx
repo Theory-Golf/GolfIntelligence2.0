@@ -3,9 +3,9 @@ import { ArrowLeft } from 'lucide-react';
 import WeatherYardageCard from '@/components/WeatherYardageCard';
 
 export const metadata = {
-  title: 'Weather Yardage Card — Resources',
+  title: 'Round Specific Yardage Card — Resources',
   description:
-    'Generate a printable yardage card with club distances adjusted for temperature, altitude, humidity, and wind.',
+    'Generate a printable yardage card with club distances adjusted for your round\'s temperature, altitude, humidity, and wind forecast.',
 };
 
 export default function WeatherYardageCardPage() {
@@ -18,10 +18,10 @@ export default function WeatherYardageCardPage() {
           </Link>
           <p className="eyebrow mb-4">Tool</p>
           <h1 className="font-display font-extrabold text-[clamp(32px,6vw,64px)] leading-[0.9] tracking-tight uppercase text-foreground">
-            Weather <span className="text-primary">Yardage</span> Card
+            Round Specific <span className="text-primary">Yardage</span> Card
           </h1>
           <p className="font-body text-base text-muted-foreground mt-5 max-w-lg leading-relaxed">
-            Enter your round details to generate a weather-adjusted yardage card.
+            Enter your round details to generate a yardage card adjusted for today&apos;s conditions.
             Fetches live forecast data for your course and calculates how temperature,
             altitude, humidity, and wind affect each club in your bag.
           </p>

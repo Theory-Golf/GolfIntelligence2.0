@@ -1,61 +1,8 @@
 /* =============================================================
-   WeatherYardageCard — Print Styles
-   The wizard UI uses tokens.css variables (dark theme by default).
-   The printable card always renders on white paper.
+   WeatherYardageCard — Card Print Styles
+   Matches the Standard Yardage Card forest/gold/parchment theme.
+   Wizard UI uses tokens from tools.css (.wyc-*).
    ============================================================= */
-
-/* ── PRINT: Show card only, hide wizard ────────────────────── */
-@media print {
-  /*
-   * Visibility trick: hide the entire page body, then make only
-   * the print preview visible. Child visibility:visible overrides
-   * parent visibility:hidden — no !important wars needed.
-   */
-  body {
-    visibility: hidden;
-  }
-
-  #wyc-print-preview {
-    visibility: visible;
-    position: fixed;
-    top: 0;
-    left: 0;
-  }
-
-  .yc-card {
-    visibility: visible;
-  }
-
-  /* Force light theme for print card regardless of site theme */
-  .yc-print-page {
-    background: white !important;
-    display: flex !important;
-    flex-direction: row !important;
-    gap: 0.25in !important;
-    padding: 0.25in !important;
-    page-break-inside: avoid;
-  }
-
-  .yc-card {
-    background: #FFFEF8 !important;
-    border: 1px solid #333 !important;
-    color: #1A1A1A !important;
-    width: 4in !important;
-    min-height: 6.5in !important;
-    font-size: 7.5pt !important;
-  }
-
-  /* Preserve cell background colors on print */
-  * {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-
-  @page {
-    size: letter landscape;
-    margin: 0.25in;
-  }
-}
 
 /* ── SCREEN: Preview label (hidden during print) ───────────── */
 .wyc-preview-label {
@@ -85,8 +32,8 @@
 .yc-card {
   width: 320px;
   min-width: 300px;
-  background: #FFFEF8;
-  border: 1px solid #2A2A2A;
+  background: #FAFAF4;
+  border: 1px solid #C0B898;
   color: #1A1A1A;
   font-family: 'Barlow', sans-serif;
   font-size: 9px;
@@ -94,14 +41,18 @@
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 }
 
 /* ── CARD HEADER ────────────────────────────────────────────── */
 .yc-header {
-  background: #1A2E1F;
+  background: #1E3A2A;
   color: #F7F3E9;
   padding: 8px 10px;
   border-bottom: 2px solid #B8952A;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 }
 
 .yc-header-top {
@@ -114,16 +65,20 @@
 .yc-title {
   font-family: 'Barlow Condensed', sans-serif;
   font-weight: 800;
-  font-size: 13px;
+  font-size: 12px;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
   color: #F7F3E9;
+}
+
+.yc-title-accent {
+  color: #D4AF50;
 }
 
 .yc-course {
   font-family: 'DM Mono', monospace;
   font-size: 8px;
-  color: #B8952A;
+  color: #D4AF50;
   text-align: right;
 }
 
@@ -133,7 +88,7 @@
   font-family: 'DM Mono', monospace;
   font-size: 8px;
   color: #A8C8B0;
-  margin-bottom: 6px;
+  margin-bottom: 5px;
 }
 
 .yc-pills {
@@ -147,13 +102,13 @@
   font-size: 7px;
   padding: 2px 6px;
   background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.15);
-  color: #D0E8D8;
+  border: 1px solid rgba(184,149,42,0.3);
+  color: #F5EAB8;
   letter-spacing: 0.05em;
 }
 
 .yc-pill-hi {
-  background: rgba(184, 149, 42, 0.2);
+  background: rgba(184, 149, 42, 0.25);
   border-color: #B8952A;
   color: #D4AF50;
 }
@@ -163,30 +118,42 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0;
-  border-bottom: 1px solid #D0C8B8;
+  border-bottom: 2px solid #C0B898;
   flex: 1;
 }
 
 .yc-section {
-  padding: 6px 7px;
+  padding: 0;
 }
 
 .yc-section:first-child {
-  border-right: 1px solid #D0C8B8;
+  border-right: 2px solid #C0B898;
+  background: #F4F0E4;
 }
 
+/* ── SECTION HEADS ──────────────────────────────────────────── */
 .yc-section-head {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-weight: 700;
+  background: #1E3A2A;
+  padding: 4px 8px;
+  font-family: 'DM Mono', monospace;
   font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  letter-spacing: 0.2em;
-  color: #3D2A00;
-  background: #F0E8C8;
-  padding: 2px 4px;
-  margin-bottom: 4px;
-  margin-left: -7px;
-  margin-right: -7px;
+  color: #D4AF50;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.yc-section-head-amber {
+  background: linear-gradient(90deg, #3D2A00, #5A3E00);
+}
+
+.yc-section-note {
+  font-weight: 400;
+  opacity: 0.7;
+  font-size: 7px;
+  letter-spacing: 0.04em;
 }
 
 /* ── SHARED TABLE STYLES ────────────────────────────────────── */
@@ -199,46 +166,58 @@
 .yc-table th {
   font-family: 'DM Mono', monospace;
   font-size: 7px;
-  font-weight: normal;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: #6B5A3E;
-  border-bottom: 1px solid #D0C8B8;
-  padding: 2px 3px;
-  text-align: right;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.7);
+  background: #1E3A2A;
+  border-bottom: none;
+  padding: 3px 4px;
+  text-align: center;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 }
 
-.yc-table th:first-child {
-  text-align: left;
-}
+.yc-th-left   { text-align: left !important; padding-left: 8px !important; color: #D4AF50 !important; }
+.yc-th-accent { color: #D4AF50 !important; }
+.yc-th-amber  { background: #3D2A00 !important; color: rgba(255,220,140,0.85) !important; }
 
 .yc-table td {
-  padding: 1.5px 3px;
-  border-bottom: 1px solid #EDE8DC;
+  padding: 2px 4px;
+  border-bottom: 1px solid rgba(192,184,152,0.3);
   vertical-align: middle;
 }
 
 .yc-club-name {
   font-family: 'Barlow', sans-serif;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 8px;
-  color: #1A2E1F;
+  color: #1E3A2A;
+  padding-left: 6px !important;
 }
 
 .yc-num {
   font-family: 'DM Mono', monospace;
   font-size: 7.5px;
   text-align: right;
-  color: #3A3A3A;
+  color: #1A2E1F;
+  font-weight: 600;
+  padding-right: 6px !important;
 }
 
 .yc-adj {
-  font-weight: bold;
-  color: #1A2E1F;
+  color: #2D5A3F;
+  font-weight: 700;
 }
 
 .yc-dsp {
   color: #7A5500;
+}
+
+.yc-yds-cell {
+  text-align: left !important;
+  padding-left: 6px !important;
+  color: #1E3A2A;
 }
 
 /* ── WEDGE TABLE ────────────────────────────────────────────── */
@@ -249,14 +228,19 @@
   color: #5A4A30;
 }
 
-.yc-wedge-full td {
-  background: #F5EAB8;
+.yc-wedge-full-cell {
+  font-weight: 700;
+  color: #3D2A00;
+  background: rgba(184,149,42,0.2) !important;
 }
 
-/* ── WIND TABLE ─────────────────────────────────────────────── */
+.yc-wedge-full td {
+  background: rgba(240,232,200,0.4);
+}
+
+/* ── WIND SECTION ───────────────────────────────────────────── */
 .yc-wind-section {
-  padding: 6px 7px;
-  border-bottom: 1px solid #D0C8B8;
+  background: #FAFAF4;
 }
 
 .yc-wind-table {
@@ -269,7 +253,7 @@
 .yc-wind-table td {
   padding: 2px 3px;
   text-align: center;
-  border: 1px solid #D0C8B8;
+  border: 1px solid #C0B898;
 }
 
 .yc-wind-group-row th {
@@ -277,71 +261,93 @@
   font-size: 7px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   padding: 2px;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 }
 
 .yc-wind-head-red {
-  background: #5A1A1A;
-  color: #F5C8C8;
+  background: #5A1A1A !important;
+  color: #F5C8C8 !important;
 }
 
 .yc-wind-head-blue {
-  background: #1A3A5A;
-  color: #C8D8F5;
+  background: #1A3A5A !important;
+  color: #C8D8F5 !important;
 }
 
 .yc-wind-speed-row th {
   font-family: 'DM Mono', monospace;
   font-size: 7px;
-  color: #6B5A3E;
   background: #F0E8C8;
+  color: #3D2A00;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.yc-wind-col-head {
+  background: rgba(90,26,26,0.1) !important;
+  color: #5A1A1A !important;
+}
+
+.yc-wind-col-tail {
+  background: rgba(26,58,90,0.1) !important;
+  color: #1A3A5A !important;
 }
 
 .yc-wind-range-th {
   text-align: left !important;
+  background: #1E3A2A !important;
+  color: #D4AF50 !important;
 }
 
 .yc-wind-range {
   font-family: 'DM Mono', monospace;
   font-size: 7px;
   text-align: left;
-  color: #3A3A3A;
+  color: #1E3A2A;
+  font-weight: 700;
   white-space: nowrap;
+  padding-left: 6px !important;
 }
 
 .yc-wind-cell {
   font-family: 'DM Mono', monospace;
   font-size: 7.5px;
+  font-weight: 600;
 }
 
 .yc-wind-head-cell {
-  background: rgba(90, 26, 26, 0.08);
-  color: #5A1A1A;
+  background: rgba(90, 26, 26, 0.06);
+  color: #8B2020;
 }
 
 .yc-wind-tail-cell {
-  background: rgba(26, 58, 90, 0.08);
-  color: #1A3A5A;
+  background: rgba(26, 58, 90, 0.06);
+  color: #2A5B9A;
 }
 
 .yc-wind-fcst {
-  background: #F5EAB8 !important;
+  background: rgba(184,149,42,0.25) !important;
   font-weight: bold;
   color: #3D2A00 !important;
 }
 
 /* ── CARD FOOTER ────────────────────────────────────────────── */
 .yc-footer {
-  padding: 5px 8px;
+  padding: 4px 8px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-family: 'DM Mono', monospace;
   font-size: 6.5px;
-  color: #6B5A3E;
-  background: #F5F0E8;
+  color: #D9D0B8;
+  background: #1E3A2A;
   gap: 8px;
+  border-top: 1px solid rgba(184,149,42,0.3);
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 }
 
 .yc-footer-legend {
@@ -362,3 +368,144 @@
 .yc-dot-red   { background: #8B2020; }
 .yc-dot-blue  { background: #2A5B9A; }
 .yc-dot-gold  { background: #B8952A; }
+
+/* ── PRINT: Show cards only, hide wizard ───────────────────── */
+@media print {
+  body {
+    visibility: hidden;
+  }
+
+  #wyc-print-preview {
+    visibility: visible;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+
+  .wyc-preview-label {
+    display: none;
+  }
+
+  /* Force all descendant elements visible */
+  #wyc-print-preview * {
+    visibility: visible;
+  }
+
+  /* Print page: two cards side by side */
+  .yc-print-page {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 0.25in !important;
+    padding: 0 !important;
+    background: white !important;
+    border: none !important;
+    overflow: visible !important;
+    justify-content: flex-start !important;
+  }
+
+  .yc-card {
+    width: 4in !important;
+    min-height: 6.5in !important;
+    font-size: 7.5pt !important;
+    flex-shrink: 0 !important;
+    border: 1px solid #999 !important;
+  }
+
+  /* Ink-friendly print overrides: replace heavy dark backgrounds with light tints */
+  .yc-header {
+    background: #E8F2EC !important;
+    border-bottom: 2px solid #3D6B50 !important;
+  }
+
+  .yc-title {
+    color: #1E3A2A !important;
+  }
+
+  .yc-title-accent {
+    color: #8B6914 !important;
+  }
+
+  .yc-course {
+    color: #5A4A00 !important;
+  }
+
+  .yc-header-meta {
+    color: #3D6B50 !important;
+  }
+
+  .yc-pill {
+    background: rgba(0,0,0,0.04) !important;
+    border-color: rgba(100,80,0,0.3) !important;
+    color: #3D2A00 !important;
+  }
+
+  .yc-pill-hi {
+    background: rgba(184,149,42,0.15) !important;
+    color: #5A3A00 !important;
+  }
+
+  .yc-section-head {
+    background: #D8EAE0 !important;
+    color: #1E3A2A !important;
+    border-bottom: 1px solid #3D6B50 !important;
+  }
+
+  .yc-section-head-amber {
+    background: #F0E4C0 !important;
+    color: #3D2A00 !important;
+  }
+
+  .yc-table th {
+    background: #D8EAE0 !important;
+    color: #1E3A2A !important;
+  }
+
+  .yc-th-left {
+    color: #1E3A2A !important;
+  }
+
+  .yc-th-accent {
+    color: #5A3A00 !important;
+  }
+
+  .yc-th-amber {
+    background: #F0E4C0 !important;
+    color: #3D2A00 !important;
+  }
+
+  .yc-wind-head-red {
+    background: #F5D8D8 !important;
+    color: #5A1A1A !important;
+  }
+
+  .yc-wind-head-blue {
+    background: #D8E4F5 !important;
+    color: #1A3A5A !important;
+  }
+
+  .yc-wind-speed-row th {
+    background: #F0E8C8 !important;
+    color: #3D2A00 !important;
+  }
+
+  .yc-wind-range-th {
+    background: #D8EAE0 !important;
+    color: #1E3A2A !important;
+  }
+
+  .yc-footer {
+    background: #E8F2EC !important;
+    color: #3D6B50 !important;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  @page {
+    size: 8.5in 11in portrait;
+    margin: 0.25in;
+  }
+}

@@ -39,9 +39,10 @@ function buildWedgeMatrix(wedges) {
       rows.get(yds)[wd.id] = existing ? `${existing}/${label}` : label;
     });
   });
+  // Sort descending — Full swings (largest yardage) appear at top
   return [...rows.entries()]
     .map(([yds, cells]) => ({ yds, ...cells }))
-    .sort((a, b) => a.yds - b.yds);
+    .sort((a, b) => b.yds - a.yds);
 }
 
 function buildConditionPills(wx) {
@@ -69,7 +70,7 @@ function SingleCard({ active, buckets, wedgeMatrix, pills, wx, courseName, round
       {/* Header */}
       <div className="yc-header">
         <div className="yc-header-top">
-          <span className="yc-title">Dynamic Yardage Card</span>
+          <span className="yc-title">Round Specific <span className="yc-title-accent">Yardage</span> Card</span>
           <span className="yc-course">{courseName || 'Course'}</span>
         </div>
         <div className="yc-header-meta">
@@ -89,13 +90,13 @@ function SingleCard({ active, buckets, wedgeMatrix, pills, wx, courseName, round
       <div className="yc-body">
         {/* My Bag table */}
         <div className="yc-section">
-          <div className="yc-section-head">My Bag</div>
+          <div className="yc-section-head">① My Bag</div>
           <table className="yc-table">
             <thead>
               <tr>
-                <th>Club</th>
+                <th className="yc-th-left">Club</th>
                 <th>Std</th>
-                <th>Adj</th>
+                <th className="yc-th-accent">Adj</th>
                 <th>Dsp</th>
               </tr>
             </thead>
@@ -114,12 +115,12 @@ function SingleCard({ active, buckets, wedgeMatrix, pills, wx, courseName, round
 
         {/* Wedge matrix */}
         <div className="yc-section">
-          <div className="yc-section-head">Wedges</div>
+          <div className="yc-section-head yc-section-head-amber">② Distance Wedges</div>
           <table className="yc-table">
             <thead>
               <tr>
-                <th>Yds</th>
-                {WEDGE_DEFS.map((w) => <th key={w.id}>{w.name}</th>)}
+                <th className="yc-th-left yc-th-amber">Yds</th>
+                {WEDGE_DEFS.map((w) => <th key={w.id} className="yc-th-amber">{w.name}</th>)}
               </tr>
             </thead>
             <tbody>
@@ -127,9 +128,9 @@ function SingleCard({ active, buckets, wedgeMatrix, pills, wx, courseName, round
                 const isFullRow = WEDGE_DEFS.some((w) => row[w.id] === 'F');
                 return (
                   <tr key={i} className={isFullRow ? 'yc-wedge-full' : ''}>
-                    <td className="yc-num">{row.yds}</td>
+                    <td className="yc-num yc-yds-cell">{row.yds}</td>
                     {WEDGE_DEFS.map((w) => (
-                      <td key={w.id} className="yc-wedge-cell">
+                      <td key={w.id} className={`yc-wedge-cell${row[w.id] === 'F' ? ' yc-wedge-full-cell' : ''}`}>
                         {row[w.id] || '·'}
                       </td>
                     ))}
@@ -143,7 +144,7 @@ function SingleCard({ active, buckets, wedgeMatrix, pills, wx, courseName, round
 
       {/* Wind table */}
       <div className="yc-wind-section">
-        <div className="yc-section-head">Wind Adjustments</div>
+        <div className="yc-section-head">③ Wind Adjustments <span className="yc-section-note">+ = more club · − = less</span></div>
         <table className="yc-wind-table">
           <thead>
             <tr className="yc-wind-group-row">
@@ -159,7 +160,7 @@ function SingleCard({ active, buckets, wedgeMatrix, pills, wx, courseName, round
                 return (
                   <th
                     key={i}
-                    className={`yc-wind-col${isFcst ? ' yc-wind-fcst' : ''}`}
+                    className={`yc-wind-col${isHead ? ' yc-wind-col-head' : ' yc-wind-col-tail'}${isFcst ? ' yc-wind-fcst' : ''}`}
                   >
                     {mph}
                   </th>

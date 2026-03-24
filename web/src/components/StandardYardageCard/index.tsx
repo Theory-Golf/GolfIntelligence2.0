@@ -400,15 +400,33 @@ export default function StandardYardageCard() {
   useEffect(() => { localStorage.setItem(LS_CLUBS,  JSON.stringify(clubs));  }, [clubs]);
   useEffect(() => { localStorage.setItem(LS_WEDGES, JSON.stringify(wedges)); }, [wedges]);
 
+  const WEDGE_IDS = ['pw', 'gw', 'sw', 'lw'];
+
   function handleClubChange(idx: number, field: string, value: string) {
-    setClubs(prev => prev.map((c, i) => {
-      if (i !== idx) return c;
-      if (field === 'id') {
-        const opt = CLUB_OPTIONS.find((o) => o.id === value);
-        return { id: value, dist: opt?.def ?? 0 };
+    setClubs(prev => {
+      const updated = prev.map((c, i) => {
+        if (i !== idx) return c;
+        if (field === 'id') {
+          const opt = CLUB_OPTIONS.find((o) => o.id === value);
+          return { id: value, dist: opt?.def ?? 0 };
+        }
+        return { ...c, dist: parseInt(value, 10) || 0 };
+      });
+
+      // Sync wedge Full distance when a wedge club's carry changes
+      const changed = updated[idx];
+      if (WEDGE_IDS.includes(changed.id)) {
+        const newDist = changed.dist;
+        if (newDist > 0) {
+          setWedges(prev => ({
+            ...prev,
+            [changed.id]: { ...prev[changed.id], full: newDist },
+          }));
+        }
       }
-      return { ...c, dist: parseInt(value, 10) || 0 };
-    }));
+
+      return updated;
+    });
   }
 
   function handleWedgeChange(id: string, swing: keyof WedgeSwings, value: string) {
@@ -519,7 +537,7 @@ export default function StandardYardageCard() {
             </div>
             <div className="wyc-field">
               <label className="wyc-label" htmlFor="syc-course">Course Name</label>
-              <input id="syc-course" className="wyc-input" type="text" placeholder="e.g. Pebble Beach" value={courseName}
+              <input id="syc-course" className="wyc-input" type="text" placeholder="Theory Golf Links" value={courseName}
                 onChange={(e) => setCourseName(e.target.value)} />
             </div>
             <div className="wyc-field">
@@ -542,6 +560,11 @@ export default function StandardYardageCard() {
         <div ref={previewRef} style={{ marginTop: 48 }}>
           <p className="wyc-preview-label">Card Preview — Ready to Print</p>
           <div className="syc-preview-scroll">
+            <YardageCardOutput data={cardData} courseName={courseName} cardDate={cardDate} />
+          </div>
+          {/* Print page: two cards side-by-side — hidden on screen, visible when printing */}
+          <div id="syc-print-page" aria-hidden="true">
+            <YardageCardOutput data={cardData} courseName={courseName} cardDate={cardDate} />
             <YardageCardOutput data={cardData} courseName={courseName} cardDate={cardDate} />
           </div>
           <button className="wyc-btn-primary" style={{ marginTop: 16, display: 'block' }} onClick={() => window.print()}>

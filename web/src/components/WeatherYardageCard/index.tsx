@@ -74,6 +74,20 @@ export default function WeatherYardageCard() {
     localStorage.setItem(LS_WEDGES, JSON.stringify(wedges));
   }, [wedges]);
 
+  // Auto-sync wedge Full distance from My Bag whenever a wedge club changes
+  const WEDGE_IDS = ['pw', 'gw', 'sw', 'lw'];
+  useEffect(() => {
+    clubs.forEach((c) => {
+      if (WEDGE_IDS.includes(c.id) && c.dist > 0) {
+        setWedges((prev) => {
+          if (prev[c.id]?.full === c.dist) return prev;
+          return { ...prev, [c.id]: { ...prev[c.id], full: c.dist } };
+        });
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clubs]);
+
   async function handleFetch(): Promise<void> {
     setFetchStatus('loading');
     try {

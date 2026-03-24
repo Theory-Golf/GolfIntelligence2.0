@@ -268,7 +268,7 @@
 
 .wyc-bag-header {
   display: grid;
-  grid-template-columns: 1fr 120px;
+  grid-template-columns: 150px 120px;
   gap: 8px;
   padding: 0 0 6px;
   font-family: var(--font-mono, 'DM Mono', monospace);
@@ -288,7 +288,7 @@
 
 .wyc-club-row {
   display: grid;
-  grid-template-columns: 1fr 120px;
+  grid-template-columns: 150px 120px;
   gap: 8px;
 }
 
@@ -834,6 +834,25 @@
   border-color: var(--primary);
 }
 
+.syc-bag-header {
+  display: grid;
+  grid-template-columns: 140px 80px;
+  gap: 0;
+  padding: 0 0 6px;
+  font-family: var(--font-mono, 'DM Mono', monospace);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 4px;
+}
+
+.syc-bag-header span:last-child {
+  text-align: right;
+  padding-right: 12px;
+}
+
 .syc-bag-grid {
   display: flex;
   flex-direction: column;
@@ -841,7 +860,7 @@
 
 .syc-club-row {
   display: grid;
-  grid-template-columns: 1fr 80px;
+  grid-template-columns: 140px 80px;
   align-items: center;
   border-bottom: 1px solid var(--border-color);
   padding: 0;

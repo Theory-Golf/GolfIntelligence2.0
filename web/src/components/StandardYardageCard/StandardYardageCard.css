@@ -241,29 +241,151 @@
   flex-shrink: 0;
 }
 
+/* ── PRINT PAGE (screen: hidden duplicate; print: two-card layout) ── */
+#syc-print-page {
+  display: none;
+}
+
 /* ── PRINT ──────────────────────────────────────────────────── */
 @media print {
   body {
     visibility: hidden;
   }
 
+  /* Hide the screen preview, show the print page */
   #syc-print-preview {
+    display: none !important;
+  }
+
+  #syc-print-page {
     visibility: visible;
+    display: flex !important;
+    flex-direction: row;
+    gap: 0.25in;
     position: fixed;
     top: 0;
     left: 0;
-    max-width: 100% !important;
+    padding: 0;
+    background: white;
+  }
+
+  #syc-print-page * {
+    visibility: visible;
   }
 
   .syc-card {
     visibility: visible;
-    border: 1px solid #aaa !important;
+    width: 4in !important;
+    min-height: 6.5in !important;
+    max-width: none !important;
+    font-size: 7.5pt !important;
+    border: 1px solid #999 !important;
     border-radius: 0 !important;
     box-shadow: none !important;
+    flex-shrink: 0;
+  }
+
+  /* Scale down internal table fonts to fit 4in width */
+  .syc-tbl {
+    font-size: 7pt !important;
+  }
+
+  .syc-th, .syc-td {
+    font-size: 7pt !important;
+    padding: 2px 4px !important;
+  }
+
+  .syc-td-club { font-size: 7pt !important; }
+  .syc-td-num  { font-size: 7pt !important; }
+  .syc-td-adj  { font-size: 7pt !important; }
+
+  /* Ink-friendly: replace heavy dark backgrounds with light tints */
+  .syc-card-header {
+    background: #E8F2EC !important;
+    border-bottom: 2px solid #3D6B50 !important;
+  }
+
+  .syc-card-title {
+    color: #1E3A2A !important;
+  }
+
+  .syc-card-title-accent {
+    color: #8B6914 !important;
+  }
+
+  .syc-card-meta {
+    color: #3D6B50 !important;
+    opacity: 1 !important;
+  }
+
+  .syc-pill {
+    background: rgba(0,0,0,0.04) !important;
+    border-color: rgba(100,80,0,0.3) !important;
+    color: #3D2A00 !important;
+  }
+
+  .syc-tbl-head,
+  .syc-tbl-divider {
+    background: #D8EAE0 !important;
+    color: #1E3A2A !important;
+    border-color: #3D6B50 !important;
+  }
+
+  .syc-tbl-head-amber {
+    background: #F0E4C0 !important;
+  }
+
+  .syc-th {
+    background: #D8EAE0 !important;
+    color: #1E3A2A !important;
+  }
+
+  .syc-th-amber {
+    background: #F0E4C0 !important;
+    color: #3D2A00 !important;
+  }
+
+  .syc-th-anchor {
+    background: #D8EAE0 !important;
+    color: #1E3A2A !important;
+  }
+
+  .syc-th-temp {
+    background: #F5ECD0 !important;
+    color: #5A3800 !important;
+  }
+
+  .syc-th-head, .syc-th-head-spd {
+    background: #F5D8D8 !important;
+    color: #5A1A1A !important;
+  }
+
+  .syc-th-tail, .syc-th-tail-spd {
+    background: #D8E4F5 !important;
+    color: #1A3A5A !important;
+  }
+
+  .syc-card-footer {
+    background: #E8F2EC !important;
+    border-top-color: rgba(60,100,70,0.3) !important;
+  }
+
+  .syc-footer-note, .syc-leg {
+    color: #3D6B50 !important;
+    opacity: 1 !important;
+  }
+
+  .syc-card-top {
+    grid-template-columns: 140px 1fr !important;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
   @page {
-    size: 8.5in 5.5in landscape;
-    margin: 0.28in 0.32in;
+    size: 8.5in 11in portrait;
+    margin: 0.25in;
   }
 }

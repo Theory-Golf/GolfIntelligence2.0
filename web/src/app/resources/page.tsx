@@ -10,9 +10,9 @@ const RESOURCES = [
   {
     slug: 'weather-yardage-card',
     category: 'Tool',
-    title: 'Weather Yardage Card',
+    title: 'Round Specific Yardage Card',
     description:
-      'Generate a printable yardage card with club distances adjusted for temperature, altitude, humidity, and wind at your tee time.',
+      'Generate a printable yardage card with club distances adjusted for your round\'s temperature, altitude, humidity, and wind forecast.',
     icon: CloudSun,
     span: 'md:col-span-2',
   },
