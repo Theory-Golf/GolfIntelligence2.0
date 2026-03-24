@@ -21,7 +21,7 @@ export default function WeatherYardageCardPage() {
             Round Specific <span className="text-primary">Yardage</span> Card
           </h1>
           <p className="font-body text-base text-muted-foreground mt-5 max-w-lg leading-relaxed">
-            Enter your round details to generate a yardage card adjusted for today's conditions.
+            Enter your round details to generate a yardage card adjusted for today&apos;s conditions.
             Fetches live forecast data for your course and calculates how temperature,
             altitude, humidity, and wind affect each club in your bag.
           </p>
