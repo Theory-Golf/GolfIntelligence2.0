@@ -18,7 +18,8 @@ export default function StepRoundDetails({
       <p className="eyebrow" style={{ marginBottom: 16 }}>Step 1</p>
       <h2 className="wyc-step-title">Round Details</h2>
       <p className="wyc-step-desc">
-        Enter your course location and tee time to fetch the forecast.
+        Enter your course location and tee time to fetch live forecast data.
+        Your card will be adjusted for temperature, altitude, humidity, and wind.
       </p>
 
       <div className="wyc-field-grid wyc-4col">
@@ -88,7 +89,7 @@ export default function StepRoundDetails({
         onClick={onFetch}
         disabled={courseZip.length !== 5 || isLoading}
       >
-        {isLoading ? 'Fetching…' : 'Fetch Forecast'}
+        {isLoading ? 'Fetching Forecast…' : 'Fetch Forecast →'}
       </button>
 
       {fetchStatus === 'error' && (
@@ -97,19 +98,19 @@ export default function StepRoundDetails({
 
       {wx && fetchStatus === 'success' && (
         <div className="wyc-weather-preview">
-          <p className="wyc-preview-label section-label" style={{ marginBottom: 12 }}>Forecast</p>
+          <p className="wyc-preview-label section-label" style={{ marginBottom: 12 }}>Forecast at Tee Time</p>
           <div className="wyc-wx-grid">
             <div className="wyc-wx-cell">
-              <span className="wyc-wx-val">{wx.tempF}°F</span>
-              <span className="wyc-wx-key">Temp</span>
+              <span className="wyc-wx-val" style={{ color: 'var(--color-primary)' }}>{wx.tempF}°F</span>
+              <span className="wyc-wx-key">Temperature</span>
             </div>
             <div className="wyc-wx-cell">
               <span className="wyc-wx-val">{wx.humidity}%</span>
               <span className="wyc-wx-key">Humidity</span>
             </div>
             <div className="wyc-wx-cell">
-              <span className="wyc-wx-val">{wx.windMph} mph</span>
-              <span className="wyc-wx-key">Wind</span>
+              <span className="wyc-wx-val" style={{ color: 'var(--color-primary)' }}>{wx.windMph} mph</span>
+              <span className="wyc-wx-key">Wind Speed</span>
             </div>
             <div className="wyc-wx-cell">
               <span className="wyc-wx-val">{wx.windDirText}</span>

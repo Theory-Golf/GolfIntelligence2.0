@@ -39,7 +39,6 @@ function buildWedgeMatrix(wedges) {
       rows.get(yds)[wd.id] = existing ? `${existing}/${label}` : label;
     });
   });
-  // Sort descending — Full swings (largest yardage) appear at top
   return [...rows.entries()]
     .map(([yds, cells]) => ({ yds, ...cells }))
     .sort((a, b) => b.yds - a.yds);
@@ -62,150 +61,285 @@ function buildConditionPills(wx) {
   return pills;
 }
 
+/**
+ * Temperature adjustment relative to forecast temp.
+ * Returns yards to add/subtract from card yardages.
+ * Cold → add (plays longer). Warm → subtract (plays shorter).
+ */
+function tempAdjYds(delta: number): string {
+  if (delta === 0) return '—';
+  const rounded = delta > 0
+    ? -Math.round(delta * 0.075)   // warmer → subtract
+    : Math.round(-delta * 0.075);  // colder → add
+  if (rounded === 0) return '—';
+  return rounded > 0 ? `+${rounded}` : `${rounded}`;
+}
+
 function SingleCard({ active, buckets, wedgeMatrix, pills, wx, courseName, roundDate, teeTime }) {
-  const WIND_COLS = [15, 10, 5, 5, 10, 15]; // head: 15,10,5 | tail: 5,10,15
+  const WIND_COLS = [15, 10, 5, 5, 10, 15];
+  const TEMP_DELTAS = [-30, -20, -10, 0, 10, 20, 30];
+
+  // Shared class fragments
+  const sectionHead = 'font-mono text-[7px] uppercase tracking-[0.16em] px-[7px] py-[3px] border-b border-pitch [print-color-adjust:exact] [-webkit-print-color-adjust:exact] print:border-gray-200';
+  const th = 'font-mono text-[6.5px] uppercase tracking-[0.06em] px-[4px] py-[2px]';
+  const td = 'font-mono text-[7.5px] px-[4px] py-[2px] border-t border-pitch/40 print:border-gray-100';
 
   return (
-    <div className="yc-card">
-      {/* Header */}
-      <div className="yc-header">
-        <div className="yc-header-top">
-          <span className="yc-title">Round Specific <span className="yc-title-accent">Yardage</span> Card</span>
-          <span className="yc-course">{courseName || 'Course'}</span>
-        </div>
-        <div className="yc-header-meta">
-          <span>{roundDate}</span>
-          <span>{teeTime}</span>
-        </div>
-        <div className="yc-pills">
-          {pills.map((p, i) => (
-            <span key={i} className={`yc-pill${p.highlight ? ' yc-pill-hi' : ''}`}>
-              {p.text}
-            </span>
-          ))}
+    <div
+      className="flex flex-col bg-obsidian text-foreground border border-pitch overflow-hidden font-body [print-color-adjust:exact] [-webkit-print-color-adjust:exact] print:bg-white print:text-black print:border-gray-300"
+      style={{ width: '4.5in', minHeight: '6in' }}
+    >
+      {/* ── Header ────────────────────────────────────────────────── */}
+      <div className="bg-court border-b-2 border-primary px-[10px] py-[7px] [print-color-adjust:exact] [-webkit-print-color-adjust:exact] print:bg-gray-100 print:border-primary">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <h2 className="font-display font-bold text-[13px] uppercase tracking-wide text-chalk leading-tight print:text-black">
+              Round Specific <span className="text-primary">Yardage</span> Card
+            </h2>
+            <div className="font-mono text-[7px] text-cement mt-[1px] leading-tight print:text-gray-500">
+              {courseName || 'Course'} · {roundDate}{teeTime ? ` · ${teeTime}` : ''}
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-[3px] justify-end shrink-0">
+            {pills.map((p, i) => (
+              <span
+                key={i}
+                className={`font-mono text-[6.5px] uppercase tracking-[0.06em] px-[4px] py-[1px] whitespace-nowrap border ${
+                  p.highlight
+                    ? 'border-primary/60 text-primary bg-primary/10 print:border-red-400 print:text-red-700 print:bg-red-50'
+                    : 'border-cement/30 text-cement print:border-gray-400 print:text-gray-600'
+                }`}
+              >
+                {p.text}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Two-column body */}
-      <div className="yc-body">
-        {/* My Bag table */}
-        <div className="yc-section">
-          <div className="yc-section-head">① My Bag</div>
-          <table className="yc-table">
+      {/* ── Body ──────────────────────────────────────────────────── */}
+      <div className="flex flex-col flex-1">
+
+        {/* Two-column: My Bag | Distance Wedges */}
+        <div className="flex border-b border-pitch print:border-gray-200">
+
+          {/* My Bag */}
+          <div className="flex flex-col border-r border-pitch print:border-gray-200" style={{ width: '44%' }}>
+            <div className={`${sectionHead} bg-shadow text-primary print:bg-gray-50 print:text-gray-700`}>
+              ① My Bag
+            </div>
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-shadow/60 print:bg-gray-50">
+                  <th className={`${th} text-left text-muted-foreground print:text-gray-500`}>Club</th>
+                  <th className={`${th} text-right text-muted-foreground print:text-gray-500`}>Std</th>
+                  <th className={`${th} text-right text-primary`}>Adj</th>
+                  <th className={`${th} text-right text-muted-foreground print:text-gray-500`}>Dsp</th>
+                </tr>
+              </thead>
+              <tbody>
+                {active.map((c, i) => (
+                  <tr key={i}>
+                    <td className={`${td} text-left font-body text-foreground print:text-black`}>{c.name}</td>
+                    <td className={`${td} text-right text-muted-foreground print:text-gray-500`}>{c.std}</td>
+                    <td className={`${td} text-right text-primary font-bold`}>{c.adj}</td>
+                    <td className={`${td} text-right text-muted-foreground text-[6.5px] print:text-gray-400`}>±{decadeDispersion(c.adj)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Distance Wedges */}
+          <div className="flex flex-col flex-1">
+            <div className={`${sectionHead} bg-shadow text-bogey print:bg-amber-50 print:text-amber-800`}>
+              ② Wedges
+            </div>
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-shadow/60 print:bg-gray-50">
+                  <th className={`${th} text-left text-bogey print:text-amber-700`}>Yds</th>
+                  {WEDGE_DEFS.map((w) => (
+                    <th key={w.id} className={`${th} text-center text-bogey print:text-amber-700`}>{w.name}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {wedgeMatrix.map((row, i) => {
+                  const isFullRow = WEDGE_DEFS.some((w) => row[w.id] === 'F');
+                  return (
+                    <tr key={i}>
+                      <td className={`${td} text-left text-bogey font-bold print:text-amber-700`}>{row.yds}</td>
+                      {WEDGE_DEFS.map((w) => (
+                        <td
+                          key={w.id}
+                          className={`${td} text-center ${
+                            row[w.id] === 'F'
+                              ? 'text-foreground font-bold print:text-black'
+                              : row[w.id]
+                                ? 'text-muted-foreground print:text-gray-500'
+                                : 'text-pitch print:text-gray-200'
+                          }`}
+                        >
+                          {row[w.id] || '·'}
+                        </td>
+                      ))}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Wind table */}
+        <div className="border-b border-pitch print:border-gray-200">
+          <div className={`${sectionHead} bg-shadow text-muted-foreground flex items-center gap-1 print:bg-gray-50 print:text-gray-500`}>
+            ③ Wind Adjustments
+            <span className="normal-case tracking-normal text-[6px]">+ = more club · − = less</span>
+          </div>
+          <table className="w-full border-collapse">
             <thead>
               <tr>
-                <th className="yc-th-left">Club</th>
-                <th>Std</th>
-                <th className="yc-th-accent">Adj</th>
-                <th>Dsp</th>
+                <th className={`${th} text-left`}></th>
+                <th colSpan={3} className={`${th} text-center text-scarlet print:text-red-700`}>↓ Headwind</th>
+                <th colSpan={3} className={`${th} text-center text-c1 print:text-blue-700`}>↑ Tailwind</th>
+              </tr>
+              <tr className="bg-shadow/60 print:bg-gray-50">
+                <th className={`${th} text-left text-muted-foreground print:text-gray-500`}>Yds</th>
+                {WIND_COLS.map((mph, i) => {
+                  const isHead = i < 3;
+                  const isFcst = mph === wx.windColMph;
+                  return (
+                    <th
+                      key={i}
+                      className={`${th} text-center ${
+                        isFcst
+                          ? 'bg-primary/20 text-primary font-bold print:bg-red-100 print:text-red-800'
+                          : isHead
+                            ? 'text-scarlet print:text-red-600'
+                            : 'text-c1 print:text-blue-600'
+                      }`}
+                    >
+                      {mph}
+                    </th>
+                  );
+                })}
               </tr>
             </thead>
             <tbody>
-              {active.map((c, i) => (
+              {buckets.map((b, i) => (
                 <tr key={i}>
-                  <td className="yc-club-name">{c.name}</td>
-                  <td className="yc-num">{c.std}</td>
-                  <td className="yc-num yc-adj">{c.adj}</td>
-                  <td className="yc-num yc-dsp">±{decadeDispersion(c.adj)}</td>
+                  <td className={`${td} text-left text-muted-foreground print:text-gray-500`}>{b.range}</td>
+                  {[15, 10, 5].map((mph) => {
+                    const delta = roundToFive(windAdjustment(b.mid, mph, true));
+                    const isFcst = mph === wx.windColMph;
+                    return (
+                      <td
+                        key={`h${mph}`}
+                        className={`${td} text-center font-bold ${
+                          isFcst
+                            ? 'bg-primary/10 text-primary print:bg-red-50 print:text-red-700'
+                            : 'text-scarlet print:text-red-700'
+                        }`}
+                      >
+                        +{delta}
+                      </td>
+                    );
+                  })}
+                  {[5, 10, 15].map((mph) => {
+                    const delta = roundToFive(Math.abs(windAdjustment(b.mid, mph, false)));
+                    const isFcst = mph === wx.windColMph;
+                    return (
+                      <td
+                        key={`t${mph}`}
+                        className={`${td} text-center font-bold ${
+                          isFcst
+                            ? 'bg-primary/10 text-primary print:bg-red-50 print:text-red-700'
+                            : 'text-c1 print:text-blue-700'
+                        }`}
+                      >
+                        −{delta}
+                      </td>
+                    );
+                  })}
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
 
-        {/* Wedge matrix */}
-        <div className="yc-section">
-          <div className="yc-section-head yc-section-head-amber">② Distance Wedges</div>
-          <table className="yc-table">
+        {/* ④ Temperature adjustment reference */}
+        <div>
+          <div className={`${sectionHead} bg-shadow text-c1 flex items-center gap-1 print:bg-blue-50 print:text-blue-700`}>
+            ④ Temp Adj from {wx.tempF}°F
+            <span className="normal-case tracking-normal text-[6px] text-muted-foreground print:text-gray-400">cold = add · warm = subtract</span>
+          </div>
+          <table className="w-full border-collapse">
             <thead>
-              <tr>
-                <th className="yc-th-left yc-th-amber">Yds</th>
-                {WEDGE_DEFS.map((w) => <th key={w.id} className="yc-th-amber">{w.name}</th>)}
+              <tr className="bg-shadow/60 print:bg-gray-50">
+                <th className={`${th} text-left text-muted-foreground print:text-gray-500`}>Temp</th>
+                {TEMP_DELTAS.map((delta) => (
+                  <th
+                    key={delta}
+                    className={`${th} text-center ${
+                      delta === 0
+                        ? 'text-muted-foreground print:text-gray-500'
+                        : delta < 0
+                          ? 'text-c1 print:text-blue-600'
+                          : 'text-bogey print:text-amber-600'
+                    }`}
+                  >
+                    {wx.tempF + delta}°
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
-              {wedgeMatrix.map((row, i) => {
-                const isFullRow = WEDGE_DEFS.some((w) => row[w.id] === 'F');
-                return (
-                  <tr key={i} className={isFullRow ? 'yc-wedge-full' : ''}>
-                    <td className="yc-num yc-yds-cell">{row.yds}</td>
-                    {WEDGE_DEFS.map((w) => (
-                      <td key={w.id} className={`yc-wedge-cell${row[w.id] === 'F' ? ' yc-wedge-full-cell' : ''}`}>
-                        {row[w.id] || '·'}
-                      </td>
-                    ))}
-                  </tr>
-                );
-              })}
+              <tr>
+                <td className={`${td} text-left text-muted-foreground print:text-gray-500`}>Yds adj</td>
+                {TEMP_DELTAS.map((delta) => {
+                  const adj = tempAdjYds(delta);
+                  return (
+                    <td
+                      key={delta}
+                      className={`${td} text-center font-bold ${
+                        delta === 0
+                          ? 'text-muted-foreground print:text-gray-400'
+                          : delta < 0
+                            ? 'text-c1 print:text-blue-700'
+                            : 'text-bogey print:text-amber-700'
+                      }`}
+                    >
+                      {adj}
+                    </td>
+                  );
+                })}
+              </tr>
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* Wind table */}
-      <div className="yc-wind-section">
-        <div className="yc-section-head">③ Wind Adjustments <span className="yc-section-note">+ = more club · − = less</span></div>
-        <table className="yc-wind-table">
-          <thead>
-            <tr className="yc-wind-group-row">
-              <th></th>
-              <th colSpan={3} className="yc-wind-head yc-wind-head-red">↓ Headwind</th>
-              <th colSpan={3} className="yc-wind-head yc-wind-head-blue">↑ Tailwind</th>
-            </tr>
-            <tr className="yc-wind-speed-row">
-              <th className="yc-wind-range-th">Yds</th>
-              {WIND_COLS.map((mph, i) => {
-                const isHead = i < 3;
-                const isFcst = mph === wx.windColMph;
-                return (
-                  <th
-                    key={i}
-                    className={`yc-wind-col${isHead ? ' yc-wind-col-head' : ' yc-wind-col-tail'}${isFcst ? ' yc-wind-fcst' : ''}`}
-                  >
-                    {mph}
-                  </th>
-                );
-              })}
-            </tr>
-          </thead>
-          <tbody>
-            {buckets.map((b, i) => (
-              <tr key={i}>
-                <td className="yc-wind-range">{b.range}</td>
-                {/* Headwind cols (15→5) */}
-                {[15, 10, 5].map((mph) => {
-                  const delta = roundToFive(windAdjustment(b.mid, mph, true));
-                  const isFcst = mph === wx.windColMph;
-                  return (
-                    <td key={`h${mph}`} className={`yc-wind-cell yc-wind-head-cell${isFcst ? ' yc-wind-fcst' : ''}`}>
-                      +{delta}
-                    </td>
-                  );
-                })}
-                {/* Tailwind cols (5→15) */}
-                {[5, 10, 15].map((mph) => {
-                  const delta = roundToFive(Math.abs(windAdjustment(b.mid, mph, false)));
-                  const isFcst = mph === wx.windColMph;
-                  return (
-                    <td key={`t${mph}`} className={`yc-wind-cell yc-wind-tail-cell${isFcst ? ' yc-wind-fcst' : ''}`}>
-                      −{delta}
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Footer */}
-      <div className="yc-footer">
-        <span>Adj @ {wx.tempF}°F · {wx.altFt.toLocaleString()} ft · {wx.humidity}% RH · Dsp = DECADE (yds)</span>
-        <span className="yc-footer-legend">
-          <span className="yc-legend-dot yc-dot-red" /> Head +
-          <span className="yc-legend-dot yc-dot-blue" /> Tail −
-          <span className="yc-legend-dot yc-dot-gold" /> Fcst
-        </span>
+      {/* ── Footer ──────────────────────────────────────────────────── */}
+      <div className="bg-court border-t border-pitch/60 px-[8px] py-[4px] [print-color-adjust:exact] [-webkit-print-color-adjust:exact] print:bg-gray-50 print:border-gray-200">
+        <p className="font-mono text-[6px] text-cement leading-[1.5] print:text-gray-500">
+          Adj @ {wx.tempF}°F · {wx.altFt.toLocaleString()} ft · {wx.humidity}% RH · Dsp = DECADE (yds)
+        </p>
+        <div className="flex gap-[8px] mt-[2px] flex-wrap">
+          {[
+            { color: 'bg-scarlet',  label: 'Head = longer (+)' },
+            { color: 'bg-c1',      label: 'Tail = shorter (−)' },
+            { color: 'bg-primary', label: 'Fcst wind col' },
+            { color: 'bg-c1',      label: 'Cold = add yds' },
+            { color: 'bg-bogey',   label: 'Warm = subtract yds' },
+          ].map((item, i) => (
+            <span key={i} className="font-mono text-[5.5px] text-cement print:text-gray-500 flex items-center gap-[3px]">
+              <span className={`inline-block w-[5px] h-[5px] rounded-sm ${item.color}`} />
+              {item.label}
+            </span>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -222,12 +356,21 @@ export default function YardageCardPrint({ clubs, wedges, wx, courseName, roundD
   const cardProps = { active, buckets, wedgeMatrix, pills, wx, courseName, roundDate, teeTime };
 
   return (
-    <div id="wyc-print-preview">
-      <p className="wyc-preview-label">Card Preview — Updates as you fill in your bag</p>
-      <div className="yc-print-page">
+    <>
+      {/* Screen preview */}
+      <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground text-center mt-12 mb-5">
+        Card Preview — Updates as you fill in your bag
+      </p>
+      <div className="flex flex-row gap-5 p-6 bg-surface border border-border overflow-x-auto justify-center">
         <SingleCard {...cardProps} />
         <SingleCard {...cardProps} />
       </div>
-    </div>
+
+      {/* Print page — hidden on screen, shown when printing via WeatherYardageCard.css */}
+      <div id="wyc-print-page" aria-hidden="true">
+        <SingleCard {...cardProps} />
+        <SingleCard {...cardProps} />
+      </div>
+    </>
   );
 }

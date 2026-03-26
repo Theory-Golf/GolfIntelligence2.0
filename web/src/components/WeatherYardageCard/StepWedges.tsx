@@ -21,7 +21,8 @@ export default function StepWedges({ wedges, setWedges }) {
       <p className="eyebrow" style={{ marginBottom: 16 }}>Step 3</p>
       <h2 className="wyc-step-title">Wedge Distances</h2>
       <p className="wyc-step-desc">
-        Enter your standard carry distances for partial wedge swings. Used to build the wedge distance matrix on your card.
+        Enter your carry distances for each partial swing. Full swing distances
+        sync automatically from My Bag — only adjust if they differ.
       </p>
 
       <div className="wyc-wedge-grid">

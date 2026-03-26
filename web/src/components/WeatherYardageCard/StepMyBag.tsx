@@ -60,6 +60,7 @@ export default function StepMyBag({ clubs, setClubs }) {
       <h2 className="wyc-step-title">My Bag</h2>
       <p className="wyc-step-desc">
         Enter your standard carry distance for each club at 70°F, sea level, no wind.
+        The card will calculate weather-adjusted yardages automatically.
       </p>
 
       <div className="wyc-bag-header">
@@ -71,7 +72,11 @@ export default function StepMyBag({ clubs, setClubs }) {
         {clubs.map((club, idx) => {
           const isEmpty = club.id === '';
           return (
-            <div key={idx} className="wyc-club-row">
+            <div
+              key={idx}
+              className="wyc-club-row"
+              style={{ background: idx % 2 === 0 ? 'transparent' : 'var(--surface)' }}
+            >
               <select
                 className="wyc-input wyc-club-select"
                 value={club.id}
@@ -91,6 +96,7 @@ export default function StepMyBag({ clubs, setClubs }) {
                 disabled={isEmpty}
                 onChange={(e) => handleClubChange(idx, 'dist', e.target.value)}
                 aria-label={`Distance for club ${idx + 1}`}
+                placeholder={isEmpty ? '' : '0'}
               />
             </div>
           );

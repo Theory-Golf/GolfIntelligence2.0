@@ -1,266 +1,24 @@
 /* =============================================================
-   StandardYardageCard — Card output styles + print
-   UI controls use globals.css .syc-* classes.
-   The card itself uses forest/gold/parchment (correct for print).
+   StandardYardageCard — Print layout only.
+   Card output styling lives in inline Tailwind (index.tsx).
    ============================================================= */
 
-/* ── CARD: base ─────────────────────────────────────────────── */
-.syc-card {
-  background: #FAFAF4;
-  border: 1px solid #C0B898;
-  max-width: 780px;
-  margin: 0 auto;
-  overflow: hidden;
-  font-family: 'Barlow', sans-serif;
-  font-size: 12px;
-  -webkit-print-color-adjust: exact;
-  print-color-adjust: exact;
-}
-
-/* ── HEADER ─────────────────────────────────────────────────── */
-.syc-card-header {
-  background: #1E3A2A;
-  padding: 10px 16px 8px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  border-bottom: 2px solid #B8952A;
-  -webkit-print-color-adjust: exact;
-  print-color-adjust: exact;
-}
-
-.syc-card-title {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-weight: 800;
-  font-size: 18px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: #F7F3E9;
-  line-height: 1.1;
-}
-
-.syc-card-title-accent {
-  color: #D4AF50;
-}
-
-.syc-card-meta {
-  font-family: 'DM Mono', monospace;
-  font-size: 10px;
-  color: #D9D0B8;
-  letter-spacing: 0.05em;
-  margin-top: 3px;
-  opacity: 0.85;
-}
-
-.syc-pills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  justify-content: flex-end;
-}
-
-.syc-pill {
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(184,149,42,0.3);
-  padding: 2px 8px;
-  font-family: 'DM Mono', monospace;
-  font-size: 9px;
-  font-weight: 500;
-  color: #F5EAB8;
-  letter-spacing: 0.05em;
-  white-space: nowrap;
-}
-
-/* ── CARD BODY ──────────────────────────────────────────────── */
-.syc-card-body {
-  display: flex;
-  flex-direction: column;
-}
-
-/* TOP ROW */
-.syc-card-top {
-  display: grid;
-  grid-template-columns: 168px 1fr;
-  border-bottom: 2px solid #C0B898;
-}
-
-.syc-col-bag {
-  border-right: 2px solid #C0B898;
-  background: #F4F0E4;
-}
-
-.syc-col-wedge {
-  background: #FAFAF4;
-}
-
-.syc-col-full {
-  border-top: 2px solid #C0B898;
-  background: #FAFAF4;
-}
-
-/* Section heads */
-.syc-tbl-head {
-  background: #1E3A2A;
-  padding: 5px 10px;
-  font-family: 'DM Mono', monospace;
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #D4AF50;
-  -webkit-print-color-adjust: exact;
-  print-color-adjust: exact;
-}
-
-.syc-tbl-head-amber {
-  background: linear-gradient(90deg, #3D2A00, #5A3E00);
-}
-
-.syc-tbl-divider {
-  background: #1E3A2A;
-  padding: 5px 10px;
-  font-family: 'DM Mono', monospace;
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #D4AF50;
-  border-top: 2px solid #B8952A;
-  -webkit-print-color-adjust: exact;
-  print-color-adjust: exact;
-}
-
-.syc-tbl-note {
-  font-weight: 400;
-  opacity: 0.7;
-  font-size: 8px;
-  letter-spacing: 0.04em;
-}
-
-/* ── SHARED TABLE STYLES ────────────────────────────────────── */
-.syc-tbl {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.syc-th {
-  padding: 4px 6px;
-  font-family: 'DM Mono', monospace;
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgba(255,255,255,0.7);
-  text-align: center;
-  background: #1E3A2A;
-  border-bottom: none;
-  -webkit-print-color-adjust: exact;
-  print-color-adjust: exact;
-}
-
-.syc-th-left   { text-align: left; padding-left: 10px; color: #D4AF50; }
-.syc-th-accent { color: #D4AF50; }
-.syc-th-bucket { text-align: left; padding-left: 10px; color: #D4AF50; }
-
-.syc-th-amber  { background: #3D2A00; color: rgba(255,220,140,0.85); }
-.syc-th-anchor { background: #1E3A2A; color: #D4AF50; font-weight: 800; }
-.syc-th-temp   { background: #5A3800; color: rgba(255,220,140,0.9); }
-.syc-th-head   { background: #5A1A1A; color: rgba(255,200,200,0.9); }
-.syc-th-tail   { background: #1A3A5A; color: rgba(180,210,255,0.9); }
-.syc-th-head-spd { background: #5A1A1A; color: rgba(255,200,200,0.85); }
-.syc-th-tail-spd { background: #1A3A5A; color: rgba(180,210,255,0.85); }
-
-.syc-tr-group th { padding: 4px 4px 2px; font-size: 9px; }
-
-.syc-td {
-  padding: 4px 6px;
-  font-family: 'DM Mono', monospace;
-  font-size: 11px;
-  border-bottom: 1px solid rgba(192,184,152,0.3);
-  vertical-align: middle;
-}
-
-.syc-td-center   { text-align: center; }
-.syc-td-club     { font-family: 'Barlow', sans-serif; font-weight: 700; color: #1E3A2A; font-size: 11px; padding-left: 8px; }
-.syc-td-num      { text-align: right; color: #1A2E1F; font-weight: 600; padding-right: 12px; }
-.syc-td-adj      { text-align: right; color: #2D5A3F; font-weight: 700; padding-right: 8px; }
-.syc-td-yds      { font-family: 'Barlow', sans-serif; font-size: 10px; font-weight: 700; color: #1E3A2A; padding-left: 8px; }
-.syc-td-bucket   { font-family: 'Barlow', sans-serif; font-size: 11px; font-weight: 700; color: #1E3A2A; padding-left: 10px; }
-.syc-td-empty    { color: rgba(0,0,0,0.15); font-size: 9px; }
-.syc-td-best     { font-weight: 700; color: #3D2A00; background: rgba(184,149,42,0.2) !important; }
-.syc-td-anchor   { font-weight: 700; color: #1E3A2A; background: rgba(45,90,63,0.08); }
-.syc-td-cold     { color: #1A3B6A; background: rgba(26,59,106,0.05); font-weight: 600; }
-.syc-td-warm     { color: #7A2A00; background: rgba(184,100,42,0.05); font-weight: 600; }
-.syc-td-head     { color: #8B2020; background: rgba(139,32,32,0.04); font-weight: 600; }
-.syc-td-tail     { color: #2A5B9A; background: rgba(26,59,106,0.04); font-weight: 600; }
-
-/* ── FOOTER ─────────────────────────────────────────────────── */
-.syc-card-footer {
-  background: #1E3A2A;
-  border-top: 1px solid rgba(184,149,42,0.3);
-  padding: 5px 14px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 6px;
-  -webkit-print-color-adjust: exact;
-  print-color-adjust: exact;
-}
-
-.syc-footer-note {
-  font-family: 'DM Mono', monospace;
-  font-size: 9px;
-  color: #D9D0B8;
-  opacity: 0.7;
-  letter-spacing: 0.04em;
-}
-
-.syc-legend {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.syc-leg {
-  font-family: 'DM Mono', monospace;
-  font-size: 9px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  color: #D9D0B8;
-  opacity: 0.8;
-}
-
-.syc-leg-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 2px;
-  display: inline-block;
-  flex-shrink: 0;
-}
-
-/* ── PRINT PAGE (screen: hidden duplicate; print: two-card layout) ── */
+/* Screen: hide the two-card print duplicate */
 #syc-print-page {
   display: none;
 }
 
-/* ── PRINT ──────────────────────────────────────────────────── */
 @media print {
-  body {
-    visibility: hidden;
-  }
+  body { visibility: hidden; }
 
-  /* Hide the screen preview, show the print page */
-  #syc-print-preview {
-    display: none !important;
-  }
+  /* Hide screen preview, show print page */
+  #syc-print-preview { display: none !important; }
 
   #syc-print-page {
     visibility: visible;
     display: flex !important;
     flex-direction: row;
+    align-items: flex-start;
     gap: 0.25in;
     position: fixed;
     top: 0;
@@ -269,115 +27,7 @@
     background: white;
   }
 
-  #syc-print-page * {
-    visibility: visible;
-  }
-
-  .syc-card {
-    visibility: visible;
-    width: 4in !important;
-    min-height: 6.5in !important;
-    max-width: none !important;
-    font-size: 7.5pt !important;
-    border: 1px solid #999 !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
-    flex-shrink: 0;
-  }
-
-  /* Scale down internal table fonts to fit 4in width */
-  .syc-tbl {
-    font-size: 7pt !important;
-  }
-
-  .syc-th, .syc-td {
-    font-size: 7pt !important;
-    padding: 2px 4px !important;
-  }
-
-  .syc-td-club { font-size: 7pt !important; }
-  .syc-td-num  { font-size: 7pt !important; }
-  .syc-td-adj  { font-size: 7pt !important; }
-
-  /* Ink-friendly: replace heavy dark backgrounds with light tints */
-  .syc-card-header {
-    background: #E8F2EC !important;
-    border-bottom: 2px solid #3D6B50 !important;
-  }
-
-  .syc-card-title {
-    color: #1E3A2A !important;
-  }
-
-  .syc-card-title-accent {
-    color: #8B6914 !important;
-  }
-
-  .syc-card-meta {
-    color: #3D6B50 !important;
-    opacity: 1 !important;
-  }
-
-  .syc-pill {
-    background: rgba(0,0,0,0.04) !important;
-    border-color: rgba(100,80,0,0.3) !important;
-    color: #3D2A00 !important;
-  }
-
-  .syc-tbl-head,
-  .syc-tbl-divider {
-    background: #D8EAE0 !important;
-    color: #1E3A2A !important;
-    border-color: #3D6B50 !important;
-  }
-
-  .syc-tbl-head-amber {
-    background: #F0E4C0 !important;
-  }
-
-  .syc-th {
-    background: #D8EAE0 !important;
-    color: #1E3A2A !important;
-  }
-
-  .syc-th-amber {
-    background: #F0E4C0 !important;
-    color: #3D2A00 !important;
-  }
-
-  .syc-th-anchor {
-    background: #D8EAE0 !important;
-    color: #1E3A2A !important;
-  }
-
-  .syc-th-temp {
-    background: #F5ECD0 !important;
-    color: #5A3800 !important;
-  }
-
-  .syc-th-head, .syc-th-head-spd {
-    background: #F5D8D8 !important;
-    color: #5A1A1A !important;
-  }
-
-  .syc-th-tail, .syc-th-tail-spd {
-    background: #D8E4F5 !important;
-    color: #1A3A5A !important;
-  }
-
-  .syc-card-footer {
-    background: #E8F2EC !important;
-    border-top-color: rgba(60,100,70,0.3) !important;
-  }
-
-  .syc-footer-note, .syc-leg {
-    color: #3D6B50 !important;
-    opacity: 1 !important;
-  }
-
-  .syc-card-top {
-    grid-template-columns: 140px 1fr !important;
-  }
+  #syc-print-page * { visibility: visible; }
 
   * {
     -webkit-print-color-adjust: exact !important;
@@ -385,7 +35,7 @@
   }
 
   @page {
-    size: 8.5in 11in portrait;
+    size: letter landscape;
     margin: 0.25in;
   }
 }
