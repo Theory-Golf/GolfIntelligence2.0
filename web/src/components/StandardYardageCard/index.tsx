@@ -506,38 +506,56 @@ export default function StandardYardageCard() {
       {/* ── FORM ── */}
       <div>
 
-        {/* Bag */}
+        {/* Bag — 2-column grid */}
         <div className="syc-group">
           <div className="syc-group-header">① My Bag — Standard Carry Distances</div>
-          <div style={{ padding: '12px 16px' }}>
-            <div className="syc-bag-header">
-              <span>Club</span>
-              <span>Carry (yds)</span>
-            </div>
-            <div className="syc-bag-grid">
-              {clubs.map((club, idx) => (
-                <div key={idx} className="syc-club-row">
-                  <select
-                    className="syc-club-select"
-                    value={club.id}
-                    onChange={(e) => handleClubChange(idx, 'id', e.target.value)}
-                    aria-label={`Club ${idx + 1}`}
-                  >
-                    {CLUB_OPTIONS.map((opt) => (
-                      <option key={opt.id} value={opt.id}>{opt.name}</option>
-                    ))}
-                  </select>
-                  <input
-                    className="syc-dist-input"
-                    type="number" min={0} max={400}
-                    value={club.id === '' ? '' : club.dist}
-                    disabled={club.id === ''}
-                    onChange={(e) => handleClubChange(idx, 'dist', e.target.value)}
-                    aria-label={`Distance for club ${idx + 1}`}
-                  />
-                </div>
-              ))}
-            </div>
+          {/* Two column headers */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
+            {[0, 1].map((col) => (
+              <div
+                key={col}
+                className="syc-bag-header"
+                style={{
+                  margin: 0,
+                  padding: '6px 0 6px',
+                  borderRight: col === 0 ? '1px solid var(--border-color)' : 'none',
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 80px',
+                }}
+              >
+                <span style={{ paddingLeft: 10 }}>Club</span>
+                <span style={{ textAlign: 'right', paddingRight: 12 }}>Yds</span>
+              </div>
+            ))}
+          </div>
+          {/* Two-across club rows */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
+            {clubs.map((club, idx) => (
+              <div
+                key={idx}
+                className="syc-club-row"
+                style={{ borderRight: idx % 2 === 0 ? '1px solid var(--border-color)' : 'none' }}
+              >
+                <select
+                  className="syc-club-select"
+                  value={club.id}
+                  onChange={(e) => handleClubChange(idx, 'id', e.target.value)}
+                  aria-label={`Club ${idx + 1}`}
+                >
+                  {CLUB_OPTIONS.map((opt) => (
+                    <option key={opt.id} value={opt.id}>{opt.name}</option>
+                  ))}
+                </select>
+                <input
+                  className="syc-dist-input"
+                  type="number" min={0} max={400}
+                  value={club.id === '' ? '' : club.dist}
+                  disabled={club.id === ''}
+                  onChange={(e) => handleClubChange(idx, 'dist', e.target.value)}
+                  aria-label={`Distance for club ${idx + 1}`}
+                />
+              </div>
+            ))}
           </div>
         </div>
 
@@ -616,9 +634,8 @@ export default function StandardYardageCard() {
           <div className="syc-preview-scroll">
             <YardageCardOutput data={cardData} courseName={courseName} cardDate={cardDate} />
           </div>
-          {/* Print page: two cards side-by-side — hidden on screen, visible when printing */}
+          {/* Print page: single card — hidden on screen, visible when printing */}
           <div id="syc-print-page" aria-hidden="true">
-            <YardageCardOutput data={cardData} courseName={courseName} cardDate={cardDate} />
             <YardageCardOutput data={cardData} courseName={courseName} cardDate={cardDate} />
           </div>
           <button className="wyc-btn-primary" style={{ marginTop: 16, display: 'block' }} onClick={() => window.print()}>

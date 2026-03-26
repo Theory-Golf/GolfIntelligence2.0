@@ -366,9 +366,8 @@ export default function YardageCardPrint({ clubs, wedges, wx, courseName, roundD
         <SingleCard {...cardProps} />
       </div>
 
-      {/* Print page — hidden on screen, shown when printing via WeatherYardageCard.css */}
+      {/* Print page — single card, hidden on screen, shown when printing */}
       <div id="wyc-print-page" aria-hidden="true">
-        <SingleCard {...cardProps} />
         <SingleCard {...cardProps} />
       </div>
     </>

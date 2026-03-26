@@ -63,19 +63,34 @@ export default function StepMyBag({ clubs, setClubs }) {
         The card will calculate weather-adjusted yardages automatically.
       </p>
 
-      <div className="wyc-bag-header">
-        <span>Club</span>
-        <span>Carry (yds)</span>
+      {/* Two column headers */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
+        {[0, 1].map((col) => (
+          <div
+            key={col}
+            className="wyc-bag-header"
+            style={{
+              margin: 0,
+              borderRight: col === 0 ? '1px solid var(--border-color)' : 'none',
+              display: 'grid',
+              gridTemplateColumns: '150px 1fr',
+            }}
+          >
+            <span>Club</span>
+            <span style={{ textAlign: 'right', paddingRight: 4 }}>Carry (yds)</span>
+          </div>
+        ))}
       </div>
 
-      <div className="wyc-bag-grid">
+      {/* Two-across club rows */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
         {clubs.map((club, idx) => {
           const isEmpty = club.id === '';
           return (
             <div
               key={idx}
               className="wyc-club-row"
-              style={{ background: idx % 2 === 0 ? 'transparent' : 'var(--surface)' }}
+              style={{ borderRight: idx % 2 === 0 ? '1px solid var(--border-color)' : 'none' }}
             >
               <select
                 className="wyc-input wyc-club-select"
