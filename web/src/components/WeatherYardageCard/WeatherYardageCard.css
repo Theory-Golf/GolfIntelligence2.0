@@ -5,14 +5,18 @@
    ============================================================= */
 
 @media print {
+  /* Collapse body height so browser generates only one page */
+  html, body {
+    overflow: hidden !important;
+    height: 100% !important;
+  }
+
   body { visibility: hidden; }
 
+  /* Show single card, fixed at top-left */
   #wyc-print-page {
     visibility: visible;
-    display: flex !important;
-    flex-direction: row;
-    align-items: flex-start;
-    gap: 0.25in;
+    display: block !important;
     position: fixed;
     top: 0;
     left: 0;
@@ -28,7 +32,7 @@
   }
 
   @page {
-    size: letter landscape;
-    margin: 0.25in;
+    size: letter portrait;
+    margin: 0.5in;
   }
 }
