@@ -370,6 +370,32 @@ export const ACTIVITIES: Activity[] = [
       },
     ],
   },
+
+  {
+    id: 'approach-standard',
+    name: 'Approach Standard',
+    category: 'approach',
+    type: 'skill_assessment',
+    description:
+      'A periodized assessment for full iron and hybrid shots from 125–210 yards. Five tiers anchored to PGA Tour proximity data. Binary scoring — Inside or Outside. Difficulty adjusts automatically as you improve.',
+    connected_drivers: [
+      {
+        driver_id: 'A1',
+        connection:
+          'Benchmarks GIR rate per distance band against tier-anchored proximity rings',
+      },
+      {
+        driver_id: 'A2',
+        connection:
+          'Scores proximity rate in approach scoring zones; tier system tightens rings as proximity improves',
+      },
+      {
+        driver_id: 'A4',
+        connection:
+          'Stratified random yardages expose the distance band black hole reliably across sessions',
+      },
+    ],
+  },
 ];
 
 /**
