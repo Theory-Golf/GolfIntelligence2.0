@@ -14,3 +14,5 @@ export const LS_HOME_ZIP = 'yc4_homezip';
 // ── Round Simulation ───────────────────────────────────────────────────
 export const LS_PUTTING_SESSIONS = 'putting-sessions';
 export const LS_PUTTING_PUTTERS = 'putting-putters';
+
+export const LS_INSIDE_TEN = 'theory.golf:player-path:inside-ten:v1';
