@@ -396,6 +396,18 @@ export const ACTIVITIES: Activity[] = [
       },
     ],
   },
+
+  // ── DRIVING ──────────────────────────────────────────────────────────
+
+  {
+    id: 'driver-standard',
+    name: 'Driver Standard',
+    category: 'driving',
+    type: 'skill_assessment',
+    description:
+      'A periodized practice protocol for off-the-tee accuracy. Five tiers anchored to PGA Tour fairway widths and USGA scratch standards. Binary scoring — every shot is Hit or Miss. Optional shape mode adds randomized Draw / Fade calls for contextual-interference training.',
+    connected_drivers: [],
+  },
 ];
 
 /**
