@@ -426,7 +426,7 @@ function DrillSetup({ player, sessions, patterns, showShapePrompt, onDismissProm
         <div style={{ background: 'rgba(232,32,42,.06)', border: '1px solid rgba(232,32,42,.4)', borderRadius: 'var(--radius-xl)', padding: '18px 18px 16px', marginBottom: 24 }} className="as-slide-up">
           <div className="as-eyebrow" style={{ marginBottom: 10 }}>READY TO BUILD ON THIS</div>
           <div style={{ fontSize: 14, color: 'var(--chalk)', lineHeight: 1.65 }}>
-            You've passed your last two sessions at <strong style={{ fontWeight: 500 }}>{tier.name}</strong> with Shot Shape mode off. That's a good signal — your accuracy is repeatable at this distance.
+            You&rsquo;ve passed your last two sessions at <strong style={{ fontWeight: 500 }}>{tier.name}</strong> with Shot Shape mode off. That&rsquo;s a good signal — your accuracy is repeatable at this distance.
           </div>
           <div style={{ fontSize: 13, color: 'var(--cement)', lineHeight: 1.65, marginTop: 10 }}>
             Adding Shot Shape mode now will make practice feel harder, but contextual interference research shows that performance feeling worse during practice is the mechanism that produces better transfer to the course. The brain learns more when each shot requires a fresh decision.
@@ -456,7 +456,7 @@ function DrillSetup({ player, sessions, patterns, showShapePrompt, onDismissProm
         {shotCount === 5 && (
           <div style={{ marginTop: 10, fontSize: 12, color: 'var(--bogey)', display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--bogey)', display: 'inline-block' }} />
-            Quick check sessions don't count toward streaks
+            Quick check sessions don&rsquo;t count toward streaks
           </div>
         )}
       </div>
@@ -718,7 +718,7 @@ function ShotCard({ session, onLogShot, onAbort }) {
         <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 22, zIndex: 20 }}>
           <div style={{ background: 'var(--shadow)', padding: 24, maxWidth: 320, width: '100%', border: '1px solid rgba(255,255,255,.1)', borderRadius: 'var(--radius-xl)' }}>
             <div style={{ fontSize: 22, color: 'var(--chalk)', fontFamily: 'var(--font-body)', fontWeight: 500 }}>End session?</div>
-            <div style={{ color: 'var(--ash)', fontSize: 14, marginTop: 10, lineHeight: 1.6 }}>This session will be discarded and won't count toward your streak.</div>
+            <div style={{ color: 'var(--ash)', fontSize: 14, marginTop: 10, lineHeight: 1.6 }}>This session will be discarded and won&rsquo;t count toward your streak.</div>
             <div style={{ display: 'flex', gap: 8, marginTop: 24 }}>
               <button className="as-btn-outline" style={{ flex: 1 }} onClick={() => setShowAbortModal(false)}>Keep going</button>
               <button className="as-btn-primary" style={{ flex: 1 }} onClick={onAbort}>End</button>
