@@ -40,7 +40,6 @@ export default function InsideTenPlay() {
   function handleSave() {
     const session = addSession(score, date);
     setSavedSession(session);
-    // Reload prev sessions excluding the one just saved for delta calcs
     if (isStorageAvailable()) {
       setPrevSessions(loadSessions().filter(s => s.id !== session.id));
     }
@@ -55,7 +54,7 @@ export default function InsideTenPlay() {
     <div className="min-h-[60vh] flex flex-col">
       {/* ── Score input ──────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-16">
-        <p className="font-mono text-[10px] tracking-[0.3em] uppercase mb-10" style={{ color: 'var(--ash)' }}>
+        <p className="font-mono text-[10px] tracking-[0.3em] uppercase text-ash mb-10">
           Putts Made
         </p>
 
@@ -65,8 +64,7 @@ export default function InsideTenPlay() {
             onClick={decrement}
             disabled={score === 0}
             aria-label="Decrease score"
-            className="w-14 h-14 rounded-full flex items-center justify-center transition-opacity disabled:opacity-20"
-            style={{ background: 'var(--shadow)', border: '1px solid var(--pitch)', color: 'var(--cement)' }}
+            className="w-14 h-14 rounded-full flex items-center justify-center bg-shadow border border-pitch text-cement transition-opacity disabled:opacity-20"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M5 12h14" />
@@ -75,12 +73,12 @@ export default function InsideTenPlay() {
 
           <div className="text-center min-w-[120px]">
             <div
-              className="font-display font-extrabold leading-none"
-              style={{ fontSize: 'clamp(80px, 18vw, 120px)', color: 'var(--chalk)', letterSpacing: '-0.03em' }}
+              className="font-display font-extrabold leading-none text-chalk"
+              style={{ fontSize: 'clamp(80px, 18vw, 120px)', letterSpacing: '-0.03em' }}
             >
               {score}
             </div>
-            <div className="font-mono text-[11px] tracking-[0.2em] uppercase mt-1" style={{ color: 'var(--ash)' }}>
+            <div className="font-mono text-[11px] tracking-[0.2em] uppercase text-ash mt-1">
               out of 18
             </div>
           </div>
@@ -89,8 +87,7 @@ export default function InsideTenPlay() {
             onClick={increment}
             disabled={score === 18}
             aria-label="Increase score"
-            className="w-14 h-14 rounded-full flex items-center justify-center transition-opacity disabled:opacity-20"
-            style={{ background: 'var(--shadow)', border: '1px solid var(--pitch)', color: 'var(--cement)' }}
+            className="w-14 h-14 rounded-full flex items-center justify-center bg-shadow border border-pitch text-cement transition-opacity disabled:opacity-20"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M12 5v14M5 12h14" />
@@ -100,7 +97,7 @@ export default function InsideTenPlay() {
 
         {/* Date picker */}
         <div className="flex flex-col items-center gap-2 mb-12">
-          <label className="font-mono text-[10px] tracking-[0.2em] uppercase" style={{ color: 'var(--ash)' }}>
+          <label className="font-mono text-[10px] tracking-[0.2em] uppercase text-ash">
             Date
           </label>
           <input
@@ -108,19 +105,14 @@ export default function InsideTenPlay() {
             value={date}
             max={maxDate()}
             onChange={e => setDate(e.target.value)}
-            className="px-4 py-2 rounded font-mono text-sm text-center appearance-none"
-            style={{
-              background: 'var(--shadow)',
-              border: '1px solid var(--pitch)',
-              color: 'var(--chalk)',
-              colorScheme: 'dark',
-            }}
+            className="px-4 py-2 rounded font-mono text-sm text-center appearance-none bg-shadow border border-pitch text-chalk"
+            style={{ colorScheme: 'dark' }}
           />
         </div>
 
         {/* Storage warning */}
         {!storageAvail && (
-          <p className="font-mono text-[10px] tracking-wider text-center mb-6" style={{ color: 'var(--bogey)' }}>
+          <p className="font-mono text-[10px] tracking-wider text-center mb-6 text-bogey">
             History won&apos;t be saved — private browsing detected.
           </p>
         )}
@@ -128,8 +120,7 @@ export default function InsideTenPlay() {
         {/* Save CTA */}
         <button
           onClick={handleSave}
-          className="font-display font-bold text-sm uppercase tracking-[0.15em] px-10 py-4 rounded transition-opacity hover:opacity-90"
-          style={{ background: 'var(--scarlet)', color: '#fff' }}
+          className="font-display font-bold text-sm uppercase tracking-[0.15em] px-10 py-4 rounded bg-scarlet text-white transition-opacity hover:opacity-90"
         >
           Save Session
         </button>
@@ -162,63 +153,65 @@ function ResultView({ session, prevSessions, onDone }: ResultViewProps) {
     return d > 0 ? `+${d}` : `${d}`;
   }
 
-  function deltaColor(d: number | null): string {
-    if (d === null || d === 0) return 'var(--ash)';
-    return d > 0 ? 'var(--sg-strong)' : 'var(--sg-weak)';
+  function deltaClass(d: number | null): string {
+    if (d === null || d === 0) return 'text-ash';
+    return d > 0 ? 'text-sg-strong' : 'text-sg-weak';
   }
 
   return (
     <div className="flex flex-col items-center px-6 py-16 min-h-[70vh]">
       {/* Score */}
       <div className="text-center mb-8">
-        <div className="font-display font-extrabold leading-none mb-2" style={{ fontSize: 'clamp(72px, 16vw, 108px)', color: 'var(--scarlet)', letterSpacing: '-0.03em' }}>
+        <div
+          className="font-display font-extrabold leading-none text-scarlet mb-2"
+          style={{ fontSize: 'clamp(72px, 16vw, 108px)', letterSpacing: '-0.03em' }}
+        >
           {session.score}
-          <span className="font-body font-light" style={{ fontSize: 'clamp(28px, 6vw, 44px)', color: 'var(--ash)', letterSpacing: 0 }}>/18</span>
+          <span
+            className="font-body font-light text-ash"
+            style={{ fontSize: 'clamp(28px, 6vw, 44px)', letterSpacing: 0 }}
+          >
+            /18
+          </span>
         </div>
-        <div className="font-mono text-[10px] tracking-widest uppercase" style={{ color: 'var(--ash)' }}>
+        <div className="font-mono text-[10px] tracking-widest uppercase text-ash">
           {formatDate(session.date)}
         </div>
       </div>
 
       {/* Tier badge */}
-      <div
-        className="inline-flex flex-col items-center px-8 py-4 rounded mb-6"
-        style={{ background: meta.bgColor, border: `1px solid ${meta.color}44` }}
-      >
-        <span className="font-display font-bold text-xl uppercase tracking-wider mb-1" style={{ color: meta.color }}>
+      <div className={`inline-flex flex-col items-center px-8 py-4 rounded mb-6 border ${meta.bgClass} ${meta.borderClass}`}>
+        <span className={`font-display font-bold text-xl uppercase tracking-wider mb-1 ${meta.textClass}`}>
           {meta.label}
         </span>
-        <span className="font-body text-[12px] text-center max-w-[260px] leading-relaxed" style={{ color: 'var(--cement)' }}>
+        <span className="font-body text-[12px] text-center max-w-[260px] leading-relaxed text-cement">
           {meta.copy}
         </span>
       </div>
 
       {/* SG */}
       <div className="mb-10">
-        <span className="font-mono text-base tracking-wider" style={{ color: meta.color }}>
+        <span className={`font-mono text-base tracking-wider ${meta.textClass}`}>
           {formatSG(session.sg)} SG
         </span>
-        <span className="font-mono text-[10px] tracking-wider ml-2" style={{ color: 'var(--ash)' }}>
+        <span className="font-mono text-[10px] tracking-wider ml-2 text-ash">
           (est.)
         </span>
       </div>
 
       {/* Deltas */}
       {prevSessions.length > 0 && (
-        <div
-          className="w-full max-w-sm mb-10 rounded divide-y"
-          style={{ background: 'var(--shadow)', border: '1px solid var(--pitch)', divideColor: 'var(--pitch)' }}
-        >
+        <div className="w-full max-w-sm mb-10 rounded bg-shadow border border-pitch divide-y divide-pitch">
           {[
-            { label: 'vs Previous', value: deltaPrev },
-            { label: 'vs Last 5 Avg', value: deltaAvg != null ? Math.round(deltaAvg * 10) / 10 : null },
+            { label: 'vs Previous',     value: deltaPrev },
+            { label: 'vs Last 5 Avg',   value: deltaAvg != null ? Math.round(deltaAvg * 10) / 10 : null },
             { label: 'vs Personal Best', value: deltaPB },
           ].map(({ label, value }) => (
             <div key={label} className="flex justify-between items-center px-5 py-3">
-              <span className="font-mono text-[10px] tracking-wider uppercase" style={{ color: 'var(--ash)' }}>
+              <span className="font-mono text-[10px] tracking-wider uppercase text-ash">
                 {label}
               </span>
-              <span className="font-display font-bold text-base" style={{ color: deltaColor(value) }}>
+              <span className={`font-display font-bold text-base ${deltaClass(typeof value === 'number' ? Math.round(value) : value)}`}>
                 {fmtDelta(typeof value === 'number' ? Math.round(value) : value)}
               </span>
             </div>
@@ -230,15 +223,13 @@ function ResultView({ session, prevSessions, onDone }: ResultViewProps) {
       <div className="flex flex-col gap-3 w-full max-w-sm">
         <Link
           href="/player-path/putting/inside-ten/history"
-          className="w-full text-center font-display font-bold text-sm uppercase tracking-[0.15em] px-8 py-4 rounded transition-opacity hover:opacity-90"
-          style={{ background: 'var(--scarlet)', color: '#fff' }}
+          className="w-full text-center font-display font-bold text-sm uppercase tracking-[0.15em] px-8 py-4 rounded bg-scarlet text-white transition-opacity hover:opacity-90"
         >
           View History
         </Link>
         <button
           onClick={onDone}
-          className="w-full font-display font-bold text-sm uppercase tracking-[0.15em] px-8 py-4 rounded transition-colors"
-          style={{ background: 'var(--shadow)', border: '1px solid var(--pitch)', color: 'var(--cement)' }}
+          className="w-full font-display font-bold text-sm uppercase tracking-[0.15em] px-8 py-4 rounded bg-shadow border border-pitch text-cement transition-colors hover:text-chalk"
         >
           Done
         </button>

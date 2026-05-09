@@ -25,6 +25,7 @@ import {
   formatDate,
 } from '@/lib/inside-ten/stats';
 import type { InsideTenSession } from '@/lib/inside-ten/types';
+import type { Tier } from '@/lib/inside-ten/types';
 
 // ── Custom chart tooltip ─────────────────────────────────────────────────────
 
@@ -32,23 +33,21 @@ function ScoreTooltip({ active, payload, label }: { active?: boolean; payload?: 
   if (!active || !payload?.length) return null;
   const score = payload[0].value;
   return (
-    <div
-      className="px-3 py-2 rounded text-left"
-      style={{ background: 'var(--shadow)', border: '1px solid var(--pitch)' }}
-    >
-      <div className="font-mono text-[10px] tracking-wider mb-1" style={{ color: 'var(--ash)' }}>
+    <div className="px-3 py-2 rounded text-left bg-shadow border border-pitch">
+      <div className="font-mono text-[10px] tracking-wider text-ash mb-1">
         Session {label}
       </div>
-      <div className="font-display font-bold text-lg leading-none" style={{ color: 'var(--chalk)' }}>
-        {score}<span style={{ color: 'var(--ash)', fontSize: '11px', fontFamily: 'var(--font-body)', fontWeight: 300 }}>/18</span>
+      <div className="font-display font-bold text-lg leading-none text-chalk">
+        {score}
+        <span className="font-body font-light text-ash" style={{ fontSize: '11px' }}>/18</span>
       </div>
     </div>
   );
 }
 
-// ── Tier donut ───────────────────────────────────────────────────────────────
+// ── Tier order for consistent rendering ──────────────────────────────────────
 
-const TIER_ORDER = ['elite', 'tour', 'competitive', 'developing'] as const;
+const TIER_ORDER: Tier[] = ['elite', 'tour', 'competitive', 'developing'];
 
 // ── Main component ───────────────────────────────────────────────────────────
 
@@ -88,10 +87,10 @@ export default function InsideTenHistory() {
     .sort((a, b) => a.timestamp - b.timestamp)
     .map((s, i) => ({ session: i + 1, score: s.score, date: formatDate(s.date) }));
 
-  // Donut data
+  // Donut data — use chartColor (CSS var) for Recharts SVG fill
   const donutData = TIER_ORDER
     .filter(t => counts[t] > 0)
-    .map(t => ({ name: TIER_META[t].label, value: counts[t], color: TIER_META[t].color }));
+    .map(t => ({ name: TIER_META[t].label, value: counts[t], chartColor: TIER_META[t].chartColor }));
 
   return (
     <div className="px-6 py-12">
@@ -101,45 +100,40 @@ export default function InsideTenHistory() {
         <div>
           <p className="section-label mb-6">Summary</p>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {[
-              { label: 'All-Time Best', value: pb != null ? `${pb}/18` : '—' },
-              { label: 'Last 10 Avg', value: avg10 != null ? avg10.toFixed(1) : '—' },
-              { label: 'Sessions', value: sessions.length > 0 ? String(sessions.length) : '—' },
-              {
-                label: 'Current Tier',
-                value: tierMeta?.label ?? '—',
-                color: tierMeta?.color,
-              },
-            ].map(({ label, value, color }) => (
-              <div
-                key={label}
-                className="p-4 rounded"
-                style={{ background: 'var(--shadow)', border: '1px solid var(--pitch)' }}
-              >
-                <div className="font-mono text-[9px] tracking-[0.2em] uppercase mb-2" style={{ color: 'var(--ash)' }}>
-                  {label}
-                </div>
-                <div
-                  className="font-display font-extrabold text-xl leading-none"
-                  style={{ color: color ?? 'var(--chalk)' }}
-                >
-                  {value}
-                </div>
+            <div className="p-4 rounded bg-shadow border border-pitch">
+              <div className="font-mono text-[9px] tracking-[0.2em] uppercase text-ash mb-2">All-Time Best</div>
+              <div className="font-display font-extrabold text-xl leading-none text-chalk">
+                {pb != null ? `${pb}/18` : '—'}
               </div>
-            ))}
+            </div>
+            <div className="p-4 rounded bg-shadow border border-pitch">
+              <div className="font-mono text-[9px] tracking-[0.2em] uppercase text-ash mb-2">Last 10 Avg</div>
+              <div className="font-display font-extrabold text-xl leading-none text-chalk">
+                {avg10 != null ? avg10.toFixed(1) : '—'}
+              </div>
+            </div>
+            <div className="p-4 rounded bg-shadow border border-pitch">
+              <div className="font-mono text-[9px] tracking-[0.2em] uppercase text-ash mb-2">Sessions</div>
+              <div className="font-display font-extrabold text-xl leading-none text-chalk">
+                {sessions.length > 0 ? sessions.length : '—'}
+              </div>
+            </div>
+            <div className="p-4 rounded bg-shadow border border-pitch">
+              <div className="font-mono text-[9px] tracking-[0.2em] uppercase text-ash mb-2">Current Tier</div>
+              <div className={`font-display font-extrabold text-xl leading-none ${tierMeta?.textClass ?? 'text-chalk'}`}>
+                {tierMeta?.label ?? '—'}
+              </div>
+            </div>
           </div>
         </div>
 
         {/* ── Empty state or charts ─────────────────────────────── */}
         {!hasTrend ? (
-          <div
-            className="p-10 rounded text-center"
-            style={{ background: 'var(--shadow)', border: '1px solid var(--pitch)' }}
-          >
-            <p className="font-display font-bold text-base uppercase tracking-wider mb-2" style={{ color: 'var(--cement)' }}>
+          <div className="p-10 rounded text-center bg-shadow border border-pitch">
+            <p className="font-display font-bold text-base uppercase tracking-wider text-cement mb-2">
               {sessions.length === 0 ? 'No Sessions Yet' : 'Log a Few More Sessions'}
             </p>
-            <p className="font-body text-sm" style={{ color: 'var(--ash)' }}>
+            <p className="font-body text-sm text-ash">
               {sessions.length === 0
                 ? 'Complete your first Inside Ten session to start tracking performance.'
                 : 'Log a few more sessions to unlock trend analysis.'}
@@ -150,10 +144,7 @@ export default function InsideTenHistory() {
             {/* ── Trend chart ───────────────────────────────────── */}
             <div>
               <p className="section-label mb-6">Score Trend</p>
-              <div
-                className="p-4 rounded"
-                style={{ background: 'var(--shadow)', border: '1px solid var(--pitch)' }}
-              >
+              <div className="p-4 rounded bg-shadow border border-pitch">
                 <ResponsiveContainer width="100%" height={220}>
                   <LineChart data={chartData} margin={{ top: 12, right: 12, left: -20, bottom: 0 }}>
                     <CartesianGrid stroke="var(--pitch)" strokeDasharray="0" vertical={false} />
@@ -172,21 +163,22 @@ export default function InsideTenHistory() {
                       tickLine={false}
                     />
                     <Tooltip content={<ScoreTooltip />} cursor={{ stroke: 'var(--pitch)', strokeWidth: 1 }} />
-                    {/* Tour baseline reference */}
+                    {/* Tour baseline reference — SVG prop, keep as CSS var */}
                     <ReferenceLine
                       y={12}
-                      stroke="var(--sg-gain)"
+                      stroke="var(--color-sg-gain)"
                       strokeDasharray="4 4"
                       strokeWidth={1}
-                      label={{ value: 'TOUR', position: 'insideTopRight', fontFamily: 'var(--font-mono)', fontSize: 8, fill: 'var(--sg-gain)', letterSpacing: '0.15em' }}
+                      label={{ value: 'TOUR', position: 'insideTopRight', fontFamily: 'var(--font-mono)', fontSize: 8, fill: 'var(--color-sg-gain)', letterSpacing: '0.15em' }}
                     />
+                    {/* SVG stroke prop — keep as CSS var */}
                     <Line
                       type="monotone"
                       dataKey="score"
-                      stroke="var(--c1)"
+                      stroke="var(--color-c1)"
                       strokeWidth={2}
-                      dot={{ fill: 'var(--c1)', r: 3, strokeWidth: 0 }}
-                      activeDot={{ fill: 'var(--c1)', r: 5, strokeWidth: 0 }}
+                      dot={{ fill: 'var(--color-c1)', r: 3, strokeWidth: 0 }}
+                      activeDot={{ fill: 'var(--color-c1)', r: 5, strokeWidth: 0 }}
                     />
                   </LineChart>
                 </ResponsiveContainer>
@@ -196,11 +188,8 @@ export default function InsideTenHistory() {
             {/* ── Tier breakdown ────────────────────────────────── */}
             <div>
               <p className="section-label mb-6">Tier Breakdown</p>
-              <div
-                className="p-6 rounded flex flex-col sm:flex-row items-center gap-8"
-                style={{ background: 'var(--shadow)', border: '1px solid var(--pitch)' }}
-              >
-                {/* Donut */}
+              <div className="p-6 rounded bg-shadow border border-pitch flex flex-col sm:flex-row items-center gap-8">
+                {/* Donut — SVG fill props, keep chartColor CSS vars */}
                 <div className="shrink-0">
                   <PieChart width={160} height={160}>
                     <Pie
@@ -213,7 +202,7 @@ export default function InsideTenHistory() {
                       dataKey="value"
                     >
                       {donutData.map((entry, i) => (
-                        <Cell key={i} fill={entry.color} stroke="var(--shadow)" strokeWidth={2} />
+                        <Cell key={i} fill={entry.chartColor} stroke="var(--shadow)" strokeWidth={2} />
                       ))}
                     </Pie>
                   </PieChart>
@@ -226,11 +215,11 @@ export default function InsideTenHistory() {
                     const pct = Math.round((counts[t] / sessions.length) * 100);
                     return (
                       <div key={t} className="flex items-center gap-3">
-                        <div className="w-2 h-2 rounded-full shrink-0" style={{ background: m.color }} />
-                        <span className="font-mono text-[10px] tracking-wider uppercase flex-1" style={{ color: 'var(--cement)' }}>
+                        <div className={`w-2 h-2 rounded-full shrink-0 ${m.bgClass.replace('/10', '')}`} style={{ background: m.chartColor }} />
+                        <span className="font-mono text-[10px] tracking-wider uppercase flex-1 text-cement">
                           {m.label}
                         </span>
-                        <span className="font-mono text-[10px] tracking-wider" style={{ color: 'var(--ash)' }}>
+                        <span className="font-mono text-[10px] tracking-wider text-ash">
                           {counts[t]} ({pct}%)
                         </span>
                       </div>
@@ -246,17 +235,11 @@ export default function InsideTenHistory() {
         {sessions.length > 0 && (
           <div>
             <p className="section-label mb-6">Session Log</p>
-            <div
-              className="rounded overflow-hidden"
-              style={{ border: '1px solid var(--pitch)' }}
-            >
+            <div className="rounded overflow-hidden border border-pitch">
               {/* Table header */}
-              <div
-                className="grid grid-cols-[auto_1fr_1fr_1fr_auto] gap-4 px-5 py-3"
-                style={{ background: 'var(--obsidian)', borderBottom: '1px solid var(--pitch)' }}
-              >
+              <div className="grid grid-cols-[auto_1fr_1fr_1fr_auto] gap-4 px-5 py-3 bg-obsidian border-b border-pitch">
                 {['Date', 'Score', 'SG', 'Tier', ''].map((h, i) => (
-                  <span key={i} className="font-mono text-[9px] tracking-[0.2em] uppercase" style={{ color: 'var(--ash)' }}>
+                  <span key={i} className="font-mono text-[9px] tracking-[0.2em] uppercase text-ash">
                     {h}
                   </span>
                 ))}
@@ -269,22 +252,18 @@ export default function InsideTenHistory() {
                 return (
                   <div
                     key={s.id}
-                    className="grid grid-cols-[auto_1fr_1fr_1fr_auto] gap-4 px-5 py-3 items-center"
-                    style={{
-                      borderBottom: i < sessions.length - 1 ? '1px solid var(--pitch)' : 'none',
-                      background: i % 2 === 0 ? 'var(--shadow)' : 'var(--obsidian)',
-                    }}
+                    className={`grid grid-cols-[auto_1fr_1fr_1fr_auto] gap-4 px-5 py-3 items-center ${i < sessions.length - 1 ? 'border-b border-pitch' : ''} ${i % 2 === 0 ? 'bg-shadow' : 'bg-obsidian'}`}
                   >
-                    <span className="font-mono text-[10px] tracking-wider" style={{ color: 'var(--ash)' }}>
+                    <span className="font-mono text-[10px] tracking-wider text-ash">
                       {formatDate(s.date)}
                     </span>
-                    <span className="font-display font-bold text-sm" style={{ color: 'var(--chalk)' }}>
+                    <span className="font-display font-bold text-sm text-chalk">
                       {s.score}/18
                     </span>
-                    <span className="font-mono text-[11px] tracking-wider" style={{ color: m.color }}>
+                    <span className={`font-mono text-[11px] tracking-wider ${m.textClass}`}>
                       {formatSG(s.sg)}
                     </span>
-                    <span className="font-mono text-[10px] tracking-wider uppercase" style={{ color: m.color }}>
+                    <span className={`font-mono text-[10px] tracking-wider uppercase ${m.textClass}`}>
                       {m.label}
                     </span>
                     <div className="flex items-center gap-2">
@@ -292,15 +271,13 @@ export default function InsideTenHistory() {
                         <>
                           <button
                             onClick={() => handleDelete(s.id)}
-                            className="font-mono text-[10px] tracking-wider px-2 py-1 rounded transition-opacity hover:opacity-70"
-                            style={{ color: 'var(--double)', border: '1px solid var(--double)' }}
+                            className="font-mono text-[10px] tracking-wider px-2 py-1 rounded text-double border border-double transition-opacity hover:opacity-70"
                           >
                             Confirm
                           </button>
                           <button
                             onClick={() => setConfirmDelete(null)}
-                            className="font-mono text-[10px] tracking-wider px-2 py-1 rounded transition-opacity hover:opacity-70"
-                            style={{ color: 'var(--ash)', border: '1px solid var(--pitch)' }}
+                            className="font-mono text-[10px] tracking-wider px-2 py-1 rounded text-ash border border-pitch transition-opacity hover:opacity-70"
                           >
                             Cancel
                           </button>
@@ -309,8 +286,7 @@ export default function InsideTenHistory() {
                         <button
                           onClick={() => setConfirmDelete(s.id)}
                           aria-label="Delete session"
-                          className="p-1 rounded transition-opacity hover:opacity-70"
-                          style={{ color: 'var(--ash)' }}
+                          className="p-1 rounded text-ash transition-opacity hover:opacity-70"
                         >
                           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                             <path d="M3 6h18m-2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
@@ -325,9 +301,9 @@ export default function InsideTenHistory() {
           </div>
         )}
 
-        {/* Avg5 footnote if sessions exist */}
+        {/* Avg5 footnote */}
         {sessions.length > 0 && avg5 !== null && (
-          <p className="font-mono text-[9px] tracking-wider text-center" style={{ color: 'var(--ash)' }}>
+          <p className="font-mono text-[9px] tracking-wider text-center text-ash">
             Current tier based on last-5-session average score ({avg5.toFixed(1)}/18).
             SG values are estimates — true SG depends on which specific distances were made.
           </p>

@@ -42,34 +42,45 @@ export function formatSG(sg: number): string {
 
 export interface TierMeta {
   label: string;
-  color: string;   // CSS custom property reference
-  bgColor: string; // Subtle tint for badge background
+  textClass: string;    // Tailwind text color, e.g. 'text-sg-strong'
+  bgClass: string;      // Tailwind bg with opacity, e.g. 'bg-sg-strong/10'
+  borderClass: string;  // Tailwind border color with opacity, e.g. 'border-sg-strong/20'
+  chartColor: string;   // CSS var for SVG/Recharts props (not a class)
   copy: string;
 }
 
+// Class name strings must appear literally here so Tailwind's scanner includes them.
 export const TIER_META: Readonly<Record<Tier, TierMeta>> = Object.freeze({
   elite: {
     label: 'Elite',
-    color: 'var(--sg-strong)',
-    bgColor: 'rgba(0, 192, 122, 0.12)',
+    textClass: 'text-sg-strong',
+    bgClass: 'bg-sg-strong/10',
+    borderClass: 'border-sg-strong/20',
+    chartColor: 'var(--color-sg-strong)',
     copy: 'Above Tour baseline. Strong putting performance.',
   },
   tour: {
     label: 'Tour',
-    color: 'var(--sg-gain)',
-    bgColor: 'rgba(82, 217, 160, 0.12)',
+    textClass: 'text-sg-gain',
+    bgClass: 'bg-sg-gain/10',
+    borderClass: 'border-sg-gain/20',
+    chartColor: 'var(--color-sg-gain)',
     copy: 'Tour baseline. SG-neutral inside ten.',
   },
   competitive: {
     label: 'Competitive',
-    color: 'var(--bogey)',
-    bgColor: 'rgba(245, 149, 32, 0.12)',
+    textClass: 'text-bogey',
+    bgClass: 'bg-bogey/10',
+    borderClass: 'border-bogey/20',
+    chartColor: 'var(--color-bogey)',
     copy: 'Good performance, slight improvement opportunity.',
   },
   developing: {
     label: 'Developing',
-    color: 'var(--double)',
-    bgColor: 'rgba(232, 32, 42, 0.10)',
+    textClass: 'text-double',
+    bgClass: 'bg-double/10',
+    borderClass: 'border-double/20',
+    chartColor: 'var(--color-double)',
     copy: 'Improvement opportunity — identify root cause (speed, read, start line) and ensure Base Station addresses it.',
   },
 });
