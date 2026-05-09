@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useRef } from 'react';
-import './ApproachStandard.css';
+import { cn } from '@/lib/utils';
 
 // ── Storage helpers ──────────────────────────────────────────────
 const storage = {
@@ -312,44 +312,59 @@ const detectPatterns = (player, sessions) => {
 function TierSelection({ onSelect }) {
   const [picked, setPicked] = useState(null);
   return (
-    <div className="as-slide-up" style={{ padding: '0 22px 32px' }}>
-      <div style={{ paddingTop: 16, paddingBottom: 28 }}>
-        <div className="as-eyebrow">FIRST LAUNCH</div>
-        <h2 style={{ fontSize: 28, lineHeight: 1.2, marginTop: 14, color: 'var(--chalk)', fontFamily: 'var(--font-body)', fontWeight: 500 }}>
+    <div className="animate-slide-up px-[22px] pb-8">
+      <div className="pt-4 pb-7">
+        <p className="eyebrow">FIRST LAUNCH</p>
+        <h2 className="font-body text-[28px] font-medium leading-[1.2] text-foreground mt-3.5">
           Choose your starting tier
         </h2>
-        <p style={{ color: 'var(--ash)', marginTop: 12, fontSize: 14, lineHeight: 1.6, fontWeight: 300 }}>
+        <p className="font-body text-sm font-light text-muted-foreground leading-relaxed mt-3">
           Pick where you want to begin. The system adjusts as you go — three Pass sessions advances you, two Fails pulls you back.
         </p>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div className="flex flex-col gap-2">
         {TIERS.map((tier) => {
           const active = picked === tier.id;
           const ring = ringFor(150, tier.id);
           return (
-            <button key={tier.id} className={`as-tier-btn${active ? ' active' : ''}`} onClick={() => setPicked(tier.id)}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: active ? 'var(--scarlet)' : 'var(--ash)', letterSpacing: '0.15em' }}>T{tier.id}</span>
-                  <span style={{ fontSize: 17, color: 'var(--chalk)', fontWeight: 500 }}>{tier.name}</span>
+            <button
+              key={tier.id}
+              className={cn(
+                'bg-card border border-border p-4 text-left cursor-pointer transition-colors hover:bg-surface w-full font-body',
+                active && 'bg-surface border-primary'
+              )}
+              onClick={() => setPicked(tier.id)}
+            >
+              <div className="flex justify-between items-center">
+                <div className="flex items-baseline gap-3">
+                  <span className={cn('font-mono text-[11px] tracking-[0.15em] transition-colors', active ? 'text-primary' : 'text-muted-foreground')}>
+                    T{tier.id}
+                  </span>
+                  <span className="text-[17px] text-foreground font-medium">{tier.name}</span>
                 </div>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: active ? 'var(--scarlet)' : 'var(--cement)' }}>±{ring} yd</span>
+                <span className={cn('font-mono text-[11px] transition-colors', active ? 'text-primary' : 'text-muted-foreground')}>
+                  ±{ring} yd
+                </span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8, gap: 12, alignItems: 'center' }}>
-                <span style={{ fontSize: 12, color: 'var(--ash)' }}>{tier.handicap}</span>
-                <span style={{ fontSize: 12, color: 'var(--cement)', textAlign: 'right' }}>{tier.desc}</span>
+              <div className="flex justify-between mt-2 gap-3 items-center">
+                <span className="text-xs text-muted-foreground">{tier.handicap}</span>
+                <span className="text-xs text-muted-foreground text-right">{tier.desc}</span>
               </div>
             </button>
           );
         })}
       </div>
 
-      <div style={{ marginTop: 20, fontSize: 11, color: 'var(--ash)', textAlign: 'center', lineHeight: 1.5 }}>
+      <p className="font-mono text-[11px] text-muted-foreground text-center leading-relaxed mt-5">
         Ring at 150 yd shown · scales with distance
-      </div>
-      <div style={{ marginTop: 24 }}>
-        <button className="as-btn-primary" disabled={picked === null} onClick={() => onSelect(picked)}>
+      </p>
+      <div className="mt-6">
+        <button
+          className="w-full py-4 bg-primary text-white font-body font-medium text-[15px] tracking-[0.02em] transition-colors hover:bg-scarlet-dim disabled:bg-border disabled:text-muted-foreground disabled:cursor-not-allowed"
+          disabled={picked === null}
+          onClick={() => onSelect(picked)}
+        >
           Set my tier
         </button>
       </div>
@@ -394,7 +409,7 @@ function DrillSetup({ player, sessions, patterns, showShapePrompt, onDismissProm
       window.removeEventListener('mouseup', up);
       window.removeEventListener('touchend', up);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [draggingHandle, range]);
 
   const minPct = ((range[0] - ABS_MIN) / (ABS_MAX - ABS_MIN)) * 100;
@@ -410,33 +425,39 @@ function DrillSetup({ player, sessions, patterns, showShapePrompt, onDismissProm
   const warningPatterns = patterns ? patterns.filter(p => !p.informational) : [];
 
   return (
-    <div style={{ padding: '0 22px 32px' }}>
+    <div className="px-[22px] pb-8">
       {/* Header */}
-      <div style={{ paddingTop: 16, paddingBottom: 28, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className="pt-4 pb-7 flex justify-between items-center">
         <div>
-          <div className="as-eyebrow">APPROACH STANDARD</div>
-          <div style={{ fontSize: 22, color: 'var(--chalk)', marginTop: 6, fontFamily: 'var(--font-body)', fontWeight: 500 }}>
-            Approach Precision
-          </div>
+          <p className="eyebrow">APPROACH STANDARD</p>
+          <p className="font-body text-[22px] text-foreground font-medium mt-1.5">Approach Precision</p>
         </div>
-        <div className="as-tier-badge">T{tier.id} · {tier.name.split(' ')[0]}</div>
+        <span className="inline-flex items-center px-2.5 py-1 bg-primary/5 border border-primary/30 rounded-full font-mono text-[9px] tracking-[0.2em] uppercase text-primary">
+          T{tier.id} · {tier.name.split(' ')[0]}
+        </span>
       </div>
 
       {/* Shape mode prompt */}
       {showShapePrompt && (
-        <div style={{ background: 'rgba(232,32,42,.06)', border: '1px solid rgba(232,32,42,.4)', borderRadius: 'var(--radius-xl)', padding: '18px 18px 16px', marginBottom: 24 }} className="as-slide-up">
-          <div className="as-eyebrow" style={{ marginBottom: 10 }}>READY TO BUILD ON THIS</div>
-          <div style={{ fontSize: 14, color: 'var(--chalk)', lineHeight: 1.65 }}>
-            You&apos;ve passed your last two sessions at <strong style={{ fontWeight: 500 }}>{tier.name}</strong> with Shot Shape mode off. That&apos;s a good signal — your accuracy is repeatable at this distance.
-          </div>
-          <div style={{ fontSize: 13, color: 'var(--cement)', lineHeight: 1.65, marginTop: 10 }}>
+        <div className="animate-slide-up bg-primary/8 border border-primary/40 p-[18px] mb-6">
+          <p className="eyebrow mb-2.5">READY TO BUILD ON THIS</p>
+          <p className="font-body text-sm text-foreground leading-[1.65]">
+            You&apos;ve passed your last two sessions at <strong className="font-medium">{tier.name}</strong> with Shot Shape mode off. That&apos;s a good signal — your accuracy is repeatable at this distance.
+          </p>
+          <p className="font-body text-[13px] text-muted-foreground leading-[1.65] mt-2.5">
             Adding Shot Shape mode now will make practice feel harder, but contextual interference research shows that performance feeling worse during practice is the mechanism that produces better transfer to the course. The brain learns more when each shot requires a fresh decision.
-          </div>
-          <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-            <button className="as-btn-primary" style={{ padding: '12px 16px', fontSize: 13 }} onClick={() => { setShapeMode(true); onAcceptPrompt(); }}>
+          </p>
+          <div className="flex gap-2 mt-4">
+            <button
+              className="flex-1 py-3 bg-primary text-white font-body font-medium text-[13px] tracking-[0.02em] transition-colors hover:bg-scarlet-dim"
+              onClick={() => { setShapeMode(true); onAcceptPrompt(); }}
+            >
               Try Shot Shape Mode
             </button>
-            <button className="as-btn-outline" style={{ padding: '11px 16px', fontSize: 13 }} onClick={onDismissPrompt}>
+            <button
+              className="flex-1 py-[11px] bg-transparent text-muted-foreground border border-border font-body font-medium text-[13px] transition-colors hover:border-muted-foreground hover:text-foreground"
+              onClick={onDismissPrompt}
+            >
               Not yet
             </button>
           </div>
@@ -444,108 +465,133 @@ function DrillSetup({ player, sessions, patterns, showShapePrompt, onDismissProm
       )}
 
       {/* Shot count */}
-      <div style={{ marginBottom: 28 }}>
-        <div className="as-eyebrow-muted" style={{ marginBottom: 12 }}>SHOTS</div>
-        <div className="as-shot-count-grid">
+      <div className="mb-7">
+        <p className="font-mono text-[10px] tracking-[0.3em] uppercase text-muted-foreground mb-3">SHOTS</p>
+        <div className="grid grid-cols-3 gap-1.5">
           {[{ count: 5, label: 'Quick check' }, { count: 10, label: 'Skill assess' }, { count: 15, label: 'Full assess' }].map(({ count, label }) => (
-            <button key={count} className={`as-shot-count-btn${shotCount === count ? ' active' : ''}`} onClick={() => setShotCount(count)}>
-              <div style={{ fontSize: 26, lineHeight: 1, color: shotCount === count ? 'white' : 'var(--chalk)', fontWeight: 500 }}>{count}</div>
-              <div style={{ fontSize: 11, marginTop: 6, color: shotCount === count ? 'rgba(255,255,255,.85)' : 'var(--ash)' }}>{label}</div>
+            <button
+              key={count}
+              className={cn(
+                'border py-3.5 px-2 cursor-pointer transition-colors text-center font-body',
+                count === shotCount ? 'bg-primary border-transparent' : 'bg-card border-border'
+              )}
+              onClick={() => setShotCount(count)}
+            >
+              <div className={cn('text-[26px] leading-none font-medium', count === shotCount ? 'text-white' : 'text-foreground')}>{count}</div>
+              <div className={cn('text-[11px] mt-1.5', count === shotCount ? 'text-white/85' : 'text-muted-foreground')}>{label}</div>
             </button>
           ))}
         </div>
         {shotCount === 5 && (
-          <div style={{ marginTop: 10, fontSize: 12, color: 'var(--bogey)', display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--bogey)', display: 'inline-block' }} />
+          <div className="flex items-center gap-2 mt-2.5 text-xs text-bogey">
+            <span className="size-1 rounded-full bg-bogey flex-shrink-0" />
             Quick check sessions don&apos;t count toward streaks
           </div>
         )}
       </div>
 
       {/* Distance range */}
-      <div style={{ marginBottom: 28 }}>
-        <div className="as-eyebrow-muted" style={{ marginBottom: 12 }}>DISTANCE RANGE</div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
+      <div className="mb-7">
+        <p className="font-mono text-[10px] tracking-[0.3em] uppercase text-muted-foreground mb-3">DISTANCE RANGE</p>
+        <div className="flex justify-between items-baseline mb-1">
           <div>
-            <span style={{ fontSize: 32, color: 'var(--chalk)', fontWeight: 500, fontFamily: 'var(--font-body)' }}>{range[0]}</span>
-            <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--ash)', marginLeft: 4, fontSize: 11 }}>yd</span>
+            <span className="text-[32px] text-foreground font-medium font-body">{range[0]}</span>
+            <span className="font-mono text-muted-foreground ml-1 text-[11px]">yd</span>
           </div>
-          <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--ash)', fontSize: 10, letterSpacing: '0.2em' }}>TO</span>
+          <span className="font-mono text-muted-foreground text-[10px] tracking-[0.2em]">TO</span>
           <div>
-            <span style={{ fontSize: 32, color: 'var(--chalk)', fontWeight: 500, fontFamily: 'var(--font-body)' }}>{range[1]}</span>
-            <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--ash)', marginLeft: 4, fontSize: 11 }}>yd</span>
+            <span className="text-[32px] text-foreground font-medium font-body">{range[1]}</span>
+            <span className="font-mono text-muted-foreground ml-1 text-[11px]">yd</span>
           </div>
         </div>
 
-        <div ref={trackRef} className="as-range-track" style={{ marginTop: 24, marginBottom: 16 }}>
-          <div className="as-range-fill" style={{ left: `${minPct}%`, width: `${maxPct - minPct}%` }} />
-          <div className="as-range-handle" style={{ left: `${minPct}%` }}
+        <div ref={trackRef} className="relative h-1 bg-border cursor-pointer mt-6 mb-4">
+          <div className="absolute top-0 h-full bg-primary" style={{ left: `${minPct}%`, width: `${maxPct - minPct}%` }} />
+          <div
+            className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 size-6 rounded-full bg-foreground border-[3px] border-primary cursor-grab active:scale-110 touch-none shadow-[0_2px_8px_rgba(0,0,0,0.4)] transition-transform"
+            style={{ left: `${minPct}%` }}
             onMouseDown={(e) => { e.preventDefault(); setDraggingHandle('min'); }}
-            onTouchStart={(e) => { e.preventDefault(); setDraggingHandle('min'); }} />
-          <div className="as-range-handle" style={{ left: `${maxPct}%` }}
+            onTouchStart={(e) => { e.preventDefault(); setDraggingHandle('min'); }}
+          />
+          <div
+            className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 size-6 rounded-full bg-foreground border-[3px] border-primary cursor-grab active:scale-110 touch-none shadow-[0_2px_8px_rgba(0,0,0,0.4)] transition-transform"
+            style={{ left: `${maxPct}%` }}
             onMouseDown={(e) => { e.preventDefault(); setDraggingHandle('max'); }}
-            onTouchStart={(e) => { e.preventDefault(); setDraggingHandle('max'); }} />
+            onTouchStart={(e) => { e.preventDefault(); setDraggingHandle('max'); }}
+          />
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--pitch)', letterSpacing: '0.15em' }}>
+        <div className="flex justify-between font-mono text-[9px] text-border tracking-[0.15em]">
           {[125, 150, 175, 200, 210].map(n => <span key={n}>{n}</span>)}
         </div>
       </div>
 
       {/* Shot Shape mode toggle */}
-      <div style={{ marginBottom: 24 }}>
-        <div className="as-eyebrow-muted" style={{ marginBottom: 12 }}>SHOT SHAPE MODE</div>
+      <div className="mb-6">
+        <p className="font-mono text-[10px] tracking-[0.3em] uppercase text-muted-foreground mb-3">SHOT SHAPE MODE</p>
         <button
+          className={cn(
+            'w-full border p-3.5 text-left transition-colors font-body',
+            shapeMode ? 'bg-primary/8 border-primary' : 'bg-card border-border',
+            !ciAvailable ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'
+          )}
           onClick={() => ciAvailable && setShapeMode(!shapeMode)}
           disabled={!ciAvailable}
-          style={{ width: '100%', background: shapeMode ? 'rgba(232,32,42,.08)' : 'var(--shadow)', border: shapeMode ? '1px solid var(--scarlet)' : '1px solid rgba(255,255,255,.06)', borderRadius: 'var(--radius-xl)', padding: '14px 16px', textAlign: 'left', cursor: ciAvailable ? 'pointer' : 'not-allowed', opacity: ciAvailable ? 1 : 0.6, fontFamily: 'var(--font-body)', transition: 'all var(--transition-fast)' }}
         >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 15, color: 'var(--chalk)', fontWeight: 500 }}>
+          <div className="flex justify-between items-center">
+            <div className="flex-1">
+              <div className="text-[15px] text-foreground font-medium">
                 {shapeMode ? 'On' : 'Off'}
                 {shapeMode && ciAvailable && (
-                  <span style={{ fontSize: 11, color: 'var(--scarlet)', marginLeft: 8, fontFamily: 'var(--font-mono)', letterSpacing: '0.15em' }}>
+                  <span className="font-mono text-[11px] text-primary ml-2 tracking-[0.15em]">
                     ~{Math.round(activationRate * 100)}% OF SHOTS
                   </span>
                 )}
               </div>
-              <div style={{ fontSize: 12, color: 'var(--cement)', marginTop: 4, lineHeight: 1.5 }}>
+              <div className="text-xs text-muted-foreground mt-1 leading-relaxed">
                 {ciAvailable ? shapeModeDesc : 'Available at Tier 3 and above'}
               </div>
             </div>
-            <div className="as-toggle-track" style={{ background: shapeMode ? 'var(--scarlet)' : 'var(--pitch)', marginLeft: 12 }}>
-              <div className="as-toggle-thumb" style={{ left: shapeMode ? 20 : 2 }} />
+            <div className={cn('w-10 h-[22px] rounded-full relative transition-colors flex-shrink-0 ml-3', shapeMode ? 'bg-primary' : 'bg-border')}>
+              <div className={cn('absolute top-[2px] size-[18px] rounded-full bg-white shadow-sm transition-[left] duration-[140ms]', shapeMode ? 'left-5' : 'left-[2px]')} />
             </div>
           </div>
         </button>
       </div>
 
       {/* Session summary */}
-      <div className="as-card" style={{ marginBottom: 24 }}>
-        <div className="as-eyebrow-muted" style={{ marginBottom: 10 }}>SESSION</div>
-        <div style={{ fontSize: 14, color: 'var(--cement)', lineHeight: 1.6 }}>
-          <span style={{ color: 'var(--chalk)', fontWeight: 500 }}>{shotCount} shots</span> between {range[0]} and {range[1]} yards.
+      <div className="bg-card border border-border p-5 mb-6">
+        <p className="font-mono text-[10px] tracking-[0.3em] uppercase text-muted-foreground mb-2.5">SESSION</p>
+        <p className="font-body text-sm text-muted-foreground leading-relaxed">
+          <strong className="text-foreground font-medium">{shotCount} shots</strong> between {range[0]} and {range[1]} yards.
           <br />
-          Tier {tier.id} rings · ring at 150 yd: <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--scarlet)' }}>±{ringFor(150, tier.id)} yd</span>
+          Tier {tier.id} rings · ring at 150 yd:{' '}
+          <span className="font-mono text-primary">±{ringFor(150, tier.id)} yd</span>
           {shapeMode && ciAvailable && (
-            <><br /><span style={{ color: 'var(--scarlet)' }}>Shot Shape mode on</span> · ~{Math.round(shotCount * activationRate)} shots will have a constraint</>
+            <><br /><span className="text-primary">Shot Shape mode on</span> · ~{Math.round(shotCount * activationRate)} shots will have a constraint</>
           )}
-        </div>
+        </p>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <button className="as-btn-primary" onClick={() => onStart(shotCount, range, shapeMode && ciAvailable)}>
+      <div className="flex flex-col gap-2">
+        <button
+          className="w-full py-4 bg-primary text-white font-body font-medium text-[15px] tracking-[0.02em] transition-colors hover:bg-scarlet-dim"
+          onClick={() => onStart(shotCount, range, shapeMode && ciAvailable)}
+        >
           Start Drill
         </button>
         <button
-          className="as-btn-outline"
+          className={cn(
+            'w-full py-3.5 bg-transparent font-body font-medium text-sm tracking-[0.02em] transition-colors flex items-center justify-center gap-2 border',
+            warningPatterns.length > 0
+              ? 'border-primary text-foreground hover:bg-primary/8'
+              : 'border-border text-muted-foreground hover:border-muted-foreground hover:text-foreground'
+          )}
           onClick={onHistory}
-          style={warningPatterns.length > 0 ? { borderColor: 'var(--scarlet)', color: 'var(--chalk)' } : undefined}
         >
           View history
           {warningPatterns.length > 0 && (
-            <span style={{ marginLeft: 10, padding: '2px 8px', background: 'var(--scarlet)', color: 'white', borderRadius: 999, fontSize: 11, fontWeight: 600, fontFamily: 'var(--font-mono)', letterSpacing: '0.05em' }}>
+            <span className="px-2 py-0.5 bg-primary text-white rounded-full text-[11px] font-semibold font-mono tracking-[0.05em]">
               {warningPatterns.length} pattern{warningPatterns.length === 1 ? '' : 's'}
             </span>
           )}
@@ -578,38 +624,44 @@ function ShotCard({ session, onLogShot, onAbort }) {
   const passEnd = (thresholds.elite - 1) / total * 100;
   const currentPct = idx === 0 ? 0 : (insideCount / total) * 100;
   const projectedMaxPct = ((insideCount + (total - idx)) / total) * 100;
+  const dotSize = total === 15 ? 22 : 26;
 
   return (
-    <div style={{ position: 'relative', minHeight: 'calc(100vh - 200px)' }}>
+    <div className="relative">
       {/* Header */}
-      <div style={{ padding: '12px 22px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <button onClick={() => setShowAbortModal(true)} style={{ background: 'none', border: 'none', color: 'var(--ash)', cursor: 'pointer', padding: 4, fontSize: 22, fontFamily: 'var(--font-body)' }}>×</button>
-        <div style={{ textAlign: 'center' }}>
-          <div className="as-eyebrow-muted" style={{ marginBottom: 2 }}>SHOT</div>
-          <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 18, color: 'var(--chalk)' }}>
-            {idx + 1} <span style={{ color: 'var(--pitch)' }}>/</span> {total}
+      <div className="px-[22px] py-3 flex justify-between items-center">
+        <button
+          className="bg-transparent border-none text-muted-foreground cursor-pointer p-1 text-[22px] font-body hover:text-foreground transition-colors"
+          onClick={() => setShowAbortModal(true)}
+        >
+          ×
+        </button>
+        <div className="text-center">
+          <div className="font-mono text-[9px] tracking-[0.3em] uppercase text-muted-foreground mb-0.5">SHOT</div>
+          <div className="font-display font-extrabold text-[18px] text-foreground">
+            {idx + 1} <span className="text-border">/</span> {total}
           </div>
         </div>
-        <div style={{ width: 24 }} />
+        <div className="w-6" aria-hidden />
       </div>
 
       {/* Progress band */}
-      <div style={{ padding: '0 22px', marginBottom: 24 }}>
-        <div className="as-card" style={{ padding: 14 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10 }}>
-            <span style={{ fontSize: 12, color: 'var(--ash)' }}>
-              <strong style={{ color: 'var(--chalk)', fontWeight: 500 }}>{insideCount}/{idx}</strong> inside so far
+      <div className="px-[22px] mb-6">
+        <div className="bg-card border border-border p-3.5">
+          <div className="flex justify-between items-baseline mb-2.5">
+            <span className="text-xs text-muted-foreground">
+              <strong className="text-foreground font-medium">{insideCount}/{idx}</strong> inside so far
             </span>
-            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 22, color: 'var(--chalk)' }}>{insideCount}</span>
+            <span className="font-display font-extrabold text-[22px] text-foreground">{insideCount}</span>
           </div>
-          <div className="as-progress-band" style={{ marginBottom: 8 }}>
-            <div style={{ position: 'absolute', left: 0, width: `${failEnd}%`, height: '100%', background: 'rgba(232,32,42,.18)' }} />
-            <div style={{ position: 'absolute', left: `${failEnd}%`, width: `${passEnd - failEnd}%`, height: '100%', background: 'rgba(196,191,184,.18)' }} />
-            <div style={{ position: 'absolute', left: `${passEnd}%`, right: 0, height: '100%', background: 'rgba(232,32,42,.22)' }} />
-            <div style={{ position: 'absolute', left: 0, width: `${currentPct}%`, height: '100%', background: 'var(--scarlet)' }} />
-            <div style={{ position: 'absolute', left: `${currentPct}%`, width: `${projectedMaxPct - currentPct}%`, height: '100%', background: 'rgba(232,32,42,.4)' }} />
+          <div className="relative h-[6px] bg-border mb-2 overflow-hidden">
+            <div className="absolute top-0 h-full bg-primary/18" style={{ width: `${failEnd}%` }} />
+            <div className="absolute top-0 h-full bg-muted-foreground/18" style={{ left: `${failEnd}%`, width: `${passEnd - failEnd}%` }} />
+            <div className="absolute top-0 right-0 h-full bg-primary/22" style={{ left: `${passEnd}%` }} />
+            <div className="absolute top-0 left-0 h-full bg-primary" style={{ width: `${currentPct}%` }} />
+            <div className="absolute top-0 h-full bg-primary/40" style={{ left: `${currentPct}%`, width: `${projectedMaxPct - currentPct}%` }} />
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--ash)', letterSpacing: '0.1em' }}>
+          <div className="flex justify-between font-mono text-[9px] text-muted-foreground tracking-[0.1em]">
             <span>FAIL: 0–{thresholds.pass - 1}</span>
             <span>PASS: {thresholds.pass}–{thresholds.elite - 1}</span>
             <span>ELITE: {thresholds.elite}+</span>
@@ -618,97 +670,106 @@ function ShotCard({ session, onLogShot, onAbort }) {
       </div>
 
       {/* Target card */}
-      <div style={{ padding: '0 22px', marginBottom: 24 }}>
-        <div className="as-card-raised" style={{ padding: '24px 24px 28px', textAlign: 'center' }} key={idx}>
+      <div className="px-[22px] mb-6" key={idx}>
+        <div className="bg-surface border border-border p-6 text-center">
           {ciCall && (
-            <div className="as-ci-banner">
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.3em', color: 'rgba(255,255,255,.75)', marginBottom: 4 }}>SHOT SHAPE CALL</div>
-              <div style={{ fontSize: 18, fontWeight: 500, fontFamily: 'var(--font-body)', color: 'white' }}>{ciCall.join(' · ')}</div>
+            <div className="bg-primary px-4 py-2.5 -mx-6 -mt-6 mb-6 text-center">
+              <div className="font-mono text-[9px] tracking-[0.3em] text-white/75 mb-1">SHOT SHAPE CALL</div>
+              <div className="text-[18px] font-medium font-body text-white">{ciCall.join(' · ')}</div>
             </div>
           )}
 
-          <div style={{ fontSize: 88, lineHeight: 0.9, color: 'var(--chalk)', letterSpacing: '-0.03em', fontWeight: 500, fontFamily: 'var(--font-body)' }}>
+          <div className="text-[88px] leading-[0.9] text-foreground tracking-[-0.03em] font-medium font-body">
             {currentYd}
           </div>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--ash)', marginTop: 8, letterSpacing: '0.25em' }}>YARDS</div>
+          <span className="block font-mono text-[11px] text-muted-foreground mt-2 tracking-[0.25em]">YARDS</span>
 
-          <div style={{ height: 1, background: 'rgba(255,255,255,.06)', margin: '20px 0' }} />
+          <div className="h-px bg-border my-5" />
 
-          <div className="as-eyebrow-muted" style={{ marginBottom: 14 }}>TO SCORE A HIT</div>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 28, alignItems: 'baseline' }}>
-            <div>
-              <div style={{ fontSize: 28, color: 'var(--chalk)', fontWeight: 500, fontFamily: 'var(--font-body)' }}>±{carry}</div>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--ash)', marginTop: 4, letterSpacing: '0.2em' }}>YD CARRY</div>
+          <p className="font-mono text-[10px] tracking-[0.3em] uppercase text-muted-foreground mb-3.5">TO SCORE A HIT</p>
+          <div className="flex justify-center gap-7 items-baseline">
+            <div className="text-center">
+              <div className="text-[28px] text-foreground font-medium font-body">±{carry}</div>
+              <div className="font-mono text-[9px] text-muted-foreground mt-1 tracking-[0.2em]">YD CARRY</div>
             </div>
-            <div style={{ fontSize: 18, color: 'var(--pitch)', fontWeight: 300 }}>+</div>
-            <div>
-              <div style={{ fontSize: 28, color: 'var(--chalk)', fontWeight: 500, fontFamily: 'var(--font-body)' }}>±{ring}</div>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--ash)', marginTop: 4, letterSpacing: '0.2em' }}>YD LATERAL</div>
+            <div className="text-[18px] text-border font-light">+</div>
+            <div className="text-center">
+              <div className="text-[28px] text-foreground font-medium font-body">±{ring}</div>
+              <div className="font-mono text-[9px] text-muted-foreground mt-1 tracking-[0.2em]">YD LATERAL</div>
             </div>
           </div>
 
-          <div style={{ marginTop: 22, padding: '12px 16px', background: 'rgba(232,32,42,.06)', border: '1px solid rgba(232,32,42,.18)', borderRadius: 'var(--radius-md)', fontSize: 12, color: 'var(--cement)', lineHeight: 1.6 }}>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--scarlet)', letterSpacing: '0.2em', marginBottom: 4 }}>ESTIMATE</div>
-            Carry between <span style={{ color: 'var(--chalk)', fontWeight: 500 }}>{currentYd - carry}–{currentYd + carry} yd</span>
+          <div className="mt-[22px] p-3 px-4 bg-primary/6 border border-primary/18 text-xs text-muted-foreground leading-relaxed text-left">
+            <span className="block font-mono text-[9px] text-primary tracking-[0.2em] mb-1">ESTIMATE</span>
+            Carry between <strong className="text-foreground font-medium">{currentYd - carry}–{currentYd + carry} yd</strong>
             <br />
-            Lateral within <span style={{ color: 'var(--chalk)', fontWeight: 500 }}>~{ring} yards left or right of pin</span>
+            Lateral within <strong className="text-foreground font-medium">~{ring} yards left or right of pin</strong>
           </div>
         </div>
       </div>
 
       {/* Outcome buttons */}
-      <div style={{ padding: '0 22px', marginBottom: 18 }}>
-        <div className="as-outcome-grid">
-          <button
-            className="as-outcome-btn"
-            onClick={() => handleOutcome('OUTSIDE')}
-            disabled={showConfirm !== null}
-            style={{ background: 'rgba(232,32,42,.08)', border: '1px solid rgba(232,32,42,.4)', color: 'var(--scarlet-glow)', cursor: showConfirm ? 'default' : 'pointer' }}
-          >
-            <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(232,32,42,.18)', border: '1.5px solid var(--scarlet-glow)', margin: '0 auto 10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, color: 'var(--scarlet-glow)' }}>×</div>
-            <div style={{ fontSize: 15, fontWeight: 500 }}>Outside</div>
-          </button>
-          <button
-            className="as-outcome-btn"
-            onClick={() => handleOutcome('INSIDE')}
-            disabled={showConfirm !== null}
-            style={{ background: 'rgba(0,192,122,.08)', border: '1px solid rgba(0,192,122,.45)', color: 'var(--under)', cursor: showConfirm ? 'default' : 'pointer' }}
-          >
-            <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(0,192,122,.18)', border: '1.5px solid var(--under)', margin: '0 auto 10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, fontWeight: 600, color: 'var(--under)' }}>✓</div>
-            <div style={{ fontSize: 15, fontWeight: 500 }}>Inside</div>
-          </button>
-        </div>
+      <div className="px-[22px] mb-[18px] grid grid-cols-2 gap-2">
+        <button
+          className="py-[22px] px-5 cursor-pointer font-body font-medium text-center border transition-transform active:scale-[0.98] disabled:cursor-default bg-primary/8 border-primary/40 text-scarlet-glow"
+          onClick={() => handleOutcome('OUTSIDE')}
+          disabled={showConfirm !== null}
+        >
+          <div className="size-9 rounded-full bg-primary/18 border-[1.5px] border-scarlet-glow mx-auto mb-2.5 flex items-center justify-center text-[20px] text-scarlet-glow">×</div>
+          <div className="text-[15px]">Outside</div>
+        </button>
+        <button
+          className="py-[22px] px-5 cursor-pointer font-body font-medium text-center border transition-transform active:scale-[0.98] disabled:cursor-default bg-under/8 border-under/45 text-under"
+          onClick={() => handleOutcome('INSIDE')}
+          disabled={showConfirm !== null}
+        >
+          <div className="size-9 rounded-full bg-under/18 border-[1.5px] border-under mx-auto mb-2.5 flex items-center justify-center text-[18px] font-semibold text-under">✓</div>
+          <div className="text-[15px]">Inside</div>
+        </button>
       </div>
 
       {/* Shot tracker dots */}
-      <div style={{ padding: '0 22px 24px' }}>
-        <div className="as-dots">
-          {Array.from({ length: total }).map((_, i) => {
-            const isCurrent = i === idx;
-            const outcome = session.outcomes[i];
-            const dotSize = total === 15 ? 22 : 26;
-            let bg = 'var(--pitch)', color = 'var(--ash)', border = '1px solid rgba(255,255,255,.1)';
-            if (outcome === 'INSIDE')  { bg = 'rgba(0,192,122,.15)';  color = 'var(--under)'; border = '1px solid var(--under)'; }
-            if (outcome === 'OUTSIDE') { bg = 'rgba(232,32,42,.18)';  color = 'var(--scarlet-glow)'; border = '1px solid var(--scarlet-dim)'; }
-            return (
-              <div key={i} className="as-dot" style={{ width: dotSize, height: dotSize, background: bg, border, color, outline: isCurrent ? '2px solid var(--scarlet)' : 'none', outlineOffset: 2 }}>
-                {i + 1}
-              </div>
-            );
-          })}
-        </div>
+      <div className="px-[22px] pb-6 flex flex-wrap gap-1.5 justify-center">
+        {Array.from({ length: total }).map((_, i) => {
+          const outcome = session.outcomes[i];
+          return (
+            <div
+              key={i}
+              className={cn(
+                'rounded-full flex items-center justify-center font-mono text-[10px] font-semibold border',
+                outcome === 'INSIDE'
+                  ? 'bg-under/15 text-under border-under'
+                  : outcome === 'OUTSIDE'
+                  ? 'bg-primary/18 text-scarlet-glow border-scarlet-dim'
+                  : 'bg-border text-muted-foreground border-border',
+                i === idx && 'outline outline-2 outline-primary outline-offset-2'
+              )}
+              style={{ width: dotSize, height: dotSize }}
+            >
+              {i + 1}
+            </div>
+          );
+        })}
       </div>
 
       {/* Confirmation overlay */}
       {showConfirm && (
-        <div className="as-overlay" style={{ background: 'rgba(8,8,8,.92)' }}>
-          <div style={{ width: 84, height: 84, borderRadius: '50%', background: showConfirm === 'INSIDE' ? 'rgba(0,192,122,.2)' : 'rgba(232,32,42,.2)', border: `2px solid ${showConfirm === 'INSIDE' ? 'var(--under)' : 'var(--scarlet-glow)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 44, color: showConfirm === 'INSIDE' ? 'var(--under)' : 'var(--scarlet-glow)', fontWeight: 700, marginBottom: 18 }}>
+        <div className="absolute inset-0 bg-background/92 flex items-center justify-center flex-col z-10 animate-overlay-in">
+          <div className={cn(
+            'size-[84px] rounded-full flex items-center justify-center font-bold mb-[18px] border-2 text-[44px]',
+            showConfirm === 'INSIDE'
+              ? 'bg-under/20 border-under text-under'
+              : 'bg-primary/20 border-scarlet-glow text-scarlet-glow'
+          )}>
             {showConfirm === 'INSIDE' ? '✓' : '×'}
           </div>
-          <div style={{ fontSize: 36, color: showConfirm === 'INSIDE' ? 'var(--under)' : 'var(--scarlet-glow)', letterSpacing: '-0.01em', fontWeight: 500, fontFamily: 'var(--font-body)' }}>
+          <div className={cn(
+            'text-[36px] tracking-[-0.01em] font-medium font-body',
+            showConfirm === 'INSIDE' ? 'text-under' : 'text-scarlet-glow'
+          )}>
             {showConfirm === 'INSIDE' ? 'Inside' : 'Outside'}
           </div>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--ash)', marginTop: 12, letterSpacing: '0.2em' }}>
+          <div className="font-mono text-xs text-muted-foreground mt-3 tracking-[0.2em]">
             {insideCount + (showConfirm === 'INSIDE' ? 1 : 0)} of {idx + 1} inside
           </div>
         </div>
@@ -716,13 +777,25 @@ function ShotCard({ session, onLogShot, onAbort }) {
 
       {/* Abort modal */}
       {showAbortModal && (
-        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 22, zIndex: 20 }}>
-          <div style={{ background: 'var(--shadow)', padding: 24, maxWidth: 320, width: '100%', border: '1px solid rgba(255,255,255,.1)', borderRadius: 'var(--radius-xl)' }}>
-            <div style={{ fontSize: 22, color: 'var(--chalk)', fontFamily: 'var(--font-body)', fontWeight: 500 }}>End session?</div>
-            <div style={{ color: 'var(--ash)', fontSize: 14, marginTop: 10, lineHeight: 1.6 }}>This session will be discarded and won&apos;t count toward your streak.</div>
-            <div style={{ display: 'flex', gap: 8, marginTop: 24 }}>
-              <button className="as-btn-outline" style={{ flex: 1 }} onClick={() => setShowAbortModal(false)}>Keep going</button>
-              <button className="as-btn-primary" style={{ flex: 1 }} onClick={onAbort}>End</button>
+        <div className="absolute inset-0 bg-black/85 flex items-center justify-center p-[22px] z-20">
+          <div className="bg-card p-6 max-w-[320px] w-full border border-border">
+            <div className="text-[22px] text-foreground font-body font-medium">End session?</div>
+            <div className="text-muted-foreground text-sm mt-2.5 leading-relaxed">
+              This session will be discarded and won&apos;t count toward your streak.
+            </div>
+            <div className="flex gap-2 mt-6">
+              <button
+                className="flex-1 py-3.5 border border-border text-muted-foreground font-body font-medium text-sm transition-colors hover:text-foreground hover:border-muted-foreground"
+                onClick={() => setShowAbortModal(false)}
+              >
+                Keep going
+              </button>
+              <button
+                className="flex-1 py-4 bg-primary text-white font-body font-medium text-[15px] transition-colors hover:bg-scarlet-dim"
+                onClick={onAbort}
+              >
+                End
+              </button>
             </div>
           </div>
         </div>
@@ -737,9 +810,9 @@ function SessionResult({ session, movement, streakStatus, onAnother, onHistory }
   const tier = TIERS.find(t => t.id === session.tier);
 
   const resultConfig = {
-    ELITE: { bgFrom: 'var(--scarlet)', bgTo: 'var(--scarlet-glow)', textColor: 'white', subColor: 'rgba(255,255,255,.85)', label: 'Elite',   tagline: 'Above tour standard for this tier', icon: '★' },
-    PASS:  { bgFrom: 'var(--under)',   bgTo: '#00D080',              textColor: 'white', subColor: 'rgba(255,255,255,.9)',  label: 'Pass',    tagline: 'Performed at the standard of this tier', icon: '✓' },
-    FAIL:  { bgFrom: null,             bgTo: null,                   textColor: 'var(--chalk)', subColor: 'var(--ash)', label: 'Fail', tagline: 'Below the standard of this tier', icon: '×' },
+    ELITE: { label: 'Elite',  tagline: 'Above tour standard for this tier',      icon: '★' },
+    PASS:  { label: 'Pass',   tagline: 'Performed at the standard of this tier', icon: '✓' },
+    FAIL:  { label: 'Fail',   tagline: 'Below the standard of this tier',        icon: '×' },
   }[result];
 
   const getBanner = () => {
@@ -762,82 +835,116 @@ function SessionResult({ session, movement, streakStatus, onAnother, onHistory }
   const banner = getBanner();
 
   return (
-    <div className="as-slide-up">
-      {/* Result hero */}
-      <div
-        className="as-result-hero"
-        style={{
-          background: result === 'FAIL' ? 'var(--shadow)' : `linear-gradient(135deg, ${resultConfig.bgFrom} 0%, ${resultConfig.bgTo} 100%)`,
-          borderTop: result === 'FAIL' ? '2px solid var(--scarlet-dim)' : 'none',
-          borderBottom: result === 'FAIL' ? '2px solid var(--scarlet-dim)' : 'none',
-        }}
-      >
+    <div className="animate-slide-up">
+      {/* Result hero — full-bleed within the component's max-width container */}
+      <div className={cn(
+        'px-[22px] pt-9 pb-8 text-center relative overflow-hidden',
+        result === 'ELITE' ? 'bg-gradient-to-br from-primary to-scarlet-glow'
+          : result === 'PASS' ? 'bg-gradient-to-br from-under to-[#00D080]'
+          : 'bg-card border-t-2 border-b-2 border-primary/30'
+      )}>
         {result === 'FAIL' && (
-          <div style={{ position: 'absolute', top: 12, right: 16, fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--scarlet-dim)', letterSpacing: '0.3em' }}>SESSION RESULT</div>
+          <div className="absolute top-3 right-4 font-mono text-[10px] text-primary/30 tracking-[0.3em]">
+            SESSION RESULT
+          </div>
         )}
-        <div style={{ width: 64, height: 64, borderRadius: '50%', background: result === 'FAIL' ? 'rgba(232,32,42,.15)' : 'rgba(255,255,255,.18)', border: `2px solid ${result === 'FAIL' ? 'var(--scarlet-dim)' : 'rgba(255,255,255,.5)'}`, margin: '0 auto 18px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: result === 'ELITE' ? 30 : 28, color: result === 'FAIL' ? 'var(--scarlet-dim)' : 'white', fontWeight: result === 'FAIL' ? 400 : 600 }}>
+        <div className={cn(
+          'size-16 rounded-full mx-auto mb-[18px] flex items-center justify-center border-2',
+          result === 'FAIL'
+            ? 'bg-primary/15 border-primary/30 text-primary/30 text-[28px] font-normal'
+            : 'bg-white/18 border-white/50 text-white font-semibold',
+          result === 'ELITE' ? 'text-[30px]' : result !== 'FAIL' ? 'text-[28px]' : ''
+        )}>
           {resultConfig.icon}
         </div>
-        <div style={{ fontFamily: 'var(--font-body)', fontSize: 64, lineHeight: 0.95, fontWeight: 600, color: resultConfig.textColor, letterSpacing: '-0.02em', marginBottom: 8 }}>
+        <div className={cn(
+          'font-body text-[64px] leading-[0.95] font-semibold tracking-[-0.02em] mb-2',
+          result === 'FAIL' ? 'text-foreground' : 'text-white'
+        )}>
           {resultConfig.label}
         </div>
-        <div style={{ fontSize: 14, color: resultConfig.subColor, lineHeight: 1.5, maxWidth: 280, margin: '0 auto' }}>
+        <div className={cn(
+          'text-sm leading-relaxed max-w-[280px] mx-auto',
+          result === 'FAIL' ? 'text-muted-foreground' : 'text-white/85'
+        )}>
           {resultConfig.tagline}
         </div>
       </div>
 
       {/* Score */}
-      <div style={{ padding: '28px 22px 0', textAlign: 'center' }}>
-        <div className="as-eyebrow-muted" style={{ marginBottom: 8 }}>SCORE</div>
-        <div style={{ fontSize: 80, lineHeight: 1, color: 'var(--chalk)', letterSpacing: '-0.04em', fontWeight: 500, fontFamily: 'var(--font-body)' }}>
-          {insideCount}<span style={{ color: 'var(--pitch)', fontSize: 44 }}>/{session.shotCount}</span>
+      <div className="pt-7 text-center">
+        <p className="font-mono text-[10px] tracking-[0.3em] uppercase text-muted-foreground mb-2">SCORE</p>
+        <div className="text-[80px] leading-none text-foreground tracking-[-0.04em] font-medium font-body">
+          {insideCount}<span className="text-border text-[44px]">/{session.shotCount}</span>
         </div>
-        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--ash)', marginTop: 6, letterSpacing: '0.25em' }}>INSIDE</div>
+        <span className="block font-mono text-[11px] text-muted-foreground mt-1.5 tracking-[0.25em]">INSIDE</span>
       </div>
 
-      <div style={{ textAlign: 'center', margin: '24px 0' }}>
-        <div className="as-tier-badge">PLAYED AT TIER {tier.id} · {tier.name.toUpperCase()}</div>
+      <div className="text-center my-6">
+        <span className="inline-flex items-center px-2.5 py-1 bg-primary/5 border border-primary/30 rounded-full font-mono text-[9px] tracking-[0.2em] uppercase text-primary">
+          PLAYED AT TIER {tier.id} · {tier.name.toUpperCase()}
+        </span>
       </div>
 
-      <div style={{ padding: '0 22px 32px' }}>
+      <div className="px-[22px] pb-8">
         {banner && (
-          <div style={{ padding: '18px 18px', background: banner.type === 'promote' ? 'rgba(232,32,42,.08)' : 'var(--shadow)', border: `1px solid ${banner.type === 'promote' ? 'rgba(232,32,42,.45)' : 'var(--pitch)'}`, borderRadius: 'var(--radius-xl)', marginBottom: 16 }}>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: banner.type === 'promote' ? 'var(--scarlet)' : 'var(--bogey)', letterSpacing: '0.3em', marginBottom: 8 }}>
+          <div className={cn(
+            'p-[18px] mb-4',
+            banner.type === 'promote'
+              ? 'bg-primary/8 border border-primary/45'
+              : 'bg-card border border-border'
+          )}>
+            <div className={cn(
+              'font-mono text-[10px] tracking-[0.3em] mb-2',
+              banner.type === 'promote' ? 'text-primary' : 'text-bogey'
+            )}>
               {banner.type === 'promote' ? '↑' : '↓'} {banner.title.toUpperCase()}
             </div>
-            <div style={{ fontSize: 18, color: 'var(--chalk)', fontWeight: 500, fontFamily: 'var(--font-body)' }}>{banner.text}</div>
-            <div style={{ fontSize: 12, color: 'var(--ash)', marginTop: 4 }}>{banner.sub}</div>
+            <div className="text-[18px] text-foreground font-medium font-body">{banner.text}</div>
+            <div className="text-xs text-muted-foreground mt-1">{banner.sub}</div>
           </div>
         )}
 
-        <div className="as-card" style={{ marginBottom: 24 }}>
-          <div className="as-eyebrow-muted" style={{ marginBottom: 10 }}>STREAK STATUS</div>
-          <div style={{ fontSize: 14, color: 'var(--chalk)', lineHeight: 1.5 }}>{streakStatus.text}</div>
-          {streakStatus.type === 'pass' && (
-            <div style={{ display: 'flex', gap: 4, marginTop: 12 }}>
-              {[0, 1, 2].map(i => (
-                <div key={i} style={{ flex: 1, height: 4, borderRadius: 2, background: i < streakStatus.count ? 'var(--scarlet)' : 'var(--pitch)', transition: 'background 200ms' }} />
-              ))}
-            </div>
-          )}
-          {streakStatus.type === 'elite' && (
-            <div style={{ display: 'flex', gap: 4, marginTop: 12 }}>
-              {[0, 1].map(i => (
-                <div key={i} style={{ flex: 1, height: 4, borderRadius: 2, background: i < streakStatus.count ? 'var(--scarlet-glow)' : 'var(--pitch)' }} />
+        {/* Streak card */}
+        <div className="bg-card border border-border p-5 mb-6">
+          <p className="font-mono text-[10px] tracking-[0.3em] uppercase text-muted-foreground mb-2.5">STREAK STATUS</p>
+          <div className="text-sm text-foreground leading-relaxed">{streakStatus.text}</div>
+          {(streakStatus.type === 'pass' || streakStatus.type === 'elite') && (
+            <div className="flex gap-1 mt-3">
+              {Array.from({ length: streakStatus.type === 'elite' ? 2 : 3 }).map((_, i) => (
+                <div
+                  key={i}
+                  className={cn(
+                    'flex-1 h-1 rounded-sm transition-colors',
+                    i < streakStatus.count
+                      ? streakStatus.type === 'elite' ? 'bg-scarlet-glow' : 'bg-primary'
+                      : 'bg-border'
+                  )}
+                />
               ))}
             </div>
           )}
         </div>
 
-        <div style={{ marginBottom: 24, fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--ash)', display: 'flex', justifyContent: 'space-between', letterSpacing: '0.1em' }}>
+        <div className="mb-6 font-mono text-[11px] text-muted-foreground flex justify-between tracking-[0.1em]">
           <span>{session.shotCount} SHOTS</span>
           <span>{session.range[0]}–{session.range[1]} YD</span>
-          {session.shotCount === 5 && <span style={{ color: 'var(--bogey)' }}>QUICK CHECK</span>}
+          {session.shotCount === 5 && <span className="text-bogey">QUICK CHECK</span>}
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <button className="as-btn-primary" onClick={onAnother}>Start another session</button>
-          <button className="as-btn-outline" onClick={onHistory}>View history</button>
+        <div className="flex flex-col gap-2">
+          <button
+            className="w-full py-4 bg-primary text-white font-body font-medium text-[15px] tracking-[0.02em] transition-colors hover:bg-scarlet-dim"
+            onClick={onAnother}
+          >
+            Start another session
+          </button>
+          <button
+            className="w-full py-3.5 bg-transparent text-muted-foreground border border-border font-body font-medium text-sm tracking-[0.02em] transition-colors hover:border-muted-foreground hover:text-foreground"
+            onClick={onHistory}
+          >
+            View history
+          </button>
         </div>
       </div>
     </div>
@@ -856,53 +963,70 @@ function SessionHistory({ player, sessions, patterns, onBack, onApplyPrescriptio
   }, [sessions, filter]);
 
   const tier = TIERS.find(t => t.id === player.currentTier);
-  const passRate = sessions.length > 0 ? Math.round((sessions.filter(s => s.result !== 'FAIL').length / sessions.length) * 100) : 0;
+  const passRate = sessions.length > 0
+    ? Math.round((sessions.filter(s => s.result !== 'FAIL').length / sessions.length) * 100)
+    : 0;
 
   return (
-    <div style={{ padding: '0 22px 32px' }}>
-      <div style={{ paddingTop: 12, paddingBottom: 20, display: 'flex', alignItems: 'center', gap: 16 }}>
-        <button onClick={onBack} style={{ background: 'none', border: 'none', color: 'var(--ash)', cursor: 'pointer', fontSize: 22, fontFamily: 'var(--font-body)', padding: 4 }}>‹</button>
-        <div style={{ fontSize: 22, color: 'var(--chalk)', fontWeight: 500 }}>History</div>
+    <div className="px-[22px] pb-8">
+      {/* Header */}
+      <div className="pt-3 pb-5 flex items-center gap-4">
+        <button
+          className="bg-transparent border-none text-muted-foreground cursor-pointer text-[22px] font-body p-1 hover:text-foreground transition-colors"
+          onClick={onBack}
+        >
+          ‹
+        </button>
+        <div className="text-[22px] text-foreground font-medium">History</div>
       </div>
 
-      {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, marginBottom: 20 }}>
+      {/* Stats grid */}
+      <div className="grid grid-cols-3 gap-1.5 mb-5">
         {[
-          { label: 'CURRENT', value: `T${tier.id}`, sub: tier.name, valueColor: 'var(--scarlet)' },
-          { label: 'SESSIONS', value: sessions.length, sub: 'Total logged', valueColor: 'var(--chalk)' },
-          { label: 'PASS RATE', value: `${passRate}%`, sub: 'All time', valueColor: 'var(--chalk)' },
-        ].map(({ label, value, sub, valueColor }) => (
-          <div key={label} className="as-card" style={{ padding: 14, borderRadius: 'var(--radius-lg)' }}>
-            <div className="as-eyebrow-muted" style={{ fontSize: 9, marginBottom: 6 }}>{label}</div>
-            <div style={{ fontSize: 22, color: valueColor, lineHeight: 1, fontWeight: 500, fontFamily: 'var(--font-body)' }}>{value}</div>
-            <div style={{ fontSize: 11, color: 'var(--ash)', marginTop: 4 }}>{sub}</div>
+          { label: 'CURRENT',   value: `T${tier.id}`,    sub: tier.name,       accent: true  },
+          { label: 'SESSIONS',  value: sessions.length,  sub: 'Total logged',  accent: false },
+          { label: 'PASS RATE', value: `${passRate}%`,   sub: 'All time',      accent: false },
+        ].map(({ label, value, sub, accent }) => (
+          <div key={label} className="bg-card border border-border p-3.5">
+            <div className="font-mono text-[9px] tracking-[0.15em] uppercase text-muted-foreground mb-1.5">{label}</div>
+            <div className={cn('text-[22px] leading-none font-medium font-body', accent ? 'text-primary' : 'text-foreground')}>{value}</div>
+            <div className="text-[11px] text-muted-foreground mt-1">{sub}</div>
           </div>
         ))}
       </div>
 
       {/* Patterns */}
       {patterns && patterns.length > 0 && (
-        <div style={{ marginBottom: 24 }}>
-          <div className="as-eyebrow" style={{ marginBottom: 10 }}>PATTERNS DETECTED</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div className="mb-6">
+          <p className="eyebrow mb-2.5">PATTERNS DETECTED</p>
+          <div className="flex flex-col gap-2">
             {patterns.map((p) => {
               const isInfo = p.severity === 'info';
               return (
-                <div key={p.id} style={{ background: isInfo ? 'var(--shadow)' : 'rgba(232,32,42,.06)', border: isInfo ? '1px solid rgba(255,255,255,.08)' : '1px solid rgba(232,32,42,.35)', borderRadius: 'var(--radius-xl)', padding: '14px 16px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                    <div style={{ width: 6, height: 6, borderRadius: '50%', background: isInfo ? 'var(--ash)' : 'var(--scarlet)' }} />
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.25em', color: isInfo ? 'var(--ash)' : 'var(--scarlet)' }}>
+                <div
+                  key={p.id}
+                  className={cn(
+                    'border p-3.5 px-4',
+                    isInfo ? 'bg-card border-border' : 'bg-primary/6 border-primary/35'
+                  )}
+                >
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <div className={cn('size-1.5 rounded-full flex-shrink-0', isInfo ? 'bg-muted-foreground' : 'bg-primary')} />
+                    <div className={cn('font-mono text-[9px] tracking-[0.25em]', isInfo ? 'text-muted-foreground' : 'text-primary')}>
                       {isInfo ? 'INFORMATIONAL' : 'PRESCRIPTION'}
                     </div>
                   </div>
-                  <div style={{ fontSize: 14, color: 'var(--chalk)', fontWeight: 500, marginBottom: 6 }}>{p.title}</div>
-                  <div style={{ fontSize: 13, color: 'var(--cement)', lineHeight: 1.55, marginBottom: p.prescription ? 10 : 0 }}>{p.finding}</div>
+                  <div className="text-sm text-foreground font-medium mb-1.5">{p.title}</div>
+                  <div className="text-[13px] text-muted-foreground leading-[1.55]">{p.finding}</div>
                   {p.prescription && (
-                    <div style={{ fontSize: 13, color: 'var(--cement)', lineHeight: 1.55, paddingTop: 10, borderTop: '1px solid rgba(255,255,255,.06)' }}>
-                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--scarlet)', letterSpacing: '0.2em', marginRight: 8 }}>NEXT</span>
+                    <div className="text-[13px] text-muted-foreground leading-[1.55] pt-2.5 mt-2.5 border-t border-border">
+                      <span className="font-mono text-[9px] text-primary tracking-[0.2em] mr-2">NEXT</span>
                       {p.prescription}
                       {p.suggestedRange && onApplyPrescription && (
-                        <button onClick={() => onApplyPrescription(p)} style={{ display: 'block', marginTop: 10, background: 'transparent', border: '1px solid var(--scarlet)', color: 'var(--scarlet)', borderRadius: 'var(--radius-md)', padding: '8px 14px', fontSize: 12, fontFamily: 'var(--font-body)', fontWeight: 500, cursor: 'pointer' }}>
+                        <button
+                          className="block mt-2.5 bg-transparent border border-primary text-primary px-3.5 py-2 text-xs font-body font-medium cursor-pointer transition-colors hover:bg-primary/8"
+                          onClick={() => onApplyPrescription(p)}
+                        >
                           Apply to next session
                         </button>
                       )}
@@ -917,63 +1041,86 @@ function SessionHistory({ player, sessions, patterns, onBack, onApplyPrescriptio
 
       {/* Tier movement chart */}
       {sessions.length > 1 && (
-        <div className="as-card" style={{ marginBottom: 20, padding: 16 }}>
-          <div className="as-eyebrow-muted" style={{ marginBottom: 12 }}>TIER MOVEMENT</div>
-          <div style={{ position: 'relative', height: 80 }}>
+        <div className="bg-card border border-border p-4 mb-5">
+          <p className="font-mono text-[10px] tracking-[0.3em] uppercase text-muted-foreground mb-3">TIER MOVEMENT</p>
+          <div className="relative h-20">
             <svg width="100%" height="80" preserveAspectRatio="none" viewBox="0 0 100 80">
               {[1, 2, 3, 4, 5].map(t => (
                 <line key={t} x1="0" y1={80 - t * 14} x2="100" y2={80 - t * 14} stroke="rgba(255,255,255,.04)" strokeWidth="0.3" />
               ))}
               <polyline
                 points={sessions.map((s, i) => `${(i / Math.max(sessions.length - 1, 1)) * 100},${80 - s.tier * 14}`).join(' ')}
-                fill="none" stroke="var(--scarlet)" strokeWidth="2" vectorEffect="non-scaling-stroke"
+                fill="none" stroke="var(--primary)" strokeWidth="2" vectorEffect="non-scaling-stroke"
               />
               {sessions.map((s, i) => (
-                <circle key={i} cx={(i / Math.max(sessions.length - 1, 1)) * 100} cy={80 - s.tier * 14} r="1.4"
-                  fill={s.result === 'ELITE' ? 'var(--scarlet-glow)' : s.result === 'PASS' ? 'var(--cement)' : 'var(--scarlet-dim)'} />
+                <circle
+                  key={i}
+                  cx={(i / Math.max(sessions.length - 1, 1)) * 100}
+                  cy={80 - s.tier * 14}
+                  r="1.4"
+                  fill={s.result === 'ELITE' ? 'var(--scarlet-glow)' : s.result === 'PASS' ? 'var(--cement)' : 'var(--scarlet-dim)'}
+                />
               ))}
             </svg>
           </div>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--ash)', marginTop: 6, display: 'flex', justifyContent: 'space-between', letterSpacing: '0.15em' }}>
+          <div className="font-mono text-[9px] text-muted-foreground mt-1.5 flex justify-between tracking-[0.15em]">
             <span>OLDEST</span><span>NEWEST</span>
           </div>
         </div>
       )}
 
-      {/* Filters */}
-      <div style={{ display: 'flex', gap: 6, marginBottom: 16, overflowX: 'auto', paddingBottom: 4 }}>
+      {/* Filter tabs */}
+      <div className="flex gap-1.5 mb-4 overflow-x-auto pb-1">
         {[{ id: 'all', label: 'All' }, { id: '10', label: '10-shot' }, { id: '15', label: '15-shot' }, { id: '5', label: 'Quick' }].map(f => (
-          <button key={f.id} className="as-filter-tab" onClick={() => setFilter(f.id)}
-            style={{ background: filter === f.id ? 'var(--scarlet)' : 'var(--shadow)', color: filter === f.id ? 'white' : 'var(--ash)' }}>
+          <button
+            key={f.id}
+            className={cn(
+              'px-3 py-1.5 font-mono text-[10px] tracking-[0.18em] uppercase cursor-pointer whitespace-nowrap border-none transition-colors',
+              filter === f.id ? 'bg-primary text-white' : 'bg-card text-muted-foreground'
+            )}
+            onClick={() => setFilter(f.id)}
+          >
             {f.label}
           </button>
         ))}
       </div>
 
       {/* Session list */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <div className="flex flex-col gap-1">
         {filtered.length === 0 && (
-          <div style={{ padding: '40px 20px', textAlign: 'center', color: 'var(--ash)', fontSize: 13 }}>No sessions match this filter yet.</div>
+          <div className="py-10 px-5 text-center text-muted-foreground text-[13px]">
+            No sessions match this filter yet.
+          </div>
         )}
-        {filtered.map((s, i) => {
+        {filtered.map((s) => {
           const ic = s.outcomes.filter(o => o === 'INSIDE').length;
           const isQuick = s.shotCount === 5;
-          const resultColor = s.result === 'ELITE' ? 'var(--scarlet)' : s.result === 'PASS' ? 'var(--under)' : 'var(--scarlet-dim)';
           return (
-            <div key={s.id} className="as-card" style={{ padding: '12px 14px', borderRadius: 'var(--radius-lg)', opacity: isQuick ? 0.7 : 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
-                  <span style={{ fontSize: 22, color: 'var(--chalk)', fontWeight: 500, fontFamily: 'var(--font-body)' }}>
-                    {ic}<span style={{ color: 'var(--pitch)', fontSize: 14 }}>/{s.shotCount}</span>
+            <div
+              key={s.id}
+              className={cn(
+                'bg-card border border-border p-3 px-3.5 flex justify-between items-center gap-2.5',
+                isQuick && 'opacity-70'
+              )}
+            >
+              <div className="flex-1 min-w-0">
+                <div className="flex items-baseline gap-2.5">
+                  <span className="text-[22px] text-foreground font-medium font-body">
+                    {ic}<span className="text-border text-sm">/{s.shotCount}</span>
                   </span>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: resultColor, letterSpacing: '0.25em' }}>{s.result}</span>
+                  <span className={cn(
+                    'font-mono text-[10px] tracking-[0.25em]',
+                    s.result === 'ELITE' ? 'text-primary' : s.result === 'PASS' ? 'text-under' : 'text-scarlet-dim'
+                  )}>
+                    {s.result}
+                  </span>
                 </div>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--ash)', marginTop: 4, letterSpacing: '0.1em' }}>
+                <div className="font-mono text-[9px] text-muted-foreground mt-1 tracking-[0.1em]">
                   T{s.tier} · {s.range[0]}–{s.range[1]} YD · {new Date(s.startedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
-                  {s.shapeMode && <span style={{ color: 'var(--scarlet)', marginLeft: 8 }}>· SHAPE MODE</span>}
+                  {s.shapeMode && <span className="text-primary ml-2">· SHAPE MODE</span>}
                 </div>
                 {s.movement && s.movement.movement !== 'NO_CHANGE' && (
-                  <div style={{ marginTop: 4, fontSize: 11, color: s.movement.movement.includes('PROMOTE') ? 'var(--scarlet)' : 'var(--bogey)' }}>
+                  <div className={cn('mt-1 text-[11px]', s.movement.movement.includes('PROMOTE') ? 'text-primary' : 'text-bogey')}>
                     {s.movement.movement === 'PROMOTE'         && `↑ Promoted to T${s.movement.toTier}`}
                     {s.movement.movement === 'EXPRESS_PROMOTE' && `↑↑ Express promoted to T${s.movement.toTier}`}
                     {s.movement.movement === 'REGRESS'         && `↓ Regressed to T${s.movement.toTier}`}
@@ -981,7 +1128,7 @@ function SessionHistory({ player, sessions, patterns, onBack, onApplyPrescriptio
                   </div>
                 )}
               </div>
-              {isQuick && <span style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--bogey)', letterSpacing: '0.2em' }}>QUICK</span>}
+              {isQuick && <span className="font-mono text-[8px] text-bogey tracking-[0.2em]">QUICK</span>}
             </div>
           );
         })}
@@ -1088,7 +1235,7 @@ export default function ApproachStandard() {
   }, [player, sessions]);
 
   return (
-    <div className="as-wrapper px-0">
+    <div className="max-w-[520px] mx-auto pb-16">
       {screen === 'TIER_SELECT' && <TierSelection onSelect={handleTierSelect} />}
       {screen === 'SETUP' && player && (
         <DrillSetup
