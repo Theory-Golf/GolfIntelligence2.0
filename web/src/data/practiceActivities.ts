@@ -46,6 +46,27 @@ export const ACTIVITIES: Activity[] = [
   // ── PUTTING ──────────────────────────────────────────────────────────
 
   {
+    id: 'inside-ten',
+    name: 'Inside Ten',
+    category: 'putting',
+    type: 'skill_assessment',
+    description:
+      '18 putts across 6 ascending ladders from 3 to 10 feet. Enter one number at the end — total makes. Converts to a Strokes Gained estimate and classifies session performance into a tier. Tracks par-save and birdie-conversion range over time.',
+    connected_drivers: [
+      {
+        driver_id: 'M1',
+        connection:
+          'Directly scores the 3–10 ft SG bucket — the highest-leverage make rate range',
+      },
+      {
+        driver_id: 'M2',
+        connection:
+          'Isolates the primary loss bucket when it falls in the short-putt zone (3–10 ft)',
+      },
+    ],
+  },
+
+  {
     id: 'round-simulation',
     name: 'Round Simulation',
     category: 'putting',

@@ -11,6 +11,7 @@ import './PracticeLibrary.css';
  * As each activity page is built, add its route here.
  */
 const ACTIVITY_ROUTES: Record<string, string> = {
+  'inside-ten': '/player-path/putting/inside-ten',
   'round-simulation': '/player-path/round-simulation',
   'wedge-standard': '/player-path/wedge-standard',
   'approach-standard': '/player-path/approach-standard',
