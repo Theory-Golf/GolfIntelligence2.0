@@ -1,0 +1,515 @@
+/* ================================================================
+   Theory Golf — Lag Putt Test
+   Component-scoped styles. Prefix: .lpt-
+   ================================================================ */
+
+.lpt-wrapper {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 0 20px 64px;
+}
+
+/* ── TOP NAV ───────────────────────────────────────────────────── */
+.lpt-top-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  min-height: 44px;
+}
+
+.lpt-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  min-height: 44px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  background: transparent;
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.lpt-back-btn:hover {
+  color: var(--color-text);
+  border-color: var(--color-muted);
+}
+
+.lpt-nav-shot {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text);
+}
+
+.lpt-running {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  color: var(--color-text);
+  font-weight: 500;
+  min-width: 44px;
+  text-align: right;
+}
+
+/* ── PROGRESS ──────────────────────────────────────────────────── */
+.lpt-progress-track {
+  height: 2px;
+  background: var(--color-border);
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+
+.lpt-progress-fill {
+  height: 100%;
+  background: var(--color-accent);
+  transition: width 400ms ease;
+}
+
+/* ── CARDS ─────────────────────────────────────────────────────── */
+.lpt-card {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  padding: 24px;
+  margin-bottom: 16px;
+}
+
+.lpt-card-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.lpt-card-title {
+  font-family: var(--font-display, var(--font-mono));
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  text-align: center;
+  margin: 0 0 16px;
+  color: var(--color-text);
+  text-transform: uppercase;
+}
+
+.lpt-card-copy {
+  font-family: var(--font-body, sans-serif);
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--color-muted);
+  text-align: center;
+  margin: 0 0 24px;
+}
+
+/* ── RULES LIST ────────────────────────────────────────────────── */
+.lpt-rules {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.lpt-rule {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+}
+
+.lpt-rule-key {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--color-accent);
+  min-width: 24px;
+}
+
+.lpt-rule-text {
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--color-text);
+}
+
+/* ── SCORING TABLE ─────────────────────────────────────────────── */
+.lpt-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 24px;
+}
+
+.lpt-table th,
+.lpt-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 12px;
+  text-align: left;
+  color: var(--color-text);
+}
+
+.lpt-table th {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  font-weight: 500;
+}
+
+/* ── PRIMARY BUTTON ────────────────────────────────────────────── */
+.lpt-primary-btn {
+  width: 100%;
+  padding: 16px;
+  min-height: 52px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-bg);
+  background: var(--color-text);
+  border: none;
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.lpt-primary-btn:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.lpt-primary-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── DISTANCE DISPLAY ──────────────────────────────────────────── */
+.lpt-card-distance {
+  padding: 32px 24px;
+}
+
+.lpt-distance-display {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 8px;
+}
+
+.lpt-distance-number {
+  font-family: var(--font-display, var(--font-mono));
+  font-size: 72px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--color-text);
+  line-height: 1;
+}
+
+.lpt-distance-unit {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+/* ── BUCKET GRID ───────────────────────────────────────────────── */
+.lpt-bucket-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.lpt-bucket-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 14px 8px;
+  min-height: 64px;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.lpt-bucket-btn:hover {
+  border-color: var(--color-muted);
+}
+
+.lpt-bucket-btn.is-selected {
+  border-color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+}
+
+.lpt-bucket-label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text);
+}
+
+.lpt-bucket-score {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--color-muted);
+}
+
+/* ── DIRECTION ─────────────────────────────────────────────────── */
+.lpt-dir-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.lpt-dir-btn {
+  padding: 16px;
+  min-height: 56px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.lpt-dir-btn:hover {
+  border-color: var(--color-muted);
+}
+
+.lpt-dir-btn.is-selected {
+  border-color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+}
+
+/* ── RESULTS ───────────────────────────────────────────────────── */
+.lpt-card-result {
+  text-align: center;
+  padding: 32px 24px;
+}
+
+.lpt-result-score {
+  font-family: var(--font-display, var(--font-mono));
+  font-size: 64px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--color-text);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.lpt-result-tier {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+/* ── SCALE / BENCHMARK BAR ─────────────────────────────────────── */
+.lpt-scale {
+  padding: 56px 4px 88px;
+}
+
+.lpt-scale-track {
+  position: relative;
+  height: 2px;
+  background: var(--color-border);
+}
+
+.lpt-scale-mark {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.lpt-scale-tick {
+  width: 1px;
+  height: 10px;
+  background: var(--color-muted);
+  margin-top: -4px;
+}
+
+.lpt-scale-mark-label {
+  position: absolute;
+  top: 14px;
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  white-space: nowrap;
+  transform: rotate(-45deg);
+  transform-origin: top left;
+}
+
+.lpt-scale-mark-score {
+  position: absolute;
+  top: 52px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--color-muted);
+}
+
+.lpt-scale-pin {
+  position: absolute;
+  top: -32px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 2;
+}
+
+.lpt-scale-pin-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.lpt-scale-pin-dot {
+  width: 12px;
+  height: 12px;
+  background: var(--color-accent);
+  border: 2px solid var(--color-bg);
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px var(--color-accent);
+}
+
+.lpt-scale-pin::after {
+  content: '';
+  position: absolute;
+  top: 26px;
+  width: 1px;
+  height: 18px;
+  background: var(--color-accent);
+}
+
+/* ── SUMMARY GRID ──────────────────────────────────────────────── */
+.lpt-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.lpt-summary-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 4px;
+  border: 1px solid var(--color-border);
+}
+
+.lpt-summary-num {
+  font-family: var(--font-display, var(--font-mono));
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.1;
+}
+
+.lpt-summary-lab {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  margin-top: 4px;
+}
+
+/* ── PUTT LIST ─────────────────────────────────────────────────── */
+.lpt-puttlist {
+  display: flex;
+  flex-direction: column;
+}
+
+.lpt-puttlist-head,
+.lpt-puttlist-row {
+  display: grid;
+  grid-template-columns: 32px 1fr 1.4fr 48px;
+  gap: 8px;
+  padding: 8px 0;
+  font-size: 12px;
+  color: var(--color-text);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.lpt-puttlist-head {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.lpt-puttlist-row span:last-child {
+  text-align: right;
+  font-family: var(--font-mono);
+}
+
+.lpt-score-good {
+  color: #00C07A;
+}
+
+.lpt-score-bad {
+  color: #E8202A;
+}
+
+/* ── HISTORY ───────────────────────────────────────────────────── */
+.lpt-history {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.lpt-history-row {
+  display: grid;
+  grid-template-columns: 1fr 60px 1fr;
+  gap: 8px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 12px;
+  color: var(--color-text);
+}
+
+.lpt-history-row:last-child {
+  border-bottom: none;
+}
+
+.lpt-history-date {
+  font-family: var(--font-mono);
+  color: var(--color-muted);
+}
+
+.lpt-history-total {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  text-align: center;
+}
+
+.lpt-history-tier {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  text-align: right;
+}

@@ -14,3 +14,6 @@ export const LS_HOME_ZIP = 'yc4_homezip';
 // ── Round Simulation ───────────────────────────────────────────────────
 export const LS_PUTTING_SESSIONS = 'putting-sessions';
 export const LS_PUTTING_PUTTERS = 'putting-putters';
+
+// ── Lag Putt Test ──────────────────────────────────────────────────────
+export const LS_LAG_PUTT_SESSIONS = 'lag-putt-sessions';
