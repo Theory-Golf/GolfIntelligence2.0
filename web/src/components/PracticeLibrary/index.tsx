@@ -12,6 +12,7 @@ import './PracticeLibrary.css';
  */
 const ACTIVITY_ROUTES: Record<string, string> = {
   'round-simulation': '/player-path/round-simulation',
+  'lag-putt-test': '/player-path/lag-putt-test',
   'wedge-standard': '/player-path/wedge-standard',
   'approach-standard': '/player-path/approach-standard',
   'driver-standard': '/player-path/driver-standard',
