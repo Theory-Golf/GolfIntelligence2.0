@@ -16,6 +16,7 @@ const ACTIVITY_ROUTES: Record<string, string> = {
   'wedge-standard': '/player-path/wedge-standard',
   'approach-standard': '/player-path/approach-standard',
   'driver-standard': '/player-path/driver-standard',
+  'line-test': '/player-path/line-test',
 };
 
 /**
