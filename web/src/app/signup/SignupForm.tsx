@@ -45,8 +45,8 @@ export default function SignupForm() {
     }
 
     if (data.session) {
-      router.push('/golf-intelligence');
       router.refresh();
+      router.push('/golf-intelligence');
     } else {
       setConfirmationSent(true);
       setLoading(false);
