@@ -17,3 +17,6 @@ export const LS_PUTTING_PUTTERS = 'putting-putters';
 
 // ── Lag Putt Test ──────────────────────────────────────────────────────
 export const LS_LAG_PUTT_SESSIONS = 'lag-putt-sessions';
+
+// ── Line Test ──────────────────────────────────────────────────────────
+export const LS_LINE_TEST_SESSIONS = 'lineTest:sessions';
