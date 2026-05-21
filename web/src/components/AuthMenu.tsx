@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
+import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
 
 export default function AuthMenu({ className }: { className?: string }) {
@@ -12,6 +12,10 @@ export default function AuthMenu({ className }: { className?: string }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!isSupabaseConfigured()) {
+      setLoading(false);
+      return;
+    }
     const supabase = createClient();
     let active = true;
 
