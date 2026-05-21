@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import ThemeToggle from './ThemeToggle';
+import AuthMenu from './AuthMenu';
 import { cn } from '@/lib/utils';
 
 const NAV_LINKS = [
@@ -49,8 +50,11 @@ export default function Navbar() {
           })}
         </nav>
 
-        {/* Right: Theme Toggle + Hamburger */}
-        <div className="flex items-center gap-3">
+        {/* Right: Auth + Theme Toggle + Hamburger */}
+        <div className="flex items-center gap-4">
+          <div className="hidden md:block">
+            <AuthMenu />
+          </div>
           <ThemeToggle />
           <button
             className="flex md:hidden flex-col justify-center items-center gap-[5px] w-10 h-10 bg-transparent border-none cursor-pointer p-2 shrink-0"
@@ -94,6 +98,9 @@ export default function Navbar() {
               </Link>
             );
           })}
+          <div className="px-7 min-h-[52px] flex items-center border-b border-border">
+            <AuthMenu />
+          </div>
         </nav>
       )}
     </header>
