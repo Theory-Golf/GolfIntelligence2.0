@@ -27,7 +27,7 @@ See `web/.env.example` for required variables:
 
 | Variable | Purpose |
 |----------|---------|
-| `NEXT_PUBLIC_FORMSPREE_URL` | Contact form endpoint |
+| `FORMSPREE_URL` | Contact form endpoint (server-side) |
 | `NEXT_PUBLIC_GOLF_DATA_URL` | Google Sheets CSV data source |
 
 ## Routes

@@ -40,7 +40,7 @@ export default function ContactPage() {
     setSubmitError('');
 
     try {
-      const res = await fetch(process.env.NEXT_PUBLIC_FORMSPREE_URL!, {
+      const res = await fetch('/api/contact', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -58,11 +58,14 @@ export default function ContactPage() {
       if (res.ok) {
         setSubmitted(true);
       } else {
-        const data = await res.json();
-        setSubmitError(
-          data?.errors?.[0]?.message ||
-            'Something went wrong. Please try again.'
-        );
+        let errorMessage = 'Something went wrong. Please try again.';
+        try {
+          const data = (await res.json()) as { error?: string };
+          if (data?.error) errorMessage = data.error;
+        } catch {
+          // Non-JSON response — keep default message
+        }
+        setSubmitError(errorMessage);
       }
     } catch {
       setSubmitError('Network error. Please check your connection and try again.');
