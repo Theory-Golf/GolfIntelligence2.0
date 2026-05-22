@@ -6,6 +6,7 @@
  */
 
 import { useState, lazy, Suspense } from 'react';
+import Link from 'next/link';
 import '@/styles/dashboard.css';
 import { useGolfData } from '@/lib/golf/useGolfData';
 import { getBenchmarkOptions } from '@/lib/golf/benchmarks';
@@ -82,6 +83,11 @@ export default function Dashboard() {
           <h1><span style={{ fontFamily: 'var(--font-body)' }}>Golf</span> <em>Intelligence</em></h1>
           <p className="subtitle">By: Theory Golf</p>
         </div>
+        {/* Header actions */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <Link href="/golf-intelligence/round/new" className="btn-clear">
+            + New Round
+          </Link>
         {/* Benchmark Selector */}
         <div className="benchmark-selector">
           <label htmlFor="benchmark-select">Benchmark:</label>
@@ -97,6 +103,7 @@ export default function Dashboard() {
               </option>
             ))}
           </select>
+        </div>
         </div>
       </header>
 
