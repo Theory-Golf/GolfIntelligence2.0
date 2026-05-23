@@ -6,6 +6,7 @@
  */
 
 import { useState, lazy, Suspense } from 'react';
+import Link from 'next/link';
 import '@/styles/dashboard.css';
 import { useGolfData } from '@/lib/golf/useGolfData';
 import { getBenchmarkOptions } from '@/lib/golf/benchmarks';
@@ -82,6 +83,14 @@ export default function Dashboard() {
           <h1><span style={{ fontFamily: 'var(--font-body)' }}>Golf</span> <em>Intelligence</em></h1>
           <p className="subtitle">By: Theory Golf</p>
         </div>
+        {/* Enter Round entry point */}
+        <Link
+          href="/golf-intelligence/round/new"
+          className="inline-flex items-center gap-2 rounded-md bg-scarlet text-chalk font-display font-bold text-[11px] tracking-[0.2em] uppercase px-4 py-2 hover:bg-scarlet-dim transition-colors mr-3"
+        >
+          Enter Round →
+        </Link>
+
         {/* Benchmark Selector */}
         <div className="benchmark-selector">
           <label htmlFor="benchmark-select">Benchmark:</label>
