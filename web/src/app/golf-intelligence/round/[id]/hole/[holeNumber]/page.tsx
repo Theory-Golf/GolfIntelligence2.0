@@ -19,16 +19,36 @@ import type {
 } from '@/lib/golf/db/types';
 
 const PAR_CHOICES = [3, 4, 5] as const;
+const COLOR_AMBER = '#F09020';
 
 function unitFor(lie: Lie): 'YDS' | 'FT' {
   return lie === 'Green' ? 'FT' : 'YDS';
 }
 
-function mismatchMessage(par: number, distance: number): string | null {
-  if (par === 3 && distance > 250) return `Long for a par 3 (${distance} yds)`;
-  if (par === 4 && distance > 525) return `Long for a par 4 (${distance} yds)`;
-  if (par === 4 && distance < 250) return `Short for a par 4 (${distance} yds)`;
-  if (par === 5 && distance < 450) return `Short for a par 5 (${distance} yds)`;
+function mismatchWarning(
+  par: number,
+  distance: number,
+): { title: string; body: string } | null {
+  if (par === 3 && distance > 250)
+    return {
+      title: `THAT'S A LONG PAR 3`,
+      body: `${distance} yards is unusual for a par 3. Confirm or change par above.`,
+    };
+  if (par === 4 && distance > 525)
+    return {
+      title: `THAT'S A LONG PAR 4`,
+      body: `${distance} yards is unusual for a par 4. Confirm or change par above.`,
+    };
+  if (par === 4 && distance < 250)
+    return {
+      title: `THAT'S A SHORT PAR 4`,
+      body: `${distance} yards is unusual for a par 4. Confirm or change par above.`,
+    };
+  if (par === 5 && distance < 450)
+    return {
+      title: `THAT'S A SHORT PAR 5`,
+      body: `${distance} yards is unusual for a par 5. Confirm or change par above.`,
+    };
   return null;
 }
 
@@ -62,117 +82,13 @@ export default function HolePage() {
 
   const hole = session.getHole(holeNumber);
 
-  if (!hole) {
-    return <ParGate holeNumber={holeNumber} />;
-  }
-
   return (
     <ShotEntry
-      key={`${hole.holeId}|${searchParams.toString()}`}
+      key={`hole-${holeNumber}|${searchParams.toString()}`}
       roundId={roundId}
+      holeNumber={holeNumber}
       hole={hole}
     />
-  );
-}
-
-// ─── Par Gate ───────────────────────────────────────────────────────────────
-
-function ParGate({ holeNumber }: { holeNumber: number }) {
-  const session = useRoundSession();
-  const suggestedPar = session.state.holePars[holeNumber] ?? null;
-  const [busy, setBusy] = useState(false);
-  const score = session.getRunningScore();
-
-  async function pick(par: number) {
-    if (busy) return;
-    setBusy(true);
-    try {
-      await session.setPar(holeNumber, par);
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <div className="min-h-screen bg-background text-foreground">
-      <div className="max-w-md mx-auto p-4 flex flex-col gap-5">
-        <Header holeNumber={holeNumber} editing={false} complete={false} score={score} />
-
-        {/* Par gate band */}
-        <div className="border-b border-border pb-5">
-          <p className="font-mono text-[10px] tracking-[0.25em] uppercase text-scarlet text-center mb-3">
-            Set hole par to continue
-          </p>
-          <div className="grid grid-cols-3 gap-2">
-            {PAR_CHOICES.map((p) => {
-              const suggested = suggestedPar === p;
-              return (
-                <button
-                  key={p}
-                  type="button"
-                  onClick={() => pick(p)}
-                  disabled={busy}
-                  className={
-                    suggested
-                      ? 'rounded-md border border-scarlet bg-scarlet-tint py-4 disabled:opacity-50'
-                      : 'rounded-md border border-border bg-shadow py-4 disabled:opacity-50 active:bg-pitch'
-                  }
-                >
-                  <div className="font-display font-extrabold text-3xl text-chalk leading-none">
-                    {p}
-                  </div>
-                  <div className="font-mono text-[9px] tracking-[0.25em] uppercase text-ash mt-2">
-                    Par {p}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Dimmed preview */}
-        <div className="opacity-30 pointer-events-none flex flex-col gap-4">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash">
-                Starting from
-              </p>
-              <p className="font-display font-extrabold text-3xl text-chalk mt-1">
-                — <span className="font-mono text-[10px] tracking-[0.25em] uppercase text-ash">YDS</span>
-              </p>
-            </div>
-            <div className="flex flex-col items-end">
-              <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash">Shot 1</p>
-              <div
-                className="mt-1 font-display font-bold text-[10px] tracking-[0.2em] uppercase px-2 py-1 rounded-sm"
-                style={{ background: LIE_COLORS.Tee, color: '#0C0C0C' }}
-              >
-                Tee
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash mb-2">
-              Ending distance
-            </p>
-            <div className="border border-border rounded-md bg-shadow px-4 py-6 text-center mb-3">
-              <span className="font-mono text-5xl text-chalk">—</span>
-            </div>
-            <div className="grid grid-cols-3 gap-2">
-              {[1, 2, 3, 4, 5, 6].map((d) => (
-                <div
-                  key={d}
-                  className="bg-shadow border border-border rounded-md py-4 font-mono text-2xl text-chalk text-center"
-                >
-                  {d}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
   );
 }
 
@@ -180,13 +96,9 @@ function ParGate({ holeNumber }: { holeNumber: number }) {
 
 function Header({
   holeNumber,
-  editing,
-  complete,
   score,
 }: {
   holeNumber: number;
-  editing: boolean;
-  complete: boolean;
   score: ReturnType<ReturnType<typeof useRoundSession>['getRunningScore']>;
 }) {
   return (
@@ -195,16 +107,6 @@ function Header({
         <span className="font-display font-extrabold text-3xl text-chalk uppercase tracking-tight">
           Hole {holeNumber}
         </span>
-        {editing && (
-          <span className="font-mono text-[10px] tracking-[0.25em] uppercase text-scarlet">
-            Editing
-          </span>
-        )}
-        {complete && !editing && (
-          <span className="font-mono text-[10px] tracking-[0.25em] uppercase text-ash">
-            · Complete
-          </span>
-        )}
       </div>
       <ScoreHeader front={score.front} back={score.back} total={score.total} />
     </header>
@@ -214,18 +116,25 @@ function Header({
 // ─── Shot Entry ─────────────────────────────────────────────────────────────
 
 interface FormState {
-  startingDistanceInput: string;
+  teeDistanceInput: string;
   endingDistance: string;
   endingLie: Lie | null;
   clubCategory: ClubCategory | null;
   missDirection: MissDirection | null;
   puttLongShort: PuttDirection | null;
   penalty: boolean;
-  keypadField: 'starting' | 'ending';
   warningDismissed: boolean;
 }
 
-function ShotEntry({ roundId, hole }: { roundId: string; hole: HoleEntry }) {
+function ShotEntry({
+  roundId,
+  holeNumber,
+  hole,
+}: {
+  roundId: string;
+  holeNumber: number;
+  hole: HoleEntry | undefined;
+}) {
   const session = useRoundSession();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -237,14 +146,14 @@ function ShotEntry({ roundId, hole }: { roundId: string; hole: HoleEntry }) {
   const afterOrder = insertStr !== null ? Number(insertStr) : null;
 
   const editingShot: ShotRow | null = useMemo(() => {
-    if (editOrder === null) return null;
+    if (editOrder === null || !hole) return null;
     return hole.shots.find((s) => s.shot_order === editOrder) ?? null;
-  }, [editOrder, hole.shots]);
+  }, [editOrder, hole]);
 
   const afterShot: ShotRow | null = useMemo(() => {
-    if (afterOrder === null) return null;
+    if (afterOrder === null || !hole) return null;
     return hole.shots.find((s) => s.shot_order === afterOrder) ?? null;
-  }, [afterOrder, hole.shots]);
+  }, [afterOrder, hole]);
 
   const mode: 'append' | 'edit' | 'insert' = editingShot
     ? 'edit'
@@ -252,82 +161,89 @@ function ShotEntry({ roundId, hole }: { roundId: string; hole: HoleEntry }) {
       ? 'insert'
       : 'append';
 
-  // Derive starting context for the current shot
+  const par = hole?.par ?? null;
+  const parSet = par !== null;
+
+  // Derive starting context
   let shotOrder: number;
   let startingLie: Lie;
   let inheritedDist: number | null;
-  let startingEditable: boolean;
 
   if (mode === 'edit' && editingShot) {
     shotOrder = editingShot.shot_order;
     startingLie = editingShot.starting_lie;
     inheritedDist = editingShot.starting_distance;
-    startingEditable = editingShot.shot_order === 1;
   } else if (mode === 'insert' && afterShot) {
     shotOrder = afterShot.shot_order + 1;
     startingLie = afterShot.ending_lie;
     inheritedDist = afterShot.ending_distance;
-    startingEditable = false;
   } else {
-    shotOrder = hole.shots.length + 1;
-    if (hole.shots.length === 0) {
+    // append
+    shotOrder = (hole?.shots.length ?? 0) + 1;
+    if (!hole || hole.shots.length === 0) {
       startingLie = 'Tee';
       inheritedDist = null;
-      startingEditable = true;
     } else {
       const prev = hole.shots[hole.shots.length - 1];
       startingLie = prev.ending_lie;
       inheritedDist = prev.ending_distance;
-      startingEditable = false;
     }
   }
+
+  const isFreshShot1 = mode === 'append' && shotOrder === 1;
 
   const [form, setForm] = useState<FormState>(() => {
     if (mode === 'edit' && editingShot) {
       return {
-        startingDistanceInput: String(editingShot.starting_distance),
+        teeDistanceInput: String(editingShot.starting_distance),
         endingDistance: String(editingShot.ending_distance),
         endingLie: editingShot.ending_lie,
         clubCategory: editingShot.club_category,
         missDirection: editingShot.miss_direction,
         puttLongShort: editingShot.putt_long_short,
         penalty: editingShot.penalty,
-        keypadField: 'ending',
         warningDismissed: false,
       };
     }
     return {
-      startingDistanceInput: '',
+      teeDistanceInput: '',
       endingDistance: '',
       endingLie: null,
       clubCategory: null,
       missDirection: null,
       puttLongShort: null,
       penalty: false,
-      keypadField: startingEditable ? 'starting' : 'ending',
       warningDismissed: false,
     };
   });
 
   const [saving, setSaving] = useState(false);
+  const [parBusy, setParBusy] = useState(false);
 
-  // Lock keypad to 'ending' whenever starting isn't editable
+  // After a successful append save, hole.shots grows; if we just transitioned
+  // from shot 1 to shot 2 we should clear the tee-distance input so the
+  // standard layout doesn't carry stale state.
   useEffect(() => {
-    if (!startingEditable && form.keypadField === 'starting') {
-      setForm((f) => ({ ...f, keypadField: 'ending' }));
+    if (
+      mode === 'append' &&
+      hole &&
+      hole.shots.length >= 1 &&
+      form.teeDistanceInput !== ''
+    ) {
+      setForm((f) => ({ ...f, teeDistanceInput: '' }));
     }
-  }, [startingEditable, form.keypadField]);
+  }, [mode, hole, form.teeDistanceInput]);
 
-  const startingDistanceNum = startingEditable
-    ? form.startingDistanceInput === ''
+  const startingDistanceNum = isFreshShot1
+    ? form.teeDistanceInput === ''
       ? null
-      : Number(form.startingDistanceInput)
+      : Number(form.teeDistanceInput)
     : inheritedDist;
 
   const startingUnit = unitFor(startingLie);
-  const endingUnit = startingUnit; // unit follows the shot's starting lie
+  const endingUnit = startingUnit;
 
-  // Conditional field triggers
+  // Conditional triggers
   const showClubCategory =
     shotOrder === 1 && startingDistanceNum !== null && startingDistanceNum >= 250;
   const showMissDirection =
@@ -339,33 +255,34 @@ function ShotEntry({ roundId, hole }: { roundId: string; hole: HoleEntry }) {
     startingDistanceNum !== null &&
     startingDistanceNum >= 8;
 
-  // Mismatch warning (shot 1 only)
   const warning =
-    shotOrder === 1 && startingDistanceNum !== null && !form.warningDismissed
-      ? mismatchMessage(hole.par, startingDistanceNum)
+    isFreshShot1 &&
+    parSet &&
+    startingDistanceNum !== null &&
+    !form.warningDismissed
+      ? mismatchWarning(par as number, startingDistanceNum)
       : null;
 
-  // Save validity
   const canSave =
     !saving &&
+    parSet &&
     form.endingDistance !== '' &&
     form.endingLie !== null &&
-    (!startingEditable || form.startingDistanceInput !== '') &&
+    (!isFreshShot1 || form.teeDistanceInput !== '') &&
     (!showClubCategory || form.clubCategory !== null);
 
-  function dismissWarning() {
-    if (warning) setForm((f) => ({ ...f, warningDismissed: true }));
-  }
-
-  function setKeypadValue(v: string) {
-    setForm((f) =>
-      f.keypadField === 'starting'
-        ? { ...f, startingDistanceInput: v }
-        : { ...f, endingDistance: v },
-    );
+  async function handlePickPar(p: number) {
+    if (parBusy) return;
+    setParBusy(true);
+    try {
+      await session.setPar(holeNumber, p);
+    } finally {
+      setParBusy(false);
+    }
   }
 
   async function persistAppend(endingLie: Lie, endingDistance: number) {
+    if (!hole) return;
     if (startingDistanceNum === null) return;
     const insert: ShotInsert = {
       id: createId(),
@@ -388,6 +305,7 @@ function ShotEntry({ roundId, hole }: { roundId: string; hole: HoleEntry }) {
     endingLie: Lie,
     endingDistance: number,
   ) {
+    if (!hole) return;
     await session.updateShot(hole.holeId, {
       id: shot.id,
       starting_lie: startingLie,
@@ -407,6 +325,7 @@ function ShotEntry({ roundId, hole }: { roundId: string; hole: HoleEntry }) {
     endingLie: Lie,
     endingDistance: number,
   ) {
+    if (!hole) return;
     await session.insertShotAfter(hole.holeId, afterShotRow.shot_order, {
       id: createId(),
       hole_id: hole.holeId,
@@ -422,7 +341,7 @@ function ShotEntry({ roundId, hole }: { roundId: string; hole: HoleEntry }) {
   }
 
   function summaryUrl() {
-    return `/golf-intelligence/round/${roundId}/hole/${hole.holeNumber}/summary`;
+    return `/golf-intelligence/round/${roundId}/hole/${holeNumber}/summary`;
   }
 
   function resetForNextShot() {
@@ -434,8 +353,6 @@ function ShotEntry({ roundId, hole }: { roundId: string; hole: HoleEntry }) {
       missDirection: null,
       puttLongShort: null,
       penalty: false,
-      keypadField: 'ending',
-      warningDismissed: f.warningDismissed,
     }));
   }
 
@@ -468,7 +385,7 @@ function ShotEntry({ roundId, hole }: { roundId: string; hole: HoleEntry }) {
   }
 
   async function handleHoled() {
-    if (saving) return;
+    if (saving || !parSet) return;
     setSaving(true);
     try {
       if (mode === 'edit' && editingShot) {
@@ -488,7 +405,7 @@ function ShotEntry({ roundId, hole }: { roundId: string; hole: HoleEntry }) {
     }
   }
 
-  const completedShots: ShotPathShot[] = hole.shots
+  const completedShots: ShotPathShot[] = (hole?.shots ?? [])
     .filter((s) =>
       mode === 'edit' && editingShot ? s.shot_order < editingShot.shot_order : true,
     )
@@ -501,206 +418,268 @@ function ShotEntry({ roundId, hole }: { roundId: string; hole: HoleEntry }) {
     }));
 
   return (
-    <div className="min-h-screen bg-background text-foreground" onClick={dismissWarning}>
+    <div className="min-h-screen bg-background text-foreground">
       <div className="max-w-md mx-auto p-4 flex flex-col gap-5">
-        <Header holeNumber={hole.holeNumber} editing={false} complete={false} score={score} />
+        <Header holeNumber={holeNumber} score={score} />
 
-        {/* THIS HOLE shot path */}
-        <div>
-          <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash mb-2">
-            This hole
-          </p>
-          <ShotPath shots={completedShots} activeShotNumber={shotOrder} />
-        </div>
-
-        {/* Starting from */}
-        <div className="flex items-start justify-between border-t border-border pt-4">
-          <div>
-            <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash">
-              Starting from
+        {/* HOLE PAR — only on fresh shot 1 */}
+        {isFreshShot1 && (
+          <div className="border-b border-border pb-5">
+            <p className="font-mono text-[10px] tracking-[0.25em] uppercase text-ash mb-3">
+              Hole par
             </p>
-            {startingEditable ? (
-              <button
-                type="button"
-                onClick={() => setForm((f) => ({ ...f, keypadField: 'starting' }))}
-                className={
-                  'mt-1 text-left ' +
-                  (form.keypadField === 'starting'
-                    ? 'outline outline-1 outline-scarlet rounded-sm px-1 -mx-1'
-                    : '')
-                }
-              >
-                <span className="font-display font-extrabold text-3xl text-chalk">
-                  {form.startingDistanceInput === '' ? '—' : form.startingDistanceInput}
-                </span>{' '}
-                <span className="font-mono text-[10px] tracking-[0.25em] uppercase text-ash">
-                  {startingUnit}
-                </span>
-              </button>
-            ) : (
-              <p className="mt-1">
-                <span className="font-display font-extrabold text-3xl text-chalk">
-                  {inheritedDist ?? '—'}
-                </span>{' '}
-                <span className="font-mono text-[10px] tracking-[0.25em] uppercase text-ash">
-                  {startingUnit}
-                </span>
-              </p>
-            )}
-            {warning && (
-              <p className="mt-2 font-mono text-[10px] tracking-[0.15em] uppercase" style={{ color: '#F09020' }}>
-                {warning} · tap to dismiss
-              </p>
-            )}
-          </div>
-          <div className="flex flex-col items-end">
-            <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash">
-              Shot {shotOrder}
-            </p>
-            <div
-              className="mt-1 font-display font-bold text-[10px] tracking-[0.2em] uppercase px-2 py-1 rounded-sm"
-              style={{ background: LIE_COLORS[startingLie], color: '#0C0C0C' }}
-            >
-              {startingLie}
+            <div className="grid grid-cols-3 gap-2">
+              {PAR_CHOICES.map((p) => {
+                const selected = par === p;
+                return (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => handlePickPar(p)}
+                    disabled={parBusy}
+                    className={
+                      'rounded-md py-5 disabled:opacity-50 ' +
+                      (selected
+                        ? 'border border-scarlet bg-scarlet-tint'
+                        : 'border border-border bg-shadow active:bg-pitch')
+                    }
+                  >
+                    <div
+                      className={
+                        'font-display font-extrabold text-3xl leading-none ' +
+                        (selected ? 'text-scarlet' : 'text-chalk')
+                      }
+                    >
+                      {p}
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
-        </div>
+        )}
 
-        {/* Ending distance + keypad */}
-        <div>
-          <div className="flex items-baseline justify-between mb-2">
-            <button
-              type="button"
-              onClick={() => setForm((f) => ({ ...f, keypadField: 'ending' }))}
-              className={
-                'font-mono text-[9px] tracking-[0.3em] uppercase ' +
-                (form.keypadField === 'ending' ? 'text-chalk' : 'text-ash')
-              }
-            >
-              {form.keypadField === 'starting' ? 'Starting distance' : 'Ending distance'}
-            </button>
-            <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-ash">
-              {endingUnit}
-            </span>
-          </div>
-          <NumericKeypad
-            value={
-              form.keypadField === 'starting'
-                ? form.startingDistanceInput
-                : form.endingDistance
-            }
-            onChange={setKeypadValue}
-          />
-        </div>
-
-        {/* Ending lie */}
-        <div>
-          <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash mb-2">
-            Ending lie
-          </p>
-          <LieGrid
-            selected={form.endingLie}
-            onChange={(lie) => setForm((f) => ({ ...f, endingLie: lie }))}
-            showHoled
-            onHoled={handleHoled}
-          />
-        </div>
-
-        {/* Conditional fields */}
-        <ConditionalBlock show={showClubCategory}>
-          <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash mb-2">
-            Club category
-          </p>
-          <div className="grid grid-cols-2 gap-2">
-            {(['Driver', 'Non-driver'] as ClubCategory[]).map((c) => {
-              const active = form.clubCategory === c;
-              return (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => setForm((f) => ({ ...f, clubCategory: c }))}
-                  className={
-                    active
-                      ? 'rounded-md border border-scarlet bg-scarlet-tint py-3 font-display font-bold text-sm tracking-[0.15em] uppercase text-chalk'
-                      : 'rounded-md border border-border bg-shadow py-3 font-display font-bold text-sm tracking-[0.15em] uppercase text-ash'
-                  }
-                >
-                  {c}
-                </button>
-              );
-            })}
-          </div>
-        </ConditionalBlock>
-
-        <ConditionalBlock show={showMissDirection}>
-          <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash mb-2">
-            Miss direction
-          </p>
-          <div className="grid grid-cols-2 gap-2">
-            {(['Left', 'Right'] as MissDirection[]).map((m) => {
-              const active = form.missDirection === m;
-              return (
-                <button
-                  key={m}
-                  type="button"
-                  onClick={() => setForm((f) => ({ ...f, missDirection: m }))}
-                  className={
-                    active
-                      ? 'rounded-md border border-scarlet bg-scarlet-tint py-3 font-display font-bold text-sm tracking-[0.15em] uppercase text-chalk'
-                      : 'rounded-md border border-border bg-shadow py-3 font-display font-bold text-sm tracking-[0.15em] uppercase text-ash'
-                  }
-                >
-                  {m}
-                </button>
-              );
-            })}
-          </div>
-        </ConditionalBlock>
-
-        <ConditionalBlock show={showPuttLongShort}>
-          <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash mb-2">
-            Putt long / short
-          </p>
-          <div className="grid grid-cols-2 gap-2">
-            {(['Long', 'Short'] as PuttDirection[]).map((p) => {
-              const active = form.puttLongShort === p;
-              return (
-                <button
-                  key={p}
-                  type="button"
-                  onClick={() => setForm((f) => ({ ...f, puttLongShort: p }))}
-                  className={
-                    active
-                      ? 'rounded-md border border-scarlet bg-scarlet-tint py-3 font-display font-bold text-sm tracking-[0.15em] uppercase text-chalk'
-                      : 'rounded-md border border-border bg-shadow py-3 font-display font-bold text-sm tracking-[0.15em] uppercase text-ash'
-                  }
-                >
-                  {p}
-                </button>
-              );
-            })}
-          </div>
-        </ConditionalBlock>
-
-        {/* Penalty toggle */}
-        <PenaltyToggle
-          on={form.penalty}
-          onChange={(v) => setForm((f) => ({ ...f, penalty: v }))}
-        />
-
-        {/* Save */}
-        <button
-          type="button"
-          onClick={handleSave}
-          disabled={!canSave}
-          className="w-full rounded-md bg-chalk text-court py-4 font-display font-bold text-sm tracking-[0.2em] uppercase disabled:opacity-40"
+        {/* Sections below are gated by parSet on fresh shot 1 */}
+        <div
+          className={
+            isFreshShot1 && !parSet
+              ? 'opacity-30 pointer-events-none flex flex-col gap-5'
+              : 'flex flex-col gap-5'
+          }
         >
-          {mode === 'edit'
-            ? 'Save edit · Back'
-            : mode === 'insert'
-              ? 'Insert shot · Back'
-              : 'Save shot · Next →'}
-        </button>
+          {/* THIS HOLE shot path — hidden on fresh shot 1 (nothing to show yet) */}
+          {!isFreshShot1 && hole && (
+            <div>
+              <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash mb-2">
+                This hole
+              </p>
+              <ShotPath shots={completedShots} activeShotNumber={shotOrder} />
+            </div>
+          )}
+
+          {/* Starting from */}
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash">
+                Starting from
+              </p>
+              {isFreshShot1 ? (
+                <div className="mt-1 flex items-baseline gap-2">
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    min={0}
+                    max={9999}
+                    placeholder="—"
+                    value={form.teeDistanceInput}
+                    onChange={(e) =>
+                      setForm((f) => ({
+                        ...f,
+                        teeDistanceInput: e.target.value.replace(/[^0-9]/g, ''),
+                        warningDismissed: false,
+                      }))
+                    }
+                    className="font-display font-extrabold text-3xl text-chalk bg-transparent border-0 outline-none w-24 p-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  />
+                  <span className="font-mono text-[10px] tracking-[0.25em] uppercase text-ash">
+                    {startingUnit}
+                  </span>
+                </div>
+              ) : (
+                <p className="mt-1">
+                  <span className="font-display font-extrabold text-3xl text-chalk">
+                    {inheritedDist ?? '—'}
+                  </span>{' '}
+                  <span className="font-mono text-[10px] tracking-[0.25em] uppercase text-ash">
+                    {startingUnit}
+                  </span>
+                </p>
+              )}
+            </div>
+            <div className="flex flex-col items-end">
+              <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash">
+                Shot {shotOrder}
+              </p>
+              <div
+                className="mt-1 font-display font-bold text-[10px] tracking-[0.2em] uppercase px-2 py-1 rounded-sm"
+                style={{ background: LIE_COLORS[startingLie], color: '#0C0C0C' }}
+              >
+                {startingLie}
+              </div>
+            </div>
+          </div>
+
+          {/* Soft warning card */}
+          {warning && (
+            <div
+              className="rounded-md px-4 py-3 flex items-start gap-3"
+              style={{ border: `1px solid ${COLOR_AMBER}` }}
+            >
+              <button
+                type="button"
+                onClick={() =>
+                  setForm((f) => ({ ...f, warningDismissed: true }))
+                }
+                aria-label="Dismiss warning"
+                className="mt-0.5 w-4 h-4 rounded-sm shrink-0"
+                style={{ border: `1px solid ${COLOR_AMBER}` }}
+              />
+              <div className="flex-1">
+                <p
+                  className="font-display font-bold text-sm tracking-[0.1em] uppercase"
+                  style={{ color: COLOR_AMBER }}
+                >
+                  {warning.title}
+                </p>
+                <p className="font-mono text-[11px] text-cement mt-1 leading-snug">
+                  {warning.body}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Ending distance + keypad */}
+          <div>
+            <div className="flex items-baseline justify-between mb-2">
+              <span className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash">
+                Ending distance
+              </span>
+              <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-ash">
+                {endingUnit}
+              </span>
+            </div>
+            <NumericKeypad
+              value={form.endingDistance}
+              onChange={(v) => setForm((f) => ({ ...f, endingDistance: v }))}
+            />
+          </div>
+
+          {/* Ending lie */}
+          <div>
+            <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash mb-2">
+              Ending lie
+            </p>
+            <LieGrid
+              selected={form.endingLie}
+              onChange={(lie) => setForm((f) => ({ ...f, endingLie: lie }))}
+              showHoled
+              onHoled={handleHoled}
+            />
+          </div>
+
+          <ConditionalBlock show={showClubCategory}>
+            <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash mb-2">
+              Club category
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              {(['Driver', 'Non-driver'] as ClubCategory[]).map((c) => {
+                const active = form.clubCategory === c;
+                return (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setForm((f) => ({ ...f, clubCategory: c }))}
+                    className={
+                      active
+                        ? 'rounded-md border border-scarlet bg-scarlet-tint py-3 font-display font-bold text-sm tracking-[0.15em] uppercase text-chalk'
+                        : 'rounded-md border border-border bg-shadow py-3 font-display font-bold text-sm tracking-[0.15em] uppercase text-ash'
+                    }
+                  >
+                    {c}
+                  </button>
+                );
+              })}
+            </div>
+          </ConditionalBlock>
+
+          <ConditionalBlock show={showMissDirection}>
+            <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash mb-2">
+              Miss direction
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              {(['Left', 'Right'] as MissDirection[]).map((m) => {
+                const active = form.missDirection === m;
+                return (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => setForm((f) => ({ ...f, missDirection: m }))}
+                    className={
+                      active
+                        ? 'rounded-md border border-scarlet bg-scarlet-tint py-3 font-display font-bold text-sm tracking-[0.15em] uppercase text-chalk'
+                        : 'rounded-md border border-border bg-shadow py-3 font-display font-bold text-sm tracking-[0.15em] uppercase text-ash'
+                    }
+                  >
+                    {m}
+                  </button>
+                );
+              })}
+            </div>
+          </ConditionalBlock>
+
+          <ConditionalBlock show={showPuttLongShort}>
+            <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash mb-2">
+              Putt long / short
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              {(['Long', 'Short'] as PuttDirection[]).map((p) => {
+                const active = form.puttLongShort === p;
+                return (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => setForm((f) => ({ ...f, puttLongShort: p }))}
+                    className={
+                      active
+                        ? 'rounded-md border border-scarlet bg-scarlet-tint py-3 font-display font-bold text-sm tracking-[0.15em] uppercase text-chalk'
+                        : 'rounded-md border border-border bg-shadow py-3 font-display font-bold text-sm tracking-[0.15em] uppercase text-ash'
+                    }
+                  >
+                    {p}
+                  </button>
+                );
+              })}
+            </div>
+          </ConditionalBlock>
+
+          <PenaltyToggle
+            on={form.penalty}
+            onChange={(v) => setForm((f) => ({ ...f, penalty: v }))}
+          />
+
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={!canSave}
+            className="w-full rounded-md bg-chalk text-court py-4 font-display font-bold text-sm tracking-[0.2em] uppercase disabled:opacity-40"
+          >
+            {mode === 'edit'
+              ? 'Save edit · Back'
+              : mode === 'insert'
+                ? 'Insert shot · Back'
+                : 'Save shot · Next →'}
+          </button>
+        </div>
       </div>
     </div>
   );

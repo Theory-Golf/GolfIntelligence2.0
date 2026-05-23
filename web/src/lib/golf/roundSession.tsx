@@ -15,6 +15,7 @@ import {
   getShotsForHole,
   getCoursesByPlayer,
   upsertHole,
+  updateHole,
   upsertShot,
   updateShot as dbUpdateShot,
   deleteShot as dbDeleteShot,
@@ -233,8 +234,15 @@ export function RoundSessionProvider({
     async (holeNumber: number, par: number): Promise<HoleEntry> => {
       const existing = state.holes.find((h) => h.holeNumber === holeNumber);
       if (existing) {
-        // Hole already created — par change not supported in this phase.
-        return existing;
+        if (existing.par === par) return existing;
+        const row = await updateHole({ id: existing.holeId, par });
+        setState((prev) => ({
+          ...prev,
+          holes: prev.holes.map((h) =>
+            h.holeId === existing.holeId ? { ...h, par: row.par } : h,
+          ),
+        }));
+        return { ...existing, par: row.par };
       }
       const id = createId();
       const row = await upsertHole({
