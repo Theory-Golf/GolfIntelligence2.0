@@ -1,7 +1,6 @@
 'use client';
 
 import { useReducer, useEffect, useRef, useState } from 'react';
-import type { CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
@@ -72,6 +71,32 @@ const defaultPars = {
   par_hole_17: 4, par_hole_18: 4,
 } as const;
 
+// ─── Shared Tailwind class strings ───────────────────────────────────────────
+
+const monoLabel = 'font-mono text-[10px] tracking-[0.25em] uppercase text-ash';
+const containerLabel = 'block font-mono text-[9px] tracking-[0.3em] uppercase text-ash mb-3';
+const container = 'border border-border rounded-md p-6';
+const input =
+  'w-full bg-shadow border border-border rounded-md px-3 py-2.5 text-chalk font-body text-sm outline-none box-border';
+
+function roundTypeBtnClass(selected: boolean): string {
+  return (
+    'w-full px-4 py-3 rounded-md border font-display text-[13px] font-semibold tracking-[0.12em] uppercase text-left transition-colors ' +
+    (selected
+      ? 'border-scarlet bg-scarlet-tint text-chalk'
+      : 'border-border bg-shadow text-ash')
+  );
+}
+
+function roundNumBtnClass(selected: boolean): string {
+  return (
+    'flex-1 py-2.5 rounded-md border font-display text-[15px] font-bold transition-colors ' +
+    (selected
+      ? 'border-scarlet bg-scarlet-tint text-chalk'
+      : 'border-border bg-shadow text-ash')
+  );
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function NewRoundPage() {
@@ -94,7 +119,6 @@ export default function NewRoundPage() {
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Load auth + player's courses
   useEffect(() => {
     const supabase = createBrowserClient();
     supabase.auth.getUser().then(({ data }) => {
@@ -107,7 +131,6 @@ export default function NewRoundPage() {
     });
   }, []);
 
-  // Close dropdown on outside click
   useEffect(() => {
     function onMouseDown(e: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -117,8 +140,6 @@ export default function NewRoundPage() {
     document.addEventListener('mousedown', onMouseDown);
     return () => document.removeEventListener('mousedown', onMouseDown);
   }, []);
-
-  // ─── Derived ──────────────────────────────────────────────────────────────
 
   const needsRoundNumber =
     state.roundType === 'Qualifying' || state.roundType === 'Tournament';
@@ -137,7 +158,6 @@ export default function NewRoundPage() {
       ? fuzzyMatchCourse(state.courseName, courses)
       : null;
 
-  // Only show "Did you mean" when the match isn't already visible in the list
   const showFuzzyHint =
     fuzzyMatch !== null &&
     !filteredCourses.some((c) => c.id === fuzzyMatch.id);
@@ -148,8 +168,6 @@ export default function NewRoundPage() {
     !filteredCourses.some(
       (c) => c.name.toLowerCase() === state.courseName.trim().toLowerCase(),
     );
-
-  // ─── Handlers ─────────────────────────────────────────────────────────────
 
   function selectCourse(course: CourseRow) {
     dispatch({ type: 'SET_COURSE', courseId: course.id, courseName: course.name });
@@ -190,48 +208,42 @@ export default function NewRoundPage() {
       }
     });
 
-    router.push(`/golf-intelligence/round/${roundId}`);
+    router.push(`/golf-intelligence/round/${roundId}/hole/1`);
   }
 
-  // ─── Render ───────────────────────────────────────────────────────────────
-
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--background)', color: 'var(--foreground)' }}>
-
+    <div className="min-h-screen bg-background text-foreground">
       {/* Page header */}
-      <header style={headerStyle}>
-        <span style={monoLabelStyle}>New Round</span>
-        <span style={monoLabelStyle}>{playerName}</span>
+      <header className="flex items-center justify-between px-4 py-3.5 border-b border-border">
+        <span className={monoLabel}>New Round</span>
+        <span className={monoLabel}>{playerName}</span>
       </header>
 
       {/* Scrollable form */}
-      <div style={formWrapStyle}>
-
+      <div className="max-w-[480px] mx-auto p-4 flex flex-col gap-4">
         {/* ── Container 1: WHEN ── */}
-        <div style={containerStyle}>
-          <span style={containerLabelStyle}>When</span>
+        <div className={container}>
+          <span className={containerLabel}>When</span>
           <input
             type="date"
             value={state.date}
             onChange={(e) => dispatch({ type: 'SET_DATE', date: e.target.value })}
-            style={{ ...inputStyle, colorScheme: 'dark' }}
+            className={`${input} [color-scheme:dark]`}
           />
         </div>
 
         {/* ── Container 2: WHERE ── */}
-        <div style={containerStyle}>
-          <span style={containerLabelStyle}>Where</span>
+        <div className={container}>
+          <span className={containerLabel}>Where</span>
 
-          {/* Course typeahead */}
-          <div style={{ marginBottom: 12 }}>
+          <div className="mb-3">
             {state.courseId ? (
-              /* Selected pill */
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={coursePillStyle}>
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 bg-accent text-accent-foreground font-display text-[11px] font-bold tracking-[0.1em] uppercase px-2.5 py-1 rounded-sm">
                   {state.courseName}
                   <button
                     onClick={() => dispatch({ type: 'CLEAR_COURSE' })}
-                    style={pillClearBtnStyle}
+                    className="bg-transparent border-0 text-inherit p-0 leading-none text-base"
                     aria-label="Clear course"
                   >
                     ×
@@ -239,8 +251,7 @@ export default function NewRoundPage() {
                 </span>
               </div>
             ) : (
-              /* Typeahead input */
-              <div ref={dropdownRef} style={{ position: 'relative' }}>
+              <div ref={dropdownRef} className="relative">
                 <input
                   type="text"
                   placeholder="Course name"
@@ -249,20 +260,19 @@ export default function NewRoundPage() {
                     dispatch({ type: 'SET_COURSE_NAME', courseName: e.target.value })
                   }
                   onFocus={() => setShowDropdown(true)}
-                  style={inputStyle}
+                  className={input}
                 />
 
-                {/* Dropdown list */}
                 {showDropdown && (filteredCourses.length > 0 || showAddNew) && (
-                  <div style={dropdownStyle}>
+                  <div className="absolute left-0 right-0 top-[calc(100%+4px)] bg-shadow border border-border rounded-md overflow-hidden z-50">
                     {filteredCourses.map((c) => (
                       <button
                         key={c.id}
                         onMouseDown={(e) => {
-                          e.preventDefault(); // keep focus on input until selection
+                          e.preventDefault();
                           selectCourse(c);
                         }}
-                        style={dropdownItemStyle}
+                        className="block w-full px-3.5 py-2.5 bg-transparent border-b border-border text-cement font-body text-[13px] text-left last:border-b-0"
                       >
                         {c.name}
                       </button>
@@ -273,7 +283,7 @@ export default function NewRoundPage() {
                           e.preventDefault();
                           addNewCourse();
                         }}
-                        style={{ ...dropdownItemStyle, color: 'var(--scarlet-glow)', borderBottom: 'none' }}
+                        className="block w-full px-3.5 py-2.5 bg-transparent text-scarlet-glow font-body text-[13px] text-left"
                       >
                         + Add &ldquo;{state.courseName.trim()}&rdquo; as new course
                       </button>
@@ -281,14 +291,14 @@ export default function NewRoundPage() {
                   </div>
                 )}
 
-                {/* Fuzzy suggestion (when not already in list) */}
                 {showFuzzyHint && fuzzyMatch && (
-                  <div style={{ marginTop: 6 }}>
+                  <div className="mt-1.5">
                     <button
                       onClick={() => selectCourse(fuzzyMatch)}
-                      style={fuzzySuggestionStyle}
+                      className="bg-transparent border-0 font-body text-xs text-ash p-0 text-left"
                     >
-                      Did you mean <strong style={{ color: 'var(--chalk)' }}>{fuzzyMatch.name}</strong>?
+                      Did you mean{' '}
+                      <strong className="text-chalk">{fuzzyMatch.name}</strong>?
                     </button>
                   </div>
                 )}
@@ -296,43 +306,36 @@ export default function NewRoundPage() {
             )}
           </div>
 
-          {/* Location */}
-          <div style={{ marginBottom: 16 }}>
+          <div className="mb-4">
             <input
               type="text"
               placeholder="City, State"
               value={state.location}
               onChange={(e) => dispatch({ type: 'SET_LOCATION', location: e.target.value })}
-              style={inputStyle}
+              className={input}
             />
           </div>
 
-          {/* Weather placeholder */}
-          <div style={weatherCardStyle}>
-            <span style={{ ...containerLabelStyle, marginBottom: 6 }}>Conditions</span>
-            <span style={{
-              fontFamily: 'var(--font-body)',
-              fontSize: 13,
-              color: 'var(--ash)',
-            }}>
+          <div className="border border-border rounded-md px-4 py-3.5">
+            <span className={`${containerLabel} mb-1.5`}>Conditions</span>
+            <span className="font-body text-[13px] text-ash">
               Weather will be pulled automatically
             </span>
           </div>
         </div>
 
         {/* ── Container 3: WHAT ── */}
-        <div style={containerStyle}>
-          <span style={containerLabelStyle}>What</span>
+        <div className={container}>
+          <span className={containerLabel}>What</span>
 
-          {/* Round type selector */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div className="flex flex-col gap-2">
             {ROUND_TYPES.map((rt) => {
               const selected = state.roundType === rt;
               return (
                 <button
                   key={rt}
                   onClick={() => dispatch({ type: 'SET_ROUND_TYPE', roundType: rt })}
-                  style={roundTypeBtnStyle(selected)}
+                  className={roundTypeBtnClass(selected)}
                 >
                   {rt}
                 </button>
@@ -340,26 +343,24 @@ export default function NewRoundPage() {
             })}
           </div>
 
-          {/* Round number — animated height */}
-          <div style={{
-            maxHeight: needsRoundNumber ? '140px' : '0px',
-            overflow: 'hidden',
-            transition: 'max-height 240ms ease',
-          }}>
-            <div style={{
-              borderTop: '1px solid var(--border-color)',
-              marginTop: 16,
-              paddingTop: 16,
-            }}>
-              <span style={{ ...containerLabelStyle, marginBottom: 10 }}>Round</span>
-              <div style={{ display: 'flex', gap: 8 }}>
+          <div
+            className={
+              'overflow-hidden transition-[max-height] duration-200 ' +
+              (needsRoundNumber ? 'max-h-[140px]' : 'max-h-0')
+            }
+          >
+            <div className="border-t border-border mt-4 pt-4">
+              <span className={`${containerLabel} mb-2.5`}>Round</span>
+              <div className="flex gap-2">
                 {ROUND_NUMBERS.map((n) => {
                   const selected = state.roundNumber === n;
                   return (
                     <button
                       key={n}
-                      onClick={() => dispatch({ type: 'SET_ROUND_NUMBER', roundNumber: n })}
-                      style={roundNumBtnStyle(selected)}
+                      onClick={() =>
+                        dispatch({ type: 'SET_ROUND_NUMBER', roundNumber: n })
+                      }
+                      className={roundNumBtnClass(selected)}
                     >
                       {n}
                     </button>
@@ -370,7 +371,6 @@ export default function NewRoundPage() {
           </div>
         </div>
 
-        {/* Start button */}
         <Button
           disabled={!isValid || isSubmitting}
           onClick={handleStart}
@@ -379,167 +379,7 @@ export default function NewRoundPage() {
         >
           Start Round →
         </Button>
-
       </div>
     </div>
   );
-}
-
-// ─── Styles ───────────────────────────────────────────────────────────────────
-
-const headerStyle: CSSProperties = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  padding: '14px 16px',
-  borderBottom: '1px solid var(--border-color)',
-};
-
-const monoLabelStyle: CSSProperties = {
-  fontFamily: 'var(--font-mono)',
-  fontSize: 10,
-  letterSpacing: '0.25em',
-  textTransform: 'uppercase',
-  color: 'var(--ash)',
-};
-
-const formWrapStyle: CSSProperties = {
-  maxWidth: 480,
-  margin: '0 auto',
-  padding: 16,
-  display: 'flex',
-  flexDirection: 'column',
-  gap: 16,
-};
-
-const containerStyle: CSSProperties = {
-  border: '1px solid var(--border-color)',
-  borderRadius: 'var(--radius-md)',
-  padding: 24,
-};
-
-const containerLabelStyle: CSSProperties = {
-  fontFamily: 'var(--font-mono)',
-  fontSize: 9,
-  letterSpacing: '0.3em',
-  textTransform: 'uppercase',
-  color: 'var(--ash)',
-  display: 'block',
-  marginBottom: 12,
-};
-
-const inputStyle: CSSProperties = {
-  width: '100%',
-  background: 'var(--shadow)',
-  border: '1px solid var(--border-color)',
-  borderRadius: 'var(--radius-md)',
-  padding: '10px 12px',
-  color: 'var(--chalk)',
-  fontFamily: 'var(--font-body)',
-  fontSize: 14,
-  outline: 'none',
-  boxSizing: 'border-box',
-};
-
-const coursePillStyle: CSSProperties = {
-  background: 'var(--accent)',
-  color: 'var(--accent-foreground)',
-  fontFamily: 'var(--font-display)',
-  fontSize: 11,
-  fontWeight: 700,
-  letterSpacing: '0.1em',
-  textTransform: 'uppercase',
-  padding: '4px 10px',
-  borderRadius: 'var(--radius-sm)',
-  display: 'inline-flex',
-  alignItems: 'center',
-  gap: 6,
-};
-
-const pillClearBtnStyle: CSSProperties = {
-  background: 'none',
-  border: 'none',
-  color: 'inherit',
-  cursor: 'pointer',
-  padding: 0,
-  lineHeight: 1,
-  fontSize: 16,
-};
-
-const dropdownStyle: CSSProperties = {
-  position: 'absolute',
-  top: 'calc(100% + 4px)',
-  left: 0,
-  right: 0,
-  background: 'var(--shadow)',
-  border: '1px solid var(--border-color)',
-  borderRadius: 'var(--radius-md)',
-  overflow: 'hidden',
-  zIndex: 50,
-};
-
-const dropdownItemStyle: CSSProperties = {
-  display: 'block',
-  width: '100%',
-  padding: '11px 14px',
-  background: 'none',
-  border: 'none',
-  borderBottom: '1px solid var(--border-color)',
-  color: 'var(--cement)',
-  fontFamily: 'var(--font-body)',
-  fontSize: 13,
-  cursor: 'pointer',
-  textAlign: 'left',
-};
-
-const fuzzySuggestionStyle: CSSProperties = {
-  background: 'none',
-  border: 'none',
-  cursor: 'pointer',
-  fontFamily: 'var(--font-body)',
-  fontSize: 12,
-  color: 'var(--ash)',
-  padding: 0,
-  textAlign: 'left',
-};
-
-const weatherCardStyle: CSSProperties = {
-  border: '1px solid var(--border-color)',
-  borderRadius: 'var(--radius-md)',
-  padding: '14px 16px',
-};
-
-function roundTypeBtnStyle(selected: boolean): CSSProperties {
-  return {
-    width: '100%',
-    padding: '12px 16px',
-    border: `1px solid ${selected ? 'var(--scarlet)' : 'var(--border-color)'}`,
-    borderRadius: 'var(--radius-md)',
-    background: selected ? 'var(--scarlet-tint)' : 'var(--shadow)',
-    color: selected ? 'var(--chalk)' : 'var(--ash)',
-    fontFamily: 'var(--font-display)',
-    fontSize: 13,
-    fontWeight: 600,
-    letterSpacing: '0.12em',
-    textTransform: 'uppercase',
-    cursor: 'pointer',
-    textAlign: 'left',
-    transition: 'border-color 150ms ease, background 150ms ease, color 150ms ease',
-  };
-}
-
-function roundNumBtnStyle(selected: boolean): CSSProperties {
-  return {
-    flex: 1,
-    padding: '10px 0',
-    border: `1px solid ${selected ? 'var(--scarlet)' : 'var(--border-color)'}`,
-    borderRadius: 'var(--radius-md)',
-    background: selected ? 'var(--scarlet-tint)' : 'var(--shadow)',
-    color: selected ? 'var(--chalk)' : 'var(--ash)',
-    fontFamily: 'var(--font-display)',
-    fontSize: 15,
-    fontWeight: 700,
-    cursor: 'pointer',
-    transition: 'border-color 150ms ease, background 150ms ease, color 150ms ease',
-  };
 }
