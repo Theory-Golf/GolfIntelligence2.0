@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { createClient } from '@/lib/supabase/client';
 
@@ -10,7 +9,6 @@ const inputClasses =
   'w-full bg-surface border border-border text-foreground font-mono text-sm px-3 py-2.5 min-h-11 outline-none transition-colors focus:border-primary';
 
 export default function SignupForm() {
-  const router = useRouter();
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -45,8 +43,7 @@ export default function SignupForm() {
     }
 
     if (data.session) {
-      router.refresh();
-      router.push('/golf-intelligence');
+      window.location.assign('/golf-intelligence');
     } else {
       setConfirmationSent(true);
       setLoading(false);
