@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useRoundSession, isHoled, type HoleEntry } from '@/lib/golf/roundSession';
 import { ScoreHeader } from '@/components/golf/ScoreHeader';
 import { LIE_ABBREVIATIONS, LIE_COLORS } from '@/lib/golf/utils/lieColors';
@@ -43,9 +43,12 @@ function conditionalLabel(s: ShotRow): string | null {
 
 export default function HoleSummaryPage() {
   const params = useParams<{ id: string; holeNumber: string }>();
+  const searchParams = useSearchParams();
   const router = useRouter();
   const session = useRoundSession();
-  const [mode, setMode] = useState<'review' | 'editing'>('review');
+  const [mode, setMode] = useState<'review' | 'editing'>(
+    searchParams.get('mode') === 'editing' ? 'editing' : 'review',
+  );
 
   const roundId = params?.id ?? '';
   const holeNumber = Number(params?.holeNumber ?? '1');
@@ -105,10 +108,18 @@ function ReviewMode({
   const startDist = hole.shots[0]?.starting_distance ?? null;
   const startUnit = hole.shots[0]?.starting_lie === 'Green' ? 'FT' : 'YDS';
 
+  const isLastHole = hole.holeNumber === 18;
+
   function goNext() {
+    session.setLastActiveHole(hole.holeNumber);
     session.completeHole(hole.holeNumber);
-    const next = Math.min(18, hole.holeNumber + 1);
-    router.push(`/golf-intelligence/round/${roundId}/hole/${next}`);
+    if (isLastHole) {
+      router.push(`/golf-intelligence/round/${roundId}/review`);
+    } else {
+      router.push(
+        `/golf-intelligence/round/${roundId}/hole/${hole.holeNumber + 1}`,
+      );
+    }
   }
 
   return (
@@ -183,7 +194,7 @@ function ReviewMode({
           onClick={goNext}
           className="w-full rounded-md bg-chalk text-court py-4 font-display font-bold text-sm tracking-[0.2em] uppercase"
         >
-          Next hole →
+          {isLastHole ? 'Review round →' : 'Next hole →'}
         </button>
       </div>
     </div>

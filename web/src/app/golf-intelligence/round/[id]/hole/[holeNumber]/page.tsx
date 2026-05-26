@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useRoundSession, type HoleEntry } from '@/lib/golf/roundSession';
 import { ScoreHeader } from '@/components/golf/ScoreHeader';
@@ -96,9 +97,11 @@ export default function HolePage() {
 
 function Header({
   holeNumber,
+  roundId,
   score,
 }: {
   holeNumber: number;
+  roundId: string;
   score: ReturnType<ReturnType<typeof useRoundSession>['getRunningScore']>;
 }) {
   return (
@@ -107,6 +110,12 @@ function Header({
         <span className="font-display font-extrabold text-3xl text-chalk uppercase tracking-tight">
           Hole {holeNumber}
         </span>
+        <Link
+          href={`/golf-intelligence/round/${roundId}/review`}
+          className="font-mono text-[10px] tracking-[0.25em] uppercase text-ash hover:text-chalk"
+        >
+          Review
+        </Link>
       </div>
       <ScoreHeader front={score.front} back={score.back} total={score.total} />
     </header>
@@ -420,7 +429,7 @@ function ShotEntry({
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="max-w-md mx-auto p-4 flex flex-col gap-5">
-        <Header holeNumber={holeNumber} score={score} />
+        <Header holeNumber={holeNumber} roundId={roundId} score={score} />
 
         {/* HOLE PAR — only on fresh shot 1 */}
         {isFreshShot1 && (
