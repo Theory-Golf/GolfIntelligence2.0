@@ -25,6 +25,7 @@ import type {
   HoleRow,
   Lie,
   RoundRow,
+  RoundType,
   ShotInsert,
   ShotRow,
   ShotUpdate,
@@ -49,11 +50,14 @@ export interface RoundSessionState {
   roundId: string;
   courseId: string | null;
   courseName: string;
+  roundDate: string | null;
+  roundType: RoundType | null;
   holePars: Record<number, number>;
   holes: HoleEntry[];
   activeHoleNumber: number;
   activeHoleId: string | null;
   activeShotOrder: number;
+  lastActiveHole: number | null;
 }
 
 export interface RoundSessionContextValue {
@@ -73,6 +77,9 @@ export interface RoundSessionContextValue {
   cascadeFromShot: (holeId: string, fromShotOrder: number) => Promise<void>;
   completeHole: (holeNumber: number) => void;
   getRunningScore: () => RunningScore;
+  setLastActiveHole: (holeNumber: number) => void;
+  isRoundComplete: () => boolean;
+  getTotalYardage: () => number | null;
 }
 
 const RoundSessionContext = createContext<RoundSessionContextValue | null>(null);
@@ -125,11 +132,14 @@ export function RoundSessionProvider({
     roundId,
     courseId: null,
     courseName: '',
+    roundDate: null,
+    roundType: null,
     holePars: {},
     holes: [],
     activeHoleNumber: 1,
     activeHoleId: null,
     activeShotOrder: 1,
+    lastActiveHole: null,
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -192,11 +202,14 @@ export function RoundSessionProvider({
           roundId,
           courseId: round.course_id,
           courseName,
+          roundDate: round.date,
+          roundType: round.round_type,
           holePars,
           holes: entries,
           activeHoleNumber,
           activeHoleId: activeEntry?.holeId ?? null,
           activeShotOrder: (activeEntry?.shots.length ?? 0) + 1,
+          lastActiveHole: null,
         });
         setLoading(false);
       } catch (e) {
@@ -415,6 +428,31 @@ export function RoundSessionProvider({
     };
   }, [state.holes]);
 
+  const setLastActiveHole = useCallback((holeNumber: number) => {
+    setState((prev) => ({ ...prev, lastActiveHole: holeNumber }));
+  }, []);
+
+  const isRoundComplete = useCallback((): boolean => {
+    for (let n = 1; n <= 18; n++) {
+      const h = state.holes.find((e) => e.holeNumber === n);
+      if (!h || !holeIsComplete(h)) return false;
+    }
+    return true;
+  }, [state.holes]);
+
+  const getTotalYardage = useCallback((): number | null => {
+    let total = 0;
+    let any = false;
+    for (const h of state.holes) {
+      const d = h.shots[0]?.starting_distance;
+      if (typeof d === 'number') {
+        total += d;
+        any = true;
+      }
+    }
+    return any ? total : null;
+  }, [state.holes]);
+
   const value = useMemo<RoundSessionContextValue>(
     () => ({
       state,
@@ -429,6 +467,9 @@ export function RoundSessionProvider({
       cascadeFromShot,
       completeHole,
       getRunningScore,
+      setLastActiveHole,
+      isRoundComplete,
+      getTotalYardage,
     }),
     [
       state,
@@ -443,6 +484,9 @@ export function RoundSessionProvider({
       cascadeFromShot,
       completeHole,
       getRunningScore,
+      setLastActiveHole,
+      isRoundComplete,
+      getTotalYardage,
     ],
   );
 
