@@ -14,16 +14,10 @@ import {
   getHolesForRound,
   getShotsForHole,
   getCoursesByPlayer,
-  upsertHole,
-  updateHole,
-  upsertShot,
-  updateShot as dbUpdateShot,
-  deleteShot as dbDeleteShot,
 } from './db/index';
 import type {
   CourseRow,
   HoleRow,
-  Lie,
   RoundRow,
   RoundType,
   ShotInsert,
@@ -31,6 +25,7 @@ import type {
   ShotUpdate,
 } from './db/types';
 import { createId } from './utils/uuid';
+import { persistOrQueue } from './offlineQueue';
 
 export interface HoleEntry {
   holeId: string;
@@ -226,15 +221,17 @@ export function RoundSessionProvider({
   }, [roundId]);
 
   // ── Helpers ───────────────────────────────────────────────────────────────
-  const refreshHoleShots = useCallback(async (holeId: string) => {
-    const shots = await getShotsForHole(holeId);
-    setState((prev) => ({
-      ...prev,
-      holes: prev.holes.map((h) =>
-        h.holeId === holeId ? { ...h, shots } : h,
-      ),
-    }));
-  }, []);
+  const setHoleShots = useCallback(
+    (holeId: string, fn: (shots: ShotRow[]) => ShotRow[]) => {
+      setState((prev) => ({
+        ...prev,
+        holes: prev.holes.map((h) =>
+          h.holeId === holeId ? { ...h, shots: fn(h.shots) } : h,
+        ),
+      }));
+    },
+    [],
+  );
 
   const getHole = useCallback(
     (holeNumber: number) =>
@@ -248,26 +245,23 @@ export function RoundSessionProvider({
       const existing = state.holes.find((h) => h.holeNumber === holeNumber);
       if (existing) {
         if (existing.par === par) return existing;
-        const row = await updateHole({ id: existing.holeId, par });
         setState((prev) => ({
           ...prev,
           holes: prev.holes.map((h) =>
-            h.holeId === existing.holeId ? { ...h, par: row.par } : h,
+            h.holeId === existing.holeId ? { ...h, par } : h,
           ),
         }));
-        return { ...existing, par: row.par };
+        void persistOrQueue({
+          type: 'updateHole',
+          payload: { id: existing.holeId, par },
+        });
+        return { ...existing, par };
       }
       const id = createId();
-      const row = await upsertHole({
-        id,
-        round_id: roundId,
-        hole_number: holeNumber,
-        par,
-      });
       const entry: HoleEntry = {
-        holeId: row.id,
-        holeNumber: row.hole_number,
-        par: row.par,
+        holeId: id,
+        holeNumber,
+        par,
         shots: [],
       };
       setState((prev) => ({
@@ -279,6 +273,10 @@ export function RoundSessionProvider({
         activeHoleId: entry.holeId,
         activeShotOrder: 1,
       }));
+      void persistOrQueue({
+        type: 'upsertHole',
+        payload: { id, round_id: roundId, hole_number: holeNumber, par },
+      });
       return entry;
     },
     [roundId, state.holes],
@@ -286,82 +284,110 @@ export function RoundSessionProvider({
 
   const saveShot = useCallback(
     async (shot: ShotInsert) => {
-      await upsertShot(shot);
-      await refreshHoleShots(shot.hole_id);
+      const localRow: ShotRow = {
+        ...shot,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      setHoleShots(shot.hole_id, (shots) => {
+        const without = shots.filter((s) => s.id !== shot.id);
+        return [...without, localRow].sort(
+          (a, b) => a.shot_order - b.shot_order,
+        );
+      });
       setState((prev) => ({
         ...prev,
         activeShotOrder: shot.shot_order + 1,
       }));
+      void persistOrQueue({ type: 'upsertShot', payload: shot });
     },
-    [refreshHoleShots],
+    [setHoleShots],
   );
 
   const cascadeFromShot = useCallback(
     async (holeId: string, fromShotOrder: number) => {
-      const shots = await getShotsForHole(holeId);
-      const ordered = shots.slice().sort((a, b) => a.shot_order - b.shot_order);
-      for (let i = 1; i < ordered.length; i++) {
-        const prev = ordered[i - 1];
-        const cur = ordered[i];
-        if (cur.shot_order <= fromShotOrder) continue;
-        const desiredLie: Lie = prev.ending_lie;
-        const desiredDist = prev.ending_distance;
-        if (
-          cur.starting_lie !== desiredLie ||
-          cur.starting_distance !== desiredDist
-        ) {
-          await dbUpdateShot({
-            id: cur.id,
-            starting_lie: desiredLie,
-            starting_distance: desiredDist,
-          });
+      const updates: ShotUpdate[] = [];
+      setHoleShots(holeId, (shots) => {
+        const ordered = shots.slice().sort((a, b) => a.shot_order - b.shot_order);
+        const next: ShotRow[] = ordered.map((s) => ({ ...s }));
+        for (let i = 1; i < next.length; i++) {
+          const prev = next[i - 1];
+          const cur = next[i];
+          if (cur.shot_order <= fromShotOrder) continue;
+          if (
+            cur.starting_lie !== prev.ending_lie ||
+            cur.starting_distance !== prev.ending_distance
+          ) {
+            cur.starting_lie = prev.ending_lie;
+            cur.starting_distance = prev.ending_distance;
+            updates.push({
+              id: cur.id,
+              starting_lie: prev.ending_lie,
+              starting_distance: prev.ending_distance,
+            });
+          }
         }
+        return next;
+      });
+      for (const u of updates) {
+        void persistOrQueue({ type: 'updateShot', payload: u });
       }
-      await refreshHoleShots(holeId);
     },
-    [refreshHoleShots],
+    [setHoleShots],
   );
 
   const updateShot = useCallback(
     async (holeId: string, shot: ShotUpdate) => {
-      await dbUpdateShot(shot);
-      await refreshHoleShots(holeId);
+      setHoleShots(holeId, (shots) =>
+        shots.map((s) => (s.id === shot.id ? { ...s, ...shot } : s)),
+      );
+      void persistOrQueue({ type: 'updateShot', payload: shot });
     },
-    [refreshHoleShots],
+    [setHoleShots],
   );
 
   const deleteShot = useCallback(
     async (holeId: string, shotId: string) => {
-      await dbDeleteShot(shotId);
-      // Resequence remaining shots: orders 1..N, cascade starting from each prev ending.
-      const remaining = (await getShotsForHole(holeId))
-        .slice()
-        .sort((a, b) => a.shot_order - b.shot_order);
-      for (let i = 0; i < remaining.length; i++) {
-        const s = remaining[i];
-        const desiredOrder = i + 1;
-        const prev = i > 0 ? remaining[i - 1] : null;
-        const update: ShotUpdate = { id: s.id };
-        let changed = false;
-        if (s.shot_order !== desiredOrder) {
-          update.shot_order = desiredOrder;
-          changed = true;
-        }
-        if (prev) {
-          if (s.starting_lie !== prev.ending_lie) {
-            update.starting_lie = prev.ending_lie;
+      const resequenceUpdates: ShotUpdate[] = [];
+      setHoleShots(holeId, (shots) => {
+        const remaining = shots
+          .filter((s) => s.id !== shotId)
+          .slice()
+          .sort((a, b) => a.shot_order - b.shot_order);
+        const next: ShotRow[] = remaining.map((s) => ({ ...s }));
+        for (let i = 0; i < next.length; i++) {
+          const s = next[i];
+          const desiredOrder = i + 1;
+          const prev = i > 0 ? next[i - 1] : null;
+          const update: ShotUpdate = { id: s.id };
+          let changed = false;
+          if (s.shot_order !== desiredOrder) {
+            s.shot_order = desiredOrder;
+            update.shot_order = desiredOrder;
             changed = true;
           }
-          if (s.starting_distance !== prev.ending_distance) {
-            update.starting_distance = prev.ending_distance;
-            changed = true;
+          if (prev) {
+            if (s.starting_lie !== prev.ending_lie) {
+              s.starting_lie = prev.ending_lie;
+              update.starting_lie = prev.ending_lie;
+              changed = true;
+            }
+            if (s.starting_distance !== prev.ending_distance) {
+              s.starting_distance = prev.ending_distance;
+              update.starting_distance = prev.ending_distance;
+              changed = true;
+            }
           }
+          if (changed) resequenceUpdates.push(update);
         }
-        if (changed) await dbUpdateShot(update);
+        return next;
+      });
+      void persistOrQueue({ type: 'deleteShot', payload: { id: shotId } });
+      for (const u of resequenceUpdates) {
+        void persistOrQueue({ type: 'updateShot', payload: u });
       }
-      await refreshHoleShots(holeId);
     },
-    [refreshHoleShots],
+    [setHoleShots],
   );
 
   const insertShotAfter = useCallback(
@@ -370,20 +396,58 @@ export function RoundSessionProvider({
       afterOrder: number,
       shot: Omit<ShotInsert, 'shot_order'>,
     ) => {
-      // Shift later shots' shot_order +1 (descending to avoid any tie window).
-      const current = (await getShotsForHole(holeId))
-        .slice()
-        .sort((a, b) => b.shot_order - a.shot_order);
-      for (const s of current) {
-        if (s.shot_order > afterOrder) {
-          await dbUpdateShot({ id: s.id, shot_order: s.shot_order + 1 });
-        }
-      }
+      const shiftUpdates: ShotUpdate[] = [];
       const newOrder = afterOrder + 1;
-      await upsertShot({ ...shot, shot_order: newOrder });
-      await cascadeFromShot(holeId, newOrder);
+      const inserted: ShotInsert = { ...shot, shot_order: newOrder };
+      const insertedRow: ShotRow = {
+        ...inserted,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      const cascadeUpdates: ShotUpdate[] = [];
+
+      setHoleShots(holeId, (shots) => {
+        // Shift later shots' shot_order +1.
+        const shifted: ShotRow[] = shots.map((s) => {
+          if (s.shot_order > afterOrder) {
+            shiftUpdates.push({ id: s.id, shot_order: s.shot_order + 1 });
+            return { ...s, shot_order: s.shot_order + 1 };
+          }
+          return { ...s };
+        });
+        // Splice in the new shot, then run cascade from newOrder forward.
+        const merged = [...shifted, insertedRow].sort(
+          (a, b) => a.shot_order - b.shot_order,
+        );
+        for (let i = 1; i < merged.length; i++) {
+          const prev = merged[i - 1];
+          const cur = merged[i];
+          if (cur.shot_order <= newOrder) continue;
+          if (
+            cur.starting_lie !== prev.ending_lie ||
+            cur.starting_distance !== prev.ending_distance
+          ) {
+            cur.starting_lie = prev.ending_lie;
+            cur.starting_distance = prev.ending_distance;
+            cascadeUpdates.push({
+              id: cur.id,
+              starting_lie: prev.ending_lie,
+              starting_distance: prev.ending_distance,
+            });
+          }
+        }
+        return merged;
+      });
+
+      for (const u of shiftUpdates) {
+        void persistOrQueue({ type: 'updateShot', payload: u });
+      }
+      void persistOrQueue({ type: 'upsertShot', payload: inserted });
+      for (const u of cascadeUpdates) {
+        void persistOrQueue({ type: 'updateShot', payload: u });
+      }
     },
-    [cascadeFromShot],
+    [setHoleShots],
   );
 
   const completeHole = useCallback((holeNumber: number) => {

@@ -2,6 +2,7 @@
 
 import { useParams } from 'next/navigation';
 import { RoundSessionProvider } from '@/lib/golf/roundSession';
+import { QueueFlusher } from '@/lib/golf/offlineQueue';
 
 export default function RoundLayout({ children }: { children: React.ReactNode }) {
   const params = useParams<{ id: string }>();
@@ -15,5 +16,10 @@ export default function RoundLayout({ children }: { children: React.ReactNode })
       </div>
     );
   }
-  return <RoundSessionProvider roundId={roundId}>{children}</RoundSessionProvider>;
+  return (
+    <RoundSessionProvider roundId={roundId}>
+      <QueueFlusher />
+      {children}
+    </RoundSessionProvider>
+  );
 }

@@ -7,13 +7,34 @@ import {
   getCoursesByPlayer,
   upsertCourse,
   fuzzyMatchCourse,
-  upsertRound,
 } from '@/lib/golf/db/index';
 import { createBrowserClient } from '@/lib/golf/db/client';
 import { createId } from '@/lib/golf/utils/index';
+import { persistOrQueue } from '@/lib/golf/offlineQueue';
+import {
+  geocodeLocation,
+  fetchWeather,
+  type GeocodeResult,
+} from '@/lib/golf/weatherService';
 import type { CourseRow, RoundType } from '@/lib/golf/db/types';
 
 // ─── State ────────────────────────────────────────────────────────────────────
+
+type WeatherStatus = 'idle' | 'loading' | 'ok' | 'manual';
+
+interface WeatherFields {
+  temp: string;
+  windSpeed: string;
+  windDirection: string;
+  precip: string;
+}
+
+const EMPTY_WEATHER: WeatherFields = {
+  temp: '',
+  windSpeed: '',
+  windDirection: '',
+  precip: '',
+};
 
 interface RoundSetupState {
   date: string;
@@ -22,6 +43,9 @@ interface RoundSetupState {
   location: string;
   roundType: RoundType | null;
   roundNumber: number | null;
+  weather: WeatherFields;
+  geocode: GeocodeResult | null;
+  weatherStatus: WeatherStatus;
 }
 
 type Action =
@@ -31,7 +55,11 @@ type Action =
   | { type: 'CLEAR_COURSE' }
   | { type: 'SET_LOCATION'; location: string }
   | { type: 'SET_ROUND_TYPE'; roundType: RoundType }
-  | { type: 'SET_ROUND_NUMBER'; roundNumber: number };
+  | { type: 'SET_ROUND_NUMBER'; roundNumber: number }
+  | { type: 'SET_WEATHER_FIELD'; field: keyof WeatherFields; value: string }
+  | { type: 'SET_GEOCODE'; geocode: GeocodeResult | null }
+  | { type: 'SET_WEATHER_STATUS'; status: WeatherStatus }
+  | { type: 'SET_WEATHER_AUTO'; weather: WeatherFields };
 
 function todayIso(): string {
   return new Date().toISOString().split('T')[0];
@@ -57,6 +85,17 @@ function reducer(state: RoundSetupState, action: Action): RoundSetupState {
       };
     case 'SET_ROUND_NUMBER':
       return { ...state, roundNumber: action.roundNumber };
+    case 'SET_WEATHER_FIELD':
+      return {
+        ...state,
+        weather: { ...state.weather, [action.field]: action.value },
+      };
+    case 'SET_GEOCODE':
+      return { ...state, geocode: action.geocode };
+    case 'SET_WEATHER_STATUS':
+      return { ...state, weatherStatus: action.status };
+    case 'SET_WEATHER_AUTO':
+      return { ...state, weather: action.weather, weatherStatus: 'ok' };
   }
 }
 
@@ -109,6 +148,9 @@ export default function NewRoundPage() {
     location: '',
     roundType: null,
     roundNumber: null,
+    weather: EMPTY_WEATHER,
+    geocode: null,
+    weatherStatus: 'idle',
   });
 
   const [playerId, setPlayerId] = useState<string | null>(null);
@@ -140,6 +182,58 @@ export default function NewRoundPage() {
     document.addEventListener('mousedown', onMouseDown);
     return () => document.removeEventListener('mousedown', onMouseDown);
   }, []);
+
+  // Geocode the location field on a 600ms debounce.
+  const geocodeReqId = useRef(0);
+  useEffect(() => {
+    const query = state.location.trim();
+    if (!query) {
+      dispatch({ type: 'SET_GEOCODE', geocode: null });
+      dispatch({ type: 'SET_WEATHER_STATUS', status: 'idle' });
+      return;
+    }
+    const my = ++geocodeReqId.current;
+    dispatch({ type: 'SET_WEATHER_STATUS', status: 'loading' });
+    const t = setTimeout(async () => {
+      const result = await geocodeLocation(query);
+      if (my !== geocodeReqId.current) return;
+      if (!result) {
+        dispatch({ type: 'SET_GEOCODE', geocode: null });
+        dispatch({ type: 'SET_WEATHER_STATUS', status: 'manual' });
+        return;
+      }
+      dispatch({ type: 'SET_GEOCODE', geocode: result });
+    }, 600);
+    return () => clearTimeout(t);
+  }, [state.location]);
+
+  // Re-fetch weather whenever geocode or date changes, on a 300ms debounce.
+  const weatherReqId = useRef(0);
+  useEffect(() => {
+    if (!state.geocode) return;
+    const my = ++weatherReqId.current;
+    dispatch({ type: 'SET_WEATHER_STATUS', status: 'loading' });
+    const { lat, lon } = state.geocode;
+    const date = state.date;
+    const t = setTimeout(async () => {
+      const w = await fetchWeather(lat, lon, date);
+      if (my !== weatherReqId.current) return;
+      if (!w) {
+        dispatch({ type: 'SET_WEATHER_STATUS', status: 'manual' });
+        return;
+      }
+      dispatch({
+        type: 'SET_WEATHER_AUTO',
+        weather: {
+          temp: String(Math.round(w.temp)),
+          windSpeed: String(Math.round(w.windSpeed)),
+          windDirection: w.windDirection,
+          precip: w.precip.toFixed(2),
+        },
+      });
+    }, 300);
+    return () => clearTimeout(t);
+  }, [state.geocode, state.date]);
 
   const needsRoundNumber =
     state.roundType === 'Qualifying' || state.roundType === 'Tournament';
@@ -188,24 +282,26 @@ export default function NewRoundPage() {
     setIsSubmitting(true);
     const roundId = createId();
 
-    upsertRound({
-      id: roundId,
-      player_id: playerId,
-      course_id: state.courseId,
-      date: state.date,
-      round_type: state.roundType,
-      round_number: state.roundNumber,
-      location: state.location.trim() || null,
-      weather_temp: null,
-      weather_wind_speed: null,
-      weather_wind_direction: null,
-      weather_precip: null,
-    }).catch(() => {
-      try {
-        sessionStorage.setItem(`round-error:${roundId}`, '1');
-      } catch {
-        // sessionStorage unavailable
-      }
+    const numericTemp = state.weather.temp.trim();
+    const numericWind = state.weather.windSpeed.trim();
+    const numericPrecip = state.weather.precip.trim();
+
+    void persistOrQueue({
+      type: 'upsertRound',
+      payload: {
+        id: roundId,
+        player_id: playerId,
+        course_id: state.courseId,
+        date: state.date,
+        round_type: state.roundType,
+        round_number: state.roundNumber,
+        location: state.location.trim() || null,
+        weather_temp: numericTemp === '' ? null : Number(numericTemp),
+        weather_wind_speed: numericWind === '' ? null : Number(numericWind),
+        weather_wind_direction:
+          state.weather.windDirection.trim() || null,
+        weather_precip: numericPrecip === '' ? null : Number(numericPrecip),
+      },
     });
 
     router.push(`/golf-intelligence/round/${roundId}/hole/1`);
@@ -306,7 +402,7 @@ export default function NewRoundPage() {
             )}
           </div>
 
-          <div className="mb-4">
+          <div className="mb-2">
             <input
               type="text"
               placeholder="City, State"
@@ -314,13 +410,96 @@ export default function NewRoundPage() {
               onChange={(e) => dispatch({ type: 'SET_LOCATION', location: e.target.value })}
               className={input}
             />
+            <p className="font-mono text-[10px] tracking-[0.25em] uppercase text-ash mt-1.5 min-h-[14px]">
+              {state.weatherStatus === 'loading' && 'Fetching weather…'}
+              {state.weatherStatus === 'ok' && state.geocode?.displayName}
+              {state.weatherStatus === 'manual' &&
+                'Location not found — enter weather manually'}
+              {state.weatherStatus === 'idle' && ' '}
+            </p>
           </div>
 
           <div className="border border-border rounded-md px-4 py-3.5">
-            <span className={`${containerLabel} mb-1.5`}>Conditions</span>
-            <span className="font-body text-[13px] text-ash">
-              Weather will be pulled automatically
-            </span>
+            <span className={`${containerLabel} mb-2`}>Conditions</span>
+            <div className="grid grid-cols-2 gap-3">
+              <label className="flex flex-col gap-1">
+                <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-ash">
+                  Temp °F
+                </span>
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  value={state.weather.temp}
+                  onChange={(e) =>
+                    dispatch({
+                      type: 'SET_WEATHER_FIELD',
+                      field: 'temp',
+                      value: e.target.value,
+                    })
+                  }
+                  className={input}
+                />
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-ash">
+                  Wind mph
+                </span>
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  value={state.weather.windSpeed}
+                  onChange={(e) =>
+                    dispatch({
+                      type: 'SET_WEATHER_FIELD',
+                      field: 'windSpeed',
+                      value: e.target.value,
+                    })
+                  }
+                  className={input}
+                />
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-ash">
+                  Wind dir
+                </span>
+                <input
+                  type="text"
+                  value={state.weather.windDirection}
+                  onChange={(e) =>
+                    dispatch({
+                      type: 'SET_WEATHER_FIELD',
+                      field: 'windDirection',
+                      value: e.target.value.toUpperCase(),
+                    })
+                  }
+                  className={input}
+                />
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-ash">
+                  Precip in
+                </span>
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  step="0.01"
+                  value={state.weather.precip}
+                  onChange={(e) =>
+                    dispatch({
+                      type: 'SET_WEATHER_FIELD',
+                      field: 'precip',
+                      value: e.target.value,
+                    })
+                  }
+                  className={input}
+                />
+              </label>
+            </div>
+            {state.weatherStatus === 'ok' && (
+              <p className="font-mono text-[9px] tracking-[0.25em] uppercase text-ash mt-3">
+                Weather auto-filled · edit if needed
+              </p>
+            )}
           </div>
         </div>
 

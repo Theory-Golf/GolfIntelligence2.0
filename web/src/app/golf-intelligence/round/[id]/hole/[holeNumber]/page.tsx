@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useRoundSession, type HoleEntry } from '@/lib/golf/roundSession';
+import { useOnlineStatus } from '@/lib/golf/offlineQueue';
 import { ScoreHeader } from '@/components/golf/ScoreHeader';
 import { ShotPath, type ShotPathShot } from '@/components/golf/ShotPath';
 import { NumericKeypad } from '@/components/golf/NumericKeypad';
@@ -104,6 +105,7 @@ function Header({
   roundId: string;
   score: ReturnType<ReturnType<typeof useRoundSession>['getRunningScore']>;
 }) {
+  const online = useOnlineStatus();
   return (
     <header className="flex items-start justify-between border-b border-border pb-3">
       <div className="flex items-baseline gap-3">
@@ -116,6 +118,14 @@ function Header({
         >
           Review
         </Link>
+        {!online && (
+          <span
+            className="font-mono text-[9px] tracking-[0.2em] uppercase px-2 py-0.5 rounded-sm bg-shadow"
+            style={{ color: COLOR_AMBER }}
+          >
+            Offline · Saving locally
+          </span>
+        )}
       </div>
       <ScoreHeader front={score.front} back={score.back} total={score.total} />
     </header>
