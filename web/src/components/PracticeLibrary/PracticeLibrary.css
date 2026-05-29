@@ -66,9 +66,9 @@
 }
 
 .pl-filter-btn.is-active {
-  background: var(--color-accent);
-  border-color: var(--color-accent);
-  color: #fff;
+  background: transparent;
+  border-color: var(--seg-color, var(--color-accent-pop));
+  color: var(--seg-color, var(--color-accent-pop));
 }
 
 /* ── DRIVER TOGGLE BAR ─────────────────────────────────────────── */

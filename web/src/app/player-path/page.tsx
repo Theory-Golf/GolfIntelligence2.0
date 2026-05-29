@@ -1,12 +1,19 @@
+'use client';
+
+import { useState } from 'react';
 import PracticeLibrary from '@/components/PracticeLibrary';
 import PracticePlanner from '@/components/PracticePlanner';
 
-export const metadata = {
-  title: 'PlayerPath',
-  description: 'Identify each player\'s highest-leverage improvement areas.',
-};
+type View = 'library' | 'planner';
+
+const VIEW_OPTIONS: { value: View; label: string }[] = [
+  { value: 'library', label: 'Practice Library' },
+  { value: 'planner', label: 'Practice Planner' },
+];
 
 export default function PlayerPathPage() {
+  const [view, setView] = useState<View>('library');
+
   return (
     <>
       {/* ── Hero ─────────────────────────────────────────────── */}
@@ -21,14 +28,34 @@ export default function PlayerPathPage() {
             quantifying exactly which part of the game is costing the most strokes
             and mapping a clear development priority.
           </p>
+
+          {/* ── Tool Selector ─────────────────────────────────── */}
+          <div className="mt-8 flex items-center gap-4">
+            <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground shrink-0">
+              Tool
+            </span>
+            <div className="relative">
+              <select
+                value={view}
+                onChange={(e) => setView(e.target.value as View)}
+                className="font-mono text-[11px] tracking-[0.12em] uppercase bg-card border border-border text-foreground pl-4 pr-10 py-2.5 appearance-none cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary transition-colors hover:border-muted-foreground"
+              >
+                {VIEW_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-[10px]">
+                ▾
+              </span>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* ── Practice Planner ─────────────────────────────────── */}
-      <PracticePlanner />
-
-      {/* ── Practice Activity Library ────────────────────────── */}
-      <PracticeLibrary />
+      {/* ── Active Tool ──────────────────────────────────────── */}
+      {view === 'library' ? <PracticeLibrary /> : <PracticePlanner />}
     </>
   );
 }

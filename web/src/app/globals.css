@@ -36,6 +36,14 @@
   --color-sg-loss: #F59520;
   --color-sg-weak: #E8202A;
 
+  /* Game segment identity colors (PlayerPath pillars) */
+  --color-seg-drive:     #E040A0;
+  --color-seg-approach:  #8B5BE0;
+  --color-seg-shortgame: #3D8EF0;
+  --color-seg-putting:   #00B870;
+  --color-seg-recovery:  #F07030;
+  --color-seg-penalty:   #8B1219;
+
   /* Chart categorical */
   --color-c1: #3D8EF0;
   --color-c2: #A855F7;
@@ -128,6 +136,14 @@
   --scarlet-dim: #9B1520;
   --scarlet-glow: #FF3D47;
   --scarlet-tint: #1F0507;
+
+  /* Game segment identity colors */
+  --seg-drive:      #E040A0;
+  --seg-approach:   #8B5BE0;
+  --seg-shortgame:  #3D8EF0;
+  --seg-putting:    #00B870;
+  --seg-recovery:   #F07030;
+  --seg-penalty:    #8B1219;
 
   /* Data semantic (legacy refs) */
   --under: #00C07A;

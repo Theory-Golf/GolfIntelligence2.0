@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import type { CSSProperties } from 'react';
 import Link from 'next/link';
 import { ACTIVITIES, CATEGORIES, TYPES } from '@/data/practiceActivities';
 import type { Activity } from '@/data/practiceActivities';
@@ -26,6 +27,15 @@ const ACTIVITY_ROUTES: Record<string, string> = {
  * Additional segments extend this list as activities are added.
  */
 const ALL_DRIVER_IDS = ['M1', 'M2', 'L1', 'L2', 'L3', 'A1', 'A2', 'A3', 'A4'];
+
+// Map category IDs to their game-segment identity color token
+const CATEGORY_SEGMENT_COLOR: Record<string, string> = {
+  putting:    'var(--seg-putting)',    // green
+  wedge:      'var(--seg-approach)',   // violet (wedge is a distance-wedge / approach segment)
+  approach:   'var(--seg-approach)',   // violet
+  short_game: 'var(--seg-shortgame)', // blue
+  driving:    'var(--seg-drive)',      // magenta
+};
 
 export default function PracticeLibrary() {
   const [activeCategory, setActiveCategory] = useState('all');
@@ -74,15 +84,19 @@ export default function PracticeLibrary() {
       <div className="pl-filter-row">
         <span className="pl-filter-label">Category</span>
         <div className="pl-filters">
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat.id}
-              className={`pl-filter-btn${activeCategory === cat.id ? ' is-active' : ''}`}
-              onClick={() => setActiveCategory(cat.id)}
-            >
-              {cat.label}
-            </button>
-          ))}
+          {CATEGORIES.map((cat) => {
+            const segColor = CATEGORY_SEGMENT_COLOR[cat.id];
+            return (
+              <button
+                key={cat.id}
+                className={`pl-filter-btn${activeCategory === cat.id ? ' is-active' : ''}`}
+                onClick={() => setActiveCategory(cat.id)}
+                style={segColor ? { '--seg-color': segColor } as CSSProperties : undefined}
+              >
+                {cat.label}
+              </button>
+            );
+          })}
         </div>
       </div>
 
