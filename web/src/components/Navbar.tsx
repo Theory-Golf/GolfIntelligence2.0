@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 
 const NAV_LINKS = [
   { href: '/', label: 'Home' },
+  { href: '/golf-intelligence/round/new', label: 'Round Entry' },
   { href: '/golf-intelligence', label: 'Golf Intelligence' },
   { href: '/player-path', label: 'PlayerPath' },
   { href: '/resources', label: 'Resources' },
