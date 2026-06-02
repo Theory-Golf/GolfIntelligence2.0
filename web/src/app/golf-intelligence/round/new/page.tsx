@@ -14,6 +14,7 @@ import { persistOrQueue } from '@/lib/golf/offlineQueue';
 import {
   geocodeLocation,
   fetchWeather,
+  currentTimeHHMM,
   type GeocodeResult,
 } from '@/lib/golf/weatherService';
 import type { CourseRow, RoundType } from '@/lib/golf/db/types';
@@ -38,6 +39,7 @@ const EMPTY_WEATHER: WeatherFields = {
 
 interface RoundSetupState {
   date: string;
+  teeTime: string;
   courseId: string | null;
   courseName: string;
   locationCity: string;
@@ -52,6 +54,7 @@ interface RoundSetupState {
 
 type Action =
   | { type: 'SET_DATE'; date: string }
+  | { type: 'SET_TEE_TIME'; teeTime: string }
   | { type: 'SET_COURSE'; courseId: string; courseName: string }
   | { type: 'SET_COURSE_NAME'; courseName: string }
   | { type: 'CLEAR_COURSE' }
@@ -73,6 +76,8 @@ function reducer(state: RoundSetupState, action: Action): RoundSetupState {
   switch (action.type) {
     case 'SET_DATE':
       return { ...state, date: action.date };
+    case 'SET_TEE_TIME':
+      return { ...state, teeTime: action.teeTime };
     case 'SET_COURSE':
       return { ...state, courseId: action.courseId, courseName: action.courseName };
     case 'SET_COURSE_NAME':
@@ -151,6 +156,7 @@ export default function NewRoundPage() {
 
   const [state, dispatch] = useReducer(reducer, {
     date: todayIso(),
+    teeTime: currentTimeHHMM(),
     courseId: null,
     courseName: '',
     locationCity: '',
@@ -171,6 +177,7 @@ export default function NewRoundPage() {
   const [courseError, setCourseError] = useState<string | null>(null);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const pendingCourseRef = useRef<Promise<void> | null>(null);
 
   useEffect(() => {
     const supabase = createBrowserClient();
@@ -226,16 +233,16 @@ export default function NewRoundPage() {
     return () => clearTimeout(t);
   }, [locationQuery]);
 
-  // Re-fetch weather whenever geocode or date changes, on a 300ms debounce.
+  // Re-fetch weather whenever geocode, date, or tee time changes, on a 300ms debounce.
   const weatherReqId = useRef(0);
   useEffect(() => {
     if (!state.geocode) return;
     const my = ++weatherReqId.current;
     dispatch({ type: 'SET_WEATHER_STATUS', status: 'loading' });
     const { lat, lon } = state.geocode;
-    const date = state.date;
+    const { date, teeTime } = state;
     const t = setTimeout(async () => {
-      const w = await fetchWeather(lat, lon, date);
+      const w = await fetchWeather(lat, lon, date, teeTime);
       if (my !== weatherReqId.current) return;
       if (!w) {
         dispatch({ type: 'SET_WEATHER_STATUS', status: 'manual' });
@@ -252,7 +259,7 @@ export default function NewRoundPage() {
       });
     }, 300);
     return () => clearTimeout(t);
-  }, [state.geocode, state.date]);
+  }, [state.geocode, state.date, state.teeTime]);
 
   const needsRoundNumber =
     state.roundType === 'Qualifying' || state.roundType === 'Tournament';
@@ -297,14 +304,18 @@ export default function NewRoundPage() {
     // Optimistically add the course so the user can proceed immediately.
     setCourses((prev) => [...prev, optimistic]);
     selectCourse(optimistic);
-    // Persist in the background; surface any error without blocking the round.
-    upsertCourse({ id, player_id: playerId, name, ...defaultPars }).catch((err) => {
-      console.error('[addNewCourse]', err);
-      setCourseError('Course could not be saved — it will sync when online.');
-    });
+    // Track the pending DB write so handleStart can await it before saving the round.
+    const p = upsertCourse({ id, player_id: playerId, name, ...defaultPars })
+      .then(() => { pendingCourseRef.current = null; })
+      .catch((err) => {
+        console.error('[addNewCourse]', err);
+        pendingCourseRef.current = null;
+        setCourseError('Course could not be saved — it will sync when online.');
+      });
+    pendingCourseRef.current = p;
   }
 
-  function handleStart() {
+  async function handleStart() {
     if (!isValid || !playerId || isSubmitting || !state.roundType) return;
     setIsSubmitting(true);
     const roundId = createId();
@@ -313,7 +324,11 @@ export default function NewRoundPage() {
     const numericWind = state.weather.windSpeed.trim();
     const numericPrecip = state.weather.precip.trim();
 
-    void persistOrQueue({
+    // Ensure any in-flight course upsert completes before saving the round,
+    // so the course FK exists in the DB when the round row is written.
+    if (pendingCourseRef.current) await pendingCourseRef.current;
+
+    await persistOrQueue({
       type: 'upsertRound',
       payload: {
         id: roundId,
@@ -347,12 +362,24 @@ export default function NewRoundPage() {
         {/* ── Container 1: WHEN ── */}
         <div className={container}>
           <span className={containerLabel}>When</span>
-          <input
-            type="date"
-            value={state.date}
-            onChange={(e) => dispatch({ type: 'SET_DATE', date: e.target.value })}
-            className={`${input} [color-scheme:dark]`}
-          />
+          <div className="flex gap-2">
+            <div className="flex-1 min-w-0">
+              <input
+                type="date"
+                value={state.date}
+                onChange={(e) => dispatch({ type: 'SET_DATE', date: e.target.value })}
+                className={`${input} [color-scheme:dark]`}
+              />
+            </div>
+            <div className="w-32 flex-shrink-0">
+              <input
+                type="time"
+                value={state.teeTime}
+                onChange={(e) => dispatch({ type: 'SET_TEE_TIME', teeTime: e.target.value })}
+                className={`${input} [color-scheme:dark]`}
+              />
+            </div>
+          </div>
         </div>
 
         {/* ── Container 2: WHERE ── */}

@@ -21,18 +21,12 @@ interface GeocodeApiResult {
   country_code?: string;
 }
 
-interface ForecastCurrent {
-  temperature_2m?: number | null;
-  wind_speed_10m?: number | null;
-  wind_direction_10m?: number | null;
-  precipitation?: number | null;
-}
-
-interface ArchiveDaily {
-  temperature_2m_max?: Array<number | null>;
-  wind_speed_10m_max?: Array<number | null>;
-  wind_direction_10m_dominant?: Array<number | null>;
-  precipitation_sum?: Array<number | null>;
+interface HourlyBlock {
+  time?: Array<string | null>;
+  temperature_2m?: Array<number | null>;
+  wind_speed_10m?: Array<number | null>;
+  wind_direction_10m?: Array<number | null>;
+  precipitation?: Array<number | null>;
 }
 
 function compassFromDegrees(deg: number): string {
@@ -46,6 +40,41 @@ function localTodayIso(): string {
   const m = String(d.getMonth() + 1).padStart(2, '0');
   const day = String(d.getDate()).padStart(2, '0');
   return `${y}-${m}-${day}`;
+}
+
+function currentTimeHHMM(): string {
+  const d = new Date();
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+}
+
+export { currentTimeHHMM };
+
+function pickHourlyIndex(times: Array<string | null>, date: string, teeTime: string): number {
+  const hour = teeTime.slice(0, 2);
+  const target = `${date}T${hour}:00`;
+  const idx = times.findIndex((t) => t && t.startsWith(target));
+  return idx >= 0 ? idx : 0;
+}
+
+function extractHourly(hourly: HourlyBlock, idx: number): WeatherResult | null {
+  const temp = hourly.temperature_2m?.[idx];
+  const wind = hourly.wind_speed_10m?.[idx];
+  const dir = hourly.wind_direction_10m?.[idx];
+  const precip = hourly.precipitation?.[idx];
+  if (
+    typeof temp !== 'number' ||
+    typeof wind !== 'number' ||
+    typeof dir !== 'number' ||
+    typeof precip !== 'number'
+  ) {
+    return null;
+  }
+  return {
+    temp,
+    windSpeed: wind,
+    windDirection: compassFromDegrees(dir),
+    precip,
+  };
 }
 
 export async function geocodeLocation(
@@ -87,67 +116,45 @@ export async function fetchWeather(
   lat: number,
   lon: number,
   date: string,
+  teeTime?: string,
 ): Promise<WeatherResult | null> {
-  const isToday = date === localTodayIso();
+  const today = localTodayIso();
+  const time = teeTime ?? currentTimeHHMM();
+  const hourlyParams =
+    'hourly=temperature_2m,wind_speed_10m,wind_direction_10m,precipitation' +
+    '&temperature_unit=fahrenheit&wind_speed_unit=mph' +
+    '&precipitation_unit=inch&timezone=auto';
+
   try {
-    if (isToday) {
+    if (date >= today) {
       const url =
         'https://api.open-meteo.com/v1/forecast' +
         `?latitude=${lat}&longitude=${lon}` +
-        '&current=temperature_2m,wind_speed_10m,wind_direction_10m,precipitation' +
-        '&temperature_unit=fahrenheit&wind_speed_unit=mph' +
-        '&precipitation_unit=inch&timezone=auto';
+        `&${hourlyParams}` +
+        `&start_date=${date}&end_date=${date}`;
       const res = await fetch(url);
       if (!res.ok) return null;
-      const json = (await res.json()) as { current?: ForecastCurrent };
-      const c = json.current;
-      if (
-        !c ||
-        typeof c.temperature_2m !== 'number' ||
-        typeof c.wind_speed_10m !== 'number' ||
-        typeof c.wind_direction_10m !== 'number' ||
-        typeof c.precipitation !== 'number'
-      ) {
-        return null;
-      }
-      return {
-        temp: c.temperature_2m,
-        windSpeed: c.wind_speed_10m,
-        windDirection: compassFromDegrees(c.wind_direction_10m),
-        precip: c.precipitation,
-      };
+      const json = (await res.json()) as { hourly?: HourlyBlock };
+      const hourly = json.hourly;
+      if (!hourly?.time) return null;
+      const idx = pickHourlyIndex(hourly.time, date, time);
+      return extractHourly(hourly, idx);
     }
 
     const url =
       'https://archive-api.open-meteo.com/v1/archive' +
       `?latitude=${lat}&longitude=${lon}` +
       `&start_date=${date}&end_date=${date}` +
-      '&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant,precipitation_sum' +
-      '&temperature_unit=fahrenheit&wind_speed_unit=mph' +
-      '&precipitation_unit=inch&timezone=auto';
+      `&${hourlyParams}`;
     const res = await fetch(url);
     if (!res.ok) return null;
-    const json = (await res.json()) as { daily?: ArchiveDaily };
-    const d = json.daily;
-    const temp = d?.temperature_2m_max?.[0];
-    const wind = d?.wind_speed_10m_max?.[0];
-    const dir = d?.wind_direction_10m_dominant?.[0];
-    const precip = d?.precipitation_sum?.[0];
-    if (
-      typeof temp !== 'number' ||
-      typeof wind !== 'number' ||
-      typeof dir !== 'number' ||
-      typeof precip !== 'number'
-    ) {
-      return null;
-    }
-    return {
-      temp,
-      windSpeed: wind,
-      windDirection: compassFromDegrees(dir),
-      precip,
-    };
+    const json = (await res.json()) as { hourly?: HourlyBlock };
+    const hourly = json.hourly;
+    if (!hourly?.time) return null;
+    const idx = pickHourlyIndex(hourly.time, date, time);
+    return extractHourly(hourly, idx);
   } catch {
     return null;
   }
 }
+
