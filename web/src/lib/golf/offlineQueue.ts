@@ -115,15 +115,20 @@ async function runWrite(input: QueueEntryInput): Promise<void> {
   }
 }
 
-export async function persistOrQueue(input: QueueEntryInput): Promise<void> {
+export type PersistResult = 'saved' | 'queued-offline' | 'queued-error';
+
+export async function persistOrQueue(input: QueueEntryInput): Promise<PersistResult> {
   if (typeof navigator !== 'undefined' && !navigator.onLine) {
     enqueue(input);
-    return;
+    return 'queued-offline';
   }
   try {
     await runWrite(input);
-  } catch {
+    return 'saved';
+  } catch (err) {
+    console.error('[persistOrQueue]', err);
     enqueue(input);
+    return 'queued-error';
   }
 }
 

@@ -175,6 +175,7 @@ export default function NewRoundPage() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [courseError, setCourseError] = useState<string | null>(null);
+  const [submitWarning, setSubmitWarning] = useState<string | null>(null);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const pendingCourseRef = useRef<Promise<void> | null>(null);
@@ -351,7 +352,7 @@ export default function NewRoundPage() {
       );
     }
 
-    await persistOrQueue({
+    const result = await persistOrQueue({
       type: 'upsertRound',
       payload: {
         id: roundId,
@@ -368,6 +369,12 @@ export default function NewRoundPage() {
         weather_precip: numericPrecip === '' ? null : Number(numericPrecip),
       },
     });
+
+    if (result === 'queued-error') {
+      setSubmitWarning('Database write failed — check console for details. Round saved locally.');
+      setIsSubmitting(false);
+      return;
+    }
 
     router.push(`/golf-intelligence/round/${roundId}/hole/1`);
   }
@@ -662,6 +669,12 @@ export default function NewRoundPage() {
             </div>
           </div>
         </div>
+
+        {submitWarning && (
+          <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-yellow-400 text-center px-2">
+            {submitWarning}
+          </p>
+        )}
 
         <Button
           disabled={!isValid || isSubmitting}
