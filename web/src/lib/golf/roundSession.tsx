@@ -145,8 +145,52 @@ export function RoundSessionProvider({
 
     async function load() {
       try {
-        const round: RoundRow | null = await getRound(roundId);
+        let round: RoundRow | null = await getRound(roundId);
+
+        // If the round isn't in the DB yet (queued offline or DB write still
+        // in-flight), fall back to the bootstrap written by the new-round page.
         if (!round) {
+          const raw =
+            typeof sessionStorage !== 'undefined'
+              ? sessionStorage.getItem(`tg_round_bootstrap_${roundId}`)
+              : null;
+
+          if (raw) {
+            try {
+              const b = JSON.parse(raw) as {
+                playerId: string;
+                courseId: string | null;
+                courseName: string;
+                date: string;
+                roundType: RoundType;
+                roundNumber: number | null;
+                holePars: Record<number, number>;
+              };
+              if (!cancelled) {
+                setState({
+                  roundId,
+                  courseId: b.courseId,
+                  courseName: b.courseName,
+                  roundDate: b.date,
+                  roundType: b.roundType,
+                  holePars: b.holePars,
+                  holes: [],
+                  activeHoleNumber: 1,
+                  activeHoleId: null,
+                  activeShotOrder: 1,
+                  lastActiveHole: null,
+                });
+                setLoading(false);
+              }
+            } catch {
+              if (!cancelled) {
+                setError('Round not found');
+                setLoading(false);
+              }
+            }
+            return;
+          }
+
           if (!cancelled) {
             setError('Round not found');
             setLoading(false);
@@ -193,6 +237,10 @@ export function RoundSessionProvider({
         const activeEntry = entries.find((e) => e.holeNumber === activeHoleNumber);
 
         if (cancelled) return;
+        // Clear bootstrap now that we have a confirmed DB record.
+        if (typeof sessionStorage !== 'undefined') {
+          sessionStorage.removeItem(`tg_round_bootstrap_${roundId}`);
+        }
         setState({
           roundId,
           courseId: round.course_id,

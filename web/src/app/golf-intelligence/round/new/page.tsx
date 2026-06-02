@@ -328,6 +328,29 @@ export default function NewRoundPage() {
     // so the course FK exists in the DB when the round row is written.
     if (pendingCourseRef.current) await pendingCourseRef.current;
 
+    // Build hole pars from the selected course so the session can start
+    // even if the DB write hasn't completed yet.
+    const selectedCourse = courses.find((c) => c.id === state.courseId);
+    const holePars: Record<number, number> = {};
+    for (let i = 1; i <= 18; i++) {
+      const key = `par_hole_${i}` as keyof typeof defaultPars;
+      holePars[i] = selectedCourse ? (selectedCourse[key as keyof CourseRow] as number) : 4;
+    }
+    if (typeof sessionStorage !== 'undefined') {
+      sessionStorage.setItem(
+        `tg_round_bootstrap_${roundId}`,
+        JSON.stringify({
+          playerId,
+          courseId: state.courseId,
+          courseName: state.courseName,
+          date: state.date,
+          roundType: state.roundType,
+          roundNumber: state.roundNumber,
+          holePars,
+        }),
+      );
+    }
+
     await persistOrQueue({
       type: 'upsertRound',
       payload: {
