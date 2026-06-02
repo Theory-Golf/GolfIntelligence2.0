@@ -370,8 +370,8 @@ export default function NewRoundPage() {
       },
     });
 
-    if (result === 'queued-error') {
-      setSubmitWarning('Database write failed — check console for details. Round saved locally.');
+    if (result.status === 'queued-error') {
+      setSubmitWarning(`DB error: ${result.message}`);
       setIsSubmitting(false);
       return;
     }
