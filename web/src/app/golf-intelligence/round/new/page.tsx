@@ -40,7 +40,9 @@ interface RoundSetupState {
   date: string;
   courseId: string | null;
   courseName: string;
-  location: string;
+  locationCity: string;
+  locationState: string;
+  locationZip: string;
   roundType: RoundType | null;
   roundNumber: number | null;
   weather: WeatherFields;
@@ -53,7 +55,9 @@ type Action =
   | { type: 'SET_COURSE'; courseId: string; courseName: string }
   | { type: 'SET_COURSE_NAME'; courseName: string }
   | { type: 'CLEAR_COURSE' }
-  | { type: 'SET_LOCATION'; location: string }
+  | { type: 'SET_LOCATION_CITY'; city: string }
+  | { type: 'SET_LOCATION_STATE'; stateAbbr: string }
+  | { type: 'SET_LOCATION_ZIP'; zip: string }
   | { type: 'SET_ROUND_TYPE'; roundType: RoundType }
   | { type: 'SET_ROUND_NUMBER'; roundNumber: number }
   | { type: 'SET_WEATHER_FIELD'; field: keyof WeatherFields; value: string }
@@ -75,8 +79,12 @@ function reducer(state: RoundSetupState, action: Action): RoundSetupState {
       return { ...state, courseName: action.courseName, courseId: null };
     case 'CLEAR_COURSE':
       return { ...state, courseId: null, courseName: '' };
-    case 'SET_LOCATION':
-      return { ...state, location: action.location };
+    case 'SET_LOCATION_CITY':
+      return { ...state, locationCity: action.city };
+    case 'SET_LOCATION_STATE':
+      return { ...state, locationState: action.stateAbbr };
+    case 'SET_LOCATION_ZIP':
+      return { ...state, locationZip: action.zip };
     case 'SET_ROUND_TYPE':
       return {
         ...state,
@@ -145,7 +153,9 @@ export default function NewRoundPage() {
     date: todayIso(),
     courseId: null,
     courseName: '',
-    location: '',
+    locationCity: '',
+    locationState: '',
+    locationZip: '',
     roundType: null,
     roundNumber: null,
     weather: EMPTY_WEATHER,
@@ -174,19 +184,27 @@ export default function NewRoundPage() {
   }, []);
 
   useEffect(() => {
-    function onMouseDown(e: MouseEvent) {
+    function onPointerDown(e: PointerEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setShowDropdown(false);
       }
     }
-    document.addEventListener('mousedown', onMouseDown);
-    return () => document.removeEventListener('mousedown', onMouseDown);
+    document.addEventListener('pointerdown', onPointerDown);
+    return () => document.removeEventListener('pointerdown', onPointerDown);
   }, []);
+
+  const locationQuery = state.locationZip.trim()
+    ? state.locationZip.trim()
+    : state.locationCity.trim() && state.locationState.trim()
+      ? `${state.locationCity.trim()}, ${state.locationState.trim()}`
+      : '';
+
+  const locationString = locationQuery || null;
 
   // Geocode the location field on a 600ms debounce.
   const geocodeReqId = useRef(0);
   useEffect(() => {
-    const query = state.location.trim();
+    const query = locationQuery;
     if (!query) {
       dispatch({ type: 'SET_GEOCODE', geocode: null });
       dispatch({ type: 'SET_WEATHER_STATUS', status: 'idle' });
@@ -205,7 +223,7 @@ export default function NewRoundPage() {
       dispatch({ type: 'SET_GEOCODE', geocode: result });
     }, 600);
     return () => clearTimeout(t);
-  }, [state.location]);
+  }, [locationQuery]);
 
   // Re-fetch weather whenever geocode or date changes, on a 300ms debounce.
   const weatherReqId = useRef(0);
@@ -295,7 +313,7 @@ export default function NewRoundPage() {
         date: state.date,
         round_type: state.roundType,
         round_number: state.roundNumber,
-        location: state.location.trim() || null,
+        location: locationString,
         weather_temp: numericTemp === '' ? null : Number(numericTemp),
         weather_wind_speed: numericWind === '' ? null : Number(numericWind),
         weather_wind_direction:
@@ -364,10 +382,8 @@ export default function NewRoundPage() {
                     {filteredCourses.map((c) => (
                       <button
                         key={c.id}
-                        onMouseDown={(e) => {
-                          e.preventDefault();
-                          selectCourse(c);
-                        }}
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => selectCourse(c)}
                         className="block w-full px-3.5 py-2.5 bg-transparent border-b border-border text-cement font-body text-[13px] text-left last:border-b-0"
                       >
                         {c.name}
@@ -375,10 +391,8 @@ export default function NewRoundPage() {
                     ))}
                     {showAddNew && (
                       <button
-                        onMouseDown={(e) => {
-                          e.preventDefault();
-                          addNewCourse();
-                        }}
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => addNewCourse()}
                         className="block w-full px-3.5 py-2.5 bg-transparent text-scarlet-glow font-body text-[13px] text-left"
                       >
                         + Add &ldquo;{state.courseName.trim()}&rdquo; as new course
@@ -403,13 +417,47 @@ export default function NewRoundPage() {
           </div>
 
           <div className="mb-2">
-            <input
-              type="text"
-              placeholder="City, State"
-              value={state.location}
-              onChange={(e) => dispatch({ type: 'SET_LOCATION', location: e.target.value })}
-              className={input}
-            />
+            <div className="flex gap-2">
+              <div className="flex-1 min-w-0">
+                <input
+                  type="text"
+                  placeholder="City"
+                  value={state.locationCity}
+                  onChange={(e) =>
+                    dispatch({ type: 'SET_LOCATION_CITY', city: e.target.value })
+                  }
+                  className={input}
+                />
+              </div>
+              <div className="w-14 flex-shrink-0">
+                <input
+                  type="text"
+                  placeholder="ST"
+                  value={state.locationState}
+                  maxLength={2}
+                  onChange={(e) =>
+                    dispatch({
+                      type: 'SET_LOCATION_STATE',
+                      stateAbbr: e.target.value.toUpperCase(),
+                    })
+                  }
+                  className={input}
+                />
+              </div>
+              <div className="w-20 flex-shrink-0">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="Zip"
+                  value={state.locationZip}
+                  maxLength={5}
+                  onChange={(e) =>
+                    dispatch({ type: 'SET_LOCATION_ZIP', zip: e.target.value.replace(/\D/g, '') })
+                  }
+                  className={input}
+                />
+              </div>
+            </div>
             <p className="font-mono text-[10px] tracking-[0.25em] uppercase text-ash mt-1.5 min-h-[14px]">
               {state.weatherStatus === 'loading' && 'Fetching weather…'}
               {state.weatherStatus === 'ok' && state.geocode?.displayName}
