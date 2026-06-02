@@ -168,6 +168,7 @@ export default function NewRoundPage() {
   const [courses, setCourses] = useState<CourseRow[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [courseError, setCourseError] = useState<string | null>(null);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -286,13 +287,21 @@ export default function NewRoundPage() {
     setShowDropdown(false);
   }
 
-  async function addNewCourse() {
+  function addNewCourse() {
     if (!playerId || !state.courseName.trim()) return;
+    setCourseError(null);
     const name = state.courseName.trim();
     const id = createId();
-    const newCourse = await upsertCourse({ id, player_id: playerId, name, ...defaultPars });
-    setCourses((prev) => [...prev, newCourse]);
-    selectCourse(newCourse);
+    const now = new Date().toISOString();
+    const optimistic: CourseRow = { id, player_id: playerId, name, ...defaultPars, created_at: now, updated_at: now };
+    // Optimistically add the course so the user can proceed immediately.
+    setCourses((prev) => [...prev, optimistic]);
+    selectCourse(optimistic);
+    // Persist in the background; surface any error without blocking the round.
+    upsertCourse({ id, player_id: playerId, name, ...defaultPars }).catch((err) => {
+      console.error('[addNewCourse]', err);
+      setCourseError('Course could not be saved — it will sync when online.');
+    });
   }
 
   function handleStart() {
@@ -382,7 +391,7 @@ export default function NewRoundPage() {
                     {filteredCourses.map((c) => (
                       <button
                         key={c.id}
-                        onMouseDown={(e) => e.preventDefault()}
+                        onPointerDown={(e) => e.preventDefault()}
                         onClick={() => selectCourse(c)}
                         className="block w-full px-3.5 py-2.5 bg-transparent border-b border-border text-cement font-body text-[13px] text-left last:border-b-0"
                       >
@@ -391,7 +400,7 @@ export default function NewRoundPage() {
                     ))}
                     {showAddNew && (
                       <button
-                        onMouseDown={(e) => e.preventDefault()}
+                        onPointerDown={(e) => e.preventDefault()}
                         onClick={() => addNewCourse()}
                         className="block w-full px-3.5 py-2.5 bg-transparent text-scarlet-glow font-body text-[13px] text-left"
                       >
@@ -399,6 +408,12 @@ export default function NewRoundPage() {
                       </button>
                     )}
                   </div>
+                )}
+
+                {courseError && (
+                  <p className="mt-1.5 font-mono text-[10px] tracking-[0.2em] uppercase text-scarlet">
+                    {courseError}
+                  </p>
                 )}
 
                 {showFuzzyHint && fuzzyMatch && (
