@@ -14,6 +14,7 @@ import { persistOrQueue } from '@/lib/golf/offlineQueue';
 import {
   geocodeLocation,
   fetchWeather,
+  currentTimeHHMM,
   type GeocodeResult,
 } from '@/lib/golf/weatherService';
 import type { CourseRow, RoundType } from '@/lib/golf/db/types';
@@ -38,6 +39,7 @@ const EMPTY_WEATHER: WeatherFields = {
 
 interface RoundSetupState {
   date: string;
+  teeTime: string;
   courseId: string | null;
   courseName: string;
   locationCity: string;
@@ -52,6 +54,7 @@ interface RoundSetupState {
 
 type Action =
   | { type: 'SET_DATE'; date: string }
+  | { type: 'SET_TEE_TIME'; teeTime: string }
   | { type: 'SET_COURSE'; courseId: string; courseName: string }
   | { type: 'SET_COURSE_NAME'; courseName: string }
   | { type: 'CLEAR_COURSE' }
@@ -73,6 +76,8 @@ function reducer(state: RoundSetupState, action: Action): RoundSetupState {
   switch (action.type) {
     case 'SET_DATE':
       return { ...state, date: action.date };
+    case 'SET_TEE_TIME':
+      return { ...state, teeTime: action.teeTime };
     case 'SET_COURSE':
       return { ...state, courseId: action.courseId, courseName: action.courseName };
     case 'SET_COURSE_NAME':
@@ -151,6 +156,7 @@ export default function NewRoundPage() {
 
   const [state, dispatch] = useReducer(reducer, {
     date: todayIso(),
+    teeTime: currentTimeHHMM(),
     courseId: null,
     courseName: '',
     locationCity: '',
@@ -168,8 +174,11 @@ export default function NewRoundPage() {
   const [courses, setCourses] = useState<CourseRow[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [courseError, setCourseError] = useState<string | null>(null);
+  const [submitWarning, setSubmitWarning] = useState<string | null>(null);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const pendingCourseRef = useRef<Promise<void> | null>(null);
 
   useEffect(() => {
     const supabase = createBrowserClient();
@@ -225,16 +234,16 @@ export default function NewRoundPage() {
     return () => clearTimeout(t);
   }, [locationQuery]);
 
-  // Re-fetch weather whenever geocode or date changes, on a 300ms debounce.
+  // Re-fetch weather whenever geocode, date, or tee time changes, on a 300ms debounce.
   const weatherReqId = useRef(0);
   useEffect(() => {
     if (!state.geocode) return;
     const my = ++weatherReqId.current;
     dispatch({ type: 'SET_WEATHER_STATUS', status: 'loading' });
     const { lat, lon } = state.geocode;
-    const date = state.date;
+    const { date, teeTime } = state;
     const t = setTimeout(async () => {
-      const w = await fetchWeather(lat, lon, date);
+      const w = await fetchWeather(lat, lon, date, teeTime);
       if (my !== weatherReqId.current) return;
       if (!w) {
         dispatch({ type: 'SET_WEATHER_STATUS', status: 'manual' });
@@ -251,7 +260,7 @@ export default function NewRoundPage() {
       });
     }, 300);
     return () => clearTimeout(t);
-  }, [state.geocode, state.date]);
+  }, [state.geocode, state.date, state.teeTime]);
 
   const needsRoundNumber =
     state.roundType === 'Qualifying' || state.roundType === 'Tournament';
@@ -286,16 +295,28 @@ export default function NewRoundPage() {
     setShowDropdown(false);
   }
 
-  async function addNewCourse() {
+  function addNewCourse() {
     if (!playerId || !state.courseName.trim()) return;
+    setCourseError(null);
     const name = state.courseName.trim();
     const id = createId();
-    const newCourse = await upsertCourse({ id, player_id: playerId, name, ...defaultPars });
-    setCourses((prev) => [...prev, newCourse]);
-    selectCourse(newCourse);
+    const now = new Date().toISOString();
+    const optimistic: CourseRow = { id, player_id: playerId, name, ...defaultPars, created_at: now, updated_at: now };
+    // Optimistically add the course so the user can proceed immediately.
+    setCourses((prev) => [...prev, optimistic]);
+    selectCourse(optimistic);
+    // Track the pending DB write so handleStart can await it before saving the round.
+    const p = upsertCourse({ id, player_id: playerId, name, ...defaultPars })
+      .then(() => { pendingCourseRef.current = null; })
+      .catch((err) => {
+        console.error('[addNewCourse]', err);
+        pendingCourseRef.current = null;
+        setCourseError('Course could not be saved — it will sync when online.');
+      });
+    pendingCourseRef.current = p;
   }
 
-  function handleStart() {
+  async function handleStart() {
     if (!isValid || !playerId || isSubmitting || !state.roundType) return;
     setIsSubmitting(true);
     const roundId = createId();
@@ -304,23 +325,56 @@ export default function NewRoundPage() {
     const numericWind = state.weather.windSpeed.trim();
     const numericPrecip = state.weather.precip.trim();
 
-    void persistOrQueue({
+    // Ensure any in-flight course upsert completes before saving the round,
+    // so the course FK exists in the DB when the round row is written.
+    if (pendingCourseRef.current) await pendingCourseRef.current;
+
+    // Build hole pars from the selected course so the session can start
+    // even if the DB write hasn't completed yet.
+    const selectedCourse = courses.find((c) => c.id === state.courseId);
+    const holePars: Record<number, number> = {};
+    for (let i = 1; i <= 18; i++) {
+      const key = `par_hole_${i}` as keyof typeof defaultPars;
+      holePars[i] = selectedCourse ? (selectedCourse[key as keyof CourseRow] as number) : 4;
+    }
+    if (typeof sessionStorage !== 'undefined') {
+      sessionStorage.setItem(
+        `tg_round_bootstrap_${roundId}`,
+        JSON.stringify({
+          playerId,
+          courseId: state.courseId,
+          courseName: state.courseName,
+          played_on: state.date,
+          roundType: state.roundType,
+          roundNumber: state.roundNumber,
+          holePars,
+        }),
+      );
+    }
+
+    const result = await persistOrQueue({
       type: 'upsertRound',
       payload: {
         id: roundId,
         player_id: playerId,
         course_id: state.courseId,
-        date: state.date,
+        played_on: state.date,
         round_type: state.roundType,
         round_number: state.roundNumber,
-        location: locationString,
-        weather_temp: numericTemp === '' ? null : Number(numericTemp),
-        weather_wind_speed: numericWind === '' ? null : Number(numericWind),
-        weather_wind_direction:
-          state.weather.windDirection.trim() || null,
+        location_city: state.locationCity.trim() || null,
+        location_state: state.locationState.trim() || null,
+        weather_temp_f: numericTemp === '' ? null : Number(numericTemp),
+        weather_wind_mph: numericWind === '' ? null : Number(numericWind),
+        weather_wind_dir: state.weather.windDirection.trim() || null,
         weather_precip: numericPrecip === '' ? null : Number(numericPrecip),
       },
     });
+
+    if (result.status === 'queued-error') {
+      setSubmitWarning(`DB error: ${result.message}`);
+      setIsSubmitting(false);
+      return;
+    }
 
     router.push(`/golf-intelligence/round/${roundId}/hole/1`);
   }
@@ -338,12 +392,24 @@ export default function NewRoundPage() {
         {/* ── Container 1: WHEN ── */}
         <div className={container}>
           <span className={containerLabel}>When</span>
-          <input
-            type="date"
-            value={state.date}
-            onChange={(e) => dispatch({ type: 'SET_DATE', date: e.target.value })}
-            className={`${input} [color-scheme:dark]`}
-          />
+          <div className="flex gap-2">
+            <div className="flex-1 min-w-0">
+              <input
+                type="date"
+                value={state.date}
+                onChange={(e) => dispatch({ type: 'SET_DATE', date: e.target.value })}
+                className={`${input} [color-scheme:dark]`}
+              />
+            </div>
+            <div className="w-32 flex-shrink-0">
+              <input
+                type="time"
+                value={state.teeTime}
+                onChange={(e) => dispatch({ type: 'SET_TEE_TIME', teeTime: e.target.value })}
+                className={`${input} [color-scheme:dark]`}
+              />
+            </div>
+          </div>
         </div>
 
         {/* ── Container 2: WHERE ── */}
@@ -382,7 +448,7 @@ export default function NewRoundPage() {
                     {filteredCourses.map((c) => (
                       <button
                         key={c.id}
-                        onMouseDown={(e) => e.preventDefault()}
+                        onPointerDown={(e) => e.preventDefault()}
                         onClick={() => selectCourse(c)}
                         className="block w-full px-3.5 py-2.5 bg-transparent border-b border-border text-cement font-body text-[13px] text-left last:border-b-0"
                       >
@@ -391,7 +457,7 @@ export default function NewRoundPage() {
                     ))}
                     {showAddNew && (
                       <button
-                        onMouseDown={(e) => e.preventDefault()}
+                        onPointerDown={(e) => e.preventDefault()}
                         onClick={() => addNewCourse()}
                         className="block w-full px-3.5 py-2.5 bg-transparent text-scarlet-glow font-body text-[13px] text-left"
                       >
@@ -399,6 +465,12 @@ export default function NewRoundPage() {
                       </button>
                     )}
                   </div>
+                )}
+
+                {courseError && (
+                  <p className="mt-1.5 font-mono text-[10px] tracking-[0.2em] uppercase text-scarlet">
+                    {courseError}
+                  </p>
                 )}
 
                 {showFuzzyHint && fuzzyMatch && (
@@ -597,6 +669,12 @@ export default function NewRoundPage() {
             </div>
           </div>
         </div>
+
+        {submitWarning && (
+          <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-yellow-400 text-center px-2">
+            {submitWarning}
+          </p>
+        )}
 
         <Button
           disabled={!isValid || isSubmitting}

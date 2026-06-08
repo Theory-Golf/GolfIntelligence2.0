@@ -296,7 +296,7 @@ function EditMode({
                 className="flex items-center justify-between border border-border rounded-md px-3 py-3 bg-shadow"
               >
                 <div className="flex items-center gap-3 font-mono text-[13px]">
-                  <span className="text-ash w-4">{s.shot_order}</span>
+                  <span className="text-ash w-4">{s.shot_number}</span>
                   <span style={{ color: LIE_COLORS[s.starting_lie] }}>
                     {s.starting_distance}
                     <span className="ml-0.5">{LIE_ABBREVIATIONS[s.starting_lie]}</span>
@@ -314,14 +314,14 @@ function EditMode({
                 <div className="flex items-center gap-1">
                   <IconButton
                     label="Edit shot"
-                    onClick={() => goEdit(s.shot_order)}
+                    onClick={() => goEdit(s.shot_number)}
                     disabled={busyId !== null}
                   >
                     ✎
                   </IconButton>
                   <IconButton
                     label="Insert after"
-                    onClick={() => goInsert(s.shot_order)}
+                    onClick={() => goInsert(s.shot_number)}
                     disabled={busyId !== null}
                   >
                     +

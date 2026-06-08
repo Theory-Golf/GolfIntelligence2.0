@@ -67,7 +67,7 @@ export interface RoundSessionContextValue {
   insertShotAfter: (
     holeId: string,
     afterOrder: number,
-    shot: Omit<ShotInsert, 'shot_order'>,
+    shot: Omit<ShotInsert, 'shot_number'>,
   ) => Promise<void>;
   cascadeFromShot: (holeId: string, fromShotOrder: number) => Promise<void>;
   completeHole: (holeNumber: number) => void;
@@ -145,8 +145,52 @@ export function RoundSessionProvider({
 
     async function load() {
       try {
-        const round: RoundRow | null = await getRound(roundId);
+        let round: RoundRow | null = await getRound(roundId);
+
+        // If the round isn't in the DB yet (queued offline or DB write still
+        // in-flight), fall back to the bootstrap written by the new-round page.
         if (!round) {
+          const raw =
+            typeof sessionStorage !== 'undefined'
+              ? sessionStorage.getItem(`tg_round_bootstrap_${roundId}`)
+              : null;
+
+          if (raw) {
+            try {
+              const b = JSON.parse(raw) as {
+                playerId: string;
+                courseId: string | null;
+                courseName: string;
+                played_on: string;
+                roundType: RoundType;
+                roundNumber: number | null;
+                holePars: Record<number, number>;
+              };
+              if (!cancelled) {
+                setState({
+                  roundId,
+                  courseId: b.courseId,
+                  courseName: b.courseName,
+                  roundDate: b.played_on,
+                  roundType: b.roundType,
+                  holePars: b.holePars,
+                  holes: [],
+                  activeHoleNumber: 1,
+                  activeHoleId: null,
+                  activeShotOrder: 1,
+                  lastActiveHole: null,
+                });
+                setLoading(false);
+              }
+            } catch {
+              if (!cancelled) {
+                setError('Round not found');
+                setLoading(false);
+              }
+            }
+            return;
+          }
+
           if (!cancelled) {
             setError('Round not found');
             setLoading(false);
@@ -193,11 +237,15 @@ export function RoundSessionProvider({
         const activeEntry = entries.find((e) => e.holeNumber === activeHoleNumber);
 
         if (cancelled) return;
+        // Clear bootstrap now that we have a confirmed DB record.
+        if (typeof sessionStorage !== 'undefined') {
+          sessionStorage.removeItem(`tg_round_bootstrap_${roundId}`);
+        }
         setState({
           roundId,
           courseId: round.course_id,
           courseName,
-          roundDate: round.date,
+          roundDate: round.played_on,
           roundType: round.round_type,
           holePars,
           holes: entries,
@@ -292,12 +340,12 @@ export function RoundSessionProvider({
       setHoleShots(shot.hole_id, (shots) => {
         const without = shots.filter((s) => s.id !== shot.id);
         return [...without, localRow].sort(
-          (a, b) => a.shot_order - b.shot_order,
+          (a, b) => a.shot_number - b.shot_number,
         );
       });
       setState((prev) => ({
         ...prev,
-        activeShotOrder: shot.shot_order + 1,
+        activeShotOrder: shot.shot_number + 1,
       }));
       void persistOrQueue({ type: 'upsertShot', payload: shot });
     },
@@ -308,12 +356,12 @@ export function RoundSessionProvider({
     async (holeId: string, fromShotOrder: number) => {
       const updates: ShotUpdate[] = [];
       setHoleShots(holeId, (shots) => {
-        const ordered = shots.slice().sort((a, b) => a.shot_order - b.shot_order);
+        const ordered = shots.slice().sort((a, b) => a.shot_number - b.shot_number);
         const next: ShotRow[] = ordered.map((s) => ({ ...s }));
         for (let i = 1; i < next.length; i++) {
           const prev = next[i - 1];
           const cur = next[i];
-          if (cur.shot_order <= fromShotOrder) continue;
+          if (cur.shot_number <= fromShotOrder) continue;
           if (
             cur.starting_lie !== prev.ending_lie ||
             cur.starting_distance !== prev.ending_distance
@@ -353,7 +401,7 @@ export function RoundSessionProvider({
         const remaining = shots
           .filter((s) => s.id !== shotId)
           .slice()
-          .sort((a, b) => a.shot_order - b.shot_order);
+          .sort((a, b) => a.shot_number - b.shot_number);
         const next: ShotRow[] = remaining.map((s) => ({ ...s }));
         for (let i = 0; i < next.length; i++) {
           const s = next[i];
@@ -361,9 +409,9 @@ export function RoundSessionProvider({
           const prev = i > 0 ? next[i - 1] : null;
           const update: ShotUpdate = { id: s.id };
           let changed = false;
-          if (s.shot_order !== desiredOrder) {
-            s.shot_order = desiredOrder;
-            update.shot_order = desiredOrder;
+          if (s.shot_number !== desiredOrder) {
+            s.shot_number = desiredOrder;
+            update.shot_number = desiredOrder;
             changed = true;
           }
           if (prev) {
@@ -394,11 +442,11 @@ export function RoundSessionProvider({
     async (
       holeId: string,
       afterOrder: number,
-      shot: Omit<ShotInsert, 'shot_order'>,
+      shot: Omit<ShotInsert, 'shot_number'>,
     ) => {
       const shiftUpdates: ShotUpdate[] = [];
       const newOrder = afterOrder + 1;
-      const inserted: ShotInsert = { ...shot, shot_order: newOrder };
+      const inserted: ShotInsert = { ...shot, shot_number: newOrder };
       const insertedRow: ShotRow = {
         ...inserted,
         created_at: new Date().toISOString(),
@@ -407,22 +455,22 @@ export function RoundSessionProvider({
       const cascadeUpdates: ShotUpdate[] = [];
 
       setHoleShots(holeId, (shots) => {
-        // Shift later shots' shot_order +1.
+        // Shift later shots' shot_number +1.
         const shifted: ShotRow[] = shots.map((s) => {
-          if (s.shot_order > afterOrder) {
-            shiftUpdates.push({ id: s.id, shot_order: s.shot_order + 1 });
-            return { ...s, shot_order: s.shot_order + 1 };
+          if (s.shot_number > afterOrder) {
+            shiftUpdates.push({ id: s.id, shot_number: s.shot_number + 1 });
+            return { ...s, shot_number: s.shot_number + 1 };
           }
           return { ...s };
         });
         // Splice in the new shot, then run cascade from newOrder forward.
         const merged = [...shifted, insertedRow].sort(
-          (a, b) => a.shot_order - b.shot_order,
+          (a, b) => a.shot_number - b.shot_number,
         );
         for (let i = 1; i < merged.length; i++) {
           const prev = merged[i - 1];
           const cur = merged[i];
-          if (cur.shot_order <= newOrder) continue;
+          if (cur.shot_number <= newOrder) continue;
           if (
             cur.starting_lie !== prev.ending_lie ||
             cur.starting_distance !== prev.ending_distance
