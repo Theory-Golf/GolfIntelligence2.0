@@ -166,12 +166,12 @@ function ShotEntry({
 
   const editingShot: ShotRow | null = useMemo(() => {
     if (editOrder === null || !hole) return null;
-    return hole.shots.find((s) => s.shot_order === editOrder) ?? null;
+    return hole.shots.find((s) => s.shot_number === editOrder) ?? null;
   }, [editOrder, hole]);
 
   const afterShot: ShotRow | null = useMemo(() => {
     if (afterOrder === null || !hole) return null;
-    return hole.shots.find((s) => s.shot_order === afterOrder) ?? null;
+    return hole.shots.find((s) => s.shot_number === afterOrder) ?? null;
   }, [afterOrder, hole]);
 
   const mode: 'append' | 'edit' | 'insert' = editingShot
@@ -189,11 +189,11 @@ function ShotEntry({
   let inheritedDist: number | null;
 
   if (mode === 'edit' && editingShot) {
-    shotOrder = editingShot.shot_order;
+    shotOrder = editingShot.shot_number;
     startingLie = editingShot.starting_lie;
     inheritedDist = editingShot.starting_distance;
   } else if (mode === 'insert' && afterShot) {
-    shotOrder = afterShot.shot_order + 1;
+    shotOrder = afterShot.shot_number + 1;
     startingLie = afterShot.ending_lie;
     inheritedDist = afterShot.ending_distance;
   } else {
@@ -220,7 +220,7 @@ function ShotEntry({
         clubCategory: editingShot.club_category,
         missDirection: editingShot.miss_direction,
         puttLongShort: editingShot.putt_long_short,
-        penalty: editingShot.penalty,
+        penalty: editingShot.has_penalty,
         warningDismissed: false,
       };
     }
@@ -306,12 +306,12 @@ function ShotEntry({
     const insert: ShotInsert = {
       id: createId(),
       hole_id: hole.holeId,
-      shot_order: shotOrder,
+      shot_number: shotOrder,
       starting_lie: startingLie,
       starting_distance: startingDistanceNum,
       ending_lie: endingLie,
       ending_distance: endingDistance,
-      penalty: form.penalty,
+      has_penalty: form.penalty,
       club_category: showClubCategory ? form.clubCategory : null,
       miss_direction: showMissDirection ? form.missDirection : null,
       putt_long_short: showPuttLongShort ? form.puttLongShort : null,
@@ -331,12 +331,12 @@ function ShotEntry({
       starting_distance: startingDistanceNum ?? shot.starting_distance,
       ending_lie: endingLie,
       ending_distance: endingDistance,
-      penalty: form.penalty,
+      has_penalty: form.penalty,
       club_category: showClubCategory ? form.clubCategory : null,
       miss_direction: showMissDirection ? form.missDirection : null,
       putt_long_short: showPuttLongShort ? form.puttLongShort : null,
     });
-    await session.cascadeFromShot(hole.holeId, shot.shot_order);
+    await session.cascadeFromShot(hole.holeId, shot.shot_number);
   }
 
   async function persistInsert(
@@ -345,14 +345,14 @@ function ShotEntry({
     endingDistance: number,
   ) {
     if (!hole) return;
-    await session.insertShotAfter(hole.holeId, afterShotRow.shot_order, {
+    await session.insertShotAfter(hole.holeId, afterShotRow.shot_number, {
       id: createId(),
       hole_id: hole.holeId,
       starting_lie: startingLie,
       starting_distance: startingDistanceNum ?? afterShotRow.ending_distance,
       ending_lie: endingLie,
       ending_distance: endingDistance,
-      penalty: form.penalty,
+      has_penalty: form.penalty,
       club_category: showClubCategory ? form.clubCategory : null,
       miss_direction: showMissDirection ? form.missDirection : null,
       putt_long_short: showPuttLongShort ? form.puttLongShort : null,
@@ -426,7 +426,7 @@ function ShotEntry({
 
   const completedShots: ShotPathShot[] = (hole?.shots ?? [])
     .filter((s) =>
-      mode === 'edit' && editingShot ? s.shot_order < editingShot.shot_order : true,
+      mode === 'edit' && editingShot ? s.shot_number < editingShot.shot_number : true,
     )
     .map((s) => ({
       startingDistance: s.starting_distance,

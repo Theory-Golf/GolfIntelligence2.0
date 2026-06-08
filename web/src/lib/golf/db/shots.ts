@@ -7,7 +7,7 @@ export async function getShotsForHole(holeId: string): Promise<ShotRow[]> {
     .from('shots')
     .select('*')
     .eq('hole_id', holeId)
-    .order('shot_order', { ascending: true });
+    .order('shot_number', { ascending: true });
   if (error) throw error;
   return data;
 }
@@ -19,7 +19,7 @@ export async function getShotsForRound(roundId: string): Promise<ShotRow[]> {
     .select('*, holes!inner(hole_number, round_id)')
     .eq('holes.round_id', roundId)
     .order('holes(hole_number)', { ascending: true })
-    .order('shot_order', { ascending: true });
+    .order('shot_number', { ascending: true });
   if (error) throw error;
   return data as ShotRow[];
 }

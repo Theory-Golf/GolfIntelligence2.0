@@ -52,13 +52,14 @@ export interface RoundRow {
   id: string;
   player_id: string;
   course_id: string | null;
-  date: string;
+  played_on: string;
   round_type: RoundType;
   round_number: number | null;
-  location: string | null;
-  weather_temp: number | null;
-  weather_wind_speed: number | null;
-  weather_wind_direction: string | null;
+  location_city: string | null;
+  location_state: string | null;
+  weather_temp_f: number | null;
+  weather_wind_mph: number | null;
+  weather_wind_dir: string | null;
   weather_precip: number | null;
   created_at: string;
   updated_at: string;
@@ -76,12 +77,12 @@ export interface HoleRow {
 export interface ShotRow {
   id: string;
   hole_id: string;
-  shot_order: number;
+  shot_number: number;
   starting_lie: Lie;
   starting_distance: number;
   ending_lie: Lie;
   ending_distance: number;
-  penalty: boolean;
+  has_penalty: boolean;
   club_category: ClubCategory | null;
   miss_direction: MissDirection | null;
   putt_long_short: PuttDirection | null;
