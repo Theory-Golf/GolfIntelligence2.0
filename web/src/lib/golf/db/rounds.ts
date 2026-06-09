@@ -21,7 +21,7 @@ export async function getRoundsByPlayer(
     .from('rounds')
     .select('*')
     .eq('player_id', playerId)
-    .order('date', { ascending: false })
+    .order('played_on', { ascending: false })
     .order('created_at', { ascending: false })
     .limit(limit);
   if (error) throw error;
