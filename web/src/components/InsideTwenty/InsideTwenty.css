@@ -1,0 +1,61 @@
+/* ================================================================
+   Theory Golf — Inside Twenty (Putting Hub)
+   Shares all .it- utility styles from InsideTen.css.
+   This file adds only Inside Twenty–specific overrides.
+   Prefix for new rules: .i20-
+   ================================================================ */
+
+/* ── PLAY: Distance reference grid ────────────────────────────── */
+.i20-distance-ref {
+  margin-bottom: 8px;
+}
+
+.i20-distance-ref-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ash);
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--pitch);
+}
+
+.i20-group-row {
+  display: grid;
+  grid-template-columns: 52px 1fr 1fr 1fr;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--pitch);
+}
+
+.i20-group-row:last-child {
+  border-bottom: none;
+}
+
+.i20-group-num {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ash);
+}
+
+.i20-group-dist {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--chalk);
+  text-align: center;
+}
+
+.i20-group-dist span {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  color: var(--ash);
+  margin-left: 1px;
+}

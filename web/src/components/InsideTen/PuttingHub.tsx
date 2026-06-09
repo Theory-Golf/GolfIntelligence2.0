@@ -22,12 +22,12 @@ const DRILLS: Drill[] = [
     live: true,
   },
   {
-    id: 'stress-ten',
-    name: 'Stress Ten',
-    desc: 'Coming soon.',
-    meta: 'Coming soon',
-    href: null,
-    live: false,
+    id: 'inside-twenty',
+    name: 'Inside Twenty',
+    desc: '18 putts across 6 ladders from 5 to 19 feet. Mid-range conversion with tier-based tracking.',
+    meta: '18 putts · single-input scoring · tier tracked',
+    href: '/player-path/putting/inside-twenty',
+    live: true,
   },
   {
     id: 'lag-test',
