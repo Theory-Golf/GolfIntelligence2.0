@@ -46,6 +46,53 @@ export const ACTIVITIES: Activity[] = [
   // ── PUTTING ──────────────────────────────────────────────────────────
 
   {
+    id: 'inside-ten',
+    name: 'Inside Ten',
+    category: 'putting',
+    type: 'skill_development',
+    description:
+      '18 putts across 6 ladders from 3 to 10 feet. Single-number entry at the end converts to a Strokes Gained estimate against PGA Tour baseline. Weighted toward the 5–8 ft range — the band where par saves and birdie conversions are decided.',
+    connected_drivers: [
+      {
+        driver_id: 'M1',
+        connection:
+          'Scores SG in the 3–10 ft range — the primary make-rate band where conversion drives SG putting',
+      },
+      {
+        driver_id: 'M2',
+        connection:
+          'Isolates the short-range loss bucket — repeated sessions reveal if the 5–8 ft band is the primary cost',
+      },
+    ],
+  },
+
+  {
+    id: 'inside-twenty',
+    name: 'Inside Twenty',
+    category: 'putting',
+    type: 'skill_development',
+    description:
+      '18 putts across 6 ladders from 5 to 19 feet — the mid-range conversion zone. Tier-based performance tracking anchored to PGA Tour benchmark of 9–10 makes. Trains the band where make percentage drops sharply but confident speed and line still produce conversions.',
+    connected_drivers: [
+      {
+        driver_id: 'M1',
+        connection:
+          'Assesses conversion rate across the 5–19 ft band — flags underperformance in the mid-range SG buckets',
+      },
+      {
+        driver_id: 'M2',
+        connection:
+          'Targets the primary loss bucket when it falls in the 10–20 ft conversion zone',
+      },
+      {
+        driver_id: 'L1',
+        connection:
+          'Longer distances in the drill (15–19 ft) overlap with lag putt territory — speed control transfers directly',
+      },
+    ],
+  },
+
+  {
     id: 'round-simulation',
     name: 'Round Simulation',
     category: 'putting',

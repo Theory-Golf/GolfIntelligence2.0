@@ -11,12 +11,14 @@ import './PracticeLibrary.css';
  * As each activity page is built, add its route here.
  */
 const ACTIVITY_ROUTES: Record<string, string> = {
+  'inside-ten':       '/player-path/putting/inside-ten',
+  'inside-twenty':    '/player-path/putting/inside-twenty',
   'round-simulation': '/player-path/round-simulation',
-  'lag-putt-test': '/player-path/lag-putt-test',
-  'wedge-standard': '/player-path/wedge-standard',
-  'approach-standard': '/player-path/approach-standard',
-  'driver-standard': '/player-path/driver-standard',
-  'line-test': '/player-path/line-test',
+  'lag-putt-test':    '/player-path/lag-putt-test',
+  'wedge-standard':   '/player-path/wedge-standard',
+  'approach-standard':'/player-path/approach-standard',
+  'driver-standard':  '/player-path/driver-standard',
+  'line-test':        '/player-path/line-test',
 };
 
 /**
