@@ -1,0 +1,836 @@
+/* ================================================================
+   Theory Golf — Inside Ten (Putting Hub)
+   Component-scoped styles. Prefix: .it-
+   ================================================================ */
+
+.it-wrapper {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 0 20px 80px;
+}
+
+/* ── TOP NAV ───────────────────────────────────────────────────── */
+.it-top-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  min-height: 44px;
+}
+
+.it-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  min-height: 44px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ash);
+  background: transparent;
+  border: 1px solid var(--pitch);
+  cursor: pointer;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.it-back-btn:hover {
+  color: var(--chalk);
+  border-color: var(--ash);
+}
+
+.it-nav-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--chalk);
+}
+
+/* ── CARDS ─────────────────────────────────────────────────────── */
+.it-card {
+  background: var(--shadow);
+  border: 1px solid var(--pitch);
+  padding: 24px;
+  margin-bottom: 12px;
+}
+
+.it-card-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ash);
+  margin-bottom: 16px;
+}
+
+.it-card-eyebrow-center {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ash);
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+/* ── STORAGE WARNING ───────────────────────────────────────────── */
+.it-storage-warn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  background: color-mix(in srgb, var(--bogey) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--bogey) 30%, transparent);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--bogey);
+}
+
+/* ── HOME: HERO ────────────────────────────────────────────────── */
+.it-hero {
+  padding: 0 0 8px;
+  margin-bottom: 12px;
+}
+
+.it-hero-subtitle {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ash);
+  margin-bottom: 24px;
+}
+
+/* ── HOME: DRILL SECTION ───────────────────────────────────────── */
+.it-section-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ash);
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--pitch);
+}
+
+.it-ladder-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.it-ladder-table th,
+.it-ladder-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--pitch);
+  font-size: 12px;
+  text-align: center;
+  color: var(--chalk);
+}
+
+.it-ladder-table th {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ash);
+  font-weight: 500;
+}
+
+.it-ladder-table td:first-child {
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--ash);
+}
+
+.it-ladder-table td span {
+  display: inline-block;
+  padding: 2px 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.it-rules {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.it-rule {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 10px 12px;
+  border: 1px solid var(--pitch);
+}
+
+.it-rule-key {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--scarlet);
+  min-width: 24px;
+  flex-shrink: 0;
+}
+
+.it-rule-text {
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--chalk);
+  font-family: var(--font-body);
+}
+
+/* ── HOME: TIER GRID ───────────────────────────────────────────── */
+.it-tier-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.it-tier-item {
+  padding: 14px;
+  border: 1px solid var(--pitch);
+  border-left-width: 3px;
+}
+
+.it-tier-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.it-tier-range {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: var(--ash);
+  margin-bottom: 6px;
+}
+
+.it-tier-copy {
+  font-family: var(--font-body);
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--ash);
+}
+
+/* ── HOME: WHY IT MATTERS ──────────────────────────────────────── */
+.it-body-text {
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--cement);
+}
+
+/* ── HOME: RECENT SESSIONS ─────────────────────────────────────── */
+.it-recent-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.it-recent-row {
+  display: grid;
+  grid-template-columns: 80px 1fr 90px 80px;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--pitch);
+}
+
+.it-recent-row:last-child {
+  border-bottom: none;
+}
+
+.it-recent-date {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--ash);
+}
+
+.it-recent-score {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--chalk);
+  letter-spacing: -0.02em;
+}
+
+.it-recent-score span {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--ash);
+  letter-spacing: 0;
+}
+
+.it-recent-sg {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-align: right;
+}
+
+.it-recent-tier-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: 1px solid currentColor;
+  text-align: center;
+}
+
+.it-view-history-link {
+  display: block;
+  margin-top: 14px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ash);
+  text-decoration: none;
+  text-align: right;
+  transition: color var(--transition-fast);
+}
+
+.it-view-history-link:hover {
+  color: var(--chalk);
+}
+
+/* ── PRIMARY / SECONDARY BUTTONS ───────────────────────────────── */
+.it-primary-btn {
+  width: 100%;
+  padding: 16px;
+  min-height: 52px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #ffffff;
+  background: var(--scarlet);
+  border: none;
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+  margin-top: 8px;
+}
+
+.it-primary-btn:hover:not(:disabled) {
+  opacity: 0.88;
+}
+
+.it-primary-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.it-secondary-btn {
+  width: 100%;
+  padding: 14px;
+  min-height: 48px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ash);
+  background: transparent;
+  border: 1px solid var(--pitch);
+  cursor: pointer;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+  margin-top: 8px;
+}
+
+.it-secondary-btn:hover {
+  color: var(--chalk);
+  border-color: var(--ash);
+}
+
+/* ── PLAY: SCORE STEPPER ───────────────────────────────────────── */
+.it-score-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 16px 0 8px;
+}
+
+.it-stepper-btn {
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--pitch);
+  color: var(--chalk);
+  font-family: var(--font-mono);
+  font-size: 20px;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), color var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.it-stepper-btn:hover:not(:disabled) {
+  border-color: var(--ash);
+}
+
+.it-stepper-btn:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+}
+
+.it-score-display {
+  text-align: center;
+  min-width: 120px;
+}
+
+.it-score-large {
+  font-family: var(--font-display);
+  font-size: 80px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--chalk);
+  line-height: 1;
+  display: block;
+}
+
+.it-score-denom {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  color: var(--ash);
+  margin-top: 4px;
+  text-transform: uppercase;
+}
+
+/* ── PLAY: DATE FIELD ──────────────────────────────────────────── */
+.it-date-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 4px;
+}
+
+.it-date-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ash);
+}
+
+.it-date-input {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--chalk);
+  background: transparent;
+  border: 1px solid var(--pitch);
+  padding: 8px 10px;
+  min-height: 36px;
+  cursor: pointer;
+  outline: none;
+  color-scheme: dark;
+  transition: border-color var(--transition-fast);
+}
+
+.it-date-input:focus {
+  border-color: var(--ash);
+}
+
+/* ── RESULT: SCORE DISPLAY ─────────────────────────────────────── */
+.it-result-hero {
+  padding: 32px 24px 24px;
+  text-align: center;
+}
+
+.it-result-score {
+  font-family: var(--font-display);
+  font-size: 88px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--scarlet);
+  line-height: 1;
+}
+
+.it-result-score-denom {
+  font-family: var(--font-display);
+  font-size: 40px;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: var(--ash);
+}
+
+.it-result-sg {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  letter-spacing: 0.06em;
+  color: var(--cement);
+  margin-top: 10px;
+}
+
+.it-result-sg-note {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ash);
+  margin-top: 6px;
+}
+
+/* ── RESULT: TIER BADGE ────────────────────────────────────────── */
+.it-tier-badge-wrap {
+  padding: 20px 24px;
+  border-top: 1px solid var(--pitch);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.it-tier-badge {
+  padding: 5px 14px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 600;
+  border: 1px solid currentColor;
+  flex-shrink: 0;
+}
+
+.it-tier-badge-copy {
+  font-family: var(--font-body);
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--cement);
+}
+
+/* ── RESULT: DELTA ROW ─────────────────────────────────────────── */
+.it-deltas {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--pitch);
+  border: 1px solid var(--pitch);
+  margin-bottom: 12px;
+}
+
+.it-delta-cell {
+  background: var(--shadow);
+  padding: 16px 12px;
+  text-align: center;
+}
+
+.it-delta-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ash);
+  margin-bottom: 8px;
+}
+
+.it-delta-value {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.it-delta-pos {
+  color: var(--sg-strong);
+}
+
+.it-delta-neg {
+  color: var(--double);
+}
+
+.it-delta-neutral {
+  color: var(--ash);
+}
+
+.it-delta-pb {
+  color: var(--sg-strong);
+}
+
+.it-delta-sub {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: var(--ash);
+  margin-top: 4px;
+}
+
+/* ── RESULT: CTA ROW ───────────────────────────────────────────── */
+.it-cta-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.it-cta-row .it-primary-btn,
+.it-cta-row .it-secondary-btn {
+  margin-top: 0;
+}
+
+/* ── HISTORY: SUMMARY CARDS ────────────────────────────────────── */
+.it-stat-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+@media (min-width: 480px) {
+  .it-stat-row {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.it-stat-card {
+  background: var(--shadow);
+  border: 1px solid var(--pitch);
+  padding: 16px;
+}
+
+.it-stat-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ash);
+  margin-bottom: 10px;
+}
+
+.it-stat-value {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--chalk);
+  line-height: 1;
+}
+
+.it-stat-sub {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: var(--ash);
+  margin-top: 6px;
+}
+
+/* ── HISTORY: CHART CONTAINER ──────────────────────────────────── */
+.it-chart-card {
+  background: var(--shadow);
+  border: 1px solid var(--pitch);
+  padding: 24px 8px 16px 8px;
+  margin-bottom: 12px;
+}
+
+.it-chart-card-header {
+  padding: 0 16px 16px;
+}
+
+.it-chart-note {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ash);
+  margin-top: 8px;
+}
+
+/* ── HISTORY: EMPTY STATE ──────────────────────────────────────── */
+.it-empty-state {
+  padding: 40px 24px;
+  text-align: center;
+  background: var(--shadow);
+  border: 1px solid var(--pitch);
+  margin-bottom: 12px;
+}
+
+.it-empty-icon {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ash);
+  margin-bottom: 12px;
+}
+
+.it-empty-text {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--cement);
+  line-height: 1.55;
+}
+
+/* ── HISTORY: SESSION LOG ──────────────────────────────────────── */
+.it-log-head,
+.it-log-row {
+  display: grid;
+  grid-template-columns: 80px 60px 70px 80px 44px;
+  gap: 8px;
+  align-items: center;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--pitch);
+  font-size: 12px;
+}
+
+.it-log-head {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ash);
+  border-bottom-width: 1px;
+}
+
+.it-log-row {
+  color: var(--chalk);
+}
+
+.it-log-row:last-child {
+  border-bottom: none;
+}
+
+.it-log-date {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ash);
+}
+
+.it-log-score {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.it-log-sg {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-align: right;
+}
+
+.it-log-tier-badge {
+  display: inline-block;
+  padding: 2px 7px;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 1px solid currentColor;
+}
+
+.it-log-delete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--ash);
+  cursor: pointer;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+  font-size: 14px;
+  margin-left: auto;
+}
+
+.it-log-delete:hover {
+  color: var(--double);
+  border-color: var(--double);
+}
+
+/* ── PUTTING HUB: DRILL CARDS ──────────────────────────────────── */
+.it-hub-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+@media (min-width: 480px) {
+  .it-hub-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.it-hub-drill-card {
+  display: block;
+  background: var(--shadow);
+  border: 1px solid var(--pitch);
+  padding: 24px;
+  text-decoration: none;
+  transition: border-color var(--transition-fast);
+  cursor: pointer;
+}
+
+.it-hub-drill-card:hover {
+  border-color: var(--ash);
+}
+
+.it-hub-drill-card.is-placeholder {
+  opacity: 0.4;
+  cursor: default;
+  pointer-events: none;
+}
+
+.it-hub-drill-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.it-hub-drill-name {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  color: var(--chalk);
+}
+
+.it-hub-drill-badge {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ash);
+  border: 1px solid var(--pitch);
+  padding: 3px 7px;
+}
+
+.it-hub-drill-badge.is-live {
+  color: var(--sg-strong);
+  border-color: var(--sg-strong);
+}
+
+.it-hub-drill-desc {
+  font-family: var(--font-body);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--cement);
+  margin-bottom: 14px;
+}
+
+.it-hub-drill-meta {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ash);
+}
