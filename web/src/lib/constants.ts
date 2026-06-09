@@ -20,3 +20,6 @@ export const LS_LAG_PUTT_SESSIONS = 'lag-putt-sessions';
 
 // ── Line Test ──────────────────────────────────────────────────────────
 export const LS_LINE_TEST_SESSIONS = 'lineTest:sessions';
+
+// ── Inside Ten (Putting Hub) ──────────────────────────────────
+export const LS_INSIDE_TEN_SESSIONS = 'theory.golf:player-path:inside-ten:v1';
