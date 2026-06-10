@@ -116,6 +116,22 @@ function holeIsComplete(entry: HoleEntry): boolean {
   return entry.shots.length > 0 && entry.shots.some(isHoled);
 }
 
+// Each penalty counts as an extra stroke on top of the physical shots.
+function holeStrokes(entry: HoleEntry): number {
+  return (
+    entry.shots.length + entry.shots.filter((s) => s.has_penalty).length
+  );
+}
+
+// Stroke number shown to the player: the stored shot_number plus penalty
+// strokes incurred on earlier shots (penalty on shot 1 → next shot is 3).
+function strokeNumberForShot(shots: ShotRow[], shotNumber: number): number {
+  const prior = shots.filter(
+    (s) => s.shot_number < shotNumber && s.has_penalty,
+  ).length;
+  return shotNumber + prior;
+}
+
 export function RoundSessionProvider({
   roundId,
   children,
@@ -518,7 +534,7 @@ export function RoundSessionProvider({
       if (!h || !holeIsComplete(h)) {
         frontComplete = false;
       } else {
-        front += h.shots.length - h.par;
+        front += holeStrokes(h) - h.par;
       }
     }
     for (let n = 10; n <= 18; n++) {
@@ -526,11 +542,11 @@ export function RoundSessionProvider({
       if (!h || !holeIsComplete(h)) {
         backComplete = false;
       } else {
-        back += h.shots.length - h.par;
+        back += holeStrokes(h) - h.par;
       }
     }
     for (const h of state.holes) {
-      if (holeIsComplete(h)) total += h.shots.length - h.par;
+      if (holeIsComplete(h)) total += holeStrokes(h) - h.par;
     }
     return {
       front: frontComplete ? front : null,
@@ -617,4 +633,4 @@ export function useRoundSession(): RoundSessionContextValue {
   return ctx;
 }
 
-export { holeIsComplete, isHoled };
+export { holeIsComplete, holeStrokes, isHoled, strokeNumberForShot };

@@ -1,9 +1,13 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { useRoundSession, type HoleEntry } from '@/lib/golf/roundSession';
+import {
+  strokeNumberForShot,
+  useRoundSession,
+  type HoleEntry,
+} from '@/lib/golf/roundSession';
 import { useOnlineStatus } from '@/lib/golf/offlineQueue';
 import { ScoreHeader } from '@/components/golf/ScoreHeader';
 import { ShotPath, type ShotPathShot } from '@/components/golf/ShotPath';
@@ -107,7 +111,7 @@ function Header({
 }) {
   const online = useOnlineStatus();
   return (
-    <header className="flex items-start justify-between border-b border-border pb-3">
+    <header className="flex items-start justify-between border-b border-border pb-2">
       <div className="flex items-baseline gap-3">
         <span className="font-display font-extrabold text-3xl text-chalk uppercase tracking-tight">
           Hole {holeNumber}
@@ -238,6 +242,19 @@ function ShotEntry({
 
   const [saving, setSaving] = useState(false);
   const [parBusy, setParBusy] = useState(false);
+  const [setupDone, setSetupDone] = useState(false);
+
+  // When the course is in the database its par is known ahead of time;
+  // pre-select it on the setup screen so the player only confirms.
+  const coursePar = session.state.holePars[holeNumber];
+  const autoParApplied = useRef(false);
+  useEffect(() => {
+    if (autoParApplied.current) return;
+    if (isFreshShot1 && !parSet && coursePar) {
+      autoParApplied.current = true;
+      void session.setPar(holeNumber, coursePar);
+    }
+  }, [isFreshShot1, parSet, coursePar, session, holeNumber]);
 
   // After a successful append save, hole.shots grows; if we just transitioned
   // from shot 1 to shot 2 we should clear the tee-distance input so the
@@ -265,8 +282,11 @@ function ShotEntry({
   // Conditional triggers
   const showClubCategory =
     shotOrder === 1 && startingDistanceNum !== null && startingDistanceNum >= 250;
+  // Miss direction only applies to par 4 / par 5 tee shots.
   const showMissDirection =
     startingLie === 'Tee' &&
+    par !== null &&
+    par >= 4 &&
     form.endingLie !== null &&
     form.endingLie !== 'Fairway';
   const showPuttLongShort =
@@ -436,15 +456,18 @@ function ShotEntry({
       holed: s.ending_lie === 'Green' && s.ending_distance === 0,
     }));
 
-  return (
-    <div className="min-h-screen bg-background text-foreground">
-      <div className="max-w-md mx-auto p-4 flex flex-col gap-5">
-        <Header holeNumber={holeNumber} roundId={roundId} score={score} />
+  const displayShotNumber = strokeNumberForShot(hole?.shots ?? [], shotOrder);
 
-        {/* HOLE PAR — only on fresh shot 1 */}
-        {isFreshShot1 && (
-          <div className="border-b border-border pb-5">
-            <p className="font-mono text-[10px] tracking-[0.25em] uppercase text-ash mb-3">
+  // ── Hole setup: par + hole distance get their own screen ──────────────────
+  if (isFreshShot1 && !setupDone) {
+    return (
+      <div className="min-h-screen bg-background text-foreground">
+        <div className="max-w-md mx-auto px-4 pt-3 pb-4 flex flex-col gap-3">
+          <Header holeNumber={holeNumber} roundId={roundId} score={score} />
+
+          {/* Hole par */}
+          <div>
+            <p className="font-mono text-[10px] tracking-[0.25em] uppercase text-ash mb-1">
               Hole par
             </p>
             <div className="grid grid-cols-3 gap-2">
@@ -457,7 +480,7 @@ function ShotEntry({
                     onClick={() => handlePickPar(p)}
                     disabled={parBusy}
                     className={
-                      'rounded-md py-5 disabled:opacity-50 ' +
+                      'rounded-md py-3 disabled:opacity-50 ' +
                       (selected
                         ? 'border border-scarlet bg-scarlet-tint'
                         : 'border border-border bg-shadow active:bg-pitch')
@@ -465,7 +488,7 @@ function ShotEntry({
                   >
                     <div
                       className={
-                        'font-display font-extrabold text-3xl leading-none ' +
+                        'font-display font-extrabold text-2xl leading-none ' +
                         (selected ? 'text-scarlet' : 'text-chalk')
                       }
                     >
@@ -476,110 +499,104 @@ function ShotEntry({
               })}
             </div>
           </div>
-        )}
 
-        {/* Sections below are gated by parSet on fresh shot 1 */}
-        <div
-          className={
-            isFreshShot1 && !parSet
-              ? 'opacity-30 pointer-events-none flex flex-col gap-5'
-              : 'flex flex-col gap-5'
-          }
-        >
-          {/* THIS HOLE shot path — hidden on fresh shot 1 (nothing to show yet) */}
-          {!isFreshShot1 && hole && (
-            <div>
-              <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash mb-2">
-                This hole
-              </p>
-              <ShotPath shots={completedShots} activeShotNumber={shotOrder} />
+          {/* Hole distance */}
+          <div>
+            <div className="flex items-baseline justify-between mb-1">
+              <span className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash">
+                Hole distance
+              </span>
+              <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-ash">
+                {startingUnit}
+              </span>
             </div>
+            <NumericKeypad
+              value={form.teeDistanceInput}
+              onChange={(v) =>
+                setForm((f) => ({
+                  ...f,
+                  teeDistanceInput: v,
+                  warningDismissed: false,
+                }))
+              }
+            />
+          </div>
+
+          {warning && (
+            <WarningCard
+              warning={warning}
+              onDismiss={() =>
+                setForm((f) => ({ ...f, warningDismissed: true }))
+              }
+            />
           )}
 
-          {/* Starting from */}
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash">
-                Starting from
-              </p>
-              {isFreshShot1 ? (
-                <div className="mt-1 flex items-baseline gap-2">
-                  <input
-                    type="number"
-                    inputMode="numeric"
-                    min={0}
-                    max={9999}
-                    placeholder="—"
-                    value={form.teeDistanceInput}
-                    onChange={(e) =>
-                      setForm((f) => ({
-                        ...f,
-                        teeDistanceInput: e.target.value.replace(/[^0-9]/g, ''),
-                        warningDismissed: false,
-                      }))
-                    }
-                    className="font-display font-extrabold text-3xl text-chalk bg-transparent border-0 outline-none w-24 p-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  />
-                  <span className="font-mono text-[10px] tracking-[0.25em] uppercase text-ash">
-                    {startingUnit}
-                  </span>
-                </div>
-              ) : (
-                <p className="mt-1">
-                  <span className="font-display font-extrabold text-3xl text-chalk">
-                    {inheritedDist ?? '—'}
-                  </span>{' '}
-                  <span className="font-mono text-[10px] tracking-[0.25em] uppercase text-ash">
-                    {startingUnit}
-                  </span>
-                </p>
-              )}
-            </div>
-            <div className="flex flex-col items-end">
-              <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash">
-                Shot {shotOrder}
-              </p>
-              <div
-                className="mt-1 font-display font-bold text-[10px] tracking-[0.2em] uppercase px-2 py-1 rounded-sm"
-                style={{ background: LIE_COLORS[startingLie], color: '#0C0C0C' }}
-              >
-                {startingLie}
+          {/* Starting location */}
+          <div className="flex items-center justify-between border border-border bg-shadow rounded-md px-3 py-2">
+            <span className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash">
+              Starting from
+            </span>
+            <span
+              className="font-display font-bold text-[10px] tracking-[0.2em] uppercase px-2 py-1 rounded-sm"
+              style={{ background: LIE_COLORS.Tee, color: '#0C0C0C' }}
+            >
+              Tee
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setSetupDone(true)}
+            disabled={!parSet || form.teeDistanceInput === ''}
+            className="w-full rounded-md bg-chalk text-court py-3 font-display font-bold text-sm tracking-[0.2em] uppercase disabled:opacity-40"
+          >
+            Start hole →
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background text-foreground">
+      <div className="max-w-md mx-auto px-4 pt-3 pb-4 flex flex-col gap-3">
+        <Header holeNumber={holeNumber} roundId={roundId} score={score} />
+
+        <div className="flex flex-col gap-3">
+          {/* Shot path + starting context on one compact block */}
+          <div>
+            {!isFreshShot1 && hole && (
+              <div className="mb-2">
+                <ShotPath shots={completedShots} activeShotNumber={shotOrder} />
               </div>
+            )}
+            <div className="flex items-center justify-between">
+              <div className="flex items-baseline gap-2">
+                <span className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash">
+                  From
+                </span>
+                <span className="font-display font-extrabold text-2xl text-chalk">
+                  {startingDistanceNum ?? '—'}
+                </span>
+                <span className="font-mono text-[10px] tracking-[0.25em] uppercase text-ash">
+                  {startingUnit}
+                </span>
+                <span
+                  className="font-display font-bold text-[10px] tracking-[0.2em] uppercase px-2 py-1 rounded-sm"
+                  style={{ background: LIE_COLORS[startingLie], color: '#0C0C0C' }}
+                >
+                  {startingLie}
+                </span>
+              </div>
+              <span className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash">
+                Shot {displayShotNumber}
+              </span>
             </div>
           </div>
 
-          {/* Soft warning card */}
-          {warning && (
-            <div
-              className="rounded-md px-4 py-3 flex items-start gap-3"
-              style={{ border: `1px solid ${COLOR_AMBER}` }}
-            >
-              <button
-                type="button"
-                onClick={() =>
-                  setForm((f) => ({ ...f, warningDismissed: true }))
-                }
-                aria-label="Dismiss warning"
-                className="mt-0.5 w-4 h-4 rounded-sm shrink-0"
-                style={{ border: `1px solid ${COLOR_AMBER}` }}
-              />
-              <div className="flex-1">
-                <p
-                  className="font-display font-bold text-sm tracking-[0.1em] uppercase"
-                  style={{ color: COLOR_AMBER }}
-                >
-                  {warning.title}
-                </p>
-                <p className="font-mono text-[11px] text-cement mt-1 leading-snug">
-                  {warning.body}
-                </p>
-              </div>
-            </div>
-          )}
-
           {/* Ending distance + keypad */}
           <div>
-            <div className="flex items-baseline justify-between mb-2">
+            <div className="flex items-baseline justify-between mb-1">
               <span className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash">
                 Ending distance
               </span>
@@ -595,7 +612,7 @@ function ShotEntry({
 
           {/* Ending lie */}
           <div>
-            <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash mb-2">
+            <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash mb-1">
               Ending lie
             </p>
             <LieGrid
@@ -607,7 +624,7 @@ function ShotEntry({
           </div>
 
           <ConditionalBlock show={showClubCategory}>
-            <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash mb-2">
+            <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash mb-1">
               Club category
             </p>
             <div className="grid grid-cols-2 gap-2">
@@ -620,8 +637,8 @@ function ShotEntry({
                     onClick={() => setForm((f) => ({ ...f, clubCategory: c }))}
                     className={
                       active
-                        ? 'rounded-md border border-scarlet bg-scarlet-tint py-3 font-display font-bold text-sm tracking-[0.15em] uppercase text-chalk'
-                        : 'rounded-md border border-border bg-shadow py-3 font-display font-bold text-sm tracking-[0.15em] uppercase text-ash'
+                        ? 'rounded-md border border-scarlet bg-scarlet-tint py-2 font-display font-bold text-sm tracking-[0.15em] uppercase text-chalk'
+                        : 'rounded-md border border-border bg-shadow py-2 font-display font-bold text-sm tracking-[0.15em] uppercase text-ash'
                     }
                   >
                     {c}
@@ -632,7 +649,7 @@ function ShotEntry({
           </ConditionalBlock>
 
           <ConditionalBlock show={showMissDirection}>
-            <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash mb-2">
+            <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash mb-1">
               Miss direction
             </p>
             <div className="grid grid-cols-2 gap-2">
@@ -645,8 +662,8 @@ function ShotEntry({
                     onClick={() => setForm((f) => ({ ...f, missDirection: m }))}
                     className={
                       active
-                        ? 'rounded-md border border-scarlet bg-scarlet-tint py-3 font-display font-bold text-sm tracking-[0.15em] uppercase text-chalk'
-                        : 'rounded-md border border-border bg-shadow py-3 font-display font-bold text-sm tracking-[0.15em] uppercase text-ash'
+                        ? 'rounded-md border border-scarlet bg-scarlet-tint py-2 font-display font-bold text-sm tracking-[0.15em] uppercase text-chalk'
+                        : 'rounded-md border border-border bg-shadow py-2 font-display font-bold text-sm tracking-[0.15em] uppercase text-ash'
                     }
                   >
                     {m}
@@ -657,7 +674,7 @@ function ShotEntry({
           </ConditionalBlock>
 
           <ConditionalBlock show={showPuttLongShort}>
-            <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash mb-2">
+            <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash mb-1">
               Putt long / short
             </p>
             <div className="grid grid-cols-2 gap-2">
@@ -670,8 +687,8 @@ function ShotEntry({
                     onClick={() => setForm((f) => ({ ...f, puttLongShort: p }))}
                     className={
                       active
-                        ? 'rounded-md border border-scarlet bg-scarlet-tint py-3 font-display font-bold text-sm tracking-[0.15em] uppercase text-chalk'
-                        : 'rounded-md border border-border bg-shadow py-3 font-display font-bold text-sm tracking-[0.15em] uppercase text-ash'
+                        ? 'rounded-md border border-scarlet bg-scarlet-tint py-2 font-display font-bold text-sm tracking-[0.15em] uppercase text-chalk'
+                        : 'rounded-md border border-border bg-shadow py-2 font-display font-bold text-sm tracking-[0.15em] uppercase text-ash'
                     }
                   >
                     {p}
@@ -690,7 +707,7 @@ function ShotEntry({
             type="button"
             onClick={handleSave}
             disabled={!canSave}
-            className="w-full rounded-md bg-chalk text-court py-4 font-display font-bold text-sm tracking-[0.2em] uppercase disabled:opacity-40"
+            className="w-full rounded-md bg-chalk text-court py-3 font-display font-bold text-sm tracking-[0.2em] uppercase disabled:opacity-40"
           >
             {mode === 'edit'
               ? 'Save edit · Back'
@@ -723,6 +740,40 @@ function ConditionalBlock({
   );
 }
 
+function WarningCard({
+  warning,
+  onDismiss,
+}: {
+  warning: { title: string; body: string };
+  onDismiss: () => void;
+}) {
+  return (
+    <div
+      className="rounded-md px-4 py-3 flex items-start gap-3"
+      style={{ border: `1px solid ${COLOR_AMBER}` }}
+    >
+      <button
+        type="button"
+        onClick={onDismiss}
+        aria-label="Dismiss warning"
+        className="mt-0.5 w-4 h-4 rounded-sm shrink-0"
+        style={{ border: `1px solid ${COLOR_AMBER}` }}
+      />
+      <div className="flex-1">
+        <p
+          className="font-display font-bold text-sm tracking-[0.1em] uppercase"
+          style={{ color: COLOR_AMBER }}
+        >
+          {warning.title}
+        </p>
+        <p className="font-mono text-[11px] text-cement mt-1 leading-snug">
+          {warning.body}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function PenaltyToggle({
   on,
   onChange,
@@ -734,7 +785,7 @@ function PenaltyToggle({
     <button
       type="button"
       onClick={() => onChange(!on)}
-      className="w-full flex items-center justify-between border border-border bg-shadow rounded-md px-3 py-3"
+      className="w-full flex items-center justify-between border border-border bg-shadow rounded-md px-3 py-2"
     >
       <span className="flex items-center gap-2">
         <span
