@@ -14,7 +14,7 @@ export default function EmptyState({
 
   return (
     <div className="border border-border bg-card p-8 text-center">
-      <p className="eyebrow mb-3">Practice Planner</p>
+      <p className="eyebrow mb-3">The Plan</p>
       <h3 className="font-display text-2xl font-extrabold uppercase tracking-tight text-foreground">
         Build the next session
       </h3>
@@ -40,7 +40,7 @@ export default function EmptyState({
         />
       </div>
       <p className="mt-6 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-        Future: link drills to the Practice Library · sync history to your player profile
+        Future: link drills to The Library · sync history to your player profile
       </p>
     </div>
   );

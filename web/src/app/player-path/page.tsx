@@ -1,5 +1,4 @@
-import PracticeLibrary from '@/components/PracticeLibrary';
-import PracticePlanner from '@/components/PracticePlanner';
+import PlayerPathSections from '@/components/PlayerPathSections';
 
 export const metadata = {
   title: 'PlayerPath',
@@ -24,11 +23,8 @@ export default function PlayerPathPage() {
         </div>
       </section>
 
-      {/* ── Practice Planner ─────────────────────────────────── */}
-      <PracticePlanner />
-
-      {/* ── Practice Activity Library ────────────────────────── */}
-      <PracticeLibrary />
+      {/* ── The Plan / The Library ───────────────────────────── */}
+      <PlayerPathSections />
     </>
   );
 }

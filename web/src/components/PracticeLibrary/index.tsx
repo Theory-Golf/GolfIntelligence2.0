@@ -4,7 +4,6 @@ import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { ACTIVITIES, CATEGORIES, TYPES } from '@/data/practiceActivities';
 import type { Activity } from '@/data/practiceActivities';
-import './PracticeLibrary.css';
 
 /**
  * Map activity IDs to their interactive tool routes.
@@ -26,6 +25,13 @@ const ACTIVITY_ROUTES: Record<string, string> = {
  * Additional segments extend this list as activities are added.
  */
 const ALL_DRIVER_IDS = ['M1', 'M2', 'L1', 'L2', 'L3', 'A1', 'A2', 'A3', 'A4'];
+
+/** Chip row that scrolls horizontally on phones and wraps on larger screens. */
+const CHIP_ROW =
+  'flex gap-1.5 overflow-x-auto -mx-6 px-6 pb-1 sm:mx-0 sm:px-0 sm:pb-0 sm:flex-wrap sm:overflow-visible';
+
+const FILTER_BTN =
+  'min-h-[44px] whitespace-nowrap border px-3 font-mono text-[10px] uppercase tracking-[0.12em] transition-colors duration-150';
 
 export default function PracticeLibrary() {
   const [activeCategory, setActiveCategory] = useState('all');
@@ -66,114 +72,145 @@ export default function PracticeLibrary() {
   const hasDriverFilter = flaggedDrivers.length > 0;
 
   return (
-    <div className="pl-wrapper">
+    <section className="px-6 pb-20">
+      <div className="mx-auto max-w-5xl">
+        {/* ── Header ─────────────────────────────────────────── */}
+        <header className="mb-8 space-y-4">
+          <p className="eyebrow">The Library</p>
+          <h2 className="font-display text-[clamp(32px,5vw,56px)] font-extrabold uppercase leading-[0.95] tracking-tight text-foreground">
+            Browse the <span className="text-primary">work</span>
+          </h2>
+          <p className="max-w-2xl text-base leading-relaxed text-muted-foreground">
+            Every assessment and development activity in one catalog. Filter by segment or type,
+            or flag a performance driver to surface the activities that address it.
+          </p>
+        </header>
 
-      {/* ── Filter bar ─────────────────────────────────────── */}
-      <p className="pl-section-label">Practice Library</p>
-
-      <div className="pl-filter-row">
-        <span className="pl-filter-label">Category</span>
-        <div className="pl-filters">
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat.id}
-              className={`pl-filter-btn${activeCategory === cat.id ? ' is-active' : ''}`}
-              onClick={() => setActiveCategory(cat.id)}
-            >
-              {cat.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="pl-filter-row">
-        <span className="pl-filter-label">Type</span>
-        <div className="pl-filters">
-          {TYPES.map((t) => (
-            <button
-              key={t.id}
-              className={`pl-filter-btn${activeType === t.id ? ' is-active' : ''}`}
-              onClick={() => setActiveType(t.id)}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* ── Driver intelligence toggle ──────────────────────── */}
-      <div className="pl-driver-section">
-        <div className="pl-driver-section-header">
-          <span className="pl-driver-section-title">Flagged Drivers</span>
-          <span className="pl-driver-section-hint">
-            Toggle a driver to surface the activities that address it
+        {/* ── Filter bar ─────────────────────────────────────── */}
+        <div className="mb-4">
+          <span className="mb-2 block font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+            Category
           </span>
+          <div className={CHIP_ROW}>
+            {CATEGORIES.map((cat) => (
+              <button
+                key={cat.id}
+                className={`${FILTER_BTN} ${
+                  activeCategory === cat.id
+                    ? 'border-primary bg-primary text-primary-foreground'
+                    : 'border-border text-muted-foreground hover:border-muted-foreground hover:text-foreground'
+                }`}
+                onClick={() => setActiveCategory(cat.id)}
+              >
+                {cat.label}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="pl-driver-chips">
-          {ALL_DRIVER_IDS.map((id) => (
-            <button
-              key={id}
-              className={`pl-driver-chip${flaggedDrivers.includes(id) ? ' is-flagged' : ''}`}
-              onClick={() => toggleDriver(id)}
-            >
-              {id}
-            </button>
-          ))}
-          {hasDriverFilter && (
-            <button
-              className="pl-driver-chip-clear"
-              onClick={() => setFlaggedDrivers([])}
-            >
-              Clear
-            </button>
-          )}
-        </div>
-      </div>
 
-      {/* ── Results bar ────────────────────────────────────── */}
-      <div className="pl-results-bar">
-        <p className="pl-results-count">
-          <strong>{totalVisible}</strong>{' '}
-          {totalVisible === 1 ? 'activity' : 'activities'}
+        <div className="mb-4">
+          <span className="mb-2 block font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+            Type
+          </span>
+          <div className={CHIP_ROW}>
+            {TYPES.map((t) => (
+              <button
+                key={t.id}
+                className={`${FILTER_BTN} ${
+                  activeType === t.id
+                    ? 'border-primary bg-primary text-primary-foreground'
+                    : 'border-border text-muted-foreground hover:border-muted-foreground hover:text-foreground'
+                }`}
+                onClick={() => setActiveType(t.id)}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Driver intelligence toggle ──────────────────────── */}
+        <div className="mt-7 border border-border bg-card p-5 sm:p-6">
+          <div className="mb-3.5 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+              Flagged Drivers
+            </span>
+            <span className="text-xs text-muted-foreground">
+              Toggle a driver to surface the activities that address it
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {ALL_DRIVER_IDS.map((id) => (
+              <button
+                key={id}
+                className={`min-h-[44px] border px-3.5 font-mono text-[11px] uppercase tracking-[0.08em] transition-colors duration-150 ${
+                  flaggedDrivers.includes(id)
+                    ? 'border-primary bg-accent text-accent-foreground'
+                    : 'border-border text-muted-foreground hover:border-muted-foreground hover:text-foreground'
+                }`}
+                onClick={() => toggleDriver(id)}
+              >
+                {id}
+              </button>
+            ))}
+            {hasDriverFilter && (
+              <button
+                className="min-h-[44px] pl-2 font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground transition-colors duration-150 hover:text-primary"
+                onClick={() => setFlaggedDrivers([])}
+              >
+                Clear
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* ── Results bar ────────────────────────────────────── */}
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-2 border-b border-border pb-3">
+          <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+            <strong className="font-normal text-foreground">{totalVisible}</strong>{' '}
+            {totalVisible === 1 ? 'activity' : 'activities'}
+            {hasDriverFilter && relevant.length > 0 && (
+              <> &mdash; <strong className="font-normal text-foreground">{relevant.length}</strong> matched</>
+            )}
+          </p>
           {hasDriverFilter && relevant.length > 0 && (
-            <> &mdash; <strong>{relevant.length}</strong> matched</>
+            <span className="font-mono text-[10px] uppercase tracking-[0.10em] text-primary">
+              Relevant activities ranked first
+            </span>
           )}
-        </p>
-        {hasDriverFilter && relevant.length > 0 && (
-          <span className="pl-relevance-note">
-            Relevant activities ranked first
-          </span>
+        </div>
+
+        {/* ── Activity grid ───────────────────────────────────── */}
+        {totalVisible === 0 ? (
+          <div className="mt-3 border border-border bg-card px-6 py-12 text-center">
+            <p className="font-mono text-xs uppercase tracking-[0.12em] text-muted-foreground">
+              No activities match the current filters
+            </p>
+          </div>
+        ) : (
+          <div className="mt-3 grid grid-cols-1 gap-px border border-border bg-border sm:grid-cols-2 lg:grid-cols-3">
+            {/* Relevant activities first */}
+            {relevant.map((activity) => (
+              <ActivityCard
+                key={activity.id}
+                activity={activity}
+                flaggedDrivers={flaggedDrivers}
+                variant="relevant"
+              />
+            ))}
+            {/* Remaining activities */}
+            {others.map((activity) => (
+              <ActivityCard
+                key={activity.id}
+                activity={activity}
+                flaggedDrivers={flaggedDrivers}
+                variant={hasDriverFilter ? 'dimmed' : 'normal'}
+              />
+            ))}
+          </div>
         )}
       </div>
-
-      {/* ── Activity grid ───────────────────────────────────── */}
-      {totalVisible === 0 ? (
-        <div className="pl-empty">
-          <p className="pl-empty-text">No activities match the current filters</p>
-        </div>
-      ) : (
-        <div className="pl-grid">
-          {/* Relevant activities first */}
-          {relevant.map((activity) => (
-            <ActivityCard
-              key={activity.id}
-              activity={activity}
-              flaggedDrivers={flaggedDrivers}
-              variant="relevant"
-            />
-          ))}
-          {/* Remaining activities */}
-          {others.map((activity) => (
-            <ActivityCard
-              key={activity.id}
-              activity={activity}
-              flaggedDrivers={flaggedDrivers}
-              variant={hasDriverFilter ? 'dimmed' : 'normal'}
-            />
-          ))}
-        </div>
-      )}
-    </div>
+    </section>
   );
 }
 
@@ -193,10 +230,12 @@ function ActivityCard({ activity, flaggedDrivers, variant }: ActivityCardProps) 
   const route = ACTIVITY_ROUTES[activity.id];
 
   const cardClass = [
-    'pl-card',
-    isRelevant ? 'is-relevant' : '',
-    isDimmed ? 'is-dimmed' : '',
-    route ? 'is-linkable' : '',
+    'relative flex flex-col gap-3 bg-card p-6 transition-colors duration-150',
+    isRelevant
+      ? 'bg-surface before:absolute before:inset-y-0 before:left-0 before:w-[3px] before:bg-primary'
+      : '',
+    isDimmed ? 'opacity-45' : '',
+    route ? 'group cursor-pointer no-underline hover:bg-surface' : '',
   ]
     .filter(Boolean)
     .join(' ');
@@ -204,40 +243,64 @@ function ActivityCard({ activity, flaggedDrivers, variant }: ActivityCardProps) 
   const cardContent = (
     <>
       {/* Name + type badge */}
-      <div className="pl-card-header">
-        <span className="pl-card-name">{activity.name}</span>
-        <span className={`pl-type-badge ${isAssessment ? 'assessment' : 'development'}`}>
+      <div className="flex items-start justify-between gap-3">
+        <span className="font-display text-base font-bold uppercase leading-tight tracking-[0.03em] text-foreground">
+          {activity.name}
+        </span>
+        <span
+          className={`shrink-0 whitespace-nowrap px-2 py-[3px] font-mono text-[9px] uppercase tracking-[0.18em] ${
+            isAssessment
+              ? 'bg-accent text-accent-foreground'
+              : 'bg-secondary text-muted-foreground'
+          }`}
+        >
           {isAssessment ? 'Assessment' : 'Development'}
         </span>
       </div>
 
       {/* Description */}
-      <p className="pl-card-description">{activity.description}</p>
+      <p className="flex-1 text-[13px] leading-relaxed text-muted-foreground">
+        {activity.description}
+      </p>
 
       {/* Connected drivers + launch arrow */}
-      <div className="pl-card-drivers">
-        <span className="pl-card-drivers-label">Drivers</span>
+      <div className="mt-auto flex flex-wrap items-center gap-1.5 border-t border-border pt-2.5">
+        <span className="mr-0.5 font-mono text-[9px] uppercase tracking-[0.15em] text-muted-foreground">
+          Drivers
+        </span>
         {activity.connected_drivers.map((cd) => {
           const isFlagged = flaggedSet.has(cd.driver_id);
           return (
             <span
               key={cd.driver_id}
-              className={`pl-connected-driver${isFlagged ? ' is-flagged' : ''}`}
+              className={`border px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.08em] transition-colors duration-150 ${
+                isFlagged
+                  ? 'border-primary bg-accent text-accent-foreground'
+                  : 'border-border bg-surface text-muted-foreground'
+              }`}
               title={cd.connection}
             >
               {cd.driver_id}
             </span>
           );
         })}
-        {isRelevant && <span className="pl-relevant-badge">Recommended</span>}
-        {route && <span className="pl-card-launch">Launch →</span>}
+        {isRelevant && (
+          <span className="ml-auto font-mono text-[9px] uppercase tracking-[0.15em] text-primary">
+            Recommended
+          </span>
+        )}
+        {route && (
+          <span className="ml-auto font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground transition duration-150 group-hover:translate-x-[3px] group-hover:text-primary">
+            Launch →
+          </span>
+        )}
       </div>
     </>
   );
 
   if (route) {
     return (
-      <Link href={route} className={cardClass} style={{ textDecoration: 'none' }}>
+      <Link href={route} className={cardClass}>
         {cardContent}
       </Link>
     );
