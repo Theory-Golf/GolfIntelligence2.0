@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import {
   useRoundSession,
   holeIsComplete,
+  holeStrokes,
   type HoleEntry,
 } from '@/lib/golf/roundSession';
 
@@ -254,7 +255,7 @@ function sumStrokes(
   let total = 0;
   for (let n = fromHole; n <= toHole; n++) {
     const h = session.getHole(n);
-    if (h && holeIsComplete(h)) total += h.shots.length;
+    if (h && holeIsComplete(h)) total += holeStrokes(h);
   }
   return total;
 }
@@ -346,7 +347,7 @@ function HoleRow({
   }
 
   if (state.kind === 'in-progress') {
-    const shotsSoFar = state.entry.shots.length;
+    const shotsSoFar = holeStrokes(state.entry);
     return (
       <button type="button" onClick={navigate} className={`${baseRow} ${tint}`}>
         <span className="font-display font-extrabold text-xl text-chalk w-8">
@@ -364,7 +365,7 @@ function HoleRow({
 
   // Completed
   const entry = state.entry;
-  const score = entry.shots.length;
+  const score = holeStrokes(entry);
   const rel = score - entry.par;
   const trailingIcon = mode === 'editing' ? '□' : '›';
   return (

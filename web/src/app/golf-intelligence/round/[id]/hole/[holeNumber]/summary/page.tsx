@@ -2,7 +2,13 @@
 
 import { useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { useRoundSession, isHoled, type HoleEntry } from '@/lib/golf/roundSession';
+import {
+  useRoundSession,
+  holeStrokes,
+  isHoled,
+  strokeNumberForShot,
+  type HoleEntry,
+} from '@/lib/golf/roundSession';
 import { ScoreHeader } from '@/components/golf/ScoreHeader';
 import { LIE_ABBREVIATIONS, LIE_COLORS } from '@/lib/golf/utils/lieColors';
 import type { ShotRow } from '@/lib/golf/db/types';
@@ -103,7 +109,7 @@ function ReviewMode({
 }) {
   const router = useRouter();
   const session = useRoundSession();
-  const holeScore = hole.shots.length;
+  const holeScore = holeStrokes(hole);
   const rel = holeScore - hole.par;
   const startDist = hole.shots[0]?.starting_distance ?? null;
   const startUnit = hole.shots[0]?.starting_lie === 'Green' ? 'FT' : 'YDS';
@@ -168,7 +174,11 @@ function ReviewMode({
                 key={s.id}
                 className="flex items-center justify-between py-3 border-b border-border last:border-b-0"
               >
-                <ShotPathRow shot={s} index={i + 1} lastHoled={isHoled(s) && i === hole.shots.length - 1} />
+                <ShotPathRow
+                  shot={s}
+                  index={strokeNumberForShot(hole.shots, s.shot_number)}
+                  lastHoled={isHoled(s) && i === hole.shots.length - 1}
+                />
                 {conditionalLabel(s) && (
                   <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-ash">
                     {conditionalLabel(s)}
@@ -225,6 +235,9 @@ function ShotPathRow({
           {shot.ending_distance}
           <span className="ml-0.5">{LIE_ABBREVIATIONS[shot.ending_lie]}</span>
         </span>
+      )}
+      {shot.has_penalty && (
+        <span className="text-scarlet text-[10px] tracking-[0.15em]">+PEN</span>
       )}
     </div>
   );
@@ -296,7 +309,9 @@ function EditMode({
                 className="flex items-center justify-between border border-border rounded-md px-3 py-3 bg-shadow"
               >
                 <div className="flex items-center gap-3 font-mono text-[13px]">
-                  <span className="text-ash w-4">{s.shot_number}</span>
+                  <span className="text-ash w-4">
+                    {strokeNumberForShot(hole.shots, s.shot_number)}
+                  </span>
                   <span style={{ color: LIE_COLORS[s.starting_lie] }}>
                     {s.starting_distance}
                     <span className="ml-0.5">{LIE_ABBREVIATIONS[s.starting_lie]}</span>
@@ -308,6 +323,11 @@ function EditMode({
                     <span style={{ color: LIE_COLORS[s.ending_lie] }}>
                       {s.ending_distance}
                       <span className="ml-0.5">{LIE_ABBREVIATIONS[s.ending_lie]}</span>
+                    </span>
+                  )}
+                  {s.has_penalty && (
+                    <span className="text-scarlet text-[10px] tracking-[0.15em]">
+                      +PEN
                     </span>
                   )}
                 </div>

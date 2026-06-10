@@ -15,7 +15,7 @@ const LIES: Lie[] = ['Tee', 'Fairway', 'Rough', 'Sand', 'Recovery', 'Green'];
 function lieButtonClass(active: boolean): string {
   // Active gets scarlet border; text color is set inline (scarlet, or green for Green).
   const base =
-    'rounded-md py-3 px-3 font-display font-bold text-sm tracking-[0.15em] uppercase transition-colors';
+    'rounded-md py-2 px-3 font-display font-bold text-sm tracking-[0.15em] uppercase transition-colors';
   if (active) {
     return `${base} bg-shadow border border-scarlet`;
   }
@@ -59,7 +59,7 @@ export function LieGrid({
         <button
           type="button"
           onClick={onHoled}
-          className="rounded-md py-3 bg-obsidian border border-border font-display font-bold text-sm tracking-[0.2em] uppercase text-chalk hover:border-chalk transition-colors"
+          className="rounded-md py-2 bg-obsidian border border-border font-display font-bold text-sm tracking-[0.2em] uppercase text-chalk hover:border-chalk transition-colors"
         >
           Holed
         </button>

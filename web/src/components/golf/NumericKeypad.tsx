@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+
 interface NumericKeypadProps {
   value: string;
   onChange: (value: string) => void;
@@ -13,6 +15,8 @@ export function NumericKeypad({
   onChange,
   maxDigits = 4,
 }: NumericKeypadProps) {
+  const [pressedKey, setPressedKey] = useState<string | null>(null);
+
   function pressDigit(d: string) {
     if (value.length >= maxDigits) return;
     if (value === '0') {
@@ -39,11 +43,38 @@ export function NumericKeypad({
     onChange(value.slice(0, -1));
   }
 
+  // Input fires on pointerdown (not click) so touch input registers
+  // immediately, with the pressed style applied in the same frame.
+  function keyHandlers(key: string, action: () => void) {
+    return {
+      onPointerDown: (e: React.PointerEvent) => {
+        e.preventDefault();
+        setPressedKey(key);
+        if (typeof navigator !== 'undefined') navigator.vibrate?.(10);
+        action();
+      },
+      onPointerUp: () => setPressedKey((k) => (k === key ? null : k)),
+      onPointerLeave: () => setPressedKey((k) => (k === key ? null : k)),
+      onPointerCancel: () => setPressedKey((k) => (k === key ? null : k)),
+    };
+  }
+
+  function keyClass(key: string, extra = '') {
+    const pressed = pressedKey === key;
+    return (
+      'rounded-md py-2.5 select-none touch-manipulation ' +
+      (pressed
+        ? 'bg-pitch border border-chalk scale-95 '
+        : 'bg-shadow border border-border transition-[background-color,border-color,transform] duration-150 ') +
+      extra
+    );
+  }
+
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-2">
       {/* Display */}
-      <div className="border border-border rounded-md bg-shadow px-4 py-6 text-center">
-        <span className="font-mono text-5xl text-chalk tracking-tight">
+      <div className="border border-border rounded-md bg-shadow px-4 py-2 text-center">
+        <span className="font-mono text-3xl text-chalk tracking-tight">
           {value || '—'}
         </span>
       </div>
@@ -54,31 +85,37 @@ export function NumericKeypad({
           <button
             key={d}
             type="button"
-            onClick={() => pressDigit(d)}
-            className="bg-shadow border border-border rounded-md py-4 font-mono text-2xl text-chalk active:bg-pitch transition-colors"
+            {...keyHandlers(d, () => pressDigit(d))}
+            className={keyClass(d, 'font-mono text-xl text-chalk')}
           >
             {d}
           </button>
         ))}
         <button
           type="button"
-          onClick={pressClear}
-          className="bg-shadow border border-border rounded-md py-4 font-mono text-[11px] tracking-[0.2em] uppercase text-ash active:bg-pitch transition-colors"
+          {...keyHandlers('clear', pressClear)}
+          className={keyClass(
+            'clear',
+            'font-mono text-[11px] tracking-[0.2em] uppercase text-ash',
+          )}
         >
           Clear
         </button>
         <button
           type="button"
-          onClick={pressZero}
-          className="bg-shadow border border-border rounded-md py-4 font-mono text-2xl text-chalk active:bg-pitch transition-colors"
+          {...keyHandlers('0', pressZero)}
+          className={keyClass('0', 'font-mono text-xl text-chalk')}
         >
           0
         </button>
         <button
           type="button"
-          onClick={pressBackspace}
+          {...keyHandlers('backspace', pressBackspace)}
           aria-label="Backspace"
-          className="bg-shadow border border-border rounded-md py-4 font-mono text-xl text-chalk active:bg-pitch transition-colors flex items-center justify-center"
+          className={keyClass(
+            'backspace',
+            'font-mono text-lg text-chalk flex items-center justify-center',
+          )}
         >
           ⌫
         </button>
