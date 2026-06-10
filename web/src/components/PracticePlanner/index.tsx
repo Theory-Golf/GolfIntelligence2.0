@@ -379,7 +379,7 @@ export default function PracticePlanner() {
     <section className="px-6 pb-20">
       <div className="mx-auto max-w-5xl">
         <header className="mb-8 space-y-4">
-          <p className="eyebrow">Practice Planner</p>
+          <p className="eyebrow">The Plan</p>
           <h2 className="font-display text-[clamp(32px,5vw,56px)] font-extrabold uppercase leading-[0.95] tracking-tight text-foreground">
             Build the <span className="text-primary">session</span>
           </h2>
@@ -387,7 +387,7 @@ export default function PracticePlanner() {
             A guided practice cycle: set your weekly technical focus, scale a session to your shot
             budget, run structured blocks with checkpoints and practice-intent gates, then track
             acquisition over time. Data lives on this device for now — future versions will sync to
-            your player profile and the Practice Library.
+            your player profile and The Library.
           </p>
         </header>
 
