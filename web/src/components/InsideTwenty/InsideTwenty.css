@@ -59,3 +59,12 @@
   color: var(--ash);
   margin-left: 1px;
 }
+
+/* ── RESPONSIVE ────────────────────────────────────────────────── */
+@media (max-width: 400px) {
+  .i20-group-row {
+    grid-template-columns: 40px 1fr 1fr 1fr;
+    gap: 4px;
+  }
+  .i20-group-dist { font-size: 16px; }
+}

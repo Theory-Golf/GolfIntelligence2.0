@@ -6,9 +6,9 @@
 
 /* ── WRAPPER ───────────────────────────────────────────────────── */
 .rs-wrapper {
-  max-width: 480px;
+  max-width: 576px;
   margin: 0 auto;
-  padding: 0 20px 64px;
+  padding: 0 24px 64px;
 }
 
 /* ── TOP NAV ───────────────────────────────────────────────────── */
@@ -29,16 +29,16 @@
   font-size: 10px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--color-muted);
+  color: var(--ash);
   background: transparent;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border-color);
   cursor: pointer;
   transition: color var(--transition-fast), border-color var(--transition-fast);
 }
 
 .rs-back-btn:hover {
-  color: var(--color-text);
-  border-color: var(--color-muted);
+  color: var(--foreground);
+  border-color: var(--ash);
 }
 
 .rs-hole-label {
@@ -46,27 +46,27 @@
   font-size: 11px;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: var(--color-muted);
+  color: var(--ash);
 }
 
 /* ── PROGRESS BAR ──────────────────────────────────────────────── */
 .rs-progress-track {
   height: 2px;
-  background: var(--color-border);
+  background: var(--border-color);
   margin-bottom: 24px;
   overflow: hidden;
 }
 
 .rs-progress-fill {
   height: 100%;
-  background: var(--color-accent);
+  background: var(--primary);
   transition: width 300ms ease;
 }
 
 /* ── CARDS ─────────────────────────────────────────────────────── */
 .rs-card {
-  background: var(--color-card);
-  border: 1px solid var(--color-border);
+  background: var(--card);
+  border: 1px solid var(--border-color);
   padding: 24px;
   margin-bottom: 16px;
 }
@@ -76,7 +76,7 @@
   font-size: 10px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--color-muted);
+  color: var(--ash);
   margin-bottom: 20px;
   text-align: center;
 }
@@ -92,7 +92,7 @@
   font-size: 80px;
   font-weight: 800;
   line-height: 1;
-  color: var(--color-text);
+  color: var(--foreground);
   text-transform: uppercase;
   letter-spacing: -0.02em;
   display: block;
@@ -103,7 +103,7 @@
   font-size: 11px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--color-muted);
+  color: var(--ash);
   display: block;
   margin-top: 4px;
 }
@@ -113,7 +113,7 @@
   font-size: 11px;
   letter-spacing: 0.10em;
   text-transform: uppercase;
-  color: var(--color-muted);
+  color: var(--ash);
   text-align: center;
   margin-bottom: 20px;
 }
@@ -125,7 +125,7 @@
   align-items: center;
   gap: 20px;
   padding-top: 16px;
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid var(--border-color);
 }
 
 .rs-condition {
@@ -136,20 +136,20 @@
 
 .rs-condition-icon {
   font-size: 14px;
-  color: var(--color-accent);
+  color: var(--primary);
 }
 
 .rs-condition-text {
   font-family: var(--font-body);
   font-size: 13px;
-  color: var(--color-text);
+  color: var(--foreground);
   font-weight: 500;
 }
 
 .rs-condition-divider {
   width: 1px;
   height: 16px;
-  background: var(--color-border);
+  background: var(--border-color);
 }
 
 /* ── TOGGLE ROW (read assessment) ──────────────────────────────── */
@@ -168,7 +168,7 @@
 .rs-toggle-label {
   font-family: var(--font-body);
   font-size: 14px;
-  color: var(--color-text);
+  color: var(--foreground);
   font-weight: 500;
 }
 
@@ -185,20 +185,20 @@
   padding: 8px 14px;
   min-height: 44px;
   background: transparent;
-  border: 1px solid var(--color-border);
-  color: var(--color-muted);
+  border: 1px solid var(--border-color);
+  color: var(--ash);
   cursor: pointer;
   transition: all var(--transition-fast);
 }
 
 .rs-toggle-btn.is-correct {
-  background: var(--color-card);
+  background: var(--card);
   border-color: var(--under);
   color: var(--under);
 }
 
 .rs-toggle-btn.is-incorrect {
-  background: var(--color-card);
+  background: var(--card);
   border-color: var(--bogey);
   color: var(--bogey);
 }
@@ -223,22 +223,22 @@
   font-size: 10px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-muted);
+  color: var(--ash);
   background: transparent;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border-color);
   cursor: pointer;
   transition: all var(--transition-fast);
 }
 
 .rs-result-btn:hover {
-  border-color: var(--color-muted);
-  color: var(--color-text);
+  border-color: var(--ash);
+  color: var(--foreground);
 }
 
 .rs-result-btn.is-made {
   background: var(--under);
   border-color: var(--under);
-  color: var(--color-bg);
+  color: var(--background);
   font-weight: 600;
 }
 
@@ -249,7 +249,7 @@
   justify-content: center;
   gap: 8px;
   padding: 12px 16px;
-  background: var(--color-card);
+  background: var(--card);
   border: 1px solid var(--bogey);
   margin-bottom: 16px;
 }
@@ -259,7 +259,7 @@
   font-size: 10px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--color-muted);
+  color: var(--ash);
 }
 
 .rs-miss-notice-value {
@@ -285,17 +285,17 @@
   font-size: 10px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-muted);
+  color: var(--ash);
   background: transparent;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border-color);
   cursor: pointer;
   transition: all var(--transition-fast);
 }
 
 .rs-dist-btn.is-selected {
-  background: var(--color-accent);
-  border-color: var(--color-accent);
-  color: #fff;
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-foreground);
 }
 
 /* ── SECOND PUTT RESULT BUTTONS ─────────────────────────────────── */
@@ -318,7 +318,7 @@
 
 .rs-make-btn.is-made {
   background: var(--under);
-  color: var(--color-bg);
+  color: var(--background);
 }
 
 .rs-make-btn.is-missed {
@@ -338,7 +338,7 @@
   font-size: 10px;
   letter-spacing: 0.10em;
   text-transform: uppercase;
-  color: var(--color-muted);
+  color: var(--ash);
   text-align: center;
   margin-top: 12px;
 }
@@ -347,45 +347,48 @@
 .rs-primary-btn {
   width: 100%;
   padding: 16px 32px;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.15em;
+  margin-top: 8px;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: #fff;
-  background: var(--color-accent);
+  color: var(--primary-foreground);
+  background: var(--primary);
   border: none;
   cursor: pointer;
-  transition: background var(--transition-fast);
-  margin-top: 8px;
+  transition: background-color 150ms ease;
 }
 
-.rs-primary-btn:hover {
-  background: var(--color-accent-hover);
+.rs-primary-btn:hover:not(:disabled) {
+  background: var(--scarlet-glow);
 }
 
 .rs-primary-btn:disabled {
-  opacity: 0.35;
+  background: var(--pitch);
+  color: var(--ash);
+  opacity: 1;
   cursor: not-allowed;
 }
 
 .rs-secondary-btn {
   width: 100%;
-  padding: 14px 32px;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--color-muted);
-  background: transparent;
-  border: 1px solid var(--color-border);
-  cursor: pointer;
-  transition: all var(--transition-fast);
+  padding: 15px 32px;
   margin-top: 10px;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--foreground);
+  background: transparent;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: border-color 150ms ease;
 }
 
 .rs-secondary-btn:hover {
-  color: var(--color-text);
-  border-color: var(--color-muted);
+  border-color: var(--cement);
 }
 
 /* ── WELCOME SCREEN ────────────────────────────────────────────── */
@@ -397,9 +400,9 @@
 .rs-welcome-eyebrow {
   font-family: var(--font-mono);
   font-size: 10px;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.28em;
   text-transform: uppercase;
-  color: var(--color-accent);
+  color: var(--primary);
   margin-bottom: 16px;
 }
 
@@ -409,7 +412,7 @@
   font-size: clamp(36px, 10vw, 56px);
   letter-spacing: -0.01em;
   text-transform: uppercase;
-  color: var(--color-text);
+  color: var(--foreground);
   line-height: 1;
   margin-bottom: 24px;
 }
@@ -427,21 +430,21 @@
   font-size: 10px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-muted);
+  color: var(--ash);
   padding: 5px 10px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  background: var(--surface);
+  border: 1px solid var(--border-color);
 }
 
 .rs-dist-chip strong {
-  color: var(--color-text);
+  color: var(--foreground);
   font-weight: 400;
 }
 
 /* ── TREND CARD ────────────────────────────────────────────────── */
 .rs-trend-card {
-  background: var(--color-card);
-  border: 1px solid var(--color-border);
+  background: var(--card);
+  border: 1px solid var(--border-color);
   padding: 20px;
   margin-bottom: 16px;
   text-align: left;
@@ -452,7 +455,7 @@
   font-size: 10px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--color-muted);
+  color: var(--ash);
   margin-bottom: 16px;
 }
 
@@ -461,7 +464,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 7px 0;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--border-color);
   font-family: var(--font-body);
   font-size: 13px;
 }
@@ -471,7 +474,7 @@
 }
 
 .rs-trend-label {
-  color: var(--color-muted);
+  color: var(--ash);
 }
 
 .rs-sg-positive { color: var(--under); }
@@ -489,16 +492,16 @@
   padding: 13px 16px;
   font-family: var(--font-body);
   font-size: 16px; /* 16px min prevents iOS auto-zoom on focus */
-  color: var(--color-text);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  color: var(--foreground);
+  background: var(--surface);
+  border: 1px solid var(--border-color);
   outline: none;
   box-sizing: border-box;
   transition: border-color var(--transition-fast);
 }
 
 .rs-text-input:focus {
-  border-color: var(--color-muted);
+  border-color: var(--ash);
 }
 
 .rs-putter-chips {
@@ -515,17 +518,17 @@
   text-transform: uppercase;
   padding: 7px 12px;
   min-height: 44px;
-  color: var(--color-muted);
+  color: var(--ash);
   background: transparent;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border-color);
   cursor: pointer;
   transition: all var(--transition-fast);
 }
 
 .rs-putter-chip.is-selected {
-  background: var(--color-accent);
-  border-color: var(--color-accent);
-  color: #fff;
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-foreground);
 }
 
 .rs-marking-grid {
@@ -540,17 +543,17 @@
   align-items: center;
   gap: 10px;
   padding: 18px 12px;
-  color: var(--color-muted);
+  color: var(--ash);
   background: transparent;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border-color);
   cursor: pointer;
   transition: all var(--transition-fast);
 }
 
 .rs-marking-btn.is-selected {
-  background: var(--color-accent);
-  border-color: var(--color-accent);
-  color: #fff;
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-foreground);
 }
 
 .rs-marking-label {
@@ -564,7 +567,7 @@
 .rs-setup-desc {
   font-family: var(--font-body);
   font-size: 13px;
-  color: var(--color-muted);
+  color: var(--ash);
   text-align: center;
   margin-bottom: 16px;
 }
@@ -574,7 +577,7 @@
   text-align: center;
   margin-bottom: 20px;
   padding-bottom: 20px;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .rs-summary-date {
@@ -582,7 +585,7 @@
   font-size: 10px;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: var(--color-muted);
+  color: var(--ash);
   margin-bottom: 8px;
 }
 
@@ -596,7 +599,7 @@
 .rs-summary-putter {
   font-family: var(--font-body);
   font-size: 14px;
-  color: var(--color-text);
+  color: var(--foreground);
   font-weight: 500;
 }
 
@@ -605,9 +608,9 @@
   font-size: 9px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--color-muted);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  color: var(--ash);
+  background: var(--surface);
+  border: 1px solid var(--border-color);
   padding: 3px 8px;
 }
 
@@ -615,7 +618,7 @@
 .rs-tab-nav {
   display: flex;
   gap: 1px;
-  background: var(--color-border);
+  background: var(--border-color);
   margin-bottom: 20px;
 }
 
@@ -626,16 +629,16 @@
   font-size: 10px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--color-muted);
-  background: var(--color-card);
+  color: var(--ash);
+  background: var(--card);
   border: none;
   cursor: pointer;
   transition: all var(--transition-fast);
 }
 
 .rs-tab-btn.is-active {
-  color: var(--color-text);
-  background: var(--color-surface);
+  color: var(--foreground);
+  background: var(--surface);
 }
 
 /* SG hero card */
@@ -644,9 +647,9 @@
   flex-direction: column;
   align-items: center;
   padding: 28px 24px;
-  background: var(--color-card);
-  border: 1px solid var(--color-border);
-  border-top: 3px solid var(--color-border);
+  background: var(--card);
+  border: 1px solid var(--border-color);
+  border-top: 3px solid var(--border-color);
   margin-bottom: 16px;
 }
 
@@ -663,7 +666,7 @@
   font-size: 10px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--color-muted);
+  color: var(--ash);
   margin-bottom: 8px;
 }
 
@@ -681,7 +684,7 @@
   font-size: 10px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--color-muted);
+  color: var(--ash);
   margin-top: 10px;
 }
 
@@ -690,9 +693,9 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1px;
-  background: var(--color-border);
+  background: var(--border-color);
   margin-bottom: 16px;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border-color);
 }
 
 .rs-stat-cell {
@@ -700,7 +703,7 @@
   flex-direction: column;
   align-items: center;
   padding: 16px 8px;
-  background: var(--color-card);
+  background: var(--card);
 }
 
 .rs-stat-value {
@@ -708,7 +711,7 @@
   font-size: 28px;
   font-weight: 800;
   line-height: 1;
-  color: var(--color-text);
+  color: var(--foreground);
   text-transform: uppercase;
 }
 
@@ -717,7 +720,7 @@
   font-size: 9px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--color-muted);
+  color: var(--ash);
   margin-top: 4px;
 }
 
@@ -726,8 +729,8 @@
   display: flex;
   flex-direction: column;
   gap: 1px;
-  background: var(--color-border);
-  border: 1px solid var(--color-border);
+  background: var(--border-color);
+  border: 1px solid var(--border-color);
 }
 
 .rs-bucket-row {
@@ -735,13 +738,13 @@
   justify-content: space-between;
   align-items: center;
   padding: 14px 16px;
-  background: var(--color-card);
+  background: var(--card);
 }
 
 .rs-bucket-name {
   font-family: var(--font-body);
   font-size: 14px;
-  color: var(--color-text);
+  color: var(--foreground);
   font-weight: 500;
 }
 
@@ -750,7 +753,7 @@
   font-size: 10px;
   letter-spacing: 0.10em;
   text-transform: uppercase;
-  color: var(--color-muted);
+  color: var(--ash);
   margin-top: 2px;
 }
 
@@ -777,7 +780,7 @@
   font-size: 30px;
   font-weight: 800;
   text-transform: uppercase;
-  color: var(--color-text);
+  color: var(--foreground);
 }
 
 .rs-accuracy-label {
@@ -785,13 +788,13 @@
   font-size: 10px;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: var(--color-muted);
+  color: var(--ash);
   margin-bottom: 8px;
 }
 
 .rs-accuracy-bar {
   height: 3px;
-  background: var(--color-border);
+  background: var(--border-color);
   overflow: hidden;
   margin-top: 8px;
 }
@@ -806,8 +809,8 @@
 .rs-balance-track {
   position: relative;
   height: 8px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  background: var(--surface);
+  border: 1px solid var(--border-color);
   margin-bottom: 8px;
 }
 
@@ -817,7 +820,7 @@
   right: 35%;
   top: 0;
   bottom: 0;
-  background: var(--color-border);
+  background: var(--border-color);
 }
 
 .rs-balance-marker {
@@ -827,7 +830,7 @@
   height: 16px;
   border-radius: 50%;
   transform: translateX(-50%);
-  border: 2px solid var(--color-card);
+  border: 2px solid var(--card);
 }
 
 .rs-balance-labels {
@@ -837,7 +840,7 @@
   font-size: 10px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-muted);
+  color: var(--ash);
 }
 
 .rs-balance-status {
@@ -867,7 +870,7 @@
   font-size: 32px;
   font-weight: 800;
   text-transform: uppercase;
-  color: var(--color-text);
+  color: var(--foreground);
 }
 
 .rs-tendency-label {
@@ -875,18 +878,18 @@
   font-size: 10px;
   letter-spacing: 0.10em;
   text-transform: uppercase;
-  color: var(--color-muted);
+  color: var(--ash);
 }
 
 .rs-tendency-tip {
   font-family: var(--font-body);
   font-size: 12px;
-  color: var(--color-muted);
+  color: var(--ash);
   text-align: center;
   margin-top: 16px;
   padding: 12px 14px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  background: var(--surface);
+  border: 1px solid var(--border-color);
   line-height: 1.6;
 }
 
@@ -901,12 +904,12 @@
   grid-template-columns: 1.4fr 0.9fr 0.9fr 1.1fr;
   gap: 8px;
   padding: 8px 0;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--border-color);
   font-family: var(--font-mono);
   font-size: 9px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--color-muted);
+  color: var(--ash);
 }
 
 .rs-compare-row {
@@ -914,7 +917,7 @@
   grid-template-columns: 1.4fr 0.9fr 0.9fr 1.1fr;
   gap: 8px;
   padding: 12px 0;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--border-color);
   font-family: var(--font-body);
   font-size: 13px;
   align-items: center;
@@ -926,7 +929,7 @@
 
 .rs-metric-name {
   font-weight: 500;
-  color: var(--color-text);
+  color: var(--foreground);
 }
 
 .rs-trend-indicator {
@@ -939,7 +942,7 @@
 .rs-trend-note {
   font-family: var(--font-body);
   font-size: 12px;
-  color: var(--color-muted);
+  color: var(--ash);
   text-align: center;
   margin-top: 16px;
   font-style: italic;
@@ -951,13 +954,13 @@
   display: flex;
   flex-direction: column;
   gap: 1px;
-  background: var(--color-border);
-  border: 1px solid var(--color-border);
+  background: var(--border-color);
+  border: 1px solid var(--border-color);
   margin-top: 16px;
 }
 
 .rs-history-card {
-  background: var(--color-card);
+  background: var(--card);
   padding: 16px;
 }
 
@@ -973,7 +976,7 @@
   font-size: 11px;
   letter-spacing: 0.10em;
   text-transform: uppercase;
-  color: var(--color-text);
+  color: var(--foreground);
 }
 
 .rs-history-sg {
@@ -993,7 +996,7 @@
 .rs-history-putter {
   font-family: var(--font-body);
   font-size: 12px;
-  color: var(--color-muted);
+  color: var(--ash);
 }
 
 .rs-history-badge {
@@ -1001,9 +1004,9 @@
   font-size: 9px;
   letter-spacing: 0.10em;
   text-transform: uppercase;
-  color: var(--color-muted);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  color: var(--ash);
+  background: var(--surface);
+  border: 1px solid var(--border-color);
   padding: 2px 6px;
 }
 
@@ -1011,7 +1014,7 @@
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   padding-top: 12px;
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid var(--border-color);
 }
 
 .rs-history-stat {
@@ -1025,7 +1028,7 @@
   font-size: 18px;
   font-weight: 800;
   text-transform: uppercase;
-  color: var(--color-text);
+  color: var(--foreground);
 }
 
 .rs-history-stat-label {
@@ -1033,6 +1036,11 @@
   font-size: 9px;
   letter-spacing: 0.10em;
   text-transform: uppercase;
-  color: var(--color-muted);
+  color: var(--ash);
   margin-top: 2px;
+}
+
+/* ── RESPONSIVE ────────────────────────────────────────────────── */
+@media (max-width: 380px) {
+  .rs-distance-grid { grid-template-columns: repeat(2, 1fr); }
 }
