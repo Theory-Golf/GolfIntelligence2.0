@@ -30,6 +30,14 @@ const DRILLS: Drill[] = [
     live: true,
   },
   {
+    id: 'winners-circle',
+    name: 'Winners Circle',
+    desc: '5 tees around the hole from 4 feet. Make it and the tee survives, miss it and it’s gone. Move back a foot each round until the tees run out.',
+    meta: '5 tees · survival format · standard at 20 makes',
+    href: '/player-path/putting/winners-circle',
+    live: true,
+  },
+  {
     id: 'lag-test',
     name: 'Lag Test',
     desc: 'Coming soon.',
