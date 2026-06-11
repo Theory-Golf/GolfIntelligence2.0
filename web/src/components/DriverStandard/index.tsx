@@ -2,10 +2,21 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, X } from 'lucide-react';
+import {
+  Band,
+  Eyebrow,
+  Mono,
+  PrimaryButton,
+  SecondaryButton,
+  TextButton,
+  ToolContainer,
+  Stat,
+  StatRow,
+  bandClasses,
+} from '@/components/playerpath/ui';
 
 // ── Domain ───────────────────────────────────────────────────────────
 
-type Band = 'Pass' | 'Fail' | 'Elite';
 type Shape = 'Draw' | 'Fade';
 type Track = 'off' | 'on';
 
@@ -203,50 +214,9 @@ const detectPattern = (
   return null;
 };
 
-// ── Atoms (Tailwind only) ────────────────────────────────────────────
-
-const Eyebrow = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
-  <p className={`font-mono text-[10px] tracking-[0.28em] uppercase text-primary ${className}`}>{children}</p>
-);
-
-const Mono = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
-  <span className={`font-mono text-[10px] tracking-[0.18em] uppercase text-muted-foreground ${className}`}>{children}</span>
-);
-
-const PrimaryButton = ({
-  children, onClick, disabled = false, className = '',
-}: { children: React.ReactNode; onClick?: () => void; disabled?: boolean; className?: string }) => (
-  <button
-    type="button"
-    onClick={onClick}
-    disabled={disabled}
-    className={`w-full px-6 py-4 font-display text-sm font-bold tracking-[0.16em] uppercase transition-colors duration-150
-      ${disabled
-        ? 'bg-pitch text-muted-foreground cursor-not-allowed'
-        : 'bg-primary text-primary-foreground hover:bg-scarlet-glow cursor-pointer'} ${className}`}
-  >
-    {children}
-  </button>
-);
-
-const SecondaryButton = ({
-  children, onClick, className = '',
-}: { children: React.ReactNode; onClick?: () => void; className?: string }) => (
-  <button
-    type="button"
-    onClick={onClick}
-    className={`w-full px-6 py-[15px] font-display text-sm font-bold tracking-[0.16em] uppercase
-      bg-transparent text-foreground border border-border hover:border-cement transition-colors duration-150 cursor-pointer ${className}`}
-  >
-    {children}
-  </button>
-);
-
-const bandClasses: Record<Band, { text: string; bg: string; border: string; bgTint: string }> = {
-  Pass:  { text: 'text-sg-gain',   bg: 'bg-sg-gain',   border: 'border-sg-gain',   bgTint: 'bg-sg-gain/10' },
-  Elite: { text: 'text-sg-strong', bg: 'bg-sg-strong', border: 'border-sg-strong', bgTint: 'bg-sg-strong/10' },
-  Fail:  { text: 'text-sg-weak',   bg: 'bg-sg-weak',   border: 'border-sg-weak',   bgTint: 'bg-sg-weak/10' },
-};
+// ── Atoms ────────────────────────────────────────────────────────────
+// Shared atoms come from @/components/playerpath/ui; only the tool-specific
+// shape palette lives here.
 
 const shapeClasses: Record<Shape, { text: string; bg: string; border: string }> = {
   Draw: { text: 'text-c1', bg: 'bg-c1', border: 'border-c1' },
@@ -259,37 +229,22 @@ interface BaseProps { state: PersistedState; setState: (s: PersistedState) => vo
 
 function WelcomeScreen({ onStart }: { onStart: () => void }) {
   return (
-    <div className="flex flex-col gap-10 max-w-xl mx-auto">
-      <div className="space-y-6">
+    <div className="flex flex-col gap-8">
+      <div className="space-y-4">
         <Eyebrow>Player Path Standard</Eyebrow>
-        <div className="font-display font-extrabold leading-[0.9] tracking-tight uppercase text-foreground text-[clamp(48px,9vw,80px)]">
-          <div>The</div>
-          <div className="italic text-primary">Driver</div>
-          <div className="text-transparent [-webkit-text-stroke:2px_var(--foreground)]">Standard</div>
-        </div>
+        <h2 className="font-display font-extrabold text-4xl text-foreground uppercase tracking-tight">
+          How it <span className="italic text-primary">works</span>
+        </h2>
         <p className="font-body text-base text-muted-foreground max-w-md leading-relaxed">
           A periodized practice protocol for off-the-tee accuracy. Five tiers, anchored to PGA Tour and USGA fairway standards. Binary scoring — every shot is Hit or Miss. The standard rises with you.
         </p>
       </div>
 
-      <div className="border-t border-border pt-6 flex gap-12">
-        <div>
-          <Mono className="text-primary">Tiers</Mono>
-          <div className="font-display text-3xl font-bold mt-1 text-foreground">5</div>
-        </div>
-        <div>
-          <Mono className="text-primary">Range</Mono>
-          <div className="font-display text-3xl font-bold mt-1 text-foreground">
-            60→28<span className="text-base text-muted-foreground ml-1">YD</span>
-          </div>
-        </div>
-        <div>
-          <Mono className="text-primary">Session</Mono>
-          <div className="font-display text-3xl font-bold mt-1 text-foreground">
-            13<span className="text-base text-muted-foreground ml-1">SHOTS</span>
-          </div>
-        </div>
-      </div>
+      <StatRow>
+        <Stat label="Tiers" value="5" />
+        <Stat label="Range" value="60→28" unit="YD" />
+        <Stat label="Session" value="13" unit="SHOTS" />
+      </StatRow>
 
       <PrimaryButton onClick={onStart}>Begin</PrimaryButton>
     </div>
@@ -308,7 +263,7 @@ function TierSelectScreen({
   const [selected, setSelected] = useState<number | null>(currentTier ?? null);
 
   return (
-    <div className="max-w-xl mx-auto flex flex-col gap-6">
+    <div className="flex flex-col gap-6">
       <div>
         {onBack && (
           <button
@@ -405,7 +360,7 @@ function SessionSetupScreen({
   const td = tierData(ts.tier);
 
   return (
-    <div className="max-w-xl mx-auto flex flex-col gap-6">
+    <div className="flex flex-col gap-6">
       <div>
         <Eyebrow>Session Setup</Eyebrow>
         <h2 className="font-display font-extrabold text-4xl mt-2 text-foreground uppercase tracking-tight">Ready?</h2>
@@ -503,13 +458,7 @@ function SessionSetupScreen({
 
       <PrimaryButton onClick={() => onStart(length)}>Start session</PrimaryButton>
 
-      <button
-        type="button"
-        onClick={onShowHistory}
-        className="font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground hover:text-primary transition-colors text-center"
-      >
-        View history
-      </button>
+      <TextButton onClick={onShowHistory} className="text-center">View history</TextButton>
     </div>
   );
 }
@@ -546,7 +495,7 @@ function ShotScreen({
   }
 
   return (
-    <div className="relative max-w-xl mx-auto flex flex-col gap-7">
+    <div className="relative flex flex-col gap-7">
       {toast && (
         <div className="absolute inset-0 z-50 flex flex-col justify-center items-center bg-background/95 animate-in fade-in duration-150">
           <div className="flex items-center gap-4">
@@ -618,11 +567,11 @@ function ShotScreen({
       <div className="flex flex-col items-center justify-center py-6">
         <Mono className="block mb-4">{shapeMode ? 'Call' : 'Window'}</Mono>
         {shapeMode ? (
-          <span className={`font-display text-7xl font-extrabold italic uppercase leading-none ${shapeClasses[shape].text}`}>
+          <span className={`font-display text-[clamp(40px,8vw,72px)] font-extrabold italic uppercase leading-none ${shapeClasses[shape].text}`}>
             {shape}
           </span>
         ) : (
-          <span className="font-display text-7xl font-extrabold uppercase leading-none text-foreground">
+          <span className="font-display text-[clamp(40px,8vw,72px)] font-extrabold uppercase leading-none text-foreground">
             {td.width}<span className="text-2xl text-muted-foreground ml-1.5">YD</span>
           </span>
         )}
@@ -694,7 +643,7 @@ function SummaryScreen({
   }[band];
 
   return (
-    <div className="max-w-xl mx-auto flex flex-col gap-4">
+    <div className="flex flex-col gap-4">
       <Eyebrow>{isStandard ? 'Standard session' : 'Mini session — check-in'}</Eyebrow>
 
       <div>
@@ -789,7 +738,7 @@ function CIReadinessScreen({
   tierName, trigger, onAccept, onDismiss,
 }: { tierName: string; trigger: string; onAccept: () => void; onDismiss: () => void }) {
   return (
-    <div className="max-w-xl mx-auto flex flex-col gap-5">
+    <div className="flex flex-col gap-5">
       <Eyebrow>Contextual interference</Eyebrow>
       <h2 className="font-display text-5xl font-extrabold italic uppercase tracking-tight text-foreground leading-[0.9]">
         Ready for the<br />
@@ -819,7 +768,7 @@ function PromotionScreen({
   const fromData = tierData(fromTier);
   const toData = tierData(toTier);
   return (
-    <div className="max-w-xl mx-auto flex flex-col items-center text-center gap-6 py-6">
+    <div className="flex flex-col items-center text-center gap-6 py-6">
       <div className="font-display text-3xl font-extrabold italic uppercase tracking-wide text-sg-strong">
         {isExpress ? 'Express' : 'Tier'}<br />
         {isExpress ? 'Promotion' : 'Up'}
@@ -858,7 +807,7 @@ function PromotionScreen({
 
 function HistoryScreen({ history, onBack }: { history: SessionRecord[]; onBack: () => void }) {
   return (
-    <div className="max-w-xl mx-auto flex flex-col gap-4">
+    <div className="flex flex-col gap-4">
       <button
         type="button"
         onClick={onBack}
@@ -1273,8 +1222,8 @@ export default function DriverStandard() {
   const trigger = lastResult?.band === 'Elite' ? 'Elite session' : 'two sessions';
 
   return (
-    <section className="px-6 pb-16">
-      <div className="max-w-xl mx-auto">
+    <ToolContainer>
+      <div>
         {screen === 'welcome' && <WelcomeScreen onStart={handleStart} />}
 
         {screen === 'tier-select' && (
@@ -1348,16 +1297,10 @@ export default function DriverStandard() {
 
         {state.initialized && screen !== 'shot' && screen !== 'promotion' && (
           <div className="mt-12 pt-6 border-t border-border flex justify-end">
-            <button
-              type="button"
-              onClick={handleResetAll}
-              className="font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground hover:text-primary transition-colors"
-            >
-              Reset progress
-            </button>
+            <TextButton onClick={handleResetAll}>Reset progress</TextButton>
           </div>
         )}
       </div>
-    </section>
+    </ToolContainer>
   );
 }
