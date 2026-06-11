@@ -4,9 +4,9 @@
    ================================================================ */
 
 .it-wrapper {
-  max-width: 520px;
+  max-width: 576px;
   margin: 0 auto;
-  padding: 0 20px 80px;
+  padding: 0 24px 80px;
 }
 
 /* ── TOP NAV ───────────────────────────────────────────────────── */
@@ -59,7 +59,7 @@
 .it-card-eyebrow {
   font-family: var(--font-mono);
   font-size: 10px;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.28em;
   text-transform: uppercase;
   color: var(--ash);
   margin-bottom: 16px;
@@ -313,46 +313,49 @@
   width: 100%;
   padding: 16px;
   min-height: 52px;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.18em;
+  margin-top: 8px;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: #ffffff;
-  background: var(--scarlet);
+  color: var(--primary-foreground);
+  background: var(--primary);
   border: none;
   cursor: pointer;
-  transition: opacity var(--transition-fast);
-  margin-top: 8px;
+  transition: background-color 150ms ease;
 }
 
 .it-primary-btn:hover:not(:disabled) {
-  opacity: 0.88;
+  background: var(--scarlet-glow);
 }
 
 .it-primary-btn:disabled {
-  opacity: 0.4;
+  background: var(--pitch);
+  color: var(--ash);
+  opacity: 1;
   cursor: not-allowed;
 }
 
 .it-secondary-btn {
   width: 100%;
-  padding: 14px;
+  padding: 15px;
   min-height: 48px;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--ash);
-  background: transparent;
-  border: 1px solid var(--pitch);
-  cursor: pointer;
-  transition: color var(--transition-fast), border-color var(--transition-fast);
   margin-top: 8px;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--foreground);
+  background: transparent;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: border-color 150ms ease;
 }
 
 .it-secondary-btn:hover {
-  color: var(--chalk);
-  border-color: var(--ash);
+  border-color: var(--cement);
 }
 
 /* ── PLAY: SCORE STEPPER ───────────────────────────────────────── */
