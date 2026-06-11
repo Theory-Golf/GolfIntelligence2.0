@@ -190,6 +190,27 @@ export const ACTIVITIES: Activity[] = [
     ],
   },
 
+  {
+    id: 'winners-circle',
+    name: 'Winners Circle',
+    category: 'putting',
+    type: 'skill_assessment',
+    description:
+      'Survival putting assessment. Five tees circle the hole at 4 feet — every make keeps a tee in play, every miss removes it for good. Surviving tees move back 1 foot per round until none remain. Total makes is the score; 20 clears the Standard. Credit: John Graham, via the Spin Axis podcast.',
+    connected_drivers: [
+      {
+        driver_id: 'M1',
+        connection:
+          'Measures make rate through the 4–9 ft band where par saves are decided',
+      },
+      {
+        driver_id: 'M2',
+        connection:
+          'Escalating cost of each miss surfaces the distance where conversion breaks down',
+      },
+    ],
+  },
+
   // ── WEDGE ─────────────────────────────────────────────────────────
 
   {
