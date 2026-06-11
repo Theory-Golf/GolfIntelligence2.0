@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import type { Lie } from '@/lib/golf/db/types';
 import { LIE_COLORS } from '@/lib/golf/utils/lieColors';
 
@@ -8,6 +9,8 @@ interface LieGridProps {
   onChange: (lie: Lie) => void;
   showHoled?: boolean;
   onHoled?: () => void;
+  // Keeps the Holed button visibly "on" while the save + navigation runs.
+  holedActive?: boolean;
 }
 
 const LIES: Lie[] = ['Tee', 'Fairway', 'Rough', 'Sand', 'Recovery', 'Green'];
@@ -27,7 +30,16 @@ export function LieGrid({
   onChange,
   showHoled = true,
   onHoled,
+  holedActive = false,
 }: LieGridProps) {
+  const [holedPressed, setHoledPressed] = useState(false);
+
+  const holedClass = holedActive
+    ? 'bg-chalk border-chalk text-pitch'
+    : holedPressed
+      ? 'bg-pitch border-chalk text-chalk scale-95'
+      : 'bg-obsidian border-border text-chalk hover:border-chalk transition-[background-color,border-color,transform] duration-150';
+
   return (
     <div className="flex flex-col gap-2">
       <div className="grid grid-cols-3 gap-2">
@@ -58,10 +70,18 @@ export function LieGrid({
       {showHoled && (
         <button
           type="button"
-          onClick={onHoled}
-          className="rounded-md py-2 bg-obsidian border border-border font-display font-bold text-sm tracking-[0.2em] uppercase text-chalk hover:border-chalk transition-colors"
+          onPointerDown={(e) => {
+            e.preventDefault();
+            setHoledPressed(true);
+            if (typeof navigator !== 'undefined') navigator.vibrate?.(10);
+            onHoled?.();
+          }}
+          onPointerUp={() => setHoledPressed(false)}
+          onPointerLeave={() => setHoledPressed(false)}
+          onPointerCancel={() => setHoledPressed(false)}
+          className={`rounded-md py-2 border font-display font-bold text-sm tracking-[0.2em] uppercase select-none touch-manipulation ${holedClass}`}
         >
-          Holed
+          {holedActive ? 'Holed ✓' : 'Holed'}
         </button>
       )}
     </div>

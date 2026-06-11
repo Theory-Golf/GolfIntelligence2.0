@@ -24,6 +24,12 @@ export default function Navbar() {
     setMenuOpen(false);
   }, [pathname]);
 
+  // Round-entry screens have their own headers and need the full viewport
+  // height on phones.
+  if (pathname.startsWith('/golf-intelligence/round')) {
+    return null;
+  }
+
   return (
     <header className="sticky top-0 z-50 bg-surface border-b border-border themed">
       <div className="max-w-[1280px] mx-auto px-7 h-[61px] flex items-center justify-between gap-6">
