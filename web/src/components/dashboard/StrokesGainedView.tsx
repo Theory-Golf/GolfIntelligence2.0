@@ -15,7 +15,7 @@ export function StrokesGainedView({ metrics, filteredShots }: { metrics: Tiger5M
   const [sgDisplayMode, setSgDisplayMode] = useState<'total' | 'average'>('total');
 
   // Calculate total holes played (unique round-hole combinations)
-  const uniqueHoles = new Set(filteredShots.map(s => `${s['Round ID']}-${s.Hole}`));
+  const uniqueHoles = new Set(filteredShots.map(s => `${s.roundId}-${s.holeNumber}`));
   const totalHoles = uniqueHoles.size;
   const sgPerHole = totalHoles > 0 ? totalStrokesGained / totalHoles : 0;
 
@@ -54,11 +54,11 @@ export function StrokesGainedView({ metrics, filteredShots }: { metrics: Tiger5M
     }
 
     const holeMap = sgByHoleAndType.get(tableShotType)!;
-    const holeData = holeMap.get(shot.Hole) || { totalSG: 0, shotCount: 0, avgSG: 0 };
+    const holeData = holeMap.get(shot.holeNumber) || { totalSG: 0, shotCount: 0, avgSG: 0 };
     holeData.totalSG += shot.calculatedStrokesGained;
     holeData.shotCount += 1;
     holeData.avgSG = holeData.shotCount > 0 ? holeData.totalSG / holeData.shotCount : 0;
-    holeMap.set(shot.Hole, holeData);
+    holeMap.set(shot.holeNumber, holeData);
   });
 
   // Calculate totals for each shot type

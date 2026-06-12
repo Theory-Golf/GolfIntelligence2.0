@@ -67,14 +67,14 @@ function yardsToFeet(yards: number): number {
  * Flag when tee shot penalties exceed 5% (moderate) or 10% (severe)
  */
 export function calculateDrivingDriverD1(shots: ProcessedShot[]): DrivingDriverD1 | null {
-  const teeShots = shots.filter(s => s['Starting Lie'] === 'Tee');
+  const teeShots = shots.filter(s => s.startingLie === 'Tee');
   
   if (teeShots.length === 0) return null;
   
-  const penaltyCount = teeShots.filter(s => s.Penalty === 'Yes').length;
+  const penaltyCount = teeShots.filter(s => s.hasPenalty).length;
   const penaltyRate = (penaltyCount / teeShots.length) * 100;
   const sgImpact = teeShots
-    .filter(s => s.Penalty === 'Yes')
+    .filter(s => s.hasPenalty)
     .reduce((sum, s) => sum + s.calculatedStrokesGained, 0);
   
   const severity = getSeverity(penaltyRate, 5, 10, 20);
@@ -96,7 +96,7 @@ export function calculateDrivingDriverD1(shots: ProcessedShot[]): DrivingDriverD
  * Flag when >50% of fairway tee shots produce negative SG
  */
 export function calculateDrivingDriverD2(shots: ProcessedShot[]): DrivingDriverD2 | null {
-  const teeShots = shots.filter(s => s['Starting Lie'] === 'Tee' && s['Ending Lie'] === 'Fairway');
+  const teeShots = shots.filter(s => s.startingLie === 'Tee' && s.endingLie === 'Fairway');
   
   if (teeShots.length === 0) return null;
   
@@ -125,14 +125,14 @@ export function calculateDrivingDriverD2(shots: ProcessedShot[]): DrivingDriverD
  * Flag when tee shots ending in 'Recovery' exceed 5% of total tee shots
  */
 export function calculateDrivingDriverD3(shots: ProcessedShot[]): DrivingDriverD3 | null {
-  const teeShots = shots.filter(s => s['Starting Lie'] === 'Tee');
+  const teeShots = shots.filter(s => s.startingLie === 'Tee');
   
   if (teeShots.length === 0) return null;
   
-  const recoveryCount = teeShots.filter(s => s['Ending Lie'] === 'Recovery').length;
+  const recoveryCount = teeShots.filter(s => s.endingLie === 'Recovery').length;
   const recoveryRate = (recoveryCount / teeShots.length) * 100;
   const sgImpact = teeShots
-    .filter(s => s['Ending Lie'] === 'Recovery')
+    .filter(s => s.endingLie === 'Recovery')
     .reduce((sum, s) => sum + s.calculatedStrokesGained, 0);
   
   const severity = getSeverity(recoveryRate, 5, 10, 20);
@@ -159,13 +159,13 @@ export function calculateDrivingDriverD4(shots: ProcessedShot[]): DrivingDriverD
   if (drives.length === 0) return null;
   
   const totalDrives = drives.length;
-  const fairwayDrives = drives.filter(d => d['Ending Lie'] === 'Fairway');
+  const fairwayDrives = drives.filter(d => d.endingLie === 'Fairway');
   const fwHitRate = (fairwayDrives.length / totalDrives) * 100;
   
   // Group shots by round and hole to find second shots from rough
   const holeShotsMap = new Map<string, ProcessedShot[]>();
   shots.forEach(shot => {
-    const key = `${shot['Round ID']}-${shot.Hole}`;
+    const key = `${shot.roundId}-${shot.holeNumber}`;
     if (!holeShotsMap.has(key)) {
       holeShotsMap.set(key, []);
     }
@@ -176,8 +176,8 @@ export function calculateDrivingDriverD4(shots: ProcessedShot[]): DrivingDriverD
   
   holeShotsMap.forEach((holeShots) => {
     const driveShot = holeShots.find(s => s.shotType === 'Drive');
-    if (driveShot && driveShot['Ending Lie'] === 'Rough') {
-      const secondShot = holeShots.find(s => s.Shot === 2 && s.shotType === 'Approach');
+    if (driveShot && driveShot.endingLie === 'Rough') {
+      const secondShot = holeShots.find(s => s.shotNumber === 2 && s.shotType === 'Approach');
       if (secondShot) {
         secondShotsFromRough.push(secondShot);
       }
@@ -186,7 +186,7 @@ export function calculateDrivingDriverD4(shots: ProcessedShot[]): DrivingDriverD
   
   if (secondShotsFromRough.length === 0) return null;
   
-  const avgSecondShotDistance = secondShotsFromRough.reduce((sum, s) => sum + s['Starting Distance'], 0) / secondShotsFromRough.length;
+  const avgSecondShotDistance = secondShotsFromRough.reduce((sum, s) => sum + s.startingDistance, 0) / secondShotsFromRough.length;
   const sgImpact = secondShotsFromRough.reduce((sum, s) => sum + s.calculatedStrokesGained, 0);
   
   let severity: DriverSeverity = 'Strong';
@@ -216,12 +216,12 @@ export function calculateDrivingDriverD4(shots: ProcessedShot[]): DrivingDriverD
  * Compare SG on tee shots when hitting driver vs non-driver
  */
 export function calculateDrivingDriverD5(shots: ProcessedShot[]): DrivingDriverD5 | null {
-  const teeShots = shots.filter(s => s['Starting Lie'] === 'Tee');
+  const teeShots = shots.filter(s => s.startingLie === 'Tee');
   
   if (teeShots.length === 0) return null;
   
-  const driverShots = teeShots.filter(s => s['Did not Hit Driver'] !== 'Yes');
-  const nonDriverShots = teeShots.filter(s => s['Did not Hit Driver'] === 'Yes');
+  const driverShots = teeShots.filter(s => s.clubCategory !== 'Non-driver');
+  const nonDriverShots = teeShots.filter(s => s.clubCategory === 'Non-driver');
   
   if (driverShots.length === 0 || nonDriverShots.length === 0) return null;
   
@@ -263,8 +263,8 @@ function calculateApproachDistanceBands(shots: ProcessedShot[]): ApproachDistanc
   
   return bandDefinitions.map(band => {
     const bandShots = approaches.filter(s => 
-      s['Starting Distance'] >= band.minDistance && 
-      s['Starting Distance'] < band.maxDistance
+      s.startingDistance >= band.minDistance && 
+      s.startingDistance < band.maxDistance
     );
     
     const totalShots = bandShots.length;
@@ -283,21 +283,21 @@ function calculateApproachDistanceBands(shots: ProcessedShot[]): ApproachDistanc
       };
     }
     
-    const greenHits = bandShots.filter(s => s['Ending Lie'] === 'Green').length;
+    const greenHits = bandShots.filter(s => s.endingLie === 'Green').length;
     const girRate = (greenHits / totalShots) * 100;
     
     const proximitySum = bandShots.reduce((sum, s) => {
-      const distInFeet = s['Ending Lie'] === 'Green' 
-        ? s['Ending Distance'] 
-        : yardsToFeet(s['Ending Distance']);
+      const distInFeet = s.endingLie === 'Green' 
+        ? s.endingDistance 
+        : yardsToFeet(s.endingDistance);
       return sum + distInFeet;
     }, 0);
     const avgProximity = proximitySum / totalShots;
     
     const withinTarget = bandShots.filter(s => {
-      const distInFeet = s['Ending Lie'] === 'Green' 
-        ? s['Ending Distance'] 
-        : yardsToFeet(s['Ending Distance']);
+      const distInFeet = s.endingLie === 'Green' 
+        ? s.endingDistance 
+        : yardsToFeet(s.endingDistance);
       return distInFeet <= band.proximityTarget;
     }).length;
     const proximityRate = (withinTarget / totalShots) * 100;
@@ -427,15 +427,15 @@ export function calculateApproachDriverA3(shots: ProcessedShot[]): ApproachDrive
   
   const gapAnalysis = bandDefinitions.map(band => {
     const fairwayShots = approaches.filter(s => 
-      s['Starting Lie'] === 'Fairway' &&
-      s['Starting Distance'] >= band.minDistance && 
-      s['Starting Distance'] < band.maxDistance
+      s.startingLie === 'Fairway' &&
+      s.startingDistance >= band.minDistance && 
+      s.startingDistance < band.maxDistance
     );
     
     const roughShots = approaches.filter(s => 
-      s['Starting Lie'] === 'Rough' &&
-      s['Starting Distance'] >= band.minDistance && 
-      s['Starting Distance'] < band.maxDistance
+      s.startingLie === 'Rough' &&
+      s.startingDistance >= band.minDistance && 
+      s.startingDistance < band.maxDistance
     );
     
     if (fairwayShots.length === 0 || roughShots.length === 0) {
@@ -534,23 +534,23 @@ export function calculateLagPuttingMetrics(shots: ProcessedShot[]): LagPuttingDr
   if (putts.length === 0) return null;
   
   // Use all putts from >10 feet as "lag putts"
-  const lagPutts = putts.filter(s => s['Starting Distance'] > 10);
+  const lagPutts = putts.filter(s => s.startingDistance > 10);
   
   if (lagPutts.length === 0) return null;
   
   // L1: Poor lag rate - % finishing >5 feet from hole
-  const poorLagPutts = lagPutts.filter(s => s['Ending Distance'] > 5);
+  const poorLagPutts = lagPutts.filter(s => s.endingDistance > 5);
   const poorLagRate = (poorLagPutts.length / lagPutts.length) * 100;
   
   // L2: Speed dispersion band
-  const longPutts = lagPutts.filter(s => s['Putt Result'] === 'Long');
-  const shortPutts = lagPutts.filter(s => s['Putt Result'] === 'Short');
+  const longPutts = lagPutts.filter(s => s.puttLongShort === 'Long');
+  const shortPutts = lagPutts.filter(s => s.puttLongShort === 'Short');
   
   const maxLong = longPutts.length > 0 
-    ? Math.max(...longPutts.map(s => s['Ending Distance'])) 
+    ? Math.max(...longPutts.map(s => s.endingDistance)) 
     : 0;
   const maxShort = shortPutts.length > 0 
-    ? Math.max(...shortPutts.map(s => s['Ending Distance'])) 
+    ? Math.max(...shortPutts.map(s => s.endingDistance)) 
     : 0;
   const speedDispersionBand = maxLong + maxShort;
   
@@ -599,8 +599,8 @@ export function calculatePuttingDriverM1(shots: ProcessedShot[]): PuttingDriverM
   
   const buckets: MakeablePuttBucket[] = bucketDefinitions.map(bucket => {
     const bucketPutts = putts.filter(s => 
-      s['Starting Distance'] >= bucket.minDistance && 
-      s['Starting Distance'] < bucket.maxDistance
+      s.startingDistance >= bucket.minDistance && 
+      s.startingDistance < bucket.maxDistance
     );
     
     const totalPutts = bucketPutts.length;
@@ -617,7 +617,7 @@ export function calculatePuttingDriverM1(shots: ProcessedShot[]): PuttingDriverM
       };
     }
     
-    const madePutts = bucketPutts.filter(s => s['Ending Distance'] === 0).length;
+    const madePutts = bucketPutts.filter(s => s.endingDistance === 0).length;
     const makePct = (madePutts / totalPutts) * 100;
     const sgTotal = bucketPutts.reduce((sum, s) => sum + s.calculatedStrokesGained, 0);
     const avgSG = sgTotal / totalPutts;
@@ -671,8 +671,8 @@ export function calculatePuttingDriverM2(shots: ProcessedShot[]): PuttingDriverM
   
   const buckets: MakeablePuttBucket[] = bucketDefinitions.map(bucket => {
     const bucketPutts = putts.filter(s => 
-      s['Starting Distance'] >= bucket.minDistance && 
-      s['Starting Distance'] < bucket.maxDistance
+      s.startingDistance >= bucket.minDistance && 
+      s.startingDistance < bucket.maxDistance
     );
     
     const totalPutts = bucketPutts.length;
@@ -689,7 +689,7 @@ export function calculatePuttingDriverM2(shots: ProcessedShot[]): PuttingDriverM
       };
     }
     
-    const madePutts = bucketPutts.filter(s => s['Ending Distance'] === 0).length;
+    const madePutts = bucketPutts.filter(s => s.endingDistance === 0).length;
     const makePct = (madePutts / totalPutts) * 100;
     const sgTotal = bucketPutts.reduce((sum, s) => sum + s.calculatedStrokesGained, 0);
     const avgSG = sgTotal / totalPutts;
@@ -746,7 +746,7 @@ export function calculateShortGameDriverS1(shots: ProcessedShot[]): ShortGameDri
   const lieTypes = ['Fairway', 'Rough', 'Sand'];
   
   const lieMetrics: ShortGameLieMetric[] = lieTypes.map(lie => {
-    const lieShots = shortGame.filter(s => s['Starting Lie'] === lie);
+    const lieShots = shortGame.filter(s => s.startingLie === lie);
     const totalShots = lieShots.length;
     
     if (totalShots === 0) {
@@ -754,9 +754,9 @@ export function calculateShortGameDriverS1(shots: ProcessedShot[]): ShortGameDri
     }
     
     const inside8Feet = lieShots.filter(s => {
-      const distInFeet = s['Ending Lie'] === 'Green' 
-        ? s['Ending Distance'] 
-        : yardsToFeet(s['Ending Distance']);
+      const distInFeet = s.endingLie === 'Green' 
+        ? s.endingDistance 
+        : yardsToFeet(s.endingDistance);
       return distInFeet <= 8;
     }).length;
     
@@ -817,8 +817,8 @@ export function calculateShortGameDriverS2(shots: ProcessedShot[]): ShortGameDri
   
   const distanceMetrics: ShortGameDistanceMetric[] = bandDefinitions.map(band => {
     const bandShots = shortGame.filter(s => 
-      s['Starting Distance'] >= band.minDistance && 
-      s['Starting Distance'] < band.maxDistance
+      s.startingDistance >= band.minDistance && 
+      s.startingDistance < band.maxDistance
     );
     
     const totalShots = bandShots.length;
@@ -834,9 +834,9 @@ export function calculateShortGameDriverS2(shots: ProcessedShot[]): ShortGameDri
     }
     
     const inside8Feet = bandShots.filter(s => {
-      const distInFeet = s['Ending Lie'] === 'Green' 
-        ? s['Ending Distance'] 
-        : yardsToFeet(s['Ending Distance']);
+      const distInFeet = s.endingLie === 'Green' 
+        ? s.endingDistance 
+        : yardsToFeet(s.endingDistance);
       return distInFeet <= 8;
     }).length;
     
@@ -891,9 +891,9 @@ export function calculateShortGameDriverS3(shots: ProcessedShot[]): ShortGameDri
   if (shortGame.length === 0) return null;
   
   const failures = shortGame.filter(s => {
-    const distInFeet = s['Ending Lie'] === 'Green' 
-      ? s['Ending Distance'] 
-      : yardsToFeet(s['Ending Distance']);
+    const distInFeet = s.endingLie === 'Green' 
+      ? s.endingDistance 
+      : yardsToFeet(s.endingDistance);
     return distInFeet > 15;
   });
   
@@ -924,7 +924,7 @@ export function calculateShortGameDriverS3(shots: ProcessedShot[]): ShortGameDri
  * Calculate all PlayerPath metrics
  */
 export function calculatePlayerPathMetrics(shots: ProcessedShot[]): PlayerPathMetrics {
-  const roundIds = [...new Set(shots.map(s => s['Round ID']))];
+  const roundIds = [...new Set(shots.map(s => s.roundId))];
   const totalRounds = roundIds.length;
   
   // Calculate all drivers
@@ -1091,7 +1091,7 @@ interface CandidateDriver {
  * Calculate all candidate drivers and return top 5
  */
 export function calculatePerformanceDriversV2(shots: ProcessedShot[]): PerformanceDriversResultV2 {
-  const roundIds = [...new Set(shots.map(s => s['Round ID']))];
+  const roundIds = [...new Set(shots.map(s => s.roundId))];
   const totalRounds = roundIds.length;
   
   if (totalRounds === 0 || shots.length === 0) {
@@ -1101,19 +1101,19 @@ export function calculatePerformanceDriversV2(shots: ProcessedShot[]): Performan
   const candidates: CandidateDriver[] = [];
   
   // ===== DRIVING DRIVERS =====
-  const teeShots = shots.filter(s => s['Starting Lie'] === 'Tee');
+  const teeShots = shots.filter(s => s.startingLie === 'Tee');
   const totalTeeShots = teeShots.length;
   
   // D1 - Tee Shot Penalty Rate
   if (totalTeeShots > 0) {
-    const penaltyCount = teeShots.filter(s => s.Penalty === 'Yes').length;
+    const penaltyCount = teeShots.filter(s => s.hasPenalty).length;
     const penaltyRate = (penaltyCount / totalTeeShots) * 100;
     const threshold = 5;
     const severeThreshold = 10;
     
     if (penaltyRate >= threshold || penaltyCount >= 3) {
       const severity = getSeverityV2(penaltyRate, threshold, severeThreshold);
-      const sgImpact = teeShots.filter(s => s.Penalty === 'Yes').reduce((sum, s) => sum + s.calculatedStrokesGained, 0);
+      const sgImpact = teeShots.filter(s => s.hasPenalty).reduce((sum, s) => sum + s.calculatedStrokesGained, 0);
       
       candidates.push({
         driverId: 'D1',
@@ -1129,7 +1129,7 @@ export function calculatePerformanceDriversV2(shots: ProcessedShot[]): Performan
   }
   
   // D2 - Distance Deficiency
-  const fairwayTees = teeShots.filter(s => s['Ending Lie'] === 'Fairway');
+  const fairwayTees = teeShots.filter(s => s.endingLie === 'Fairway');
   if (fairwayTees.length >= 10) {
     const negativeSGTees = fairwayTees.filter(s => s.calculatedStrokesGained < 0);
     const negativeRate = (negativeSGTees.length / fairwayTees.length) * 100;
@@ -1155,14 +1155,14 @@ export function calculatePerformanceDriversV2(shots: ProcessedShot[]): Performan
   
   // D3 - Severe Miss Rate (Recovery)
   if (totalTeeShots > 0) {
-    const recoveryCount = teeShots.filter(s => s['Ending Lie'] === 'Recovery').length;
+    const recoveryCount = teeShots.filter(s => s.endingLie === 'Recovery').length;
     const recoveryRate = (recoveryCount / totalTeeShots) * 100;
     const threshold = 5;
     const severeThreshold = 10;
     
     if (recoveryRate >= threshold || recoveryCount >= 3) {
       const severity = getSeverityV2(recoveryRate, threshold, severeThreshold);
-      const sgImpact = teeShots.filter(s => s['Ending Lie'] === 'Recovery').reduce((sum, s) => sum + s.calculatedStrokesGained, 0);
+      const sgImpact = teeShots.filter(s => s.endingLie === 'Recovery').reduce((sum, s) => sum + s.calculatedStrokesGained, 0);
       
       candidates.push({
         driverId: 'D3',
@@ -1190,11 +1190,11 @@ export function calculatePerformanceDriversV2(shots: ProcessedShot[]): Performan
   
   approachBands.forEach(band => {
     const bandShots = approaches.filter(s => 
-      s['Starting Distance'] >= band.min && s['Starting Distance'] < band.max
+      s.startingDistance >= band.min && s.startingDistance < band.max
     );
     
     if (bandShots.length >= 10) {
-      const greenHits = bandShots.filter(s => s['Ending Lie'] === 'Green').length;
+      const greenHits = bandShots.filter(s => s.endingLie === 'Green').length;
       const girRate = (greenHits / bandShots.length) * 100;
       
       if (girRate < band.threshold) {
@@ -1224,14 +1224,14 @@ export function calculatePerformanceDriversV2(shots: ProcessedShot[]): Performan
   
   proximityBands.forEach(band => {
     const bandShots = approaches.filter(s => 
-      s['Starting Distance'] >= band.min && 
-      s['Starting Distance'] < band.max &&
-      s['Ending Lie'] === 'Green'
+      s.startingDistance >= band.min && 
+      s.startingDistance < band.max &&
+      s.endingLie === 'Green'
     );
     
     if (bandShots.length >= 10) {
       const insideTarget = bandShots.filter(s => {
-        const distInFeet = s['Ending Distance'] * 3; // Convert yards to feet
+        const distInFeet = s.endingDistance * 3; // Convert yards to feet
         return distInFeet <= band.target;
       }).length;
       const proximityRate = (insideTarget / bandShots.length) * 100;
@@ -1261,7 +1261,7 @@ export function calculatePerformanceDriversV2(shots: ProcessedShot[]): Performan
   
   approachBands.forEach(band => {
     const bandShots = approaches.filter(s => 
-      s['Starting Distance'] >= band.min && s['Starting Distance'] < band.max
+      s.startingDistance >= band.min && s.startingDistance < band.max
     );
     const sgTotal = bandShots.reduce((sum, s) => sum + s.calculatedStrokesGained, 0);
     if (sgTotal < 0) {
@@ -1294,10 +1294,10 @@ export function calculatePerformanceDriversV2(shots: ProcessedShot[]): Performan
   
   // ===== LAG PUTTING DRIVERS =====
   const putts = shots.filter(s => s.shotType === 'Putt');
-  const lagPutts = putts.filter(s => s['Starting Distance'] > 10);
+  const lagPutts = putts.filter(s => s.startingDistance > 10);
   
   if (lagPutts.length >= 10) {
-    const poorLagPutts = lagPutts.filter(s => s['Ending Distance'] > 5);
+    const poorLagPutts = lagPutts.filter(s => s.endingDistance > 5);
     const poorLagRate = (poorLagPutts.length / lagPutts.length) * 100;
     const threshold = 20;
     const severeThreshold = 30;
@@ -1320,7 +1320,7 @@ export function calculatePerformanceDriversV2(shots: ProcessedShot[]): Performan
   }
   
   // ===== MAKEABLE PUTTS DRIVERS =====
-  const makeablePutts = putts.filter(s => s['Starting Distance'] <= 20);
+  const makeablePutts = putts.filter(s => s.startingDistance <= 20);
   
   if (makeablePutts.length >= 10) {
     // M1 - SG by Distance Bucket
@@ -1333,7 +1333,7 @@ export function calculatePerformanceDriversV2(shots: ProcessedShot[]): Performan
     
     puttBuckets.forEach(bucket => {
       const bucketPutts = makeablePutts.filter(s => 
-        s['Starting Distance'] >= bucket.min && s['Starting Distance'] < bucket.max
+        s.startingDistance >= bucket.min && s.startingDistance < bucket.max
       );
       
       if (bucketPutts.length >= 10) {
@@ -1364,7 +1364,7 @@ export function calculatePerformanceDriversV2(shots: ProcessedShot[]): Performan
     
     puttBuckets.forEach(bucket => {
       const bucketPutts = makeablePutts.filter(s => 
-        s['Starting Distance'] >= bucket.min && s['Starting Distance'] < bucket.max
+        s.startingDistance >= bucket.min && s.startingDistance < bucket.max
       );
       
       if (bucketPutts.length >= 10) {
@@ -1392,7 +1392,7 @@ export function calculatePerformanceDriversV2(shots: ProcessedShot[]): Performan
   }
   
   // ===== SHORT GAME DRIVERS =====
-  const shortGame = shots.filter(s => s.shotType === 'Short Game' && s['Starting Distance'] < 60);
+  const shortGame = shots.filter(s => s.shotType === 'Short Game' && s.startingDistance < 60);
   
   if (shortGame.length >= 10) {
     // S1 - Proximity by Lie
@@ -1404,10 +1404,10 @@ export function calculatePerformanceDriversV2(shots: ProcessedShot[]): Performan
     };
     
     lieTypes.forEach(lie => {
-      const lieShots = shortGame.filter(s => s['Starting Lie'] === lie && s['Ending Lie'] === 'Green');
+      const lieShots = shortGame.filter(s => s.startingLie === lie && s.endingLie === 'Green');
       
       if (lieShots.length >= 5) {
-        const inside8Feet = lieShots.filter(s => s['Ending Distance'] <= 8).length;
+        const inside8Feet = lieShots.filter(s => s.endingDistance <= 8).length;
         const proximityRate = (inside8Feet / lieShots.length) * 100;
         const threshold = lieThresholds[lie] || 50;
         
@@ -1432,8 +1432,8 @@ export function calculatePerformanceDriversV2(shots: ProcessedShot[]): Performan
     
     // S3 - Failure Rate (>15 feet)
     const failures = shortGame.filter(s => {
-      if (s['Ending Lie'] !== 'Green') return true;
-      const distInFeet = s['Ending Distance'] * 3;
+      if (s.endingLie !== 'Green') return true;
+      const distInFeet = s.endingDistance * 3;
       return distInFeet > 15;
     });
     

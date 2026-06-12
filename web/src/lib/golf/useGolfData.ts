@@ -3,19 +3,18 @@
  */
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import Papa from 'papaparse';
-import type { RawShot, ProcessedShot, Tiger5Metrics, RoundSummary, FilterState, FilterOptions, DrivingMetrics, DrivingAnalysis, ProblemDriveMetrics, ApproachMetrics, ApproachDistanceBucket, ApproachHeatMapData, PuttingMetrics, PuttingDistanceBucket, LagPuttingMetrics, ScoringMetrics, MentalMetrics, BirdieAndBogeyMetrics, ShortGameMetrics, ShortGameHeatMapData, PerformanceDriversResult, PlayerPathMetrics, PerformanceDriversResultV2, CoachTableMetrics } from './types';
+import type { ProcessedShot, Tiger5Metrics, RoundSummary, FilterState, FilterOptions, FilterOption, DrivingMetrics, DrivingAnalysis, ProblemDriveMetrics, ApproachMetrics, ApproachDistanceBucket, ApproachHeatMapData, PuttingMetrics, PuttingDistanceBucket, LagPuttingMetrics, ScoringMetrics, MentalMetrics, BirdieAndBogeyMetrics, ShortGameMetrics, ShortGameHeatMapData, PerformanceDriversResult, PlayerPathMetrics, PerformanceDriversResultV2, CoachTableMetrics } from './types';
 import type { BenchmarkType } from './benchmarks';
 import { processShots, calculateTiger5Metrics, getRoundSummaries, calculateDrivingMetrics, calculateDrivingAnalysis, calculateProblemDriveMetrics, calculateApproachMetrics, calculateApproachByDistance, calculateApproachFromRough, calculateApproachHeatMapData, calculatePuttingMetrics, calculatePuttingByDistance, calculateLagPuttingMetrics, calculateScoringMetrics, calculateMentalMetrics, calculateBirdieAndBogeyMetrics, calculateShortGameMetrics, calculateShortGameHeatMapData } from './calculations';
 import { calculatePerformanceDrivers } from './performanceDrivers';
 import { calculatePlayerPathMetrics, calculatePerformanceDriversV2 } from './playerPathCalculations';
 import { calculateCoachTableMetrics } from './calculations';
+import { fetchDashboardShots, type DashboardShotRow } from './db/dashboard';
 
-// Google Sheet CSV URL - published to web
-const GOOGLE_SHEET_CSV_URL = process.env.NEXT_PUBLIC_GOLF_DATA_URL!;
+// Sentinel for rounds without a linked course
+const UNKNOWN_COURSE_ID = 'unknown';
 
 interface UseGolfDataResult {
-  rawShots: RawShot[];
   processedShots: ProcessedShot[];
   filteredShots: ProcessedShot[];
   tiger5Metrics: Tiger5Metrics;
@@ -52,14 +51,48 @@ interface UseGolfDataResult {
 }
 
 const initialFilters: FilterState = {
-  players: [],
-  courses: [],
-  tournaments: [],
+  playerIds: [],
+  courseIds: [],
+  roundTypes: [],
   dates: [],
 };
 
+function shotCourseId(shot: ProcessedShot): string {
+  return shot.courseId ?? UNKNOWN_COURSE_ID;
+}
+
+// Build {value, label} options from shots, sorted by label
+function buildOptions(shots: ProcessedShot[]): FilterOptions {
+  const players = new Map<string, string>();
+  const courses = new Map<string, string>();
+  const roundTypes = new Set<string>();
+  const dates = new Set<string>();
+
+  shots.forEach(s => {
+    players.set(s.playerId, s.playerName);
+    courses.set(shotCourseId(s), s.courseName);
+    roundTypes.add(s.roundType);
+    dates.add(s.playedOn);
+  });
+
+  const toSorted = (map: Map<string, string>): FilterOption[] =>
+    [...map.entries()]
+      .map(([value, label]) => ({ value, label }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+
+  return {
+    players: toSorted(players),
+    courses: toSorted(courses),
+    roundTypes: [...roundTypes].sort().map(value => ({ value, label: value })),
+    // ISO dates sort correctly as strings
+    dates: [...dates].sort().map(value => ({ value, label: value })),
+  };
+}
+
+const emptyOptions: FilterOptions = { players: [], courses: [], roundTypes: [], dates: [] };
+
 export function useGolfData(): UseGolfDataResult {
-  const [rawShots, setRawShots] = useState<RawShot[]>([]);
+  const [rows, setRows] = useState<DashboardShotRow[]>([]);
   const [filters, setFilters] = useState<FilterState>(initialFilters);
   const [benchmark, setBenchmark] = useState<BenchmarkType>('eliteCollege');
   const [isLoading, setIsLoading] = useState(true);
@@ -70,51 +103,11 @@ export function useGolfData(): UseGolfDataResult {
     async function loadData() {
       setIsLoading(true);
       setError(null);
-      
+
       try {
-        const response = await fetch(GOOGLE_SHEET_CSV_URL);
-        
-        if (!response.ok) {
-          throw new Error(`Failed to fetch data: ${response.status} ${response.statusText}`);
-        }
-        
-        const csvText = await response.text();
-        
-        Papa.parse<RawShot>(csvText, {
-          header: true,
-          skipEmptyLines: true,
-          complete: (results) => {
-            if (results.errors.length > 0) {
-              console.warn('CSV parsing warnings:', results.errors);
-            }
-            
-            // Clean up the data - trim strings and convert numbers
-            const cleanedData = results.data.map(shot => {
-              const cleaned: Partial<RawShot> = {};
-              (Object.keys(shot) as Array<keyof RawShot>).forEach(key => {
-                const value = shot[key];
-                if (typeof value === 'string') {
-                  const trimmed = value.trim();
-                  // Convert numeric fields
-                  if (['Shot', 'Hole', 'Score', 'Starting Distance', 'Ending Distance'].includes(key)) {
-                    cleaned[key] = parseFloat(trimmed) as never;
-                  } else {
-                    cleaned[key] = trimmed as never;
-                  }
-                } else {
-                  cleaned[key] = value as never;
-                }
-              });
-              return cleaned as RawShot;
-            });
-            
-            setRawShots(cleanedData);
-            setLastUpdated(new Date());
-          },
-          error: (parseError: Error) => {
-            throw new Error(`CSV parsing failed: ${parseError}`);
-          }
-        });
+        const data = await fetchDashboardShots();
+        setRows(data);
+        setLastUpdated(new Date());
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Unknown error loading data';
         setError(message);
@@ -129,136 +122,75 @@ export function useGolfData(): UseGolfDataResult {
 
   // Process shots when raw data or benchmark changes
   const processedShots = useMemo(() => {
-    if (rawShots.length === 0) return [];
-    return processShots(rawShots, benchmark);
-  }, [rawShots, benchmark]);
+    if (rows.length === 0) return [];
+    return processShots(rows, benchmark);
+  }, [rows, benchmark]);
 
-  // Compute filter options from raw data
+  // Compute filter options from all data
   const filterOptions = useMemo<FilterOptions>(() => {
-    if (rawShots.length === 0) {
-      return {
-        players: [],
-        courses: [],
-        tournaments: [],
-        dates: [],
-      };
-    }
-
-    const players = [...new Set(rawShots.map(s => s.Player))].sort();
-    const courses = [...new Set(rawShots.map(s => s.Course))].sort();
-    const tournaments = [...new Set(rawShots.map(s => s.Tournament))].sort();
-    const dates = [...new Set(rawShots.map(s => s.Date))].sort();
-
-    return { players, courses, tournaments, dates };
-  }, [rawShots]);
+    if (processedShots.length === 0) return emptyOptions;
+    return buildOptions(processedShots);
+  }, [processedShots]);
 
   // Compute cascading filter options based on current selections
   // Bidirectional cascading: selecting items in one category filters options in all other categories
   // OR within each category: selecting multiple players shows rounds for ANY of those players
   // AND across categories: dates AND courses must both match
   const cascadingFilterOptions = useMemo<FilterOptions>(() => {
-    if (processedShots.length === 0) {
-      return {
-        players: [],
-        courses: [],
-        tournaments: [],
-        dates: [],
-      };
-    }
+    if (processedShots.length === 0) return emptyOptions;
 
     // If no filters selected, show all options
-    const hasAnyFilters = filters.players.length > 0 || filters.courses.length > 0 || filters.tournaments.length > 0 || filters.dates.length > 0;
+    const hasAnyFilters = filters.playerIds.length > 0 || filters.courseIds.length > 0 || filters.roundTypes.length > 0 || filters.dates.length > 0;
     if (!hasAnyFilters) {
-      return {
-        players: [...new Set(processedShots.map(s => s.Player))].sort(),
-        courses: [...new Set(processedShots.map(s => s.Course))].sort(),
-        tournaments: [...new Set(processedShots.map(s => s.Tournament))].sort(),
-        dates: [...new Set(processedShots.map(s => s.Date))].sort(),
-      };
+      return buildOptions(processedShots);
     }
 
     // For each category, calculate valid options by applying ALL other filters (NOT the current category)
     // This allows selecting multiple within each category while cascading to others
-    
-    // Valid players: filter by courses, tournaments, dates (NOT by selected players)
-    let playerFiltered = processedShots;
-    if (filters.courses.length > 0) {
-      playerFiltered = playerFiltered.filter(s => filters.courses.includes(s.Course));
-    }
-    if (filters.tournaments.length > 0) {
-      playerFiltered = playerFiltered.filter(s => filters.tournaments.includes(s.Tournament));
-    }
-    if (filters.dates.length > 0) {
-      playerFiltered = playerFiltered.filter(s => filters.dates.includes(s.Date));
-    }
-    const validPlayers = [...new Set(playerFiltered.map(s => s.Player))].sort();
+    const applyFilters = (shots: ProcessedShot[], skip: keyof FilterState): ProcessedShot[] => {
+      let result = shots;
+      if (skip !== 'playerIds' && filters.playerIds.length > 0) {
+        result = result.filter(s => filters.playerIds.includes(s.playerId));
+      }
+      if (skip !== 'courseIds' && filters.courseIds.length > 0) {
+        result = result.filter(s => filters.courseIds.includes(shotCourseId(s)));
+      }
+      if (skip !== 'roundTypes' && filters.roundTypes.length > 0) {
+        result = result.filter(s => filters.roundTypes.includes(s.roundType));
+      }
+      if (skip !== 'dates' && filters.dates.length > 0) {
+        result = result.filter(s => filters.dates.includes(s.playedOn));
+      }
+      return result;
+    };
 
-    // Valid courses: filter by players, tournaments, dates (NOT by selected courses)
-    let courseFiltered = processedShots;
-    if (filters.players.length > 0) {
-      courseFiltered = courseFiltered.filter(s => filters.players.includes(s.Player));
-    }
-    if (filters.tournaments.length > 0) {
-      courseFiltered = courseFiltered.filter(s => filters.tournaments.includes(s.Tournament));
-    }
-    if (filters.dates.length > 0) {
-      courseFiltered = courseFiltered.filter(s => filters.dates.includes(s.Date));
-    }
-    const validCourses = [...new Set(courseFiltered.map(s => s.Course))].sort();
-
-    // Valid tournaments: filter by players, courses, dates (NOT by selected tournaments)
-    let tournamentFiltered = processedShots;
-    if (filters.players.length > 0) {
-      tournamentFiltered = tournamentFiltered.filter(s => filters.players.includes(s.Player));
-    }
-    if (filters.courses.length > 0) {
-      tournamentFiltered = tournamentFiltered.filter(s => filters.courses.includes(s.Course));
-    }
-    if (filters.dates.length > 0) {
-      tournamentFiltered = tournamentFiltered.filter(s => filters.dates.includes(s.Date));
-    }
-    const validTournaments = [...new Set(tournamentFiltered.map(s => s.Tournament))].sort();
-
-    // Valid dates: filter by players, courses, tournaments (NOT by selected dates)
-    let dateFiltered = processedShots;
-    if (filters.players.length > 0) {
-      dateFiltered = dateFiltered.filter(s => filters.players.includes(s.Player));
-    }
-    if (filters.courses.length > 0) {
-      dateFiltered = dateFiltered.filter(s => filters.courses.includes(s.Course));
-    }
-    if (filters.tournaments.length > 0) {
-      dateFiltered = dateFiltered.filter(s => filters.tournaments.includes(s.Tournament));
-    }
-    const validDates = [...new Set(dateFiltered.map(s => s.Date))].sort();
-
-    return { 
-      players: validPlayers, 
-      courses: validCourses, 
-      tournaments: validTournaments, 
-      dates: validDates 
+    return {
+      players: buildOptions(applyFilters(processedShots, 'playerIds')).players,
+      courses: buildOptions(applyFilters(processedShots, 'courseIds')).courses,
+      roundTypes: buildOptions(applyFilters(processedShots, 'roundTypes')).roundTypes,
+      dates: buildOptions(applyFilters(processedShots, 'dates')).dates,
     };
   }, [processedShots, filters]);
 
   // Filter shots based on selected filters
   const filteredShots = useMemo(() => {
     if (processedShots.length === 0) return [];
-    
+
     return processedShots.filter(shot => {
       // If filter is empty, include all
-      const playerMatch = filters.players.length === 0 || filters.players.includes(shot.Player);
-      const courseMatch = filters.courses.length === 0 || filters.courses.includes(shot.Course);
-      const tournamentMatch = filters.tournaments.length === 0 || filters.tournaments.includes(shot.Tournament);
-      const dateMatch = filters.dates.length === 0 || filters.dates.includes(shot.Date);
-      
-      return playerMatch && courseMatch && tournamentMatch && dateMatch;
+      const playerMatch = filters.playerIds.length === 0 || filters.playerIds.includes(shot.playerId);
+      const courseMatch = filters.courseIds.length === 0 || filters.courseIds.includes(shotCourseId(shot));
+      const roundTypeMatch = filters.roundTypes.length === 0 || filters.roundTypes.includes(shot.roundType);
+      const dateMatch = filters.dates.length === 0 || filters.dates.includes(shot.playedOn);
+
+      return playerMatch && courseMatch && roundTypeMatch && dateMatch;
     });
   }, [processedShots, filters]);
 
   // Calculate metrics from filtered shots
   const tiger5Metrics = useMemo(() => {
     return calculateTiger5Metrics(filteredShots);
-  }, [filteredShots, benchmark]);
+  }, [filteredShots]);
 
   // Calculate scoring metrics from filtered shots
   const scoringMetrics = useMemo(() => {
@@ -302,7 +234,7 @@ export function useGolfData(): UseGolfDataResult {
 
   // Get unique rounds count for SG per Round calculation
   const uniqueRounds = useMemo(() => {
-    return [...new Set(filteredShots.map(s => s['Round ID']))].length;
+    return [...new Set(filteredShots.map(s => s.roundId))].length;
   }, [filteredShots]);
 
   // Calculate approach heat map data
@@ -383,7 +315,6 @@ export function useGolfData(): UseGolfDataResult {
   }, []);
 
   return {
-    rawShots,
     processedShots,
     filteredShots,
     tiger5Metrics,

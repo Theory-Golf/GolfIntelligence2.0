@@ -15,6 +15,7 @@ import { FilterBar } from './FilterBar';
 
 // Lazy-load each view — only the active tab's code is fetched
 const Tiger5View = lazy(() => import('./Tiger5View').then(m => ({ default: m.Tiger5View })));
+const RoundsView = lazy(() => import('./RoundsView').then(m => ({ default: m.RoundsView })));
 const StrokesGainedView = lazy(() => import('./StrokesGainedView').then(m => ({ default: m.StrokesGainedView })));
 const DrivingView = lazy(() => import('./DrivingView').then(m => ({ default: m.DrivingView })));
 const ApproachView = lazy(() => import('./ApproachView').then(m => ({ default: m.ApproachView })));
@@ -37,7 +38,9 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('tiger5');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const {
+    processedShots,
     filteredShots,
+    roundSummaries,
     tiger5Metrics,
     scoringMetrics,
     birdieAndBogeyMetrics,
@@ -104,7 +107,7 @@ export default function Dashboard() {
       <DashboardNav activeTab={activeTab} onTabChange={setActiveTab} />
 
       {/* Filter Bar */}
-      {!isLoading && !error && (
+      {!isLoading && !error && processedShots.length > 0 && (
         <FilterBar
           filters={filters}
           options={filterOptions}
@@ -117,7 +120,7 @@ export default function Dashboard() {
       )}
 
       {/* Main Content */}
-      <main className={`main ${!isLoading && !error ? 'main-with-sidebar' : ''} ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+      <main className={`main ${!isLoading && !error && processedShots.length > 0 ? 'main-with-sidebar' : ''} ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
         {isLoading && (
           <div className="loading">
             <div className="loading-spinner"></div>
@@ -129,15 +132,43 @@ export default function Dashboard() {
           <div className="error">
             <p>{error}</p>
             <p style={{ marginTop: '8px', fontSize: '12px' }}>
-              Make sure your Google Sheet is published to the web (File → Share → Publish to web)
+              There was a problem loading your data. Make sure you are signed in, then refresh the page.
             </p>
           </div>
         )}
 
-        {!isLoading && !error && (
+        {!isLoading && !error && processedShots.length === 0 && (
+          <div className="loading">
+            <p style={{ fontSize: '16px', color: 'var(--chalk)' }}>No rounds yet</p>
+            <p style={{ marginTop: '8px', fontSize: '13px', color: 'var(--ash)' }}>
+              Enter your first round to see your Golf Intelligence dashboard.
+            </p>
+            <a
+              href="/golf-intelligence/round/new"
+              style={{
+                marginTop: '16px',
+                display: 'inline-block',
+                padding: '10px 20px',
+                background: 'var(--scarlet)',
+                color: 'var(--chalk)',
+                borderRadius: '4px',
+                fontWeight: 600,
+                textDecoration: 'none',
+              }}
+            >
+              Enter a round
+            </a>
+          </div>
+        )}
+
+        {!isLoading && !error && processedShots.length > 0 && (
           <Suspense fallback={<ViewLoading />}>
             {activeTab === 'tiger5' && (
               <Tiger5View metrics={tiger5Metrics} lastUpdated={lastUpdated} />
+            )}
+
+            {activeTab === 'rounds' && (
+              <RoundsView roundSummaries={roundSummaries} filteredShots={filteredShots} />
             )}
 
             {activeTab === 'sg' && (

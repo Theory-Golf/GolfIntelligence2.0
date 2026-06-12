@@ -235,7 +235,7 @@ function ApproachTableSection({ shots }: { shots: ProcessedShot[] }) {
 
   // Group approaches by round (date + course)
   const approachesByRound = approaches.reduce((acc, approach) => {
-    const key = `${approach.Date}|${approach.Course}`;
+    const key = `${approach.playedOn}|${approach.courseName}`;
     if (!acc[key]) {
       acc[key] = [];
     }
@@ -304,20 +304,20 @@ function ApproachTableSection({ shots }: { shots: ProcessedShot[] }) {
                   </thead>
                   <tbody>
                     {roundApproaches
-                      .sort((a, b) => a.Hole - b.Hole)
+                      .sort((a, b) => a.holeNumber - b.holeNumber)
                       .map((approach, idx) => (
                         <tr key={idx} style={{ borderBottom: '1px solid var(--dark)' }}>
-                          <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{approach.Hole}</td>
+                          <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{approach.holeNumber}</td>
                           <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>
-                            {approach['Starting Distance']}
+                            {approach.startingDistance}
                           </td>
-                          <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{approach['Starting Lie']}</td>
+                          <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{approach.startingLie}</td>
                           <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>
-                            {approach['Ending Distance']}
+                            {approach.endingDistance}
                           </td>
-                          <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{approach['Ending Lie']}</td>
-                          <td style={{ padding: '6px', textAlign: 'center', color: approach.Penalty === 'Yes' ? 'var(--scarlet)' : 'transparent' }}>
-                            {approach.Penalty === 'Yes' ? 'Yes' : ''}
+                          <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{approach.endingLie}</td>
+                          <td style={{ padding: '6px', textAlign: 'center', color: approach.hasPenalty ? 'var(--scarlet)' : 'transparent' }}>
+                            {approach.hasPenalty ? 'Yes' : ''}
                           </td>
                           <td style={{ padding: '6px', textAlign: 'center', color: getShotSGColor(approach.calculatedStrokesGained), fontFamily: 'var(--font-mono)' }}>
                             {formatStrokesGained(approach.calculatedStrokesGained)}
@@ -352,7 +352,7 @@ function ApproachEndingLieSection({ filteredShots }: { filteredShots: ProcessedS
     const lieMap = new Map<string, { count: number; strokesGained: number }>();
 
     approachShots.forEach(shot => {
-      const lie = shot['Ending Lie'] || 'Other';
+      const lie = shot.endingLie || 'Other';
       const existing = lieMap.get(lie) || { count: 0, strokesGained: 0 };
       existing.count += 1;
       existing.strokesGained += shot.calculatedStrokesGained;

@@ -37,8 +37,8 @@ function ShortGameLeaveDistributionSection({ filteredShots }: { filteredShots: P
 
     // Categorize each shot
     shortGameShots.forEach(shot => {
-      const endingLie = shot['Ending Lie'];
-      const endingDistance = shot['Ending Distance'];
+      const endingLie = shot.endingLie;
+      const endingDistance = shot.endingDistance;
 
       // Check if shot missed the green
       if (endingLie !== 'Green') {
@@ -130,7 +130,7 @@ function ShortGameTableSection({ filteredShots }: { filteredShots: ProcessedShot
   const [isExpanded, setIsExpanded] = useState(false);
   const shortGameShots = useMemo(() => filteredShots.filter(shot => shot.shotType === 'Short Game'), [filteredShots]);
   const shortGameByRound = shortGameShots.reduce((acc, shot) => {
-    const key = `${shot.Date}|${shot.Course}`;
+    const key = `${shot.playedOn}|${shot.courseName}`;
     if (!acc[key]) acc[key] = [];
     acc[key].push(shot);
     return acc;
@@ -170,15 +170,15 @@ function ShortGameTableSection({ filteredShots }: { filteredShots: ProcessedShot
                     </tr>
                   </thead>
                   <tbody>
-                    {roundShots.sort((a, b) => a.Hole - b.Hole || a.Shot - b.Shot).map((shot, idx) => (
+                    {roundShots.sort((a, b) => a.holeNumber - b.holeNumber || a.shotNumber - b.shotNumber).map((shot, idx) => (
                       <tr key={idx} style={{ borderBottom: '1px solid var(--dark)' }}>
-                        <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{shot.Shot}</td>
-                        <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{shot.Hole}</td>
-                        <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>{shot['Starting Distance']}</td>
-                        <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{shot['Starting Lie']}</td>
-                        <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>{shot['Ending Distance']}</td>
-                        <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{shot['Ending Lie']}</td>
-                        <td style={{ padding: '6px', textAlign: 'center', color: shot.Penalty === 'Yes' ? 'var(--scarlet)' : 'transparent' }}>{shot.Penalty === 'Yes' ? 'Yes' : ''}</td>
+                        <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{shot.shotNumber}</td>
+                        <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{shot.holeNumber}</td>
+                        <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>{shot.startingDistance}</td>
+                        <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{shot.startingLie}</td>
+                        <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>{shot.endingDistance}</td>
+                        <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{shot.endingLie}</td>
+                        <td style={{ padding: '6px', textAlign: 'center', color: shot.hasPenalty ? 'var(--scarlet)' : 'transparent' }}>{shot.hasPenalty ? 'Yes' : ''}</td>
                         <td style={{ padding: '6px', textAlign: 'center', color: getShotSGColor(shot.calculatedStrokesGained), fontFamily: 'var(--font-mono)' }}>{formatStrokesGained(shot.calculatedStrokesGained)}</td>
                       </tr>
                     ))}

@@ -486,7 +486,7 @@ function PuttsTableSection({ shots }: { shots: ProcessedShot[] }) {
 
   // Group putts by round (date + course)
   const puttsByRound = putts.reduce((acc, putt) => {
-    const key = `${putt.Date}|${putt.Course}`;
+    const key = `${putt.playedOn}|${putt.courseName}`;
     if (!acc[key]) {
       acc[key] = [];
     }
@@ -553,23 +553,23 @@ function PuttsTableSection({ shots }: { shots: ProcessedShot[] }) {
                   </thead>
                   <tbody>
                     {roundPutts
-                      .sort((a, b) => a.Hole - b.Hole)
+                      .sort((a, b) => a.holeNumber - b.holeNumber)
                       .map((putt, idx) => (
                         <tr key={idx} style={{ borderBottom: '1px solid var(--dark)' }}>
-                          <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{putt.Hole}</td>
+                          <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{putt.holeNumber}</td>
                           <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>
-                            {putt['Starting Distance']}
+                            {putt.startingDistance}
                           </td>
                           <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>
-                            {putt['Ending Distance']}
+                            {putt.endingDistance}
                           </td>
                           <td style={{
                             padding: '6px',
                             textAlign: 'center',
-                            color: putt['Putt Result'] === 'Made' ? 'var(--under)' : putt['Putt Result'] === 'Long' ? 'var(--double)' : 'var(--chalk)',
-                            fontWeight: putt['Putt Result'] === 'Made' ? 600 : 400
+                            color: putt.endingDistance === 0 ? 'var(--under)' : putt.puttLongShort === 'Long' ? 'var(--double)' : 'var(--chalk)',
+                            fontWeight: putt.endingDistance === 0 ? 600 : 400
                           }}>
-                            {putt['Putt Result'] || '-'}
+                            {putt.endingDistance === 0 ? 'Made' : (putt.puttLongShort || '-')}
                           </td>
                           <td style={{ padding: '6px', textAlign: 'center', color: getShotSGColor(putt.calculatedStrokesGained), fontFamily: 'var(--font-mono)' }}>
                             {formatStrokesGained(putt.calculatedStrokesGained)}
