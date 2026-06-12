@@ -231,7 +231,8 @@ function ShotEntry({
     return {
       teeDistanceInput: '',
       endingDistance: '',
-      endingLie: null,
+      // Once the ball is on the green it stays there; pre-select it.
+      endingLie: startingLie === 'Green' ? 'Green' : null,
       clubCategory: null,
       missDirection: null,
       puttLongShort: null,
@@ -241,6 +242,7 @@ function ShotEntry({
   });
 
   const [saving, setSaving] = useState(false);
+  const [holedSaving, setHoledSaving] = useState(false);
   const [parBusy, setParBusy] = useState(false);
   const [setupDone, setSetupDone] = useState(false);
 
@@ -387,7 +389,9 @@ function ShotEntry({
     setForm((f) => ({
       ...f,
       endingDistance: '',
-      endingLie: null,
+      // The just-saved shot's ending lie is the next shot's starting lie;
+      // a ball on the green stays on the green.
+      endingLie: f.endingLie === 'Green' ? 'Green' : null,
       clubCategory: null,
       missDirection: null,
       puttLongShort: null,
@@ -426,6 +430,8 @@ function ShotEntry({
   async function handleHoled() {
     if (saving || !parSet) return;
     setSaving(true);
+    setHoledSaving(true);
+    let navigated = false;
     try {
       if (mode === 'edit' && editingShot) {
         await persistEdit(editingShot, 'Green', 0);
@@ -433,14 +439,16 @@ function ShotEntry({
         await persistInsert(afterShot, 'Green', 0);
       } else {
         if (startingDistanceNum === null) {
-          setSaving(false);
           return;
         }
         await persistAppend('Green', 0);
       }
       router.push(summaryUrl());
+      navigated = true;
     } finally {
       setSaving(false);
+      // Keep the confirm style on through the navigation to the summary.
+      if (!navigated) setHoledSaving(false);
     }
   }
 
@@ -620,6 +628,7 @@ function ShotEntry({
               onChange={(lie) => setForm((f) => ({ ...f, endingLie: lie }))}
               showHoled
               onHoled={handleHoled}
+              holedActive={holedSaving}
             />
           </div>
 

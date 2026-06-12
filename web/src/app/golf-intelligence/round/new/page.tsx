@@ -10,7 +10,7 @@ import {
 } from '@/lib/golf/db/index';
 import { createBrowserClient } from '@/lib/golf/db/client';
 import { createId } from '@/lib/golf/utils/index';
-import { persistOrQueue } from '@/lib/golf/offlineQueue';
+import { writeDraft } from '@/lib/golf/draftStore';
 import {
   geocodeLocation,
   fetchWeather,
@@ -337,24 +337,11 @@ export default function NewRoundPage() {
       const key = `par_hole_${i}` as keyof typeof defaultPars;
       holePars[i] = selectedCourse ? (selectedCourse[key as keyof CourseRow] as number) : 4;
     }
-    if (typeof sessionStorage !== 'undefined') {
-      sessionStorage.setItem(
-        `tg_round_bootstrap_${roundId}`,
-        JSON.stringify({
-          playerId,
-          courseId: state.courseId,
-          courseName: state.courseName,
-          played_on: state.date,
-          roundType: state.roundType,
-          roundNumber: state.roundNumber,
-          holePars,
-        }),
-      );
-    }
-
-    const result = await persistOrQueue({
-      type: 'upsertRound',
-      payload: {
+    // Nothing is written to the DB until the player presses "Submit round"
+    // on the review screen — the round lives in a local draft until then.
+    const ok = writeDraft(roundId, {
+      version: 1,
+      round: {
         id: roundId,
         player_id: playerId,
         course_id: state.courseId,
@@ -368,10 +355,14 @@ export default function NewRoundPage() {
         weather_wind_dir: state.weather.windDirection.trim() || null,
         weather_precip: numericPrecip === '' ? null : Number(numericPrecip),
       },
+      courseName: state.courseName,
+      holePars,
+      holes: [],
+      updatedAt: new Date().toISOString(),
     });
 
-    if (result.status === 'queued-error') {
-      setSubmitWarning(`DB error: ${result.message}`);
+    if (!ok) {
+      setSubmitWarning('Could not save the round on this device — storage may be full.');
       setIsSubmitting(false);
       return;
     }

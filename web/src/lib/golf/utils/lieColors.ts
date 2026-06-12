@@ -14,6 +14,6 @@ export const LIE_ABBREVIATIONS: Record<Lie, string> = {
   Fairway: 'F',
   Rough: 'R',
   Sand: 'S',
-  Recovery: 'V', // V not R — R is taken by Rough
+  Recovery: 'X', // X not R — R is taken by Rough
   Green: 'G',
 };

@@ -6,6 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
@@ -18,6 +19,7 @@ import {
 import type {
   CourseRow,
   HoleRow,
+  RoundInsert,
   RoundRow,
   RoundType,
   ShotInsert,
@@ -25,7 +27,8 @@ import type {
   ShotUpdate,
 } from './db/types';
 import { createId } from './utils/uuid';
-import { persistOrQueue } from './offlineQueue';
+import { persistOrQueue, type PersistResult } from './offlineQueue';
+import { readDraft, writeDraft, removeDraft } from './draftStore';
 
 export interface HoleEntry {
   holeId: string;
@@ -55,10 +58,18 @@ export interface RoundSessionState {
   lastActiveHole: number | null;
 }
 
+export interface SubmitRoundResult {
+  ok: boolean;
+  queued: boolean;
+  message?: string;
+}
+
 export interface RoundSessionContextValue {
   state: RoundSessionState;
   loading: boolean;
   error: string | null;
+  // True while the round lives only on this device (not yet submitted).
+  isDraft: boolean;
   getHole: (holeNumber: number) => HoleEntry | undefined;
   setPar: (holeNumber: number, par: number) => Promise<HoleEntry>;
   saveShot: (shot: ShotInsert) => Promise<void>;
@@ -75,6 +86,7 @@ export interface RoundSessionContextValue {
   setLastActiveHole: (holeNumber: number) => void;
   isRoundComplete: () => boolean;
   getTotalYardage: () => number | null;
+  submitRound: () => Promise<SubmitRoundResult>;
 }
 
 const RoundSessionContext = createContext<RoundSessionContextValue | null>(null);
@@ -116,6 +128,14 @@ function holeIsComplete(entry: HoleEntry): boolean {
   return entry.shots.length > 0 && entry.shots.some(isHoled);
 }
 
+function firstIncompleteHole(entries: HoleEntry[]): number {
+  for (let n = 1; n <= 18; n++) {
+    const entry = entries.find((e) => e.holeNumber === n);
+    if (!entry || !holeIsComplete(entry)) return n;
+  }
+  return 18;
+}
+
 // Each penalty counts as an extra stroke on top of the physical shots.
 function holeStrokes(entry: HoleEntry): number {
   return (
@@ -154,6 +174,13 @@ export function RoundSessionProvider({
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isDraft, setIsDraft] = useState(false);
+  // Ref mirror of isDraft for use inside useCallbacks without dep churn.
+  const isDraftRef = useRef(false);
+  // The full round payload (incl. weather/location) captured at round start;
+  // it exists nowhere else until the round is submitted.
+  const draftRoundRef = useRef<RoundInsert | null>(null);
+  const submittingRef = useRef(false);
 
   // ── Initial load ──────────────────────────────────────────────────────────
   useEffect(() => {
@@ -161,52 +188,40 @@ export function RoundSessionProvider({
 
     async function load() {
       try {
-        let round: RoundRow | null = await getRound(roundId);
+        // Unsubmitted rounds live only in the local draft; check it before
+        // the DB so a partially-submitted round resumes in draft mode.
+        const draft = readDraft(roundId);
+        if (draft) {
+          if (cancelled) return;
+          draftRoundRef.current = draft.round;
+          isDraftRef.current = true;
+          const entries = draft.holes
+            .slice()
+            .sort((a, b) => a.holeNumber - b.holeNumber);
+          const activeHoleNumber = firstIncompleteHole(entries);
+          const activeEntry = entries.find(
+            (e) => e.holeNumber === activeHoleNumber,
+          );
+          setState({
+            roundId,
+            courseId: draft.round.course_id ?? null,
+            courseName: draft.courseName,
+            roundDate: draft.round.played_on,
+            roundType: draft.round.round_type,
+            holePars: draft.holePars,
+            holes: entries,
+            activeHoleNumber,
+            activeHoleId: activeEntry?.holeId ?? null,
+            activeShotOrder: (activeEntry?.shots.length ?? 0) + 1,
+            lastActiveHole: null,
+          });
+          setIsDraft(true);
+          setLoading(false);
+          return;
+        }
 
-        // If the round isn't in the DB yet (queued offline or DB write still
-        // in-flight), fall back to the bootstrap written by the new-round page.
+        const round: RoundRow | null = await getRound(roundId);
         if (!round) {
-          const raw =
-            typeof sessionStorage !== 'undefined'
-              ? sessionStorage.getItem(`tg_round_bootstrap_${roundId}`)
-              : null;
-
-          if (raw) {
-            try {
-              const b = JSON.parse(raw) as {
-                playerId: string;
-                courseId: string | null;
-                courseName: string;
-                played_on: string;
-                roundType: RoundType;
-                roundNumber: number | null;
-                holePars: Record<number, number>;
-              };
-              if (!cancelled) {
-                setState({
-                  roundId,
-                  courseId: b.courseId,
-                  courseName: b.courseName,
-                  roundDate: b.played_on,
-                  roundType: b.roundType,
-                  holePars: b.holePars,
-                  holes: [],
-                  activeHoleNumber: 1,
-                  activeHoleId: null,
-                  activeShotOrder: 1,
-                  lastActiveHole: null,
-                });
-                setLoading(false);
-              }
-            } catch {
-              if (!cancelled) {
-                setError('Round not found');
-                setLoading(false);
-              }
-            }
-            return;
-          }
-
           if (!cancelled) {
             setError('Round not found');
             setLoading(false);
@@ -240,23 +255,10 @@ export function RoundSessionProvider({
         );
         entries.sort((a, b) => a.holeNumber - b.holeNumber);
 
-        // First incomplete hole, defaulting to 1 or (lastEntered+1)
-        let activeHoleNumber = 1;
-        for (let n = 1; n <= 18; n++) {
-          const entry = entries.find((e) => e.holeNumber === n);
-          if (!entry || !holeIsComplete(entry)) {
-            activeHoleNumber = n;
-            break;
-          }
-          if (n === 18) activeHoleNumber = 18;
-        }
+        const activeHoleNumber = firstIncompleteHole(entries);
         const activeEntry = entries.find((e) => e.holeNumber === activeHoleNumber);
 
         if (cancelled) return;
-        // Clear bootstrap now that we have a confirmed DB record.
-        if (typeof sessionStorage !== 'undefined') {
-          sessionStorage.removeItem(`tg_round_bootstrap_${roundId}`);
-        }
         setState({
           roundId,
           courseId: round.course_id,
@@ -283,6 +285,24 @@ export function RoundSessionProvider({
       cancelled = true;
     };
   }, [roundId]);
+
+  // ── Draft persistence ─────────────────────────────────────────────────────
+  // While in draft mode, mirror every committed state change to localStorage
+  // so the round survives reloads. isDraft starts false and only flips true
+  // in the same commit as the hydrated state, so this can never clobber an
+  // existing draft with the empty initial state.
+  useEffect(() => {
+    if (!isDraft || !draftRoundRef.current) return;
+    const ok = writeDraft(state.roundId, {
+      version: 1,
+      round: draftRoundRef.current,
+      courseName: state.courseName,
+      holePars: state.holePars,
+      holes: state.holes,
+      updatedAt: new Date().toISOString(),
+    });
+    if (!ok) console.warn('[draft] localStorage write failed');
+  }, [isDraft, state]);
 
   // ── Helpers ───────────────────────────────────────────────────────────────
   const setHoleShots = useCallback(
@@ -315,10 +335,12 @@ export function RoundSessionProvider({
             h.holeId === existing.holeId ? { ...h, par } : h,
           ),
         }));
-        void persistOrQueue({
-          type: 'updateHole',
-          payload: { id: existing.holeId, par },
-        });
+        if (!isDraftRef.current) {
+          void persistOrQueue({
+            type: 'updateHole',
+            payload: { id: existing.holeId, par },
+          });
+        }
         return { ...existing, par };
       }
       const id = createId();
@@ -337,10 +359,12 @@ export function RoundSessionProvider({
         activeHoleId: entry.holeId,
         activeShotOrder: 1,
       }));
-      void persistOrQueue({
-        type: 'upsertHole',
-        payload: { id, round_id: roundId, hole_number: holeNumber, par },
-      });
+      if (!isDraftRef.current) {
+        void persistOrQueue({
+          type: 'upsertHole',
+          payload: { id, round_id: roundId, hole_number: holeNumber, par },
+        });
+      }
       return entry;
     },
     [roundId, state.holes],
@@ -363,7 +387,9 @@ export function RoundSessionProvider({
         ...prev,
         activeShotOrder: shot.shot_number + 1,
       }));
-      void persistOrQueue({ type: 'upsertShot', payload: shot });
+      if (!isDraftRef.current) {
+        void persistOrQueue({ type: 'upsertShot', payload: shot });
+      }
     },
     [setHoleShots],
   );
@@ -393,8 +419,10 @@ export function RoundSessionProvider({
         }
         return next;
       });
-      for (const u of updates) {
-        void persistOrQueue({ type: 'updateShot', payload: u });
+      if (!isDraftRef.current) {
+        for (const u of updates) {
+          void persistOrQueue({ type: 'updateShot', payload: u });
+        }
       }
     },
     [setHoleShots],
@@ -405,7 +433,9 @@ export function RoundSessionProvider({
       setHoleShots(holeId, (shots) =>
         shots.map((s) => (s.id === shot.id ? { ...s, ...shot } : s)),
       );
-      void persistOrQueue({ type: 'updateShot', payload: shot });
+      if (!isDraftRef.current) {
+        void persistOrQueue({ type: 'updateShot', payload: shot });
+      }
     },
     [setHoleShots],
   );
@@ -446,9 +476,11 @@ export function RoundSessionProvider({
         }
         return next;
       });
-      void persistOrQueue({ type: 'deleteShot', payload: { id: shotId } });
-      for (const u of resequenceUpdates) {
-        void persistOrQueue({ type: 'updateShot', payload: u });
+      if (!isDraftRef.current) {
+        void persistOrQueue({ type: 'deleteShot', payload: { id: shotId } });
+        for (const u of resequenceUpdates) {
+          void persistOrQueue({ type: 'updateShot', payload: u });
+        }
       }
     },
     [setHoleShots],
@@ -503,12 +535,14 @@ export function RoundSessionProvider({
         return merged;
       });
 
-      for (const u of shiftUpdates) {
-        void persistOrQueue({ type: 'updateShot', payload: u });
-      }
-      void persistOrQueue({ type: 'upsertShot', payload: inserted });
-      for (const u of cascadeUpdates) {
-        void persistOrQueue({ type: 'updateShot', payload: u });
+      if (!isDraftRef.current) {
+        for (const u of shiftUpdates) {
+          void persistOrQueue({ type: 'updateShot', payload: u });
+        }
+        void persistOrQueue({ type: 'upsertShot', payload: inserted });
+        for (const u of cascadeUpdates) {
+          void persistOrQueue({ type: 'updateShot', payload: u });
+        }
       }
     },
     [setHoleShots],
@@ -524,33 +558,28 @@ export function RoundSessionProvider({
   }, []);
 
   const getRunningScore = useCallback((): RunningScore => {
+    // Running sums over completed holes — front/back update hole by hole,
+    // null only until the first hole of that nine is finished.
     let total = 0;
     let front = 0;
     let back = 0;
-    let frontComplete = true;
-    let backComplete = true;
-    for (let n = 1; n <= 9; n++) {
-      const h = state.holes.find((e) => e.holeNumber === n);
-      if (!h || !holeIsComplete(h)) {
-        frontComplete = false;
-      } else {
-        front += holeStrokes(h) - h.par;
-      }
-    }
-    for (let n = 10; n <= 18; n++) {
-      const h = state.holes.find((e) => e.holeNumber === n);
-      if (!h || !holeIsComplete(h)) {
-        backComplete = false;
-      } else {
-        back += holeStrokes(h) - h.par;
-      }
-    }
+    let anyFront = false;
+    let anyBack = false;
     for (const h of state.holes) {
-      if (holeIsComplete(h)) total += holeStrokes(h) - h.par;
+      if (!holeIsComplete(h)) continue;
+      const vsPar = holeStrokes(h) - h.par;
+      total += vsPar;
+      if (h.holeNumber <= 9) {
+        front += vsPar;
+        anyFront = true;
+      } else {
+        back += vsPar;
+        anyBack = true;
+      }
     }
     return {
-      front: frontComplete ? front : null,
-      back: backComplete ? back : null,
+      front: anyFront ? front : null,
+      back: anyBack ? back : null,
       total,
       vsPar: total,
     };
@@ -581,11 +610,70 @@ export function RoundSessionProvider({
     return any ? total : null;
   }, [state.holes]);
 
+  // Writes the whole draft to the DB in FK order (round → holes → shots).
+  // persistOrQueue enqueues any failed write into the offline queue, so the
+  // draft can be cleared unconditionally — data is never lost, and keeping
+  // the draft after a partial submit would create two sources of truth.
+  const submitRound = useCallback(async (): Promise<SubmitRoundResult> => {
+    if (!isDraftRef.current || submittingRef.current) {
+      return { ok: true, queued: false };
+    }
+    if (!draftRoundRef.current) {
+      return { ok: false, queued: false, message: 'Draft round data missing' };
+    }
+    submittingRef.current = true;
+    try {
+      let queued = false;
+      let message: string | undefined;
+      const track = (r: PersistResult) => {
+        if (r.status !== 'saved') queued = true;
+        if (r.status === 'queued-error') message = r.message;
+      };
+      track(
+        await persistOrQueue({
+          type: 'upsertRound',
+          payload: draftRoundRef.current,
+        }),
+      );
+      for (const h of state.holes) {
+        track(
+          await persistOrQueue({
+            type: 'upsertHole',
+            payload: {
+              id: h.holeId,
+              round_id: state.roundId,
+              hole_number: h.holeNumber,
+              par: h.par,
+            },
+          }),
+        );
+        const ordered = [...h.shots].sort(
+          (a, b) => a.shot_number - b.shot_number,
+        );
+        for (const s of ordered) {
+          const { created_at: _c, updated_at: _u, ...insert } = s;
+          track(
+            await persistOrQueue({ type: 'upsertShot', payload: insert }),
+          );
+        }
+      }
+      // Leave draft mode before removing the draft so the persist effect
+      // can't resurrect it on an interleaved re-render.
+      isDraftRef.current = false;
+      setIsDraft(false);
+      removeDraft(state.roundId);
+      return { ok: true, queued, message };
+    } finally {
+      submittingRef.current = false;
+    }
+  }, [state.holes, state.roundId]);
+
   const value = useMemo<RoundSessionContextValue>(
     () => ({
       state,
       loading,
       error,
+      isDraft,
       getHole,
       setPar,
       saveShot,
@@ -598,11 +686,13 @@ export function RoundSessionProvider({
       setLastActiveHole,
       isRoundComplete,
       getTotalYardage,
+      submitRound,
     }),
     [
       state,
       loading,
       error,
+      isDraft,
       getHole,
       setPar,
       saveShot,
@@ -615,6 +705,7 @@ export function RoundSessionProvider({
       setLastActiveHole,
       isRoundComplete,
       getTotalYardage,
+      submitRound,
     ],
   );
 

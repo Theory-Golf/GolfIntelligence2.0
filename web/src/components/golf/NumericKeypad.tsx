@@ -59,13 +59,13 @@ export function NumericKeypad({
     };
   }
 
-  function keyClass(key: string, extra = '') {
+  function keyClass(key: string, extra = '', muted = false) {
     const pressed = pressedKey === key;
     return (
       'rounded-md py-2.5 select-none touch-manipulation ' +
       (pressed
         ? 'bg-pitch border border-chalk scale-95 '
-        : 'bg-shadow border border-border transition-[background-color,border-color,transform] duration-150 ') +
+        : `${muted ? 'bg-obsidian' : 'bg-shadow'} border border-border transition-[background-color,border-color,transform] duration-150 `) +
       extra
     );
   }
@@ -97,6 +97,7 @@ export function NumericKeypad({
           className={keyClass(
             'clear',
             'font-mono text-[11px] tracking-[0.2em] uppercase text-ash',
+            true,
           )}
         >
           Clear
@@ -114,7 +115,8 @@ export function NumericKeypad({
           aria-label="Backspace"
           className={keyClass(
             'backspace',
-            'font-mono text-lg text-chalk flex items-center justify-center',
+            'font-mono text-lg text-ash flex items-center justify-center',
+            true,
           )}
         >
           ⌫

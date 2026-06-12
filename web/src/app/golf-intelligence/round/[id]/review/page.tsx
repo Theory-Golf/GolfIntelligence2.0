@@ -53,6 +53,8 @@ export default function RoundReviewPage() {
   const router = useRouter();
   const session = useRoundSession();
   const [mode, setMode] = useState<'review' | 'editing'>('review');
+  const [submitting, setSubmitting] = useState(false);
+  const [submitNote, setSubmitNote] = useState<string | null>(null);
 
   const roundId = params?.id ?? '';
 
@@ -107,6 +109,22 @@ export default function RoundReviewPage() {
       router.push(
         `/golf-intelligence/round/${roundId}/hole/${lowestIncompleteHole()}`,
       );
+    }
+  }
+
+  async function handleSubmitRound() {
+    if (submitting) return;
+    setSubmitting(true);
+    setSubmitNote(null);
+    try {
+      const result = await session.submitRound();
+      if (result.ok) {
+        router.push('/golf-intelligence');
+      } else {
+        setSubmitNote(result.message ?? 'Submit failed — try again.');
+      }
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -236,6 +254,30 @@ export default function RoundReviewPage() {
             </p>
           )}
         </section>
+
+        {/* Submit round — the round only reaches the database here */}
+        {session.isDraft && (
+          <section className="flex flex-col gap-2 pt-2">
+            <button
+              type="button"
+              disabled={!roundComplete || submitting}
+              onClick={handleSubmitRound}
+              className="w-full rounded-md py-3 bg-chalk text-pitch border border-chalk font-display font-extrabold text-sm tracking-[0.25em] uppercase disabled:opacity-40"
+            >
+              {submitting ? 'Saving…' : 'Submit round'}
+            </button>
+            {!roundComplete && (
+              <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-ash text-center">
+                Complete all 18 holes to submit
+              </p>
+            )}
+            {submitNote && (
+              <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-scarlet text-center">
+                {submitNote}
+              </p>
+            )}
+          </section>
+        )}
       </div>
     </div>
   );
