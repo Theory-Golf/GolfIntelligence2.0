@@ -191,6 +191,53 @@ export const ACTIVITIES: Activity[] = [
   },
 
   {
+    id: 'inside-ten',
+    name: 'Inside Ten',
+    category: 'putting',
+    type: 'skill_assessment',
+    description:
+      '18 putts across six ladders from 3 to 10 feet — the par-save and birdie-conversion range. Single-input scoring with Strokes Gained tracked across the makeable band.',
+    connected_drivers: [
+      {
+        driver_id: 'M1',
+        connection:
+          'Scores make rate across the 3–10 ft makeable band where putting SG is won or lost',
+      },
+      {
+        driver_id: 'M2',
+        connection:
+          'SG-by-ladder breakdown surfaces the primary loss bucket inside ten feet',
+      },
+    ],
+  },
+
+  {
+    id: 'inside-twenty',
+    name: 'Inside Twenty',
+    category: 'putting',
+    type: 'skill_assessment',
+    description:
+      'Eighteen putts across six ladders from 5 to 19 feet — the mid-range conversion zone. Tier-based performance tracking across the distances where rounds are won or lost.',
+    connected_drivers: [
+      {
+        driver_id: 'M1',
+        connection:
+          'Benchmarks make rate across the 5–19 ft mid-range band against tier thresholds',
+      },
+      {
+        driver_id: 'M2',
+        connection:
+          'Per-ladder tiering identifies the primary loss bucket in the conversion zone',
+      },
+      {
+        driver_id: 'L1',
+        connection:
+          'Longer ladders (15–19 ft) double as lag putt proximity checks',
+      },
+    ],
+  },
+
+  {
     id: 'winners-circle',
     name: 'Winners Circle',
     category: 'putting',

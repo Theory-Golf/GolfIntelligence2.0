@@ -12,6 +12,9 @@ import type { Activity } from '@/data/practiceActivities';
 const ACTIVITY_ROUTES: Record<string, string> = {
   'round-simulation': '/player-path/round-simulation',
   'lag-putt-test': '/player-path/lag-putt-test',
+  'inside-ten': '/player-path/putting/inside-ten',
+  'inside-twenty': '/player-path/putting/inside-twenty',
+  'winners-circle': '/player-path/putting/winners-circle',
   'wedge-standard': '/player-path/wedge-standard',
   'approach-standard': '/player-path/approach-standard',
   'driver-standard': '/player-path/driver-standard',
