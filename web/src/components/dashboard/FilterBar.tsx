@@ -5,7 +5,7 @@
  * Collapsible sidebar on the left
  */
 
-import type { FilterState, FilterOptions } from '@/lib/golf/types';
+import type { FilterState, FilterOptions, FilterOption } from '@/lib/golf/types';
 
 interface FilterBarProps {
   filters: FilterState;
@@ -25,9 +25,9 @@ export function FilterBar({ filters, options, validOptions, onFilterChange, onCl
   };
 
   const hasActiveFilters =
-    filters.players.length > 0 ||
-    filters.courses.length > 0 ||
-    filters.tournaments.length > 0 ||
+    filters.playerIds.length > 0 ||
+    filters.courseIds.length > 0 ||
+    filters.roundTypes.length > 0 ||
     filters.dates.length > 0;
 
   function handleMultiSelect(field: keyof FilterState, value: string) {
@@ -49,32 +49,35 @@ export function FilterBar({ filters, options, validOptions, onFilterChange, onCl
             onClick={handleToggle}
             title={isCollapsed ? 'Expand filters' : 'Collapse filters'}
           >
-            {isCollapsed ? '\u25B6' : '\u25C0'}
+            {isCollapsed ? '▶' : '◀'}
           </button>
         </div>
 
         {!isCollapsed && (
           <div className="filter-sidebar-content">
-            <FilterMultiSelect
-              label="Player"
-              selected={filters.players}
-              available={options.players}
-              valid={validOptions.players}
-              onChange={(val) => handleMultiSelect('players', val)}
-            />
+            {/* Hide the Player section when only one player is visible (non-coach) */}
+            {options.players.length > 1 && (
+              <FilterMultiSelect
+                label="Player"
+                selected={filters.playerIds}
+                available={options.players}
+                valid={validOptions.players}
+                onChange={(val) => handleMultiSelect('playerIds', val)}
+              />
+            )}
             <FilterMultiSelect
               label="Course"
-              selected={filters.courses}
+              selected={filters.courseIds}
               available={options.courses}
               valid={validOptions.courses}
-              onChange={(val) => handleMultiSelect('courses', val)}
+              onChange={(val) => handleMultiSelect('courseIds', val)}
             />
             <FilterMultiSelect
-              label="Tournament"
-              selected={filters.tournaments}
-              available={options.tournaments}
-              valid={validOptions.tournaments}
-              onChange={(val) => handleMultiSelect('tournaments', val)}
+              label="Round Type"
+              selected={filters.roundTypes}
+              available={options.roundTypes}
+              valid={validOptions.roundTypes}
+              onChange={(val) => handleMultiSelect('roundTypes', val)}
             />
             <FilterMultiSelect
               label="Date"
@@ -99,8 +102,8 @@ export function FilterBar({ filters, options, validOptions, onFilterChange, onCl
 interface FilterMultiSelectProps {
   label: string;
   selected: string[];
-  available: string[];
-  valid: string[];
+  available: FilterOption[];
+  valid: FilterOption[];
   onChange: (value: string) => void;
 }
 
@@ -108,6 +111,7 @@ function FilterMultiSelect({ label, selected, available, valid, onChange }: Filt
   if (available.length === 0) return null;
 
   const isActive = selected.length > 0;
+  const validValues = new Set(valid.map(v => v.value));
 
   return (
     <div className="filter-multiselect">
@@ -116,16 +120,16 @@ function FilterMultiSelect({ label, selected, available, valid, onChange }: Filt
       </div>
       <div className="filter-options">
         {available.map(option => {
-          const isValid = valid.includes(option);
+          const isValid = validValues.has(option.value);
           return (
-            <label key={option} className={`filter-option ${!isValid ? 'is-disabled' : ''}`}>
+            <label key={option.value} className={`filter-option ${!isValid ? 'is-disabled' : ''}`}>
               <input
                 type="checkbox"
-                checked={selected.includes(option)}
+                checked={selected.includes(option.value)}
                 disabled={!isValid}
-                onChange={() => onChange(option)}
+                onChange={() => onChange(option.value)}
               />
-              <span className="filter-option-text">{option}</span>
+              <span className="filter-option-text">{option.label}</span>
             </label>
           );
         })}

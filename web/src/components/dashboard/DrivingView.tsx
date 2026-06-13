@@ -7,7 +7,7 @@ import {
 } from 'recharts';
 import type { DrivingMetrics, DrivingAnalysis, ProcessedShot, ProblemDriveMetrics } from '@/lib/golf/types';
 import { getStrokeGainedColor, formatStrokesGained, getShotSGColor, chartColors } from '@/lib/golf/tokens';
-import { calculateProblemDriveMetrics } from '@/lib/golf/calculations';
+import { calculateProblemDriveMetrics, isOutOfBounds } from '@/lib/golf/calculations';
 
 /**
  * Get color based on penalty rate (lower is better)
@@ -37,16 +37,14 @@ export function DrivingView({ metrics, analysis, filteredShots }: { metrics: Dri
   const [driveFilter, setDriveFilter] = useState<'all' | 'driver' | 'non-driver'>('all');
 
   // Filter shots based on drive type
-  // Driver = Did not Hit Driver is "No" or blank/empty
-  // Non Driver = Did not Hit Driver is "Yes"
+  // Driver = clubCategory is 'Driver' or not recorded; Non Driver = 'Non-driver'
   const filteredDrives = useMemo(() => {
     return filteredShots.filter(shot => {
       if (driveFilter === 'all') return shot.shotType === 'Drive';
       if (driveFilter === 'driver') {
-        return shot.shotType === 'Drive' &&
-          (shot['Did not Hit Driver'] === 'No' || shot['Did not Hit Driver'] === '' || shot['Did not Hit Driver'] === undefined);
+        return shot.shotType === 'Drive' && shot.clubCategory !== 'Non-driver';
       }
-      if (driveFilter === 'non-driver') return shot.shotType === 'Drive' && shot['Did not Hit Driver'] === 'Yes';
+      if (driveFilter === 'non-driver') return shot.shotType === 'Drive' && shot.clubCategory === 'Non-driver';
       return false;
     });
   }, [filteredShots, driveFilter]);
@@ -76,7 +74,7 @@ export function DrivingView({ metrics, analysis, filteredShots }: { metrics: Dri
     }
 
     // Calculate fairways
-    const fairwaysHit = drives.filter(d => d['Ending Lie'] === 'Fairway').length;
+    const fairwaysHit = drives.filter(d => d.endingLie === 'Fairway').length;
     const fairwayPct = (fairwaysHit / totalDrives) * 100;
 
     // Calculate SG
@@ -84,23 +82,23 @@ export function DrivingView({ metrics, analysis, filteredShots }: { metrics: Dri
     const avgDrivingSG = drivingSG / totalDrives;
 
     // Fairway % by driver type
-    const driverDrives = drives.filter(d => d['Did not Hit Driver'] === 'No' || d['Did not Hit Driver'] === '' || d['Did not Hit Driver'] === undefined);
-    const nonDriverDrives = drives.filter(d => d['Did not Hit Driver'] === 'Yes');
+    const driverDrives = drives.filter(d => d.clubCategory !== 'Non-driver');
+    const nonDriverDrives = drives.filter(d => d.clubCategory === 'Non-driver');
 
-    const driverFairways = driverDrives.filter(d => d['Ending Lie'] === 'Fairway').length;
-    const nonDriverFairways = nonDriverDrives.filter(d => d['Ending Lie'] === 'Fairway').length;
+    const driverFairways = driverDrives.filter(d => d.endingLie === 'Fairway').length;
+    const nonDriverFairways = nonDriverDrives.filter(d => d.endingLie === 'Fairway').length;
 
     // Calculate driving distance (75th percentile)
-    const driveDistances = drives.map(d => Math.abs(d['Starting Distance'] - d['Ending Distance'])).sort((a, b) => a - b);
+    const driveDistances = drives.map(d => Math.abs(d.startingDistance - d.endingDistance)).sort((a, b) => a - b);
     const distance75thIndex = Math.floor(driveDistances.length * 0.75);
     const drivingDistance75th = driveDistances[distance75thIndex] || 0;
 
     // Calculate penalty rate
-    const obPenalties = drives.filter(d => d.Penalty === 'Yes' && (d['Ending Lie'] === 'Out of Bounds' || d['Ending Lie'] === 'OB')).length;
-    const otherPenalties = drives.filter(d => d.Penalty === 'Yes' && d['Ending Lie'] !== 'Out of Bounds' && d['Ending Lie'] !== 'OB').length;
+    const obPenalties = drives.filter(d => isOutOfBounds(d)).length;
+    const otherPenalties = drives.filter(d => d.hasPenalty && !isOutOfBounds(d)).length;
     const totalPenalties = obPenalties + otherPenalties;
     const penaltyRate = ((obPenalties * 2 + otherPenalties) / totalDrives) * 100;
-    const sgPenalties = drives.filter(d => d.Penalty === 'Yes').reduce((sum, d) => sum + d.calculatedStrokesGained, 0);
+    const sgPenalties = drives.filter(d => d.hasPenalty).reduce((sum, d) => sum + d.calculatedStrokesGained, 0);
 
     // Calculate positive SG percentage
     const positiveDrives = drives.filter(d => d.calculatedStrokesGained > 0).length;
@@ -150,7 +148,7 @@ export function DrivingView({ metrics, analysis, filteredShots }: { metrics: Dri
     const endingLocationsMap = new Map<string, { count: number; strokesGained: number }>();
 
     filteredDrives.forEach(drive => {
-      const location = drive['Ending Lie'] as string;
+      const location = drive.endingLie as string;
       const existing = endingLocationsMap.get(location) || { count: 0, strokesGained: 0 };
       existing.count += 1;
       existing.strokesGained += drive.calculatedStrokesGained;
@@ -535,7 +533,7 @@ function DrivesTableSection({ shots }: { shots: ProcessedShot[] }) {
 
   // Group drives by round (date + course)
   const drivesByRound = drives.reduce((acc, drive) => {
-    const key = `${drive.Date}|${drive.Course}`;
+    const key = `${drive.playedOn}|${drive.courseName}`;
     if (!acc[key]) {
       acc[key] = [];
     }
@@ -605,25 +603,25 @@ function DrivesTableSection({ shots }: { shots: ProcessedShot[] }) {
                   </thead>
                   <tbody>
                     {roundDrives
-                      .sort((a, b) => a.Hole - b.Hole)
+                      .sort((a, b) => a.holeNumber - b.holeNumber)
                       .map((drive, idx) => (
                         <tr key={idx} style={{ borderBottom: '1px solid var(--dark)' }}>
-                          <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{drive.Hole}</td>
-                          <td style={{ padding: '6px', textAlign: 'center', color: drive['Did not Hit Driver'] === 'Yes' ? 'var(--bogey)' : 'var(--chalk)' }}>
-                            {drive['Did not Hit Driver'] === 'Yes' ? 'Yes' : ''}
+                          <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{drive.holeNumber}</td>
+                          <td style={{ padding: '6px', textAlign: 'center', color: drive.clubCategory === 'Non-driver' ? 'var(--bogey)' : 'var(--chalk)' }}>
+                            {drive.clubCategory === 'Non-driver' ? 'Yes' : ''}
                           </td>
                           <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>
-                            {drive['Starting Distance']}
+                            {drive.startingDistance}
                           </td>
                           <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>
-                            {drive['Ending Distance']}
+                            {drive.endingDistance}
                           </td>
-                          <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{drive['Ending Lie']}</td>
-                          <td style={{ padding: '6px', textAlign: 'center', color: drive.Penalty === 'Yes' ? 'var(--scarlet)' : 'transparent' }}>
-                            {drive.Penalty === 'Yes' ? 'Yes' : ''}
+                          <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{drive.endingLie}</td>
+                          <td style={{ padding: '6px', textAlign: 'center', color: drive.hasPenalty ? 'var(--scarlet)' : 'transparent' }}>
+                            {drive.hasPenalty ? 'Yes' : ''}
                           </td>
                           <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>
-                            {drive['Starting Distance'] - drive['Ending Distance']}
+                            {drive.startingDistance - drive.endingDistance}
                           </td>
                           <td style={{ padding: '6px', textAlign: 'center', color: getShotSGColor(drive.calculatedStrokesGained), fontFamily: 'var(--font-mono)' }}>
                             {formatStrokesGained(drive.calculatedStrokesGained)}

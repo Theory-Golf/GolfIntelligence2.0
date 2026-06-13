@@ -28,7 +28,8 @@ See `web/.env.example` for required variables:
 | Variable | Purpose |
 |----------|---------|
 | `FORMSPREE_URL` | Contact form endpoint (server-side) |
-| `NEXT_PUBLIC_GOLF_DATA_URL` | Google Sheets CSV data source |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key (RLS-gated, browser-safe) |
 
 ## Routes
 

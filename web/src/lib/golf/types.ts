@@ -2,37 +2,42 @@
  * Golf Intelligence — Data Types
  */
 
-// Raw shot data from Google Sheet
-export interface RawShot {
-  Player: string;
-  'Round ID': string;
-  Date: string;
-  Course: string;
-  'Weather Difficulty': string;
-  'Course Difficulty': string;
-  Tournament: string;
-  Shot: number;
-  Hole: number;
-  Score: number;
-  'Starting Distance': number;
-  'Starting Lie': string;
-  'Ending Distance': number;
-  'Ending Lie': string;
-  Penalty: string;
-  'Did not Hit Driver': string;
-  'Putt Result': string;
-}
+import type { ClubCategory, Lie, MissDirection, PuttDirection, RoundType } from './db/types';
 
 // Shot type classification
 export type ShotType = 'Drive' | 'Approach' | 'Recovery' | 'Short Game' | 'Putt';
 
-// Processed shot data with computed fields
-export interface ProcessedShot extends RawShot {
-  shotType: ShotType;
+// A shot denormalized with its hole/round/course/player context (from the
+// dashboard_shots Supabase view), plus client-derived fields.
+// Distances are in yards, except FEET when the corresponding lie is Green.
+export interface DashboardShot {
+  shotId: string;
+  playerId: string;
+  playerName: string;
+  roundId: string;
+  playedOn: string; // 'YYYY-MM-DD'
+  roundType: RoundType;
+  roundNumber: number | null;
+  courseId: string | null;
+  courseName: string;
+  holeNumber: number;
   holePar: number;
-  scoreToPar: number; // Will need round-level data to calculate
+  shotNumber: number;
+  startingLie: Lie;
+  startingDistance: number;
+  endingLie: Lie;
+  endingDistance: number;
+  hasPenalty: boolean;
+  clubCategory: ClubCategory | null;
+  missDirection: MissDirection | null;
+  puttLongShort: PuttDirection | null;
+  // Derived client-side
+  shotType: ShotType;
   calculatedStrokesGained: number; // SG calculated from benchmark (not raw data)
 }
+
+// Alias kept so calculation/component signatures read naturally
+export type ProcessedShot = DashboardShot;
 
 // Shot category for aggregation
 export interface ShotCategory {
@@ -61,6 +66,11 @@ export interface RoundSummary {
   roundId: string;
   date: string;
   course: string;
+  playerName: string;
+  roundType: RoundType;
+  roundNumber: number | null;
+  totalScore: number;
+  totalPar: number;
   totalShots: number;
   strokesGained: number;
   avgStrokesGained: number;
@@ -260,6 +270,7 @@ export interface Tab {
 
 export const TABS: Tab[] = [
   { id: 'tiger5', label: 'Tiger 5', path: '/' },
+  { id: 'rounds', label: 'Rounds', path: '/rounds' },
   { id: 'scoring', label: 'Scoring', path: '/scoring' },
   { id: 'sg', label: 'Strokes Gained', path: '/strokes-gained' },
   { id: 'driving', label: 'Driving', path: '/driving' },
@@ -271,18 +282,25 @@ export const TABS: Tab[] = [
 ];
 
 // Filter types
+// Selections are stored as values (player ids, course ids, round types,
+// played-on dates); options carry a display label alongside the value.
+export interface FilterOption {
+  value: string;
+  label: string;
+}
+
 export interface FilterState {
-  players: string[];
-  courses: string[];
-  tournaments: string[];
+  playerIds: string[];
+  courseIds: string[]; // 'unknown' sentinel for rounds with no course
+  roundTypes: string[];
   dates: string[];
 }
 
 export interface FilterOptions {
-  players: string[];
-  courses: string[];
-  tournaments: string[];
-  dates: string[];
+  players: FilterOption[];
+  courses: FilterOption[];
+  roundTypes: FilterOption[];
+  dates: FilterOption[];
 }
 
 // Drive Ending Location types for Driving Analysis

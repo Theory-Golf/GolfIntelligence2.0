@@ -3,47 +3,36 @@
  * Based on your shot classification rules
  */
 
-import type { RawShot, ProcessedShot, ShotType, ShotCategory, Tiger5Metrics, RoundSummary, Tiger5Fail, HoleScore, RootCauseMetrics, Tiger5FailDetail, Tiger5FailDetails, RootCauseByFailTypeList, RootCauseByFailType, Tiger5TrendDataPoint, SGSeparator, SGShotCategory, SGRoundData, DrivingMetrics, DriveEndingLocationData, DriveDistanceRange, DrivingAnalysis, DriveEndingLocationType, ProblemDriveMetrics, ApproachMetrics, ApproachDistanceBucket, ApproachHeatMapCell, ApproachHeatMapData, PuttingMetrics, PuttingDistanceBucket, LagPuttingMetrics, LagDistanceDistribution, ScoringMetrics, ParScoringMetrics, HoleOutcomeData, HoleOutcome, MentalMetrics, BogeyRateByPar, BirdieOpportunityMetrics, ScoringRootCause, BirdieAndBogeyMetrics, ShortGameMetrics, ShortGameHeatMapCell, ShortGameHeatMapData, CoachTableMetrics, CoachTablePlayerMetrics } from './types';
+import type { ProcessedShot, ShotType, ShotCategory, Tiger5Metrics, RoundSummary, Tiger5Fail, HoleScore, RootCauseMetrics, Tiger5FailDetail, Tiger5FailDetails, RootCauseByFailTypeList, RootCauseByFailType, Tiger5TrendDataPoint, SGSeparator, SGShotCategory, SGRoundData, DrivingMetrics, DriveEndingLocationData, DriveDistanceRange, DrivingAnalysis, DriveEndingLocationType, ProblemDriveMetrics, ApproachMetrics, ApproachDistanceBucket, ApproachHeatMapCell, ApproachHeatMapData, PuttingMetrics, PuttingDistanceBucket, LagPuttingMetrics, LagDistanceDistribution, ScoringMetrics, ParScoringMetrics, HoleOutcomeData, HoleOutcome, MentalMetrics, BogeyRateByPar, BirdieOpportunityMetrics, ScoringRootCause, BirdieAndBogeyMetrics, ShortGameMetrics, ShortGameHeatMapCell, ShortGameHeatMapData, CoachTableMetrics, CoachTablePlayerMetrics } from './types';
 import type { BenchmarkType } from './benchmarks';
 import { calculateStrokesGained } from './benchmarks';
-
-/**
- * Calculate Hole Par based on starting distance of first shot
- * - 0-225 yards = Par 3
- * - 226-495 yards = Par 4
- * - 495+ yards = Par 5
- */
-export function calculateHolePar(startingDistance: number): number {
-  if (startingDistance <= 225) return 3;
-  if (startingDistance <= 495) return 4;
-  return 5;
-}
+import type { DashboardShotRow } from './db/dashboard';
 
 /**
  * Group shots by hole and calculate hole scores
  */
 export function getHoleScores(shots: ProcessedShot[]): HoleScore[] {
   const holeMap = new Map<string, ProcessedShot[]>();
-  
+
   shots.forEach(shot => {
-    const key = `${shot['Round ID']}-${shot.Hole}`;
+    const key = `${shot.roundId}-${shot.holeNumber}`;
     if (!holeMap.has(key)) {
       holeMap.set(key, []);
     }
     holeMap.get(key)!.push(shot);
   });
-  
+
   const holeScores: HoleScore[] = [];
-  
+
   holeMap.forEach((holeShots, _key) => {
     const firstShot = holeShots[0];
-    const roundId = firstShot['Round ID'];
-    const hole = firstShot.Hole;
+    const roundId = firstShot.roundId;
+    const hole = firstShot.holeNumber;
     const par = firstShot.holePar;
-    // Score is the number of shots taken on this hole (each shot = 1 stroke)
-    // The CSV Score column is cumulative for the round, so we count shots instead
-    const score = holeShots.length;
-    
+    // Score is shots taken plus penalty strokes (matches the round-entry
+    // app, which counts each penalty as an extra stroke on the hole)
+    const score = holeShots.length + holeShots.filter(s => s.hasPenalty).length;
+
     holeScores.push({
       roundId,
       hole,
@@ -52,7 +41,7 @@ export function getHoleScores(shots: ProcessedShot[]): HoleScore[] {
       shots: holeShots,
     });
   });
-  
+
   return holeScores;
 }
 
@@ -90,8 +79,8 @@ export function calculateTiger5Fails(shots: ProcessedShot[], holeScores: HoleSco
   shots.forEach(shot => {
     if (shot.shotType === 'Putt') {
       // Count total putts on this hole
-      const holeKey = `${shot['Round ID']}-${shot.Hole}`;
-      const holeShots = shots.filter(s => s['Round ID'] === shot['Round ID'] && s.Hole === shot.Hole);
+      const holeKey = `${shot.roundId}-${shot.holeNumber}`;
+      const holeShots = shots.filter(s => s.roundId === shot.roundId && s.holeNumber === shot.holeNumber);
       const puttCount = holeShots.filter(s => s.shotType === 'Putt').length;
       
       if (puttCount >= 3 && !failHoleKeys.has(holeKey + '-3putt')) {
@@ -111,7 +100,7 @@ export function calculateTiger5Fails(shots: ProcessedShot[], holeScores: HoleSco
   // Check Bogey on Par 5, Double Bogey
   holeScores.forEach(hole => {
     const holeKey = `${hole.roundId}-${hole.hole}`;
-    const holeShots = shots.filter(s => s['Round ID'] === hole.roundId && s.Hole === hole.hole);
+    const holeShots = shots.filter(s => s.roundId === hole.roundId && s.holeNumber === hole.hole);
     const holeSG = holeShots.reduce((sum, s) => sum + s.calculatedStrokesGained, 0);
     
     if (hole.par === 5 && hole.score >= 6) {
@@ -137,11 +126,11 @@ export function calculateTiger5Fails(shots: ProcessedShot[], holeScores: HoleSco
   // Shot 1 on par 3, shot 2 on par 4, shot 2 or 3 on par 5
   shots.forEach(shot => {
     if (shot.shotType === 'Approach') {
-      const startDist = shot['Starting Distance'];
-      const startLoc = shot['Starting Lie'];
-      const shotNum = shot.Shot;
-      const holeKey = `${shot['Round ID']}-${shot.Hole}`;
-      const hole = holeScores.find(h => h.roundId === shot['Round ID'] && h.hole === shot.Hole);
+      const startDist = shot.startingDistance;
+      const startLoc = shot.startingLie;
+      const shotNum = shot.shotNumber;
+      const holeKey = `${shot.roundId}-${shot.holeNumber}`;
+      const hole = holeScores.find(h => h.roundId === shot.roundId && h.hole === shot.holeNumber);
       
       if (!hole) return;
       
@@ -160,7 +149,7 @@ export function calculateTiger5Fails(shots: ProcessedShot[], holeScores: HoleSco
         if (!failHoleKeys.has(holeKey + '-bogeyApproach')) {
           bogeyApproach++;
           // Calculate SG for this hole
-          const holeShots = shots.filter(s => s['Round ID'] === shot['Round ID'] && s.Hole === shot.Hole);
+          const holeShots = shots.filter(s => s.roundId === shot.roundId && s.holeNumber === shot.holeNumber);
           const holeSG = holeShots.reduce((sum, s) => sum + s.calculatedStrokesGained, 0);
           bogeyApproachSG += holeSG;
           failHoleKeys.add(holeKey + '-bogeyApproach');
@@ -175,13 +164,13 @@ export function calculateTiger5Fails(shots: ProcessedShot[], holeScores: HoleSco
   // Check Missed Green (Short Game)
   shots.forEach(shot => {
     if (shot.shotType === 'Short Game') {
-      const endLoc = shot['Ending Lie'];
+      const endLoc = shot.endingLie;
       if (endLoc !== 'Green') {
-        const holeKey = `${shot['Round ID']}-${shot.Hole}`;
+        const holeKey = `${shot.roundId}-${shot.holeNumber}`;
         if (!failHoleKeys.has(holeKey + '-missedGreen')) {
           missedGreen++;
           // Calculate SG for this hole
-          const holeShots = shots.filter(s => s['Round ID'] === shot['Round ID'] && s.Hole === shot.Hole);
+          const holeShots = shots.filter(s => s.roundId === shot.roundId && s.holeNumber === shot.holeNumber);
           const holeSG = holeShots.reduce((sum, s) => sum + s.calculatedStrokesGained, 0);
           missedGreenSG += holeSG;
           failHoleKeys.add(holeKey + '-missedGreen');
@@ -208,7 +197,7 @@ export function calculateTiger5Fails(shots: ProcessedShot[], holeScores: HoleSco
   failRoundHoles.forEach(key => {
     const [roundId, holeStr] = key.split('-');
     const hole = parseInt(holeStr);
-    const holeShots = shots.filter(s => s['Round ID'] === roundId && s.Hole === hole);
+    const holeShots = shots.filter(s => s.roundId === roundId && s.holeNumber === hole);
     const holeSG = holeShots.reduce((sum, s) => sum + s.calculatedStrokesGained, 0);
     sgOnFailHoles += holeSG;
   });
@@ -278,7 +267,7 @@ export function calculateRootCause(shots: ProcessedShot[], holeScores: HoleScore
   // We need to identify fail holes from the tiger5Fails counts
   // Check each hole if it had a Tiger 5 fail
   holeScores.forEach(hole => {
-    const holeShots = shots.filter(s => s['Round ID'] === hole.roundId && s.Hole === hole.hole);
+    const holeShots = shots.filter(s => s.roundId === hole.roundId && s.holeNumber === hole.hole);
     if (holeShots.length === 0) return;
     
     const holeKey = `${hole.roundId}-${hole.hole}`;
@@ -289,9 +278,9 @@ export function calculateRootCause(shots: ProcessedShot[], holeScores: HoleScore
     const hasDoubleBogey = hole.score >= hole.par + 2;
     const hasBogeyApproach = holeShots.some(s => {
       if (s.shotType !== 'Approach') return false;
-      const startDist = s['Starting Distance'];
-      const startLoc = s['Starting Lie'];
-      const shotNum = s.Shot;
+      const startDist = s.startingDistance;
+      const startLoc = s.startingLie;
+      const shotNum = s.shotNumber;
       const isValidLocation = ['Fairway', 'Rough', 'Sand'].includes(startLoc);
       const isValidDistance = startDist <= 125;
       let isValidShotNum = false;
@@ -302,7 +291,7 @@ export function calculateRootCause(shots: ProcessedShot[], holeScores: HoleScore
     });
     const hasMissedGreen = holeShots.some(s => {
       if (s.shotType !== 'Short Game') return false;
-      return s['Ending Lie'] !== 'Green';
+      return s.endingLie !== 'Green';
     });
     
     const isFailHole = has3Putts || hasBogeyOnPar5 || hasDoubleBogey || hasBogeyApproach || hasMissedGreen;
@@ -338,10 +327,10 @@ export function calculateRootCause(shots: ProcessedShot[], holeScores: HoleScore
   failHoleKeys.forEach(holeKey => {
     const [roundId, holeStr] = holeKey.split('-');
     const hole = parseInt(holeStr);
-    const holeShots = shots.filter(s => s['Round ID'] === roundId && s.Hole === hole);
+    const holeShots = shots.filter(s => s.roundId === roundId && s.holeNumber === hole);
     
     // Check if hole has penalty
-    const hasPenalty = holeShots.some(s => s.Penalty === 'Yes');
+    const hasPenalty = holeShots.some(s => s.hasPenalty);
     if (hasPenalty) {
       failHolesWithPenalties.add(holeKey);
     }
@@ -359,9 +348,9 @@ export function calculateRootCause(shots: ProcessedShot[], holeScores: HoleScore
     
     if (worstShot) {
       // Categorize the root cause
-      const startDist = worstShot['Starting Distance'];
+      const startDist = worstShot.startingDistance;
       const shotType: ShotType = worstShot.shotType;
-      const isPenalty: boolean = worstShot.Penalty === 'Yes';
+      const isPenalty: boolean = worstShot.hasPenalty;
       const shotSG = worstShot.calculatedStrokesGained;
       
       if (isPenalty) {
@@ -434,12 +423,12 @@ export function calculateTiger5FailDetails(shots: ProcessedShot[], holeScores: H
   };
 
   holeScores.forEach(hole => {
-    const holeShots = shots.filter(s => s['Round ID'] === hole.roundId && s.Hole === hole.hole);
+    const holeShots = shots.filter(s => s.roundId === hole.roundId && s.holeNumber === hole.hole);
     if (holeShots.length === 0) return;
     
     const firstShot = holeShots[0];
-    const date = firstShot.Date;
-    const course = firstShot.Course;
+    const date = firstShot.playedOn;
+    const course = firstShot.courseName;
     
     // Check each fail type
     const puttCount = holeShots.filter(s => s.shotType === 'Putt').length;
@@ -482,9 +471,9 @@ export function calculateTiger5FailDetails(shots: ProcessedShot[], holeScores: H
     // Check Bogey: Approach <125
     const hasBogeyApproach = holeShots.some(s => {
       if (s.shotType !== 'Approach') return false;
-      const startDist = s['Starting Distance'];
-      const startLoc = s['Starting Lie'];
-      const shotNum = s.Shot;
+      const startDist = s.startingDistance;
+      const startLoc = s.startingLie;
+      const shotNum = s.shotNumber;
       const isValidLocation = ['Fairway', 'Rough', 'Sand'].includes(startLoc);
       const isValidDistance = startDist <= 125;
       let isValidShotNum = false;
@@ -509,7 +498,7 @@ export function calculateTiger5FailDetails(shots: ProcessedShot[], holeScores: H
     // Check Missed Green
     const hasMissedGreen = holeShots.some(s => {
       if (s.shotType !== 'Short Game') return false;
-      return s['Ending Lie'] !== 'Green';
+      return s.endingLie !== 'Green';
     });
     
     if (hasMissedGreen) {
@@ -544,18 +533,18 @@ export function calculateTiger5FailDetails(shots: ProcessedShot[], holeScores: H
  */
 export function calculateTiger5Trend(shots: ProcessedShot[], holeScores: HoleScore[]): Tiger5TrendDataPoint[] {
   // Get unique rounds
-  const roundIds = [...new Set(shots.map(s => s['Round ID']))];
+  const roundIds = [...new Set(shots.map(s => s.roundId))];
   const trendData: Tiger5TrendDataPoint[] = [];
 
   roundIds.forEach(roundId => {
-    const roundShots = shots.filter(s => s['Round ID'] === roundId);
+    const roundShots = shots.filter(s => s.roundId === roundId);
     const roundHoleScores = holeScores.filter(h => h.roundId === roundId);
     
     if (roundShots.length === 0 || roundHoleScores.length === 0) return;
     
     const firstShot = roundShots[0];
-    const date = firstShot.Date;
-    const course = firstShot.Course;
+    const date = firstShot.playedOn;
+    const course = firstShot.courseName;
     
     // Calculate total score for the round
     const totalScore = roundHoleScores.reduce((sum, h) => sum + h.score, 0);
@@ -568,7 +557,7 @@ export function calculateTiger5Trend(shots: ProcessedShot[], holeScores: HoleSco
     let missedGreen = 0;
     
     roundHoleScores.forEach(hole => {
-      const holeShots = roundShots.filter(s => s.Hole === hole.hole);
+      const holeShots = roundShots.filter(s => s.holeNumber === hole.hole);
       const puttCount = holeShots.filter(s => s.shotType === 'Putt').length;
       
       if (puttCount >= 3) threePutts++;
@@ -578,9 +567,9 @@ export function calculateTiger5Trend(shots: ProcessedShot[], holeScores: HoleSco
       // Check bogey approach
       const hasBogeyApproach = holeShots.some(s => {
         if (s.shotType !== 'Approach') return false;
-        const startDist = s['Starting Distance'];
-        const startLoc = s['Starting Lie'];
-        const shotNum = s.Shot;
+        const startDist = s.startingDistance;
+        const startLoc = s.startingLie;
+        const shotNum = s.shotNumber;
         const isValidLocation = ['Fairway', 'Rough', 'Sand'].includes(startLoc);
         const isValidDistance = startDist <= 125;
         let isValidShotNum = false;
@@ -594,7 +583,7 @@ export function calculateTiger5Trend(shots: ProcessedShot[], holeScores: HoleSco
       // Check missed green
       const hasMissedGreen = holeShots.some(s => {
         if (s.shotType !== 'Short Game') return false;
-        return s['Ending Lie'] !== 'Green';
+        return s.endingLie !== 'Green';
       });
       if (hasMissedGreen) missedGreen++;
     });
@@ -654,7 +643,7 @@ export function calculateRootCauseByFailType(shots: ProcessedShot[], holeScores:
   const missedGreenByLie: Map<string, { count: number; sgTotal: number }> = new Map();
 
   holeScores.forEach(hole => {
-    const holeShots = shots.filter(s => s['Round ID'] === hole.roundId && s.Hole === hole.hole);
+    const holeShots = shots.filter(s => s.roundId === hole.roundId && s.holeNumber === hole.hole);
     if (holeShots.length === 0) return;
     
     // Find the worst shot (lowest SG) - this is the root cause
@@ -670,10 +659,10 @@ export function calculateRootCauseByFailType(shots: ProcessedShot[], holeScores:
     
     if (!worstShot) return;
     
-    const startDist = worstShot['Starting Distance'];
+    const startDist = worstShot.startingDistance;
     const shotType = worstShot.shotType;
-    const startLie = worstShot['Starting Lie'];
-    const isPenalty = worstShot.Penalty === 'Yes';
+    const startLie = worstShot.startingLie;
+    const isPenalty = worstShot.hasPenalty;
     const shotSG = worstShot.calculatedStrokesGained;
     
     // Determine which fail type this hole is
@@ -683,9 +672,9 @@ export function calculateRootCauseByFailType(shots: ProcessedShot[], holeScores:
     const isDoubleBogey = hole.score >= hole.par + 2;
     const hasBogeyApproach = holeShots.some(s => {
       if (s.shotType !== 'Approach') return false;
-      const sDist = s['Starting Distance'];
-      const sLoc = s['Starting Lie'];
-      const sNum = s.Shot;
+      const sDist = s.startingDistance;
+      const sLoc = s.startingLie;
+      const sNum = s.shotNumber;
       const isValidLocation = ['Fairway', 'Rough', 'Sand'].includes(sLoc);
       const isValidDistance = sDist <= 125;
       let isValidShotNum = false;
@@ -696,7 +685,7 @@ export function calculateRootCauseByFailType(shots: ProcessedShot[], holeScores:
     });
     const hasMissedGreen = holeShots.some(s => {
       if (s.shotType !== 'Short Game') return false;
-      return s['Ending Lie'] !== 'Green';
+      return s.endingLie !== 'Green';
     });
     
     // Categorize root cause
@@ -782,8 +771,7 @@ export function calculateRootCauseByFailType(shots: ProcessedShot[], holeScores:
  * - Short Game: Starting distance <= 50 yards, starting location is not recovery
  * - Putt: Starting location = Green
  */
-export function classifyShotType(shot: RawShot, holePar: number): ShotType {
-  const { 'Starting Lie': startLoc, 'Starting Distance': startDist } = shot;
+export function classifyShotType(startLoc: string, startDist: number, holePar: number): ShotType {
   
   // Putt: Starting location = Green
   if (startLoc === 'Green') {
@@ -820,47 +808,42 @@ export function classifyShotType(shot: RawShot, holePar: number): ShotType {
 }
 
 /**
- * Process raw shots into enhanced shots with computed fields
+ * Process dashboard_shots view rows into enhanced shots with computed fields.
+ * Par comes straight from the holes table (user input at round entry).
  */
-export function processShots(rawShots: RawShot[], benchmark: BenchmarkType = 'pgaTour'): ProcessedShot[] {
-  // Group shots by round and hole to find first shots
-  const firstShotsByHole = new Map<string, RawShot>();
-  
-  rawShots.forEach(shot => {
-    const key = `${shot['Round ID']}-${shot.Hole}`;
-    if (!firstShotsByHole.has(key)) {
-      firstShotsByHole.set(key, shot);
-    }
-  });
-  
-  // Calculate hole pars from first shots
-  const holePars = new Map<string, number>();
-  firstShotsByHole.forEach((shot, key) => {
-    holePars.set(key, calculateHolePar(shot['Starting Distance']));
-  });
-  
-  // Process each shot
-  return rawShots.map(shot => {
-    const roundHoleKey = `${shot['Round ID']}-${shot.Hole}`;
-    const holePar = holePars.get(roundHoleKey) || 4;
-    
-    // Calculate SG using benchmark
-    // Pass penalty flag: shot.Penalty === 'Yes' means this shot resulted in a penalty
-    const isPenalty = shot.Penalty === 'Yes';
+export function processShots(rows: DashboardShotRow[], benchmark: BenchmarkType = 'pgaTour'): ProcessedShot[] {
+  return rows.map(row => {
     const calculatedSG = calculateStrokesGained(
       benchmark,
-      shot['Starting Distance'],
-      shot['Starting Lie'],
-      shot['Ending Distance'],
-      shot['Ending Lie'],
-      isPenalty
+      row.starting_distance,
+      row.starting_lie,
+      row.ending_distance,
+      row.ending_lie,
+      row.has_penalty
     );
-    
+
     return {
-      ...shot,
-      holePar,
-      shotType: classifyShotType(shot, holePar),
-      scoreToPar: 0, // Will be calculated at round level
+      shotId: row.shot_id,
+      playerId: row.player_id,
+      playerName: row.player_name,
+      roundId: row.round_id,
+      playedOn: row.played_on,
+      roundType: row.round_type,
+      roundNumber: row.round_number,
+      courseId: row.course_id,
+      courseName: row.course_name,
+      holeNumber: row.hole_number,
+      holePar: row.hole_par,
+      shotNumber: row.shot_number,
+      startingLie: row.starting_lie,
+      startingDistance: row.starting_distance,
+      endingLie: row.ending_lie,
+      endingDistance: row.ending_distance,
+      hasPenalty: row.has_penalty,
+      clubCategory: row.club_category,
+      missDirection: row.miss_direction,
+      puttLongShort: row.putt_long_short,
+      shotType: classifyShotType(row.starting_lie, row.starting_distance, row.hole_par),
       calculatedStrokesGained: calculatedSG,
     };
   });
@@ -948,7 +931,7 @@ export function calculateTiger5Metrics(shots: ProcessedShot[]): Tiger5Metrics {
   const avgStrokesGained = totalStrokesGained / totalShots;
   
   // Get unique rounds
-  const roundIds = [...new Set(shots.map(s => s['Round ID']))];
+  const roundIds = [...new Set(shots.map(s => s.roundId))];
   const totalRounds = roundIds.length;
   
   // Calculate fairways (only for par 4 and 5 holes - drives that ended in fairway)
@@ -963,7 +946,7 @@ export function calculateTiger5Metrics(shots: ProcessedShot[]): Tiger5Metrics {
     // Fairway tracking: Drive (shot 1 on par 4/5) that ended in Fairway
     if (shot.shotType === 'Drive' && shot.holePar >= 4) {
       fairwaysTotal++;
-      if (shot['Ending Lie'] === 'Fairway') {
+      if (shot.endingLie === 'Fairway') {
         fairwaysHit++;
       }
     }
@@ -971,7 +954,7 @@ export function calculateTiger5Metrics(shots: ProcessedShot[]): Tiger5Metrics {
     // GIR tracking: Approach shot that ended on green
     if (shot.shotType === 'Approach') {
       girTotal++;
-      if (shot['Ending Lie'] === 'Green') {
+      if (shot.endingLie === 'Green') {
         gir++;
       }
     }
@@ -1010,26 +993,14 @@ export function calculateTiger5Metrics(shots: ProcessedShot[]): Tiger5Metrics {
   // Calculate round scores (total strokes per round)
   const roundScores = new Map<string, number>();
   const roundSG = new Map<string, number>();
-  
-  shots.forEach(shot => {
-    const roundId = shot['Round ID'];
-    if (!roundScores.has(roundId)) {
-      roundScores.set(roundId, 0);
-      roundSG.set(roundId, 0);
-    }
-    // Get the last shot's score for this round to get total score
-  });
-  
-  // Get score per round (using the last shot's Score value for each hole, then summing)
+
+  // Get score per round by summing hole scores (shots + penalty strokes)
   roundIds.forEach(roundId => {
-    const roundShots = shots.filter(s => s['Round ID'] === roundId);
-    // Find max score (total score for the round)
-    let maxScore = 0;
-    roundShots.forEach(s => {
-      if (s.Score > maxScore) maxScore = s.Score;
-    });
-    roundScores.set(roundId, maxScore);
-    
+    const roundShots = shots.filter(s => s.roundId === roundId);
+    const roundHoleScores = getHoleScores(roundShots);
+    const totalScore = roundHoleScores.reduce((sum, h) => sum + h.score, 0);
+    roundScores.set(roundId, totalScore);
+
     // Calculate SG per round
     const sg = roundShots.reduce((sum, s) => sum + s.calculatedStrokesGained, 0);
     roundSG.set(roundId, sg);
@@ -1070,7 +1041,7 @@ export function getRoundSummaries(shots: ProcessedShot[]): RoundSummary[] {
   const roundMap = new Map<string, ProcessedShot[]>();
   
   shots.forEach(shot => {
-    const roundId = shot['Round ID'];
+    const roundId = shot.roundId;
     if (!roundMap.has(roundId)) {
       roundMap.set(roundId, []);
     }
@@ -1086,19 +1057,29 @@ export function getRoundSummaries(shots: ProcessedShot[]): RoundSummary[] {
     
     // Count fairways
     const drives = roundShots.filter(s => s.shotType === 'Drive' && s.holePar >= 4);
-    const fairwaysHit = drives.filter(s => s['Ending Lie'] === 'Fairway').length;
+    const fairwaysHit = drives.filter(s => s.endingLie === 'Fairway').length;
     
     // Count GIR
     const approaches = roundShots.filter(s => s.shotType === 'Approach');
-    const gir = approaches.filter(s => s['Ending Lie'] === 'Green').length;
+    const gir = approaches.filter(s => s.endingLie === 'Green').length;
     
     // Count penalties
-    const penalties = roundShots.filter(s => s.Penalty === 'Yes').length;
-    
+    const penalties = roundShots.filter(s => s.hasPenalty).length;
+
+    // Total score and par from hole scores (shots + penalty strokes)
+    const holeScores = getHoleScores(roundShots);
+    const totalScore = holeScores.reduce((sum, h) => sum + h.score, 0);
+    const totalPar = holeScores.reduce((sum, h) => sum + h.par, 0);
+
     summaries.push({
       roundId,
-      date: firstShot.Date,
-      course: firstShot.Course,
+      date: firstShot.playedOn,
+      course: firstShot.courseName,
+      playerName: firstShot.playerName,
+      roundType: firstShot.roundType,
+      roundNumber: firstShot.roundNumber,
+      totalScore,
+      totalPar,
       totalShots: roundShots.length,
       strokesGained: totalSG,
       avgStrokesGained: totalSG / roundShots.length,
@@ -1133,7 +1114,7 @@ export function calculateSGSeparators(shots: ProcessedShot[]): SGSeparator[] {
   // SG Short shots 0-35 yards - Shot type Short Game + Starting distance 0-35 yards
   const shortShots0to35 = shots.filter(s => {
     if (s.shotType !== 'Short Game') return false;
-    const startDist = s['Starting Distance'];
+    const startDist = s.startingDistance;
     return startDist >= 0 && startDist <= 35;
   });
   const shortShots0to35SG = shortShots0to35.reduce((sum, s) => sum + s.calculatedStrokesGained, 0);
@@ -1141,7 +1122,7 @@ export function calculateSGSeparators(shots: ProcessedShot[]): SGSeparator[] {
   // SG Short Approach 100-150 - Shot type Approach + Starting distance 100-150 yards
   const shortApproach100to150 = shots.filter(s => {
     if (s.shotType !== 'Approach') return false;
-    const startDist = s['Starting Distance'];
+    const startDist = s.startingDistance;
     return startDist >= 100 && startDist <= 150;
   });
   const shortApproach100to150SG = shortApproach100to150.reduce((sum, s) => sum + s.calculatedStrokesGained, 0);
@@ -1149,7 +1130,7 @@ export function calculateSGSeparators(shots: ProcessedShot[]): SGSeparator[] {
   // SG Distance Wedges 50-100 - Shot type Approach + Starting distance 50-100 yards
   const distanceWedges50to100 = shots.filter(s => {
     if (s.shotType !== 'Approach') return false;
-    const startDist = s['Starting Distance'];
+    const startDist = s.startingDistance;
     return startDist >= 50 && startDist <= 100;
   });
   const distanceWedges50to100SG = distanceWedges50to100.reduce((sum, s) => sum + s.calculatedStrokesGained, 0);
@@ -1157,7 +1138,7 @@ export function calculateSGSeparators(shots: ProcessedShot[]): SGSeparator[] {
   // SG Putting 5-12 feet - Putts from 5-12 feet
   const putting5to12 = shots.filter(s => {
     if (s.shotType !== 'Putt') return false;
-    const startDist = s['Starting Distance'];
+    const startDist = s.startingDistance;
     return startDist >= 5 && startDist <= 12;
   });
   const putting5to12SG = putting5to12.reduce((sum, s) => sum + s.calculatedStrokesGained, 0);
@@ -1256,11 +1237,11 @@ function getShotTypesForCategory(category: SGShotCategory): ShotType[] {
  * OB: Ending lie and distance is the same as starting lie and distance AND shot has a penalty
  */
 export function isOutOfBounds(shot: ProcessedShot): boolean {
-  if (shot.Penalty !== 'Yes') {
+  if (!shot.hasPenalty) {
     return false;
   }
-  return shot['Starting Lie'] === shot['Ending Lie'] && 
-         shot['Starting Distance'] === shot['Ending Distance'];
+  return shot.startingLie === shot.endingLie && 
+         shot.startingDistance === shot.endingDistance;
 }
 
 /**
@@ -1303,17 +1284,17 @@ export function calculateDrivingMetrics(shots: ProcessedShot[]): DrivingMetrics 
   }
   
   // Calculate fairways (drives that ended in Fairway)
-  const fairwaysHit = drives.filter(d => d['Ending Lie'] === 'Fairway').length;
+  const fairwaysHit = drives.filter(d => d.endingLie === 'Fairway').length;
   const fairwayPct = (fairwaysHit / drives.length) * 100;
   
   // Calculate fairway % by driver type
   // Driver: Did not hit driver = No (or empty/undefined)
   // Non-Driver: Did not hit driver = Yes
-  const driverDrives = drives.filter(d => d['Did not Hit Driver'] !== 'Yes');
-  const nonDriverDrives = drives.filter(d => d['Did not Hit Driver'] === 'Yes');
+  const driverDrives = drives.filter(d => d.clubCategory !== 'Non-driver');
+  const nonDriverDrives = drives.filter(d => d.clubCategory === 'Non-driver');
   
-  const driverFairways = driverDrives.filter(d => d['Ending Lie'] === 'Fairway').length;
-  const nonDriverFairways = nonDriverDrives.filter(d => d['Ending Lie'] === 'Fairway').length;
+  const driverFairways = driverDrives.filter(d => d.endingLie === 'Fairway').length;
+  const nonDriverFairways = nonDriverDrives.filter(d => d.endingLie === 'Fairway').length;
   
   const fairwayPctDriver = driverDrives.length > 0 ? (driverFairways / driverDrives.length) * 100 : 0;
   const fairwayPctNonDriver = nonDriverDrives.length > 0 ? (nonDriverFairways / nonDriverDrives.length) * 100 : 0;
@@ -1325,7 +1306,7 @@ export function calculateDrivingMetrics(shots: ProcessedShot[]): DrivingMetrics 
   // Calculate 75th percentile of driving distances
   // For each drive, calculate the absolute difference between starting and ending distance
   const drivingDistances = drives
-    .map(d => Math.abs(d['Starting Distance'] - d['Ending Distance']))
+    .map(d => Math.abs(d.startingDistance - d.endingDistance))
     .filter(d => d > 0); // Filter out drives where distance didn't change (likely penalties)
   const drivingDistance75th = calculate75thPercentile(drivingDistances);
   
@@ -1336,7 +1317,7 @@ export function calculateDrivingMetrics(shots: ProcessedShot[]): DrivingMetrics 
   let sgPenalties = 0; // Total SG for drives with a penalty shot
   
   drives.forEach(drive => {
-    if (drive.Penalty === 'Yes') {
+    if (drive.hasPenalty) {
       totalPenalties++;
       sgPenalties += drive.calculatedStrokesGained;
       if (isOutOfBounds(drive)) {
@@ -1389,7 +1370,7 @@ export function getRoundSGByShotType(shots: ProcessedShot[], category: SGShotCat
   const roundMap = new Map<string, ProcessedShot[]>();
   
   filteredShots.forEach(shot => {
-    const roundId = shot['Round ID'];
+    const roundId = shot.roundId;
     if (!roundMap.has(roundId)) {
       roundMap.set(roundId, []);
     }
@@ -1408,8 +1389,8 @@ export function getRoundSGByShotType(shots: ProcessedShot[], category: SGShotCat
     roundData.push({
       roundId,
       roundNumber: 0, // Will be assigned after sorting
-      date: firstShot.Date,
-      course: firstShot.Course,
+      date: firstShot.playedOn,
+      course: firstShot.courseName,
       strokesGained: totalSG,
       shotCount: roundShots.length,
       avgStrokesGained: totalSG / roundShots.length,
@@ -1469,7 +1450,7 @@ export function calculateDriveEndingLocations(shots: ProcessedShot[]): DriveEndi
   const locationCounts = new Map<DriveEndingLocationType, { count: number; sgTotal: number }>();
   
   drives.forEach(drive => {
-    const normalizedLocation = normalizeEndingLie(drive['Ending Lie']);
+    const normalizedLocation = normalizeEndingLie(drive.endingLie);
     const current = locationCounts.get(normalizedLocation) || { count: 0, sgTotal: 0 };
     locationCounts.set(normalizedLocation, {
       count: current.count + 1,
@@ -1519,7 +1500,7 @@ export function calculateDriveDistanceAnalysis(shots: ProcessedShot[]): DriveDis
   
   // Calculate drive distance for each drive
   const drivesWithDistance = drives.map(drive => {
-    const distance = Math.abs(drive['Starting Distance'] - drive['Ending Distance']);
+    const distance = Math.abs(drive.startingDistance - drive.endingDistance);
     return {
       ...drive,
       driveDistance: distance
@@ -1621,7 +1602,7 @@ export function calculateProblemDriveMetrics(shots: ProcessedShot[]): ProblemDri
   // Process each drive
   drives.forEach(drive => {
     // Check for penalties
-    if (drive.Penalty === 'Yes') {
+    if (drive.hasPenalty) {
       totalPenalties++;
       penaltySG += drive.calculatedStrokesGained;
 
@@ -1636,13 +1617,13 @@ export function calculateProblemDriveMetrics(shots: ProcessedShot[]): ProblemDri
     }
 
     // Check for Sand
-    if (drive['Ending Lie'] === 'Sand') {
+    if (drive.endingLie === 'Sand') {
       sandCount++;
       sandSG += drive.calculatedStrokesGained;
     }
 
     // Check for Recovery (drive ending in recovery lie)
-    if (drive['Ending Lie'] === 'Recovery') {
+    if (drive.endingLie === 'Recovery') {
       recoveryCount++;
       recoverySG += drive.calculatedStrokesGained;
     }
@@ -1730,15 +1711,15 @@ export function calculateApproachMetrics(shots: ProcessedShot[]): ApproachMetric
   const positiveSGPct = (positiveSGCount / approaches.length) * 100;
   
   // Green Hit % - approaches ending on Green
-  const greenHits = approaches.filter(s => s['Ending Lie'] === 'Green').length;
+  const greenHits = approaches.filter(s => s.endingLie === 'Green').length;
   const greenHitPct = (greenHits / approaches.length) * 100;
   
   // Green Hit % by starting lie (Fairway, Rough)
-  const approachesFairway = approaches.filter(s => s['Starting Lie'] === 'Fairway');
-  const approachesRough = approaches.filter(s => s['Starting Lie'] === 'Rough');
+  const approachesFairway = approaches.filter(s => s.startingLie === 'Fairway');
+  const approachesRough = approaches.filter(s => s.startingLie === 'Rough');
   
-  const greenHitsFairway = approachesFairway.filter(s => s['Ending Lie'] === 'Green').length;
-  const greenHitsRough = approachesRough.filter(s => s['Ending Lie'] === 'Green').length;
+  const greenHitsFairway = approachesFairway.filter(s => s.endingLie === 'Green').length;
+  const greenHitsRough = approachesRough.filter(s => s.endingLie === 'Green').length;
   
   const totalApproachesFairway = approachesFairway.length;
   const totalApproachesRough = approachesRough.length;
@@ -1755,37 +1736,37 @@ export function calculateApproachMetrics(shots: ProcessedShot[]): ApproachMetric
   // Proximity = ending distance from hole (Ending Distance)
   // Note: For shots NOT on green, ending distance is in YARDS and needs to be converted to FEET (x3)
   // For shots on green, ending distance is already in FEET
-  const approachesUnder150 = approaches.filter(s => s['Starting Distance'] <= 150);
-  const approachesOver150 = approaches.filter(s => s['Starting Distance'] > 150);
+  const approachesUnder150 = approaches.filter(s => s.startingDistance <= 150);
+  const approachesOver150 = approaches.filter(s => s.startingDistance > 150);
   
   const proximityUnder150Count = approachesUnder150.length;
   // Convert yards to feet for shots not on green
   const proximityUnder150 = proximityUnder150Count > 0 
     ? approachesUnder150.reduce((sum, s) => {
-        const endingDist = s['Ending Distance'];
+        const endingDist = s.endingDistance;
         // If not on green, distance is in yards - convert to feet
-        const distInFeet = s['Ending Lie'] === 'Green' ? endingDist : endingDist * 3;
+        const distInFeet = s.endingLie === 'Green' ? endingDist : endingDist * 3;
         return sum + distInFeet;
       }, 0) / proximityUnder150Count 
     : 0;
   
   // Proximity < 150 on Green - average proximity for approaches <= 150 yards that ended on green
-  const approachesUnder150OnGreen = approachesUnder150.filter(s => s['Ending Lie'] === 'Green');
+  const approachesUnder150OnGreen = approachesUnder150.filter(s => s.endingLie === 'Green');
   const proximityUnder150OnGreenCount = approachesUnder150OnGreen.length;
   // For green shots, ending distance is already in feet
   const proximityUnder150OnGreen = proximityUnder150OnGreenCount > 0 
-    ? approachesUnder150OnGreen.reduce((sum, s) => sum + s['Ending Distance'], 0) / proximityUnder150OnGreenCount 
+    ? approachesUnder150OnGreen.reduce((sum, s) => sum + s.endingDistance, 0) / proximityUnder150OnGreenCount 
     : 0;
   
   // Within 20 feet - % of approaches ending on the green within 20 feet of the hole
   // Only include shots that end on the green (already in feet)
-  const within20FeetOnGreen = approaches.filter(s => s['Ending Lie'] === 'Green' && s['Ending Distance'] <= 20);
+  const within20FeetOnGreen = approaches.filter(s => s.endingLie === 'Green' && s.endingDistance <= 20);
   const within20FeetCount = within20FeetOnGreen.length;
   const within20FeetPct = (within20FeetCount / approaches.length) * 100;
   
   // Green hit % by distance
-  const greenHitsUnder150 = approachesUnder150.filter(s => s['Ending Lie'] === 'Green').length;
-  const greenHitsOver150 = approachesOver150.filter(s => s['Ending Lie'] === 'Green').length;
+  const greenHitsUnder150 = approachesUnder150.filter(s => s.endingLie === 'Green').length;
+  const greenHitsOver150 = approachesOver150.filter(s => s.endingLie === 'Green').length;
   
   const greenHitPctUnder150 = approachesUnder150.length > 0 
     ? (greenHitsUnder150 / approachesUnder150.length) * 100 
@@ -1838,7 +1819,7 @@ export function calculateApproachByDistance(shots: ProcessedShot[]): ApproachDis
   // Filter to approach shots from Tee and Fairway only
   const approachShots = shots.filter(s => 
     s.shotType === 'Approach' && 
-    (s['Starting Lie'] === 'Tee' || s['Starting Lie'] === 'Fairway')
+    (s.startingLie === 'Tee' || s.startingLie === 'Fairway')
   );
   
   // Define distance buckets
@@ -1852,8 +1833,8 @@ export function calculateApproachByDistance(shots: ProcessedShot[]): ApproachDis
   // Calculate metrics for each bucket
   const results: ApproachDistanceBucket[] = buckets.map(bucket => {
     const bucketShots = approachShots.filter(s => 
-      s['Starting Distance'] >= bucket.minDistance && 
-      s['Starting Distance'] <= bucket.maxDistance
+      s.startingDistance >= bucket.minDistance && 
+      s.startingDistance <= bucket.maxDistance
     );
     
     const totalShots = bucketShots.length;
@@ -1865,7 +1846,7 @@ export function calculateApproachByDistance(shots: ProcessedShot[]): ApproachDis
     const avgStrokesGained = totalShots > 0 ? strokesGained / totalShots : 0;
     
     // Calculate Green Hit %
-    const greenHits = bucketShots.filter(s => s['Ending Lie'] === 'Green').length;
+    const greenHits = bucketShots.filter(s => s.endingLie === 'Green').length;
     const greenHitPct = totalShots > 0 ? (greenHits / totalShots) * 100 : 0;
     
     // Calculate Proximity
@@ -1873,17 +1854,17 @@ export function calculateApproachByDistance(shots: ProcessedShot[]): ApproachDis
     // Shots not on green: ending distance is in yards, convert to feet (×3)
     const proximity = totalShots > 0 
       ? bucketShots.reduce((sum, s) => {
-          const endingDist = s['Ending Distance'];
+          const endingDist = s.endingDistance;
           // If not on green, distance is in yards - convert to feet
-          const distInFeet = s['Ending Lie'] === 'Green' ? endingDist : endingDist * 3;
+          const distInFeet = s.endingLie === 'Green' ? endingDist : endingDist * 3;
           return sum + distInFeet;
         }, 0) / totalShots
       : 0;
     
     // Proximity on green only
-    const greenShots = bucketShots.filter(s => s['Ending Lie'] === 'Green');
+    const greenShots = bucketShots.filter(s => s.endingLie === 'Green');
     const proximityOnGreen = greenShots.length > 0 
-      ? greenShots.reduce((sum, s) => sum + s['Ending Distance'], 0) / greenShots.length
+      ? greenShots.reduce((sum, s) => sum + s.endingDistance, 0) / greenShots.length
       : 0;
     
     return {
@@ -1915,7 +1896,7 @@ export function calculateApproachFromRough(shots: ProcessedShot[]): ApproachDist
   // Filter to approach shots from Rough only
   const roughShots = shots.filter(s => 
     s.shotType === 'Approach' && 
-    s['Starting Lie'] === 'Rough'
+    s.startingLie === 'Rough'
   );
   
   // Define four buckets (same as approach by distance)
@@ -1929,8 +1910,8 @@ export function calculateApproachFromRough(shots: ProcessedShot[]): ApproachDist
   // Calculate metrics for each bucket
   const results: ApproachDistanceBucket[] = buckets.map(bucket => {
     const bucketShots = roughShots.filter(s => 
-      s['Starting Distance'] >= bucket.minDistance && 
-      s['Starting Distance'] <= bucket.maxDistance
+      s.startingDistance >= bucket.minDistance && 
+      s.startingDistance <= bucket.maxDistance
     );
     
     const totalShots = bucketShots.length;
@@ -1942,22 +1923,22 @@ export function calculateApproachFromRough(shots: ProcessedShot[]): ApproachDist
     const avgStrokesGained = totalShots > 0 ? strokesGained / totalShots : 0;
     
     // Calculate Green Hit %
-    const greenHits = bucketShots.filter(s => s['Ending Lie'] === 'Green').length;
+    const greenHits = bucketShots.filter(s => s.endingLie === 'Green').length;
     const greenHitPct = totalShots > 0 ? (greenHits / totalShots) * 100 : 0;
     
     // Calculate Proximity (same logic as before)
     const proximity = totalShots > 0 
       ? bucketShots.reduce((sum, s) => {
-          const endingDist = s['Ending Distance'];
-          const distInFeet = s['Ending Lie'] === 'Green' ? endingDist : endingDist * 3;
+          const endingDist = s.endingDistance;
+          const distInFeet = s.endingLie === 'Green' ? endingDist : endingDist * 3;
           return sum + distInFeet;
         }, 0) / totalShots
       : 0;
     
     // Proximity on green only
-    const greenShots = bucketShots.filter(s => s['Ending Lie'] === 'Green');
+    const greenShots = bucketShots.filter(s => s.endingLie === 'Green');
     const proximityOnGreen = greenShots.length > 0 
-      ? greenShots.reduce((sum, s) => sum + s['Ending Distance'], 0) / greenShots.length
+      ? greenShots.reduce((sum, s) => sum + s.endingDistance, 0) / greenShots.length
       : 0;
     
     return {
@@ -2010,9 +1991,9 @@ export function calculateApproachHeatMapData(shots: ProcessedShot[], totalRounds
     distanceBuckets.forEach(bucket => {
       // Filter shots for this lie and distance bucket
       const cellShots = approachShots.filter(s => 
-        s['Starting Lie'] === lie &&
-        s['Starting Distance'] >= bucket.minDistance &&
-        s['Starting Distance'] <= bucket.maxDistance
+        s.startingLie === lie &&
+        s.startingDistance >= bucket.minDistance &&
+        s.startingDistance <= bucket.maxDistance
       );
       
       const totalShots = cellShots.length;
@@ -2078,13 +2059,13 @@ export function calculatePuttingMetrics(shots: ProcessedShot[]): PuttingMetrics 
   const avgSGPutting = totalSGPutting / putts.length;
   
   // Make % 0-4 ft - made = ending distance is 0
-  const putts0to4Ft = putts.filter(s => s['Starting Distance'] <= 4);
+  const putts0to4Ft = putts.filter(s => s.startingDistance <= 4);
   const total0to4Ft = putts0to4Ft.length;
-  const made0to4Ft = putts0to4Ft.filter(s => s['Ending Distance'] === 0).length;
+  const made0to4Ft = putts0to4Ft.filter(s => s.endingDistance === 0).length;
   const makePct0to4Ft = total0to4Ft > 0 ? (made0to4Ft / total0to4Ft) * 100 : 0;
   
   // Total SG 5-12 ft
-  const putts5to12Ft = putts.filter(s => s['Starting Distance'] >= 5 && s['Starting Distance'] <= 12);
+  const putts5to12Ft = putts.filter(s => s.startingDistance >= 5 && s.startingDistance <= 12);
   const total5to12Ft = putts5to12Ft.length;
   const totalSG5to12Ft = putts5to12Ft.reduce((sum, s) => sum + s.calculatedStrokesGained, 0);
   const avgSG5to12Ft = total5to12Ft > 0 ? totalSG5to12Ft / total5to12Ft : 0;
@@ -2095,7 +2076,7 @@ export function calculatePuttingMetrics(shots: ProcessedShot[]): PuttingMetrics 
   const holePuttsMap = new Map<string, ProcessedShot[]>();
   
   putts.forEach(putt => {
-    const key = `${putt['Round ID']}-${putt.Hole}`;
+    const key = `${putt.roundId}-${putt.holeNumber}`;
     if (!holePuttsMap.has(key)) {
       holePuttsMap.set(key, []);
     }
@@ -2106,20 +2087,20 @@ export function calculatePuttingMetrics(shots: ProcessedShot[]): PuttingMetrics 
   const firstPutts: ProcessedShot[] = [];
   holePuttsMap.forEach((holePutts) => {
     // Sort by Shot number ascending
-    const sorted = [...holePutts].sort((a, b) => a.Shot - b.Shot);
+    const sorted = [...holePutts].sort((a, b) => a.shotNumber - b.shotNumber);
     if (sorted.length > 0) {
       firstPutts.push(sorted[0]);
     }
   });
   
   // Poor Lag: # of first putts >20 feet with ending distance >=5 feet
-  const lagPutts = firstPutts.filter(s => s['Starting Distance'] > 20 && s['Ending Distance'] >= 5);
+  const lagPutts = firstPutts.filter(s => s.startingDistance > 20 && s.endingDistance >= 5);
   const poorLagCount = lagPutts.length;
-  const totalLagPutts = firstPutts.filter(s => s['Starting Distance'] > 20).length;
+  const totalLagPutts = firstPutts.filter(s => s.startingDistance > 20).length;
   
   // Speed Rating: % of first putts >=20ft with Putt Result = Long
-  const longPutts20ft = firstPutts.filter(s => s['Starting Distance'] >= 20 && s['Putt Result'] === 'Long');
-  const totalLongPutts = firstPutts.filter(s => s['Starting Distance'] >= 20).length;
+  const longPutts20ft = firstPutts.filter(s => s.startingDistance >= 20 && s.puttLongShort === 'Long');
+  const totalLongPutts = firstPutts.filter(s => s.startingDistance >= 20).length;
   const longPutts = longPutts20ft.length;
   const speedRating = totalLongPutts > 0 ? (longPutts / totalLongPutts) * 100 : 0;
   
@@ -2169,7 +2150,7 @@ export function calculatePuttingByDistance(shots: ProcessedShot[]): PuttingDista
   // Group putts by hole to find first putts and count for 3-putts
   const holePuttsMap = new Map<string, ProcessedShot[]>();
   putts.forEach(putt => {
-    const key = `${putt['Round ID']}-${putt.Hole}`;
+    const key = `${putt.roundId}-${putt.holeNumber}`;
     if (!holePuttsMap.has(key)) {
       holePuttsMap.set(key, []);
     }
@@ -2182,14 +2163,14 @@ export function calculatePuttingByDistance(shots: ProcessedShot[]): PuttingDista
   
   holePuttsMap.forEach((holePutts) => {
     // Sort by Shot number ascending
-    const sorted = [...holePutts].sort((a, b) => a.Shot - b.Shot);
+    const sorted = [...holePutts].sort((a, b) => a.shotNumber - b.shotNumber);
     if (sorted.length > 0) {
       firstPutts.push(sorted[0]);
       
       // Check for 3-putt hole (3 or more putts)
       if (sorted.length >= 3) {
         const firstPutt = sorted[0];
-        const startDist = firstPutt['Starting Distance'];
+        const startDist = firstPutt.startingDistance;
         
         // Find which bucket the first putt belongs to
         const bucket = buckets.find(b => startDist >= b.minDistance && startDist <= b.maxDistance);
@@ -2204,8 +2185,8 @@ export function calculatePuttingByDistance(shots: ProcessedShot[]): PuttingDista
   // Calculate metrics for each bucket
   const results: PuttingDistanceBucket[] = buckets.map(bucket => {
     const bucketPutts = putts.filter(s => 
-      s['Starting Distance'] >= bucket.minDistance && 
-      s['Starting Distance'] <= bucket.maxDistance
+      s.startingDistance >= bucket.minDistance && 
+      s.startingDistance <= bucket.maxDistance
     );
     
     const totalPutts = bucketPutts.length;
@@ -2216,14 +2197,14 @@ export function calculatePuttingByDistance(shots: ProcessedShot[]): PuttingDista
       : 0;
     
     // Make % - made = ending distance is 0
-    const madePutts = bucketPutts.filter(s => s['Ending Distance'] === 0).length;
+    const madePutts = bucketPutts.filter(s => s.endingDistance === 0).length;
     const makePct = totalPutts > 0 ? (madePutts / totalPutts) * 100 : 0;
     
     // 3 putts
     const threePutts = threePuttsByBucket.get(bucket.label) || 0;
     
     // Speed Ratio - % of putts with Putt Result = "Long"
-    const longPutts = bucketPutts.filter(s => s['Putt Result'] === 'Long').length;
+    const longPutts = bucketPutts.filter(s => s.puttLongShort === 'Long').length;
     const speedRatio = totalPutts > 0 ? (longPutts / totalPutts) * 100 : 0;
     
     // For buckets 13-60 ft: Proximity, Good Lag %, Poor Lag %
@@ -2234,17 +2215,17 @@ export function calculatePuttingByDistance(shots: ProcessedShot[]): PuttingDista
     
     if (isLagBucket && totalPutts > 0) {
       // Proximity of Missed Putts - average ending distance for missed putts
-      const missedPutts = bucketPutts.filter(s => s['Ending Distance'] > 0);
+      const missedPutts = bucketPutts.filter(s => s.endingDistance > 0);
       if (missedPutts.length > 0) {
-        proximityMissed = missedPutts.reduce((sum, s) => sum + s['Ending Distance'], 0) / missedPutts.length;
+        proximityMissed = missedPutts.reduce((sum, s) => sum + s.endingDistance, 0) / missedPutts.length;
       }
       
       // Good Lag % - % of putts <= 3 feet from hole
-      const goodLagPutts = bucketPutts.filter(s => s['Ending Distance'] <= 3);
+      const goodLagPutts = bucketPutts.filter(s => s.endingDistance <= 3);
       goodLagPct = (goodLagPutts.length / totalPutts) * 100;
       
       // Poor Lag % - % of putts >= 5 feet from hole
-      const poorLagPutts = bucketPutts.filter(s => s['Ending Distance'] >= 5);
+      const poorLagPutts = bucketPutts.filter(s => s.endingDistance >= 5);
       poorLagPct = (poorLagPutts.length / totalPutts) * 100;
     }
     
@@ -2293,7 +2274,7 @@ export function calculateLagPuttingMetrics(shots: ProcessedShot[]): LagPuttingMe
   const holePuttsMap = new Map<string, ProcessedShot[]>();
   
   putts.forEach(putt => {
-    const key = `${putt['Round ID']}-${putt.Hole}`;
+    const key = `${putt.roundId}-${putt.holeNumber}`;
     if (!holePuttsMap.has(key)) {
       holePuttsMap.set(key, []);
     }
@@ -2306,7 +2287,7 @@ export function calculateLagPuttingMetrics(shots: ProcessedShot[]): LagPuttingMe
   
   holePuttsMap.forEach((holePutts) => {
     // Sort by Shot number ascending
-    const sorted = [...holePutts].sort((a, b) => a.Shot - b.Shot);
+    const sorted = [...holePutts].sort((a, b) => a.shotNumber - b.shotNumber);
     if (sorted.length > 0) {
       firstPutts.push(sorted[0]);
       
@@ -2318,12 +2299,12 @@ export function calculateLagPuttingMetrics(shots: ProcessedShot[]): LagPuttingMe
   });
   
   // Filter to lag putts (first putts >20 ft)
-  const lagPutts = firstPutts.filter(s => s['Starting Distance'] > 20);
+  const lagPutts = firstPutts.filter(s => s.startingDistance > 20);
   const totalLagPutts = lagPutts.length;
   
   // Calculate avg leave distance
   const avgLeaveDistance = totalLagPutts > 0
-    ? lagPutts.reduce((sum, s) => sum + s['Ending Distance'], 0) / totalLagPutts
+    ? lagPutts.reduce((sum, s) => sum + s.endingDistance, 0) / totalLagPutts
     : 0;
   
   // Chart 1: 3 Putts by First Putt Starting Distance
@@ -2339,8 +2320,8 @@ export function calculateLagPuttingMetrics(shots: ProcessedShot[]): LagPuttingMe
   
   const threePuttsByStartDistance: LagDistanceDistribution[] = threePuttStartBuckets.map(bucket => {
     const count = threePuttHoles.filter(s => 
-      s['Starting Distance'] >= bucket.minDistance && 
-      s['Starting Distance'] <= bucket.maxDistance
+      s.startingDistance >= bucket.minDistance && 
+      s.startingDistance <= bucket.maxDistance
     ).length;
     const percentage = threePuttHoles.length > 0 
       ? (count / threePuttHoles.length) * 100 
@@ -2359,8 +2340,8 @@ export function calculateLagPuttingMetrics(shots: ProcessedShot[]): LagPuttingMe
   
   const leaveDistanceDistribution: LagDistanceDistribution[] = leaveDistanceBuckets.map(bucket => {
     const count = lagPutts.filter(s => 
-      s['Ending Distance'] >= bucket.minDistance && 
-      (bucket.maxDistance === Infinity || s['Ending Distance'] <= bucket.maxDistance)
+      s.endingDistance >= bucket.minDistance && 
+      (bucket.maxDistance === Infinity || s.endingDistance <= bucket.maxDistance)
     ).length;
     const percentage = totalLagPutts > 0 
       ? (count / totalLagPutts) * 100 
@@ -2384,7 +2365,7 @@ export function calculateLagPuttingMetrics(shots: ProcessedShot[]): LagPuttingMe
  * - Bogey: score = par + 1
  * - Double Bogey+: score = par + >= 2
  */
-function getHoleOutcome(score: number, par: number): HoleOutcome {
+export function getHoleOutcome(score: number, par: number): HoleOutcome {
   const scoreToPar = score - par;
   
   if (scoreToPar <= -2) return 'Eagle';
@@ -2404,7 +2385,7 @@ function calculateParMetrics(shots: ProcessedShot[], par: number): ParScoringMet
   // Get unique holes for this par
   const holeKeys = new Set<string>();
   parShots.forEach(shot => {
-    holeKeys.add(`${shot['Round ID']}-${shot.Hole}`);
+    holeKeys.add(`${shot.roundId}-${shot.holeNumber}`);
   });
   
   // Calculate metrics
@@ -2415,7 +2396,7 @@ function calculateParMetrics(shots: ProcessedShot[], par: number): ParScoringMet
   holeKeys.forEach(key => {
     const [roundId, holeStr] = key.split('-');
     const hole = parseInt(holeStr);
-    const holeShots = parShots.filter(s => s['Round ID'] === roundId && s.Hole === hole);
+    const holeShots = parShots.filter(s => s.roundId === roundId && s.holeNumber === hole);
     
     // Score is number of shots on this hole
     const score = holeShots.length;
@@ -2565,15 +2546,15 @@ export function calculateMentalMetrics(shots: ProcessedShot[], _benchmark: Bench
   
   // First, identify Tiger 5 fail holes
   shots.forEach(shot => {
-    const hole = holeScores.find(h => h.roundId === shot['Round ID'] && h.hole === shot.Hole);
+    const hole = holeScores.find(h => h.roundId === shot.roundId && h.hole === shot.holeNumber);
     if (!hole) return;
     
     const isTiger5Fail = isTiger5FailHole(hole, shots);
     if (isTiger5Fail) {
-      if (!t5FailHolesPerRound.has(shot['Round ID'])) {
-        t5FailHolesPerRound.set(shot['Round ID'], new Set());
+      if (!t5FailHolesPerRound.has(shot.roundId)) {
+        t5FailHolesPerRound.set(shot.roundId, new Set());
       }
-      t5FailHolesPerRound.get(shot['Round ID'])!.add(shot.Hole);
+      t5FailHolesPerRound.get(shot.roundId)!.add(shot.holeNumber);
     }
   });
   
@@ -2639,7 +2620,7 @@ export function calculateMentalMetrics(shots: ProcessedShot[], _benchmark: Bench
       const nextHole = roundHoles.find(h => h.hole === failHoleNum + 1);
       if (nextHole) {
         // Get the drive shot on the next hole
-        const driveShot = shots.find(s => s['Round ID'] === roundId && s.Hole === nextHole.hole && s.shotType === 'Drive');
+        const driveShot = shots.find(s => s.roundId === roundId && s.holeNumber === nextHole.hole && s.shotType === 'Drive');
         if (driveShot) {
           // This is a drive after T5 fail
           // We count it in the aggregate below
@@ -2661,7 +2642,7 @@ export function calculateMentalMetrics(shots: ProcessedShot[], _benchmark: Bench
       const nextHole = roundHoles.find(h => h.hole === failHoleNum + 1);
       if (nextHole) {
         // Get the drive shot on the next hole
-        const driveShot = shots.find(s => s['Round ID'] === roundId && s.Hole === nextHole.hole && s.shotType === 'Drive');
+        const driveShot = shots.find(s => s.roundId === roundId && s.holeNumber === nextHole.hole && s.shotType === 'Drive');
         if (driveShot) {
           driveAfterT5FailCount++;
           driveAfterT5FailSG += driveShot.calculatedStrokesGained;
@@ -2703,7 +2684,7 @@ export function calculateMentalMetrics(shots: ProcessedShot[], _benchmark: Bench
  * Check if a hole is a Tiger 5 fail
  */
 function isTiger5FailHole(hole: HoleScore, shots: ProcessedShot[]): boolean {
-  const holeShots = shots.filter(s => s['Round ID'] === hole.roundId && s.Hole === hole.hole);
+  const holeShots = shots.filter(s => s.roundId === hole.roundId && s.holeNumber === hole.hole);
   
   // Check for 3 putts
   const puttCount = holeShots.filter(s => s.shotType === 'Putt').length;
@@ -2718,9 +2699,9 @@ function isTiger5FailHole(hole: HoleScore, shots: ProcessedShot[]): boolean {
   // Check for Bogey: Approach < 125
   const approachShots = holeShots.filter(s => s.shotType === 'Approach');
   for (const approach of approachShots) {
-    const startDist = approach['Starting Distance'];
-    const startLoc = approach['Starting Lie'];
-    const shotNum = approach.Shot;
+    const startDist = approach.startingDistance;
+    const startLoc = approach.startingLie;
+    const shotNum = approach.shotNumber;
     
     const isValidLocation = ['Fairway', 'Rough', 'Sand'].includes(startLoc);
     const isValidDistance = startDist <= 125;
@@ -2738,7 +2719,7 @@ function isTiger5FailHole(hole: HoleScore, shots: ProcessedShot[]): boolean {
   // Check for Missed Green (Short Game)
   const shortGameShots = holeShots.filter(s => s.shotType === 'Short Game');
   for (const sg of shortGameShots) {
-    if (sg['Ending Lie'] !== 'Green') {
+    if (sg.endingLie !== 'Green') {
       return true;
     }
   }
@@ -2799,7 +2780,7 @@ export function calculateBirdieOpportunities(shots: ProcessedShot[], _holeScores
   // Group shots by hole
   const holeMap = new Map<string, ProcessedShot[]>();
   shots.forEach(shot => {
-    const key = `${shot['Round ID']}-${shot.Hole}`;
+    const key = `${shot.roundId}-${shot.holeNumber}`;
     if (!holeMap.has(key)) {
       holeMap.set(key, []);
     }
@@ -2816,7 +2797,7 @@ export function calculateBirdieOpportunities(shots: ProcessedShot[], _holeScores
     // GIR means: on a par 3, you hit the green in 1; par 4 in 2; par 5 in 3
     
     // Find the shot that landed on green
-    const girShot = holeShots.find(s => s['Starting Lie'] === 'Green');
+    const girShot = holeShots.find(s => s.startingLie === 'Green');
     
     if (girShot) {
       // This is a GIR - now check if putt was <= 20 feet
@@ -2828,7 +2809,7 @@ export function calculateBirdieOpportunities(shots: ProcessedShot[], _holeScores
       
       if (birdiePutts.length > 0) {
         const firstBirdiePutt = birdiePutts[0];
-        const puttDistance = firstBirdiePutt['Starting Distance'];
+        const puttDistance = firstBirdiePutt.startingDistance;
         
         // Birdie Opportunity: putt <= 20 feet (240 inches)
         if (puttDistance <= 240) {
@@ -2872,15 +2853,15 @@ function categorizeRootCause(holeShots: ProcessedShot[], holePar: number): { cat
   
   // Categorize based on shot type and distance
   const shotType = worstShot.shotType;
-  const startDist = worstShot['Starting Distance'];
+  const startDist = worstShot.startingDistance;
   
-  // Check for penalties first (Penalty column in raw data)
-  if (worstShot.Penalty === 'Yes' || worstShot.Penalty === 'y') {
+  // Check for penalties first
+  if (worstShot.hasPenalty) {
     return { category: 'penalties', strokesGained: worstShot.calculatedStrokesGained };
   }
   
   // Driving (typically first shot on par 4/5)
-  if (worstShot.Shot === 1 && holePar >= 4) {
+  if (worstShot.shotNumber === 1 && holePar >= 4) {
     return { category: 'driving', strokesGained: worstShot.calculatedStrokesGained };
   }
   
@@ -2939,7 +2920,7 @@ export function calculateBogeyRootCause(shots: ProcessedShot[], holeScores: Hole
   // Group shots by hole
   const holeMap = new Map<string, ProcessedShot[]>();
   shots.forEach(shot => {
-    const key = `${shot['Round ID']}-${shot.Hole}`;
+    const key = `${shot.roundId}-${shot.holeNumber}`;
     if (!holeMap.has(key)) {
       holeMap.set(key, []);
     }
@@ -3020,7 +3001,7 @@ export function calculateDoubleBogeyPlusRootCause(shots: ProcessedShot[], holeSc
   // Group shots by hole
   const holeMap = new Map<string, ProcessedShot[]>();
   shots.forEach(shot => {
-    const key = `${shot['Round ID']}-${shot.Hole}`;
+    const key = `${shot.roundId}-${shot.holeNumber}`;
     if (!holeMap.has(key)) {
       holeMap.set(key, []);
     }
@@ -3142,30 +3123,30 @@ export function calculateShortGameMetrics(shots: ProcessedShot[]): ShortGameMetr
   const positiveSGPct = (positiveSGCount / shortGameShots.length) * 100;
   
   // <= 8ft from Fairway - short game shots from Fairway that end on green within 8 feet
-  const shortGameFairway = shortGameShots.filter(s => s['Starting Lie'] === 'Fairway');
+  const shortGameFairway = shortGameShots.filter(s => s.startingLie === 'Fairway');
   const totalShortGameFairway = shortGameFairway.length;
   const within8FeetFairwayCount = shortGameFairway.filter(s => 
-    s['Ending Lie'] === 'Green' && s['Ending Distance'] <= 8
+    s.endingLie === 'Green' && s.endingDistance <= 8
   ).length;
   const within8FeetFairwayPct = totalShortGameFairway > 0 
     ? (within8FeetFairwayCount / totalShortGameFairway) * 100 
     : 0;
   
   // <= 8ft from Rough - short game shots from Rough that end on green within 8 feet
-  const shortGameRough = shortGameShots.filter(s => s['Starting Lie'] === 'Rough');
+  const shortGameRough = shortGameShots.filter(s => s.startingLie === 'Rough');
   const totalShortGameRough = shortGameRough.length;
   const within8FeetRoughCount = shortGameRough.filter(s => 
-    s['Ending Lie'] === 'Green' && s['Ending Distance'] <= 8
+    s.endingLie === 'Green' && s.endingDistance <= 8
   ).length;
   const within8FeetRoughPct = totalShortGameRough > 0 
     ? (within8FeetRoughCount / totalShortGameRough) * 100 
     : 0;
   
   // <= 8ft from Sand - short game shots from Sand that end on green within 8 feet
-  const shortGameSand = shortGameShots.filter(s => s['Starting Lie'] === 'Sand');
+  const shortGameSand = shortGameShots.filter(s => s.startingLie === 'Sand');
   const totalShortGameSand = shortGameSand.length;
   const within8FeetSandCount = shortGameSand.filter(s => 
-    s['Ending Lie'] === 'Green' && s['Ending Distance'] <= 8
+    s.endingLie === 'Green' && s.endingDistance <= 8
   ).length;
   const within8FeetSandPct = totalShortGameSand > 0 
     ? (within8FeetSandCount / totalShortGameSand) * 100 
@@ -3211,9 +3192,9 @@ export function calculateShortGameHeatMapData(shots: ProcessedShot[], totalRound
   lies.forEach(lie => {
     distanceBuckets.forEach(bucket => {
       const cellShots = shortGameShots.filter(s => 
-        s['Starting Lie'] === lie &&
-        s['Starting Distance'] >= bucket.minDistance &&
-        s['Starting Distance'] <= bucket.maxDistance
+        s.startingLie === lie &&
+        s.startingDistance >= bucket.minDistance &&
+        s.startingDistance <= bucket.maxDistance
       );
       
       const totalShots = cellShots.length;
@@ -3258,16 +3239,17 @@ export function calculateCoachTableMetrics(
     return { players: [], calculatedAt: new Date() };
   }
 
-  // Get all unique players
-  const players = [...new Set(processedShots.map(s => s.Player))].sort();
+  // Get all unique players (grouped by id, displayed by name)
+  const playerIds = [...new Set(processedShots.map(s => s.playerId))];
 
-  const playerMetrics: CoachTablePlayerMetrics[] = players.map(player => {
+  const playerMetrics: CoachTablePlayerMetrics[] = playerIds.map(playerId => {
     // Filter shots for this player
-    const playerShots = processedShots.filter(s => s.Player === player);
-    
+    const playerShots = processedShots.filter(s => s.playerId === playerId);
+
     if (playerShots.length === 0) {
       return null;
     }
+    const player = playerShots[0].playerName;
 
     // Calculate all metrics for this player using existing functions
     const tiger5Metrics = calculateTiger5Metrics(playerShots);
@@ -3323,7 +3305,8 @@ export function calculateCoachTableMetrics(
       // Short Game
       sgShortGame: shortGameMetrics.shortGameSG,
     };
-  }).filter((m): m is CoachTablePlayerMetrics => m !== null);
+  }).filter((m): m is CoachTablePlayerMetrics => m !== null)
+    .sort((a, b) => a.player.localeCompare(b.player));
 
   return {
     players: playerMetrics,

@@ -72,7 +72,7 @@ export function calculatePerformanceDrivers(
   puttingMetrics: PuttingMetrics,
   puttingByDistance: PuttingDistanceBucket[]
 ): PerformanceDriversResult {
-  const roundIds = [...new Set(shots.map(s => s['Round ID']))];
+  const roundIds = [...new Set(shots.map(s => s.roundId))];
   const totalRounds = roundIds.length;
   
   if (totalRounds === 0 || shots.length === 0) {
@@ -137,15 +137,15 @@ export function calculatePerformanceDrivers(
     drivers.push(createDriver('Short Game', 'Overall', 'Short Game Performance', shortGameMetrics.shortGameSG, rootCause.shortGame, shortGameMetrics.totalShortGameShots, shortGameMetrics.avgShortGameSG, 0));
   }
   if (shortGameMetrics.totalShortGameFairway > 0) {
-    const sgFairway = shots.filter(s => s.shotType === 'Short Game' && s['Starting Lie'] === 'Fairway');
+    const sgFairway = shots.filter(s => s.shotType === 'Short Game' && s.startingLie === 'Fairway');
     drivers.push(createDriver('Short Game', 'From Fairway', 'Short Game from Fairway', sgFairway.reduce((sum, s) => sum + s.calculatedStrokesGained, 0), 0, sgFairway.length, shortGameMetrics.within8FeetFairwayPct, 80));
   }
   if (shortGameMetrics.totalShortGameRough > 0) {
-    const sgRough = shots.filter(s => s.shotType === 'Short Game' && s['Starting Lie'] === 'Rough');
+    const sgRough = shots.filter(s => s.shotType === 'Short Game' && s.startingLie === 'Rough');
     drivers.push(createDriver('Short Game', 'From Rough', 'Short Game from Rough', sgRough.reduce((sum, s) => sum + s.calculatedStrokesGained, 0), 0, sgRough.length, shortGameMetrics.within8FeetRoughPct, 60));
   }
   if (shortGameMetrics.totalShortGameSand > 0) {
-    const sgSand = shots.filter(s => s.shotType === 'Short Game' && s['Starting Lie'] === 'Sand');
+    const sgSand = shots.filter(s => s.shotType === 'Short Game' && s.startingLie === 'Sand');
     drivers.push(createDriver('Short Game', 'From Sand', 'Short Game from Sand', sgSand.reduce((sum, s) => sum + s.calculatedStrokesGained, 0), 0, sgSand.length, shortGameMetrics.within8FeetSandPct, 50));
   }
   

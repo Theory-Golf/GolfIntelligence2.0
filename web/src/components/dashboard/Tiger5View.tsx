@@ -537,12 +537,12 @@ function Tiger5FailDetailsSection({ failDetails }: { failDetails: Tiger5FailDeta
                       <tbody>
                         {detail.shots.map((shot, shotIdx) => (
                           <tr key={shotIdx} style={{ borderBottom: '1px solid var(--charcoal)' }}>
-                            <td style={{ padding: '4px' }}>{shot.Shot}</td>
-                            <td style={{ padding: '4px' }}>{shot['Starting Lie']}</td>
-                            <td style={{ padding: '4px' }}>{shot['Starting Distance']}</td>
-                            <td style={{ padding: '4px' }}>{shot['Ending Lie']}</td>
-                            <td style={{ padding: '4px' }}>{shot['Ending Distance']}</td>
-                            <td style={{ padding: '4px' }}>{shot.Penalty}</td>
+                            <td style={{ padding: '4px' }}>{shot.shotNumber}</td>
+                            <td style={{ padding: '4px' }}>{shot.startingLie}</td>
+                            <td style={{ padding: '4px' }}>{shot.startingDistance}</td>
+                            <td style={{ padding: '4px' }}>{shot.endingLie}</td>
+                            <td style={{ padding: '4px' }}>{shot.endingDistance}</td>
+                            <td style={{ padding: '4px' }}>{shot.hasPenalty ? 'Yes' : ''}</td>
                             <td style={{ padding: '4px', textAlign: 'right', color: getShotSGColor(shot.calculatedStrokesGained) }}>
                               {formatStrokesGained(shot.calculatedStrokesGained)}
                             </td>
