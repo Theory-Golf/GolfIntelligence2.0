@@ -182,6 +182,44 @@ export function RoundSessionProvider({
   const draftRoundRef = useRef<RoundInsert | null>(null);
   const submittingRef = useRef(false);
 
+  // Ref mirror of the latest committed state. Mutations read `prev` from here
+  // and flush the draft synchronously (see writeDraftFrom / commit) without
+  // waiting for a re-render.
+  const stateRef = useRef(state);
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
+
+  // Write the localStorage draft immediately from a concrete state snapshot.
+  // Draft persistence MUST be synchronous with the state change: relying on a
+  // passive effect leaves a window where a saved shot is in memory but not yet
+  // on disk, and if the tab is frozen/discarded in that window (mobile "pocket
+  // the phone" mid-hole) the shot is silently lost. This closes that window.
+  const writeDraftFrom = useCallback((next: RoundSessionState) => {
+    if (!isDraftRef.current || !draftRoundRef.current) return;
+    const ok = writeDraft(next.roundId, {
+      version: 1,
+      round: draftRoundRef.current,
+      courseName: next.courseName,
+      holePars: next.holePars,
+      holes: next.holes,
+      updatedAt: new Date().toISOString(),
+    });
+    if (!ok) console.warn('[draft] localStorage write failed');
+  }, []);
+
+  // Commit a state change AND flush the draft in the same tick. All in-round
+  // mutations go through this so no shot can be left unpersisted.
+  const commit = useCallback(
+    (updater: (prev: RoundSessionState) => RoundSessionState) => {
+      const next = updater(stateRef.current);
+      stateRef.current = next;
+      setState(next);
+      writeDraftFrom(next);
+    },
+    [writeDraftFrom],
+  );
+
   // ── Initial load ──────────────────────────────────────────────────────────
   useEffect(() => {
     let cancelled = false;
@@ -304,17 +342,32 @@ export function RoundSessionProvider({
     if (!ok) console.warn('[draft] localStorage write failed');
   }, [isDraft, state]);
 
+  // Safety net for mobile: when the tab is hidden or being discarded (the
+  // player pockets the phone mid-hole), synchronously flush the draft so a
+  // just-saved shot can never be lost to a starved passive effect.
+  useEffect(() => {
+    function flush() {
+      writeDraftFrom(stateRef.current);
+    }
+    document.addEventListener('visibilitychange', flush);
+    window.addEventListener('pagehide', flush);
+    return () => {
+      document.removeEventListener('visibilitychange', flush);
+      window.removeEventListener('pagehide', flush);
+    };
+  }, [writeDraftFrom]);
+
   // ── Helpers ───────────────────────────────────────────────────────────────
   const setHoleShots = useCallback(
     (holeId: string, fn: (shots: ShotRow[]) => ShotRow[]) => {
-      setState((prev) => ({
+      commit((prev) => ({
         ...prev,
         holes: prev.holes.map((h) =>
           h.holeId === holeId ? { ...h, shots: fn(h.shots) } : h,
         ),
       }));
     },
-    [],
+    [commit],
   );
 
   const getHole = useCallback(
@@ -326,10 +379,12 @@ export function RoundSessionProvider({
   // ── Actions ───────────────────────────────────────────────────────────────
   const setPar = useCallback(
     async (holeNumber: number, par: number): Promise<HoleEntry> => {
-      const existing = state.holes.find((h) => h.holeNumber === holeNumber);
+      const existing = stateRef.current.holes.find(
+        (h) => h.holeNumber === holeNumber,
+      );
       if (existing) {
         if (existing.par === par) return existing;
-        setState((prev) => ({
+        commit((prev) => ({
           ...prev,
           holes: prev.holes.map((h) =>
             h.holeId === existing.holeId ? { ...h, par } : h,
@@ -350,7 +405,7 @@ export function RoundSessionProvider({
         par,
         shots: [],
       };
-      setState((prev) => ({
+      commit((prev) => ({
         ...prev,
         holes: [...prev.holes, entry].sort(
           (a, b) => a.holeNumber - b.holeNumber,
@@ -367,7 +422,7 @@ export function RoundSessionProvider({
       }
       return entry;
     },
-    [roundId, state.holes],
+    [commit, roundId],
   );
 
   const saveShot = useCallback(
@@ -377,21 +432,28 @@ export function RoundSessionProvider({
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
-      setHoleShots(shot.hole_id, (shots) => {
-        const without = shots.filter((s) => s.id !== shot.id);
-        return [...without, localRow].sort(
-          (a, b) => a.shot_number - b.shot_number,
-        );
-      });
-      setState((prev) => ({
+      // One atomic commit: add the shot and advance the cursor together, and
+      // flush the draft synchronously (via commit) before this resolves.
+      commit((prev) => ({
         ...prev,
+        holes: prev.holes.map((h) =>
+          h.holeId === shot.hole_id
+            ? {
+                ...h,
+                shots: [
+                  ...h.shots.filter((s) => s.id !== shot.id),
+                  localRow,
+                ].sort((a, b) => a.shot_number - b.shot_number),
+              }
+            : h,
+        ),
         activeShotOrder: shot.shot_number + 1,
       }));
       if (!isDraftRef.current) {
         void persistOrQueue({ type: 'upsertShot', payload: shot });
       }
     },
-    [setHoleShots],
+    [commit],
   );
 
   const cascadeFromShot = useCallback(
@@ -548,14 +610,17 @@ export function RoundSessionProvider({
     [setHoleShots],
   );
 
-  const completeHole = useCallback((holeNumber: number) => {
-    setState((prev) => ({
-      ...prev,
-      activeHoleNumber: Math.min(18, holeNumber + 1),
-      activeHoleId: null,
-      activeShotOrder: 1,
-    }));
-  }, []);
+  const completeHole = useCallback(
+    (holeNumber: number) => {
+      commit((prev) => ({
+        ...prev,
+        activeHoleNumber: Math.min(18, holeNumber + 1),
+        activeHoleId: null,
+        activeShotOrder: 1,
+      }));
+    },
+    [commit],
+  );
 
   const getRunningScore = useCallback((): RunningScore => {
     // Running sums over completed holes — front/back update hole by hole,
@@ -585,9 +650,12 @@ export function RoundSessionProvider({
     };
   }, [state.holes]);
 
-  const setLastActiveHole = useCallback((holeNumber: number) => {
-    setState((prev) => ({ ...prev, lastActiveHole: holeNumber }));
-  }, []);
+  const setLastActiveHole = useCallback(
+    (holeNumber: number) => {
+      commit((prev) => ({ ...prev, lastActiveHole: holeNumber }));
+    },
+    [commit],
+  );
 
   const isRoundComplete = useCallback((): boolean => {
     for (let n = 1; n <= 18; n++) {
@@ -657,12 +725,47 @@ export function RoundSessionProvider({
           );
         }
       }
+
+      // Fail-closed: only discard the local draft once every hole and shot is
+      // CONFIRMED present in the database. If any write only reached the
+      // offline queue, or a readback comes up short, keep the draft so the
+      // round can be resubmitted instead of silently losing shots.
+      let verified = false;
+      if (!queued) {
+        try {
+          const dbHoles = await getHolesForRound(state.roundId);
+          const dbHoleIds = new Set(dbHoles.map((h) => h.id));
+          verified = state.holes.every((h) => dbHoleIds.has(h.holeId));
+          if (verified) {
+            for (const h of state.holes) {
+              const dbShots = await getShotsForHole(h.holeId);
+              if (dbShots.length < h.shots.length) {
+                verified = false;
+                break;
+              }
+            }
+          }
+        } catch {
+          verified = false;
+        }
+      }
+
+      if (!verified) {
+        return {
+          ok: false,
+          queued: true,
+          message:
+            message ??
+            'Some shots could not be confirmed as saved. Your round is safe on this device — reconnect and submit again.',
+        };
+      }
+
       // Leave draft mode before removing the draft so the persist effect
       // can't resurrect it on an interleaved re-render.
       isDraftRef.current = false;
       setIsDraft(false);
       removeDraft(state.roundId);
-      return { ok: true, queued, message };
+      return { ok: true, queued: false, message };
     } finally {
       submittingRef.current = false;
     }
