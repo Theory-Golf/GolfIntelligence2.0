@@ -64,21 +64,29 @@ export default function HoleSummaryPage() {
   const holeNumber = Number(params?.holeNumber ?? '1');
   const score = session.getRunningScore();
 
-  if (session.loading) {
+  const hole = session.loading ? undefined : session.getHole(holeNumber);
+  // Deleting the last shot of a hole lands here with nothing to show.
+  const needsRedirect = !session.loading && (!hole || hole.shots.length === 0);
+
+  // Navigate from an effect, never during render. Replacing the route mid-render
+  // tore a full-height page out of the document in the same commit that
+  // dispatched the navigation, so the browser clamped the scroll offset while
+  // Next's commit-time scroll reset ran against a tree that no longer matched
+  // what was painted — which is how iOS ends up painting at one offset and
+  // hit-testing at another.
+  useEffect(() => {
+    if (!needsRedirect) return;
+    router.replace(`/golf-intelligence/round/${roundId}/hole/${holeNumber}`);
+  }, [needsRedirect, router, roundId, holeNumber]);
+
+  if (session.loading || needsRedirect || !hole) {
     return (
-      <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
+      <div className="min-h-svh bg-background text-foreground flex items-center justify-center">
         <span className="font-mono text-xs text-ash tracking-[0.25em] uppercase">
           Loading…
         </span>
       </div>
     );
-  }
-
-  const hole = session.getHole(holeNumber);
-  if (!hole || hole.shots.length === 0) {
-    // No hole or no shots — fall back to the hole entry page.
-    router.replace(`/golf-intelligence/round/${roundId}/hole/${holeNumber}`);
-    return null;
   }
 
   return mode === 'review' ? (
@@ -154,7 +162,7 @@ function ReviewMode({
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-svh bg-background text-foreground">
       <div className="max-w-md mx-auto p-4 flex flex-col gap-5">
         <header className="flex items-start justify-between border-b border-border pb-3">
           <div className="flex items-baseline gap-3">
@@ -315,7 +323,7 @@ function EditMode({
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-svh bg-background text-foreground">
       <div className="max-w-md mx-auto p-4 flex flex-col gap-5">
         <header className="flex items-start justify-between border-b border-border pb-3">
           <div className="flex items-baseline gap-3">

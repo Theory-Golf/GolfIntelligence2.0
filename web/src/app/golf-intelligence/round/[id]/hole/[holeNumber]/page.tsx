@@ -71,7 +71,7 @@ export default function HolePage() {
 
   if (session.loading) {
     return (
-      <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
+      <div className="min-h-svh bg-background text-foreground flex items-center justify-center">
         <span className="font-mono text-xs text-ash tracking-[0.25em] uppercase">
           Loading round…
         </span>
@@ -81,7 +81,7 @@ export default function HolePage() {
 
   if (session.error) {
     return (
-      <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
+      <div className="min-h-svh bg-background text-foreground flex items-center justify-center">
         <span className="font-mono text-xs text-scarlet tracking-[0.25em] uppercase">
           {session.error}
         </span>
@@ -114,23 +114,27 @@ function HeaderImpl({
 }) {
   const online = useOnlineStatus();
   return (
-    <header className="flex items-start justify-between border-b border-border pb-2">
-      <div className="flex items-baseline gap-3">
-        <span className="font-display font-extrabold text-3xl text-chalk uppercase tracking-tight">
+    // The offline pill must never wrap this row to a second line: the par grid
+    // and the keypad sit directly beneath it, and signal flapping on a course
+    // would otherwise shift both mid-entry, under the player's finger.
+    <header className="flex items-start justify-between gap-2 border-b border-border pb-2">
+      <div className="flex items-baseline gap-3 min-w-0">
+        <span className="font-display font-extrabold text-3xl text-chalk uppercase tracking-tight whitespace-nowrap">
           Hole {holeNumber}
         </span>
         <Link
           href={`/golf-intelligence/round/${roundId}/review`}
-          className="font-mono text-[10px] tracking-[0.25em] uppercase text-ash hover:text-chalk"
+          className="font-mono text-[10px] tracking-[0.25em] uppercase text-ash hover:text-chalk whitespace-nowrap"
         >
           Review
         </Link>
         {!online && (
           <span
-            className="font-mono text-[9px] tracking-[0.2em] uppercase px-2 py-0.5 rounded-sm bg-shadow"
+            className="font-mono text-[9px] tracking-[0.2em] uppercase px-2 py-0.5 rounded-sm bg-shadow whitespace-nowrap shrink-0"
             style={{ color: COLOR_AMBER }}
+            title="Offline · saving locally"
           >
-            Offline · Saving locally
+            Offline
           </span>
         )}
       </div>
@@ -415,7 +419,14 @@ function ShotEntry({
   // walking them forward through the remaining holes.
   function summaryUrl() {
     const base = `/golf-intelligence/round/${roundId}/hole/${holeNumber}/summary`;
-    return fromReview ? `${base}?from=review` : base;
+    // Edits and inserts are launched from the summary's shot list, so return
+    // the player to that list — otherwise fixing a second shot on the same
+    // hole means tapping "Edit shots" again every time.
+    const params = [
+      fromReview ? 'from=review' : null,
+      mode === 'edit' || mode === 'insert' ? 'mode=editing' : null,
+    ].filter(Boolean);
+    return params.length > 0 ? `${base}?${params.join('&')}` : base;
   }
 
   function resetForNextShot() {
@@ -514,11 +525,18 @@ function ShotEntry({
   const completedShots: ShotPathShot[] = useMemo(
     () =>
       (hole?.shots ?? [])
-        .filter((s) =>
-          mode === 'edit' && editingShot
-            ? s.shot_number < editingShot.shot_number
-            : true,
-        )
+        // Show only the path leading up to the shot being worked on: shots
+        // after an edit point (or after an insertion point) haven't happened
+        // yet from this screen's perspective.
+        .filter((s) => {
+          if (mode === 'edit' && editingShot) {
+            return s.shot_number < editingShot.shot_number;
+          }
+          if (mode === 'insert' && afterShot) {
+            return s.shot_number <= afterShot.shot_number;
+          }
+          return true;
+        })
         .map((s) => ({
           startingDistance: s.starting_distance,
           startingLie: s.starting_lie,
@@ -526,7 +544,7 @@ function ShotEntry({
           endingLie: s.ending_lie,
           holed: s.ending_lie === 'Green' && s.ending_distance === 0,
         })),
-    [hole, mode, editingShot],
+    [hole, mode, editingShot, afterShot],
   );
 
   const displayShotNumber = strokeNumberForShot(hole?.shots ?? [], shotOrder);
@@ -534,7 +552,7 @@ function ShotEntry({
   // ── Hole setup: par + hole distance get their own screen ──────────────────
   if (isFreshShot1 && !setupDone) {
     return (
-      <div className="min-h-screen bg-background text-foreground">
+      <div className="min-h-svh bg-background text-foreground">
         <div className="max-w-md mx-auto px-4 pt-3 pb-4 flex flex-col gap-3">
           <Header holeNumber={holeNumber} roundId={roundId} score={score} />
 
@@ -622,7 +640,7 @@ function ShotEntry({
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-svh bg-background text-foreground">
       <div className="max-w-md mx-auto px-4 pt-3 pb-4 flex flex-col gap-3">
         <Header holeNumber={holeNumber} roundId={roundId} score={score} />
 
@@ -778,6 +796,12 @@ function ChoiceRow<T extends string>({
   );
 }
 
+// Renders nothing at all when hidden, rather than animating max-height.
+// The animated version sat directly above the Save button and, because lies
+// commit on pointerdown, collapsed in the same frame as the touch — moving the
+// button while the player was aiming at it. It also left the collapsed
+// controls in the DOM and keyboard-focusable, and cost its flex gap even when
+// shut. Instant beats animated on a data-entry screen.
 function ConditionalBlock({
   show,
   children,
@@ -785,16 +809,8 @@ function ConditionalBlock({
   show: boolean;
   children: React.ReactNode;
 }) {
-  return (
-    <div
-      className={
-        'overflow-hidden transition-[max-height,opacity] duration-200 ' +
-        (show ? 'max-h-60 opacity-100' : 'max-h-0 opacity-0')
-      }
-    >
-      {children}
-    </div>
-  );
+  if (!show) return null;
+  return <div>{children}</div>;
 }
 
 function WarningCard({

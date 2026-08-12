@@ -351,6 +351,18 @@
 }
 
 /* ================================================================
+   TOUCH
+   Suppress double-tap-to-zoom (and the click delay that comes with
+   it) on every control. Without this a mis-registering tap invites a
+   second tap, which zooms the page — and a zoomed page offsets every
+   subsequent tap on iOS until it is reloaded.
+   ================================================================ */
+button,
+[role='button'] {
+  touch-action: manipulation;
+}
+
+/* ================================================================
    LEGACY COMPATIBILITY — Dashboard & tool CSS variable aliases
    These map the old --color-* names to the new system so existing
    dashboard.css and component CSS files continue to work.
