@@ -1,5 +1,7 @@
 'use client';
 
+import { memo } from 'react';
+
 import type { Lie } from '@/lib/golf/db/types';
 import { LIE_ABBREVIATIONS, LIE_COLORS } from '@/lib/golf/utils/lieColors';
 
@@ -21,7 +23,7 @@ interface PathToken {
   lie: Lie;
 }
 
-export function ShotPath({ shots, activeShotNumber }: ShotPathProps) {
+function ShotPathImpl({ shots, activeShotNumber }: ShotPathProps) {
   // Build chain: shot1.start, then end of each completed shot.
   const tokens: PathToken[] = [];
   if (shots.length > 0) {
@@ -51,3 +53,5 @@ export function ShotPath({ shots, activeShotNumber }: ShotPathProps) {
     </div>
   );
 }
+
+export const ShotPath = memo(ShotPathImpl);

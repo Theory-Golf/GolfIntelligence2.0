@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { memo, useState } from 'react';
 
 interface NumericKeypadProps {
   value: string;
@@ -10,7 +10,7 @@ interface NumericKeypadProps {
 
 const DIGITS = ['1', '2', '3', '4', '5', '6', '7', '8', '9'] as const;
 
-export function NumericKeypad({
+function NumericKeypadImpl({
   value,
   onChange,
   maxDigits = 4,
@@ -125,3 +125,5 @@ export function NumericKeypad({
     </div>
   );
 }
+
+export const NumericKeypad = memo(NumericKeypadImpl);

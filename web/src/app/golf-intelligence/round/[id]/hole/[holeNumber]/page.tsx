@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import {
@@ -25,6 +25,9 @@ import type {
 } from '@/lib/golf/db/types';
 
 const PAR_CHOICES = [3, 4, 5] as const;
+const CLUB_CATEGORIES: ClubCategory[] = ['Driver', 'Non-driver'];
+const MISS_DIRECTIONS: MissDirection[] = ['Left', 'Right'];
+const PUTT_DIRECTIONS: PuttDirection[] = ['Long', 'Short'];
 const COLOR_AMBER = '#F09020';
 
 function unitFor(lie: Lie): 'YDS' | 'FT' {
@@ -100,7 +103,7 @@ export default function HolePage() {
 
 // ─── Header ─────────────────────────────────────────────────────────────────
 
-function Header({
+function HeaderImpl({
   holeNumber,
   roundId,
   score,
@@ -136,6 +139,8 @@ function Header({
   );
 }
 
+const Header = memo(HeaderImpl);
+
 // ─── Shot Entry ─────────────────────────────────────────────────────────────
 
 interface FormState {
@@ -161,10 +166,13 @@ function ShotEntry({
   const session = useRoundSession();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const score = session.getRunningScore();
+  // Stable identity across form-only re-renders so the memoized header and
+  // score row don't re-render on every keypad tap.
+  const score = useMemo(() => session.getRunningScore(), [session]);
 
   const editStr = searchParams.get('edit');
   const insertStr = searchParams.get('insertAfter');
+  const fromReview = searchParams.get('from') === 'review';
   const editOrder = editStr !== null ? Number(editStr) : null;
   const afterOrder = insertStr !== null ? Number(insertStr) : null;
 
@@ -243,7 +251,6 @@ function ShotEntry({
 
   const [saving, setSaving] = useState(false);
   const [holedSaving, setHoledSaving] = useState(false);
-  const [parBusy, setParBusy] = useState(false);
   const [setupDone, setSetupDone] = useState(false);
 
   // When the course is in the database its par is known ahead of time;
@@ -304,6 +311,31 @@ function ShotEntry({
       ? mismatchWarning(par as number, startingDistanceNum)
       : null;
 
+  const setTeeDistance = useCallback((v: string) => {
+    setForm((f) => ({ ...f, teeDistanceInput: v, warningDismissed: false }));
+  }, []);
+  const setEndingDistance = useCallback((v: string) => {
+    setForm((f) => ({ ...f, endingDistance: v }));
+  }, []);
+  const setEndingLie = useCallback((lie: Lie) => {
+    setForm((f) => ({ ...f, endingLie: lie }));
+  }, []);
+  const setClubCategory = useCallback((c: ClubCategory) => {
+    setForm((f) => ({ ...f, clubCategory: c }));
+  }, []);
+  const setMissDirection = useCallback((m: MissDirection) => {
+    setForm((f) => ({ ...f, missDirection: m }));
+  }, []);
+  const setPuttLongShort = useCallback((p: PuttDirection) => {
+    setForm((f) => ({ ...f, puttLongShort: p }));
+  }, []);
+  const setPenalty = useCallback((v: boolean) => {
+    setForm((f) => ({ ...f, penalty: v }));
+  }, []);
+  const dismissWarning = useCallback(() => {
+    setForm((f) => ({ ...f, warningDismissed: true }));
+  }, []);
+
   const canSave =
     !saving &&
     parSet &&
@@ -312,14 +344,10 @@ function ShotEntry({
     (!isFreshShot1 || form.teeDistanceInput !== '') &&
     (!showClubCategory || form.clubCategory !== null);
 
-  async function handlePickPar(p: number) {
-    if (parBusy) return;
-    setParBusy(true);
-    try {
-      await session.setPar(holeNumber, p);
-    } finally {
-      setParBusy(false);
-    }
+  // setPar updates local state (and flushes the draft) synchronously; there is
+  // nothing to wait on, so the tap must not be gated behind the promise.
+  function handlePickPar(p: number) {
+    void session.setPar(holeNumber, p);
   }
 
   async function persistAppend(endingLie: Lie, endingDistance: number) {
@@ -381,8 +409,13 @@ function ShotEntry({
     });
   }
 
+  // `from=review` means the player reached this hole from the round review
+  // screen (a post-round correction), not from the hole-by-hole loop. It rides
+  // along so the summary knows to send them back to the review instead of
+  // walking them forward through the remaining holes.
   function summaryUrl() {
-    return `/golf-intelligence/round/${roundId}/hole/${holeNumber}/summary`;
+    const base = `/golf-intelligence/round/${roundId}/hole/${holeNumber}/summary`;
+    return fromReview ? `${base}?from=review` : base;
   }
 
   function resetForNextShot() {
@@ -452,17 +485,49 @@ function ShotEntry({
     }
   }
 
-  const completedShots: ShotPathShot[] = (hole?.shots ?? [])
-    .filter((s) =>
-      mode === 'edit' && editingShot ? s.shot_number < editingShot.shot_number : true,
-    )
-    .map((s) => ({
-      startingDistance: s.starting_distance,
-      startingLie: s.starting_lie,
-      endingDistance: s.ending_distance,
-      endingLie: s.ending_lie,
-      holed: s.ending_lie === 'Green' && s.ending_distance === 0,
-    }));
+  // Hole → summary → next hole are dynamic routes, so each push is a network
+  // round-trip. Warm the two the player is about to take while they're still
+  // entering shots; on a course with thin signal that's the difference between
+  // an instant transition and a visible stall.
+  useEffect(() => {
+    router.prefetch(
+      `/golf-intelligence/round/${roundId}/hole/${holeNumber}/summary`,
+    );
+    if (holeNumber < 18) {
+      router.prefetch(
+        `/golf-intelligence/round/${roundId}/hole/${holeNumber + 1}`,
+      );
+    }
+    router.prefetch(`/golf-intelligence/round/${roundId}/review`);
+  }, [router, roundId, holeNumber]);
+
+  // LieGrid fires Holed from pointerdown; route it through a ref so the grid
+  // keeps a stable prop and stays memoized across form-only re-renders.
+  const holedRef = useRef(handleHoled);
+  useEffect(() => {
+    holedRef.current = handleHoled;
+  });
+  const onHoled = useCallback(() => {
+    void holedRef.current();
+  }, []);
+
+  const completedShots: ShotPathShot[] = useMemo(
+    () =>
+      (hole?.shots ?? [])
+        .filter((s) =>
+          mode === 'edit' && editingShot
+            ? s.shot_number < editingShot.shot_number
+            : true,
+        )
+        .map((s) => ({
+          startingDistance: s.starting_distance,
+          startingLie: s.starting_lie,
+          endingDistance: s.ending_distance,
+          endingLie: s.ending_lie,
+          holed: s.ending_lie === 'Green' && s.ending_distance === 0,
+        })),
+    [hole, mode, editingShot],
+  );
 
   const displayShotNumber = strokeNumberForShot(hole?.shots ?? [], shotOrder);
 
@@ -485,10 +550,12 @@ function ShotEntry({
                   <button
                     key={p}
                     type="button"
-                    onClick={() => handlePickPar(p)}
-                    disabled={parBusy}
+                    onPointerDown={(e) => {
+                      e.preventDefault();
+                      handlePickPar(p);
+                    }}
                     className={
-                      'rounded-md py-3 disabled:opacity-50 ' +
+                      'rounded-md py-3 select-none touch-manipulation ' +
                       (selected
                         ? 'border border-scarlet bg-scarlet-tint'
                         : 'border border-border bg-shadow active:bg-pitch')
@@ -520,23 +587,12 @@ function ShotEntry({
             </div>
             <NumericKeypad
               value={form.teeDistanceInput}
-              onChange={(v) =>
-                setForm((f) => ({
-                  ...f,
-                  teeDistanceInput: v,
-                  warningDismissed: false,
-                }))
-              }
+              onChange={setTeeDistance}
             />
           </div>
 
           {warning && (
-            <WarningCard
-              warning={warning}
-              onDismiss={() =>
-                setForm((f) => ({ ...f, warningDismissed: true }))
-              }
-            />
+            <WarningCard warning={warning} onDismiss={dismissWarning} />
           )}
 
           {/* Starting location */}
@@ -614,7 +670,7 @@ function ShotEntry({
             </div>
             <NumericKeypad
               value={form.endingDistance}
-              onChange={(v) => setForm((f) => ({ ...f, endingDistance: v }))}
+              onChange={setEndingDistance}
             />
           </div>
 
@@ -625,92 +681,41 @@ function ShotEntry({
             </p>
             <LieGrid
               selected={form.endingLie}
-              onChange={(lie) => setForm((f) => ({ ...f, endingLie: lie }))}
+              onChange={setEndingLie}
               showHoled
-              onHoled={handleHoled}
+              onHoled={onHoled}
               holedActive={holedSaving}
             />
           </div>
 
           <ConditionalBlock show={showClubCategory}>
-            <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash mb-1">
-              Club category
-            </p>
-            <div className="grid grid-cols-2 gap-2">
-              {(['Driver', 'Non-driver'] as ClubCategory[]).map((c) => {
-                const active = form.clubCategory === c;
-                return (
-                  <button
-                    key={c}
-                    type="button"
-                    onClick={() => setForm((f) => ({ ...f, clubCategory: c }))}
-                    className={
-                      active
-                        ? 'rounded-md border border-scarlet bg-scarlet-tint py-2 font-display font-bold text-sm tracking-[0.15em] uppercase text-chalk'
-                        : 'rounded-md border border-border bg-shadow py-2 font-display font-bold text-sm tracking-[0.15em] uppercase text-ash'
-                    }
-                  >
-                    {c}
-                  </button>
-                );
-              })}
-            </div>
+            <ChoiceRow
+              label="Club category"
+              options={CLUB_CATEGORIES}
+              selected={form.clubCategory}
+              onSelect={setClubCategory}
+            />
           </ConditionalBlock>
 
           <ConditionalBlock show={showMissDirection}>
-            <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash mb-1">
-              Miss direction
-            </p>
-            <div className="grid grid-cols-2 gap-2">
-              {(['Left', 'Right'] as MissDirection[]).map((m) => {
-                const active = form.missDirection === m;
-                return (
-                  <button
-                    key={m}
-                    type="button"
-                    onClick={() => setForm((f) => ({ ...f, missDirection: m }))}
-                    className={
-                      active
-                        ? 'rounded-md border border-scarlet bg-scarlet-tint py-2 font-display font-bold text-sm tracking-[0.15em] uppercase text-chalk'
-                        : 'rounded-md border border-border bg-shadow py-2 font-display font-bold text-sm tracking-[0.15em] uppercase text-ash'
-                    }
-                  >
-                    {m}
-                  </button>
-                );
-              })}
-            </div>
+            <ChoiceRow
+              label="Miss direction"
+              options={MISS_DIRECTIONS}
+              selected={form.missDirection}
+              onSelect={setMissDirection}
+            />
           </ConditionalBlock>
 
           <ConditionalBlock show={showPuttLongShort}>
-            <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash mb-1">
-              Putt long / short
-            </p>
-            <div className="grid grid-cols-2 gap-2">
-              {(['Long', 'Short'] as PuttDirection[]).map((p) => {
-                const active = form.puttLongShort === p;
-                return (
-                  <button
-                    key={p}
-                    type="button"
-                    onClick={() => setForm((f) => ({ ...f, puttLongShort: p }))}
-                    className={
-                      active
-                        ? 'rounded-md border border-scarlet bg-scarlet-tint py-2 font-display font-bold text-sm tracking-[0.15em] uppercase text-chalk'
-                        : 'rounded-md border border-border bg-shadow py-2 font-display font-bold text-sm tracking-[0.15em] uppercase text-ash'
-                    }
-                  >
-                    {p}
-                  </button>
-                );
-              })}
-            </div>
+            <ChoiceRow
+              label="Putt long / short"
+              options={PUTT_DIRECTIONS}
+              selected={form.puttLongShort}
+              onSelect={setPuttLongShort}
+            />
           </ConditionalBlock>
 
-          <PenaltyToggle
-            on={form.penalty}
-            onChange={(v) => setForm((f) => ({ ...f, penalty: v }))}
-          />
+          <PenaltyToggle on={form.penalty} onChange={setPenalty} />
 
           <button
             type="button"
@@ -727,6 +732,49 @@ function ShotEntry({
         </div>
       </div>
     </div>
+  );
+}
+
+// The three conditional follow-ups (club / miss / putt) are the same control;
+// like the lie grid they commit on pointerdown so a touch lands immediately.
+function ChoiceRow<T extends string>({
+  label,
+  options,
+  selected,
+  onSelect,
+}: {
+  label: string;
+  options: readonly T[];
+  selected: T | null;
+  onSelect: (value: T) => void;
+}) {
+  return (
+    <>
+      <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash mb-1">
+        {label}
+      </p>
+      <div className="grid grid-cols-2 gap-2">
+        {options.map((o) => (
+          <button
+            key={o}
+            type="button"
+            onPointerDown={(e) => {
+              e.preventDefault();
+              if (typeof navigator !== 'undefined') navigator.vibrate?.(10);
+              onSelect(o);
+            }}
+            className={
+              'rounded-md border py-2 font-display font-bold text-sm tracking-[0.15em] uppercase select-none touch-manipulation ' +
+              (selected === o
+                ? 'border-scarlet bg-scarlet-tint text-chalk'
+                : 'border-border bg-shadow text-ash')
+            }
+          >
+            {o}
+          </button>
+        ))}
+      </div>
+    </>
   );
 }
 

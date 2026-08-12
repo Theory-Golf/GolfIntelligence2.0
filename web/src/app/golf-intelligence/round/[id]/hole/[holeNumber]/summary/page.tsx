@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import {
   useRoundSession,
@@ -55,6 +55,10 @@ export default function HoleSummaryPage() {
   const [mode, setMode] = useState<'review' | 'editing'>(
     searchParams.get('mode') === 'editing' ? 'editing' : 'review',
   );
+  // Reached from the round review screen (a post-round correction) rather than
+  // from the hole-by-hole loop: the way out is back to the review, not forward
+  // through the holes that are already in the book.
+  const fromReview = searchParams.get('from') === 'review';
 
   const roundId = params?.id ?? '';
   const holeNumber = Number(params?.holeNumber ?? '1');
@@ -82,6 +86,7 @@ export default function HoleSummaryPage() {
       hole={hole}
       roundId={roundId}
       score={score}
+      fromReview={fromReview}
       onEdit={() => setMode('editing')}
     />
   ) : (
@@ -89,6 +94,7 @@ export default function HoleSummaryPage() {
       hole={hole}
       roundId={roundId}
       score={score}
+      fromReview={fromReview}
       onDone={() => setMode('review')}
     />
   );
@@ -100,11 +106,13 @@ function ReviewMode({
   hole,
   roundId,
   score,
+  fromReview,
   onEdit,
 }: {
   hole: HoleEntry;
   roundId: string;
   score: ReturnType<ReturnType<typeof useRoundSession>['getRunningScore']>;
+  fromReview: boolean;
   onEdit: () => void;
 }) {
   const router = useRouter();
@@ -115,8 +123,25 @@ function ReviewMode({
   const startUnit = hole.shots[0]?.starting_lie === 'Green' ? 'FT' : 'YDS';
 
   const isLastHole = hole.holeNumber === 18;
+  // Once the whole round is in, "next hole" is meaningless — every exit from a
+  // hole is a return to the round review.
+  const backToReview = fromReview || session.isRoundComplete();
+
+  // Warm whichever route the primary button leads to, so the tap is instant.
+  useEffect(() => {
+    router.prefetch(`/golf-intelligence/round/${roundId}/review`);
+    if (!backToReview && !isLastHole) {
+      router.prefetch(
+        `/golf-intelligence/round/${roundId}/hole/${hole.holeNumber + 1}`,
+      );
+    }
+  }, [router, roundId, hole.holeNumber, backToReview, isLastHole]);
 
   function goNext() {
+    if (backToReview) {
+      router.push(`/golf-intelligence/round/${roundId}/review`);
+      return;
+    }
     session.setLastActiveHole(hole.holeNumber);
     session.completeHole(hole.holeNumber);
     if (isLastHole) {
@@ -204,7 +229,11 @@ function ReviewMode({
           onClick={goNext}
           className="w-full rounded-md bg-chalk text-court py-4 font-display font-bold text-sm tracking-[0.2em] uppercase"
         >
-          {isLastHole ? 'Review round →' : 'Next hole →'}
+          {backToReview
+            ? 'Back to round review →'
+            : isLastHole
+              ? 'Review round →'
+              : 'Next hole →'}
         </button>
       </div>
     </div>
@@ -249,25 +278,30 @@ function EditMode({
   hole,
   roundId,
   score,
+  fromReview,
   onDone,
 }: {
   hole: HoleEntry;
   roundId: string;
   score: ReturnType<ReturnType<typeof useRoundSession>['getRunningScore']>;
+  fromReview: boolean;
   onDone: () => void;
 }) {
   const router = useRouter();
   const session = useRoundSession();
   const [busyId, setBusyId] = useState<string | null>(null);
 
+  const returnSuffix =
+    fromReview || session.isRoundComplete() ? '&from=review' : '';
+
   function goEdit(order: number) {
     router.push(
-      `/golf-intelligence/round/${roundId}/hole/${hole.holeNumber}?edit=${order}`,
+      `/golf-intelligence/round/${roundId}/hole/${hole.holeNumber}?edit=${order}${returnSuffix}`,
     );
   }
   function goInsert(order: number) {
     router.push(
-      `/golf-intelligence/round/${roundId}/hole/${hole.holeNumber}?insertAfter=${order}`,
+      `/golf-intelligence/round/${roundId}/hole/${hole.holeNumber}?insertAfter=${order}${returnSuffix}`,
     );
   }
   async function del(shotId: string) {

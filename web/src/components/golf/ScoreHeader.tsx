@@ -1,5 +1,7 @@
 'use client';
 
+import { memo } from 'react';
+
 const COLOR_UNDER = '#00B870';
 const COLOR_EVEN = '#B8B2AA';
 const COLOR_BOGEY = '#F09020';
@@ -26,7 +28,7 @@ function fmt(v: number | null): string {
   return 'E';
 }
 
-export function ScoreHeader({ front, back, total }: ScoreHeaderProps) {
+function ScoreHeaderImpl({ front, back, total }: ScoreHeaderProps) {
   return (
     <div className="font-mono text-right leading-tight">
       <div className="flex items-center justify-end gap-2 text-[13px] font-medium">
@@ -46,3 +48,5 @@ export function ScoreHeader({ front, back, total }: ScoreHeaderProps) {
     </div>
   );
 }
+
+export const ScoreHeader = memo(ScoreHeaderImpl);
