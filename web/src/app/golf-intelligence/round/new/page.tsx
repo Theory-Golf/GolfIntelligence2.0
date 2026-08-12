@@ -12,7 +12,8 @@ import { createBrowserClient } from '@/lib/golf/db/client';
 import { createId } from '@/lib/golf/utils/index';
 import { writeDraft } from '@/lib/golf/draftStore';
 import {
-  geocodeLocation,
+  resolveLocation,
+  parseLocationQuery,
   fetchWeather,
   currentTimeHHMM,
   type GeocodeResult,
@@ -42,13 +43,14 @@ interface RoundSetupState {
   teeTime: string;
   courseId: string | null;
   courseName: string;
-  locationCity: string;
-  locationState: string;
-  locationZip: string;
+  /** Free text: "Austin, TX", "Austin", or "78701" — all resolve. */
+  locationInput: string;
   roundType: RoundType | null;
   roundNumber: number | null;
   weather: WeatherFields;
   geocode: GeocodeResult | null;
+  /** Alternates offered when a city name is ambiguous ("Springfield"). */
+  candidates: GeocodeResult[];
   weatherStatus: WeatherStatus;
 }
 
@@ -58,13 +60,12 @@ type Action =
   | { type: 'SET_COURSE'; courseId: string; courseName: string }
   | { type: 'SET_COURSE_NAME'; courseName: string }
   | { type: 'CLEAR_COURSE' }
-  | { type: 'SET_LOCATION_CITY'; city: string }
-  | { type: 'SET_LOCATION_STATE'; stateAbbr: string }
-  | { type: 'SET_LOCATION_ZIP'; zip: string }
+  | { type: 'SET_LOCATION_INPUT'; value: string }
   | { type: 'SET_ROUND_TYPE'; roundType: RoundType }
   | { type: 'SET_ROUND_NUMBER'; roundNumber: number }
   | { type: 'SET_WEATHER_FIELD'; field: keyof WeatherFields; value: string }
-  | { type: 'SET_GEOCODE'; geocode: GeocodeResult | null }
+  | { type: 'SET_CANDIDATES'; candidates: GeocodeResult[] }
+  | { type: 'PICK_CANDIDATE'; geocode: GeocodeResult }
   | { type: 'SET_WEATHER_STATUS'; status: WeatherStatus }
   | { type: 'SET_WEATHER_AUTO'; weather: WeatherFields };
 
@@ -84,12 +85,8 @@ function reducer(state: RoundSetupState, action: Action): RoundSetupState {
       return { ...state, courseName: action.courseName, courseId: null };
     case 'CLEAR_COURSE':
       return { ...state, courseId: null, courseName: '' };
-    case 'SET_LOCATION_CITY':
-      return { ...state, locationCity: action.city };
-    case 'SET_LOCATION_STATE':
-      return { ...state, locationState: action.stateAbbr };
-    case 'SET_LOCATION_ZIP':
-      return { ...state, locationZip: action.zip };
+    case 'SET_LOCATION_INPUT':
+      return { ...state, locationInput: action.value };
     case 'SET_ROUND_TYPE':
       return {
         ...state,
@@ -103,7 +100,14 @@ function reducer(state: RoundSetupState, action: Action): RoundSetupState {
         ...state,
         weather: { ...state.weather, [action.field]: action.value },
       };
-    case 'SET_GEOCODE':
+    case 'SET_CANDIDATES':
+      return {
+        ...state,
+        candidates: action.candidates,
+        geocode: action.candidates[0] ?? null,
+        weatherStatus: action.candidates.length > 0 ? state.weatherStatus : 'manual',
+      };
+    case 'PICK_CANDIDATE':
       return { ...state, geocode: action.geocode };
     case 'SET_WEATHER_STATUS':
       return { ...state, weatherStatus: action.status };
@@ -159,13 +163,12 @@ export default function NewRoundPage() {
     teeTime: currentTimeHHMM(),
     courseId: null,
     courseName: '',
-    locationCity: '',
-    locationState: '',
-    locationZip: '',
+    locationInput: '',
     roundType: null,
     roundNumber: null,
     weather: EMPTY_WEATHER,
     geocode: null,
+    candidates: [],
     weatherStatus: 'idle',
   });
 
@@ -202,48 +205,49 @@ export default function NewRoundPage() {
     return () => document.removeEventListener('pointerdown', onPointerDown);
   }, []);
 
-  const locationQuery = state.locationZip.trim()
-    ? state.locationZip.trim()
-    : state.locationCity.trim() && state.locationState.trim()
-      ? `${state.locationCity.trim()}, ${state.locationState.trim()}`
-      : '';
+  // The typed location only needs to be one of: ZIP, "City, ST", or a city.
+  const locationInput = state.locationInput;
+  const parsedLocation = parseLocationQuery(locationInput);
 
-  const locationString = locationQuery || null;
-
-  // Geocode the location field on a 600ms debounce.
+  // Geocode the location field on a 400ms debounce.
   const geocodeReqId = useRef(0);
   useEffect(() => {
-    const query = locationQuery;
-    if (!query) {
-      dispatch({ type: 'SET_GEOCODE', geocode: null });
+    const query = locationInput.trim();
+    const my = ++geocodeReqId.current;
+    if (!parseLocationQuery(query)) {
+      dispatch({ type: 'SET_CANDIDATES', candidates: [] });
       dispatch({ type: 'SET_WEATHER_STATUS', status: 'idle' });
       return;
     }
-    const my = ++geocodeReqId.current;
     dispatch({ type: 'SET_WEATHER_STATUS', status: 'loading' });
+    const controller = new AbortController();
     const t = setTimeout(async () => {
-      const result = await geocodeLocation(query);
+      const results = await resolveLocation(query, controller.signal);
       if (my !== geocodeReqId.current) return;
-      if (!result) {
-        dispatch({ type: 'SET_GEOCODE', geocode: null });
-        dispatch({ type: 'SET_WEATHER_STATUS', status: 'manual' });
-        return;
-      }
-      dispatch({ type: 'SET_GEOCODE', geocode: result });
-    }, 600);
-    return () => clearTimeout(t);
-  }, [locationQuery]);
+      dispatch({ type: 'SET_CANDIDATES', candidates: results });
+    }, 400);
+    return () => {
+      clearTimeout(t);
+      controller.abort();
+    };
+  }, [locationInput]);
 
-  // Re-fetch weather whenever geocode, date, or tee time changes, on a 300ms debounce.
+  // Re-fetch weather whenever geocode, date, or tee time changes.
   const weatherReqId = useRef(0);
+  const { geocode, date: roundDate, teeTime } = state;
   useEffect(() => {
-    if (!state.geocode) return;
+    if (!geocode) return;
     const my = ++weatherReqId.current;
     dispatch({ type: 'SET_WEATHER_STATUS', status: 'loading' });
-    const { lat, lon } = state.geocode;
-    const { date, teeTime } = state;
+    const controller = new AbortController();
     const t = setTimeout(async () => {
-      const w = await fetchWeather(lat, lon, date, teeTime);
+      const w = await fetchWeather(
+        geocode.lat,
+        geocode.lon,
+        roundDate,
+        teeTime,
+        controller.signal,
+      );
       if (my !== weatherReqId.current) return;
       if (!w) {
         dispatch({ type: 'SET_WEATHER_STATUS', status: 'manual' });
@@ -258,9 +262,12 @@ export default function NewRoundPage() {
           precip: w.precip.toFixed(2),
         },
       });
-    }, 300);
-    return () => clearTimeout(t);
-  }, [state.geocode, state.date, state.teeTime]);
+    }, 250);
+    return () => {
+      clearTimeout(t);
+      controller.abort();
+    };
+  }, [geocode, roundDate, teeTime]);
 
   const needsRoundNumber =
     state.roundType === 'Qualifying' || state.roundType === 'Tournament';
@@ -348,8 +355,14 @@ export default function NewRoundPage() {
         played_on: state.date,
         round_type: state.roundType,
         round_number: state.roundNumber,
-        location_city: state.locationCity.trim() || null,
-        location_state: state.locationState.trim() || null,
+        // Prefer the resolved place; fall back to whatever was typed so the
+        // round still records a location when geocoding was unavailable.
+        location_city:
+          state.geocode?.city ??
+          (parsedLocation?.kind === 'place' ? parsedLocation.city : null),
+        location_state:
+          state.geocode?.stateAbbr ??
+          (parsedLocation?.kind === 'place' ? parsedLocation.stateAbbr : null),
         weather_temp_f: numericTemp === '' ? null : Number(numericTemp),
         weather_wind_mph: numericWind === '' ? null : Number(numericWind),
         weather_wind_dir: state.weather.windDirection.trim() || null,
@@ -480,54 +493,56 @@ export default function NewRoundPage() {
           </div>
 
           <div className="mb-2">
-            <div className="flex gap-2">
-              <div className="flex-1 min-w-0">
-                <input
-                  type="text"
-                  placeholder="City"
-                  value={state.locationCity}
-                  onChange={(e) =>
-                    dispatch({ type: 'SET_LOCATION_CITY', city: e.target.value })
-                  }
-                  className={input}
-                />
-              </div>
-              <div className="w-14 flex-shrink-0">
-                <input
-                  type="text"
-                  placeholder="ST"
-                  value={state.locationState}
-                  maxLength={2}
-                  onChange={(e) =>
-                    dispatch({
-                      type: 'SET_LOCATION_STATE',
-                      stateAbbr: e.target.value.toUpperCase(),
-                    })
-                  }
-                  className={input}
-                />
-              </div>
-              <div className="w-20 flex-shrink-0">
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  placeholder="Zip"
-                  value={state.locationZip}
-                  maxLength={5}
-                  onChange={(e) =>
-                    dispatch({ type: 'SET_LOCATION_ZIP', zip: e.target.value.replace(/\D/g, '') })
-                  }
-                  className={input}
-                />
-              </div>
-            </div>
+            <input
+              type="text"
+              placeholder="City, state or ZIP"
+              value={state.locationInput}
+              onChange={(e) =>
+                dispatch({ type: 'SET_LOCATION_INPUT', value: e.target.value })
+              }
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="words"
+              spellCheck={false}
+              enterKeyHint="done"
+              className={input}
+            />
             <p className="font-mono text-[10px] tracking-[0.25em] uppercase text-ash mt-1.5 min-h-[14px]">
-              {state.weatherStatus === 'loading' && 'Fetching weather…'}
+              {state.weatherStatus === 'loading' && 'Finding location…'}
               {state.weatherStatus === 'ok' && state.geocode?.displayName}
               {state.weatherStatus === 'manual' &&
-                'Location not found — enter weather manually'}
-              {state.weatherStatus === 'idle' && ' '}
+                (state.geocode
+                  ? `${state.geocode.displayName} · weather unavailable`
+                  : 'Location not found — enter weather manually')}
+              {state.weatherStatus === 'idle' && ' '}
             </p>
+
+            {/* Ambiguous city names ("Springfield") — offer the alternates. */}
+            {state.candidates.length > 1 && (
+              <div className="flex flex-wrap gap-1.5 mt-1">
+                {state.candidates.map((c) => {
+                  const active =
+                    state.geocode?.lat === c.lat && state.geocode?.lon === c.lon;
+                  return (
+                    <button
+                      key={`${c.lat},${c.lon}`}
+                      type="button"
+                      onClick={() =>
+                        dispatch({ type: 'PICK_CANDIDATE', geocode: c })
+                      }
+                      className={
+                        'rounded-sm px-2 py-1 border font-mono text-[10px] tracking-[0.15em] uppercase touch-manipulation ' +
+                        (active
+                          ? 'border-scarlet bg-scarlet-tint text-chalk'
+                          : 'border-border bg-shadow text-ash')
+                      }
+                    >
+                      {c.displayName}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           <div className="border border-border rounded-md px-4 py-3.5">

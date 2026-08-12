@@ -351,7 +351,10 @@ function HoleRow({
 
   function navigate() {
     if (state.kind === 'completed') {
-      const qs = mode === 'editing' ? '?mode=editing' : '';
+      // from=review keeps the exit from that hole pointed back here rather
+      // than marching forward through holes that are already recorded.
+      const qs =
+        mode === 'editing' ? '?from=review&mode=editing' : '?from=review';
       router.push(
         `/golf-intelligence/round/${roundId}/hole/${holeNumber}/summary${qs}`,
       );

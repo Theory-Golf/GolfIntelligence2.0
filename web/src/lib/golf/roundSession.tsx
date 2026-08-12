@@ -325,22 +325,10 @@ export function RoundSessionProvider({
   }, [roundId]);
 
   // ── Draft persistence ─────────────────────────────────────────────────────
-  // While in draft mode, mirror every committed state change to localStorage
-  // so the round survives reloads. isDraft starts false and only flips true
-  // in the same commit as the hydrated state, so this can never clobber an
-  // existing draft with the empty initial state.
-  useEffect(() => {
-    if (!isDraft || !draftRoundRef.current) return;
-    const ok = writeDraft(state.roundId, {
-      version: 1,
-      round: draftRoundRef.current,
-      courseName: state.courseName,
-      holePars: state.holePars,
-      holes: state.holes,
-      updatedAt: new Date().toISOString(),
-    });
-    if (!ok) console.warn('[draft] localStorage write failed');
-  }, [isDraft, state]);
+  // Every in-round mutation goes through `commit`, which flushes the draft
+  // synchronously in the same tick. A passive effect mirroring `state` on top
+  // of that would serialise the whole round a second time on every change —
+  // pure cost on a phone — so the synchronous flush is the only writer.
 
   // Safety net for mobile: when the tab is hidden or being discarded (the
   // player pockets the phone mid-hole), synchronously flush the draft so a
