@@ -1,11 +1,14 @@
-import type { WeekConfig, Session, HistoryEntry, PlannerExport } from './types';
+import type { WeekConfig, Session, SessionRecord, HistoryEntry, PlannerExport } from './types';
 
 const KEY_PREFIX = 'tg_practice_';
+
+export const EXPORT_VERSION = 2;
 
 type StorageMap = {
   weekConfig: WeekConfig;
   currentSession: Session;
   history: HistoryEntry[];
+  sessions: SessionRecord[];
 };
 
 function read<K extends keyof StorageMap>(key: K): StorageMap[K] | null {
@@ -37,6 +40,7 @@ export const storage = {
       weekConfig: read('weekConfig'),
       currentSession: read('currentSession'),
       history: read('history') ?? [],
+      sessions: read('sessions') ?? [],
     };
   },
   saveWeekConfig(v: WeekConfig | null) {
@@ -48,10 +52,14 @@ export const storage = {
   saveHistory(v: HistoryEntry[]) {
     write('history', v);
   },
+  saveSessions(v: SessionRecord[]) {
+    write('sessions', v);
+  },
   clearAll() {
     write('weekConfig', null);
     write('currentSession', null);
     write('history', null);
+    write('sessions', null);
   },
 };
 
@@ -60,6 +68,8 @@ export function isPlannerExport(data: unknown): data is PlannerExport {
   const d = data as Record<string, unknown>;
   if (typeof d.version !== 'number') return false;
   if (!Array.isArray(d.history)) return false;
+  // sessions was added in v2 — v1 backups legitimately omit it
+  if (d.sessions !== undefined && !Array.isArray(d.sessions)) return false;
   // weekConfig and currentSession may be null
   return true;
 }

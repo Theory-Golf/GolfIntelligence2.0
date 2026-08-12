@@ -14,13 +14,12 @@ export default function EmptyState({
 
   return (
     <div className="border border-border bg-card p-8 text-center">
-      <p className="eyebrow mb-3">The Plan</p>
       <h3 className="font-display text-2xl font-extrabold uppercase tracking-tight text-foreground">
-        Build the next session
+        Start your first session
       </h3>
       <p className="mx-auto mt-3 max-w-md text-sm text-muted-foreground">
-        Define your technical focus, scale the session to your shot budget, run structured blocks,
-        and track acquisition across the mesocycle. Everything is stored locally on this device.
+        Three steps: define your technical focus, scale the session to your shot budget, then run
+        it. Everything you log is stored on this device.
       </p>
       <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
         <Button onClick={onGetStarted}>Get Started</Button>

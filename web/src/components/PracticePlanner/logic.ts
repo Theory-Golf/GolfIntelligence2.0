@@ -6,10 +6,13 @@ import {
 import type {
   Block,
   Checkpoint,
+  Direction,
   HistoryEntry,
   PracticeGate,
   Session,
+  SessionRecord,
   StatusKey,
+  WedgeShot,
   WeekConfig,
 } from './types';
 
@@ -331,4 +334,210 @@ export function newCheckpointId(): string {
 
 export function isSessionEmpty(s: Session | null): boolean {
   return !s || s.blocks.length === 0;
+}
+
+/* ================================================================
+   Session mutations — pure. Each returns the next session plus the
+   history entries the change earned, so the caller can commit both
+   in one go instead of nesting one state update inside another.
+   ================================================================ */
+
+export type SessionMutation = { session: Session; entries: HistoryEntry[] };
+
+/** Log a checkpoint set: freeze its score and write it to history. */
+export function logCheckpoint(session: Session, blockId: string, cpId: string): SessionMutation {
+  const entries: HistoryEntry[] = [];
+  const blocks = session.blocks.map((b) => {
+    if (b.id !== blockId || !b.checkpoints) return b;
+    const checkpoints = b.checkpoints.map((cp) => {
+      if (cp.id !== cpId || cp.logged) return cp;
+      const score = countSuccesses(cp);
+      entries.push({
+        date: session.date,
+        timestamp: new Date().toISOString(),
+        elementId: cp.elementId,
+        elementName: b.elementName || b.name,
+        score,
+        total: 5,
+        kind: 'technical',
+        blockType: b.type,
+      });
+      return { ...cp, logged: true, score };
+    });
+    const completed = checkpoints.every((c) => c.logged) ? true : b.completed;
+    return { ...b, checkpoints, completed };
+  });
+  return { session: { ...session, blocks }, entries };
+}
+
+/** Record the wedge shot in progress; auto-completes the block on the last shot. */
+export function recordWedgeShot(session: Session, blockId: string): SessionMutation {
+  let entries: HistoryEntry[] = [];
+  const blocks = session.blocks.map((b) => {
+    if (b.id !== blockId || !b.distanceTest) return b;
+    const cs = b.distanceTest.currentShot ?? { ballSpeed: '', direction: null as Direction };
+    const distances = b.distanceTest.distances ?? [];
+    const recordedCount = b.distanceTest.shots.filter((s) => s.recorded).length;
+    const shots: WedgeShot[] = [
+      ...b.distanceTest.shots,
+      {
+        target: distances[recordedCount] ?? 0,
+        ballSpeed: cs.ballSpeed || '',
+        direction: cs.direction ?? null,
+        recorded: true,
+        timestamp: new Date().toISOString(),
+      },
+    ];
+    const distanceTest = {
+      ...b.distanceTest,
+      shots,
+      currentShot: { ballSpeed: '', direction: null as Direction },
+    };
+    if (shots.filter((s) => s.recorded).length >= b.shots) {
+      entries = buildWedgeHistory(b, shots, session.date);
+      return { ...b, distanceTest, completed: true };
+    }
+    return { ...b, distanceTest };
+  });
+  return { session: { ...session, blocks }, entries };
+}
+
+/** Complete a wedge block early, keeping whatever shots were recorded. */
+export function completeWedgeBlock(session: Session, blockId: string): SessionMutation {
+  let entries: HistoryEntry[] = [];
+  const blocks = session.blocks.map((b) => {
+    if (b.id !== blockId || b.completed || !b.distanceTest) return b;
+    entries = buildWedgeHistory(b, b.distanceTest.shots, session.date);
+    return { ...b, completed: true };
+  });
+  return { session: { ...session, blocks }, entries };
+}
+
+/** Per-shot entries plus a block summary for a wedge distance test. */
+export function buildWedgeHistory(
+  block: Block,
+  shots: WedgeShot[],
+  date: string,
+): HistoryEntry[] {
+  const valid = shots.filter((s) => s.recorded && s.ballSpeed);
+  if (valid.length === 0) return [];
+  const ballSpeeds = valid
+    .map((s) => parseFloat(s.ballSpeed))
+    .filter((n) => !isNaN(n));
+  const avg = ballSpeeds.length
+    ? ballSpeeds.reduce((a, b) => a + b, 0) / ballSpeeds.length
+    : null;
+  const entries: HistoryEntry[] = valid.map((s) => ({
+    date,
+    timestamp: s.timestamp,
+    elementId: 'wedge_distance',
+    elementName: 'Distance Wedges',
+    kind: 'wedge_shot',
+    blockType: block.type,
+    blockSubtype: block.subtype,
+    target: s.target,
+    ballSpeed: parseFloat(s.ballSpeed) || null,
+    direction: s.direction,
+  }));
+  entries.push({
+    date,
+    timestamp: new Date().toISOString(),
+    elementId: 'wedge_distance',
+    elementName: 'Distance Wedges',
+    kind: 'distance',
+    blockType: 'wedge-distance',
+    blockSubtype: block.subtype,
+    score: valid.length,
+    total: block.shots,
+    avgBallSpeed: avg,
+  });
+  return entries;
+}
+
+/**
+ * Close out a session: build the record that gets saved, and flush any work
+ * the player did but never logged — part-finished checkpoint sets and wedge
+ * blocks left short of their shot count. Without this, that work is lost the
+ * moment the session ends.
+ */
+export function summarizeSession(
+  session: Session,
+  weekConfig: WeekConfig | null,
+): { record: SessionRecord; flushEntries: HistoryEntry[] } {
+  const week = getMesocycleWeek(weekConfig);
+  const phase = getMesocyclePhase(week);
+  const flushEntries: HistoryEntry[] = [];
+  const checkpoints: SessionRecord['checkpoints'] = [];
+  const wedgeSpeeds: number[] = [];
+  let wedgeShots = 0;
+
+  session.blocks.forEach((b) => {
+    b.checkpoints?.forEach((cp) => {
+      const attempted = cp.logged || cp.swings.some((s) => s !== null);
+      if (!attempted) return;
+      const score = cp.logged ? cp.score ?? 0 : countSuccesses(cp);
+      checkpoints.push({
+        elementId: cp.elementId,
+        elementName: b.elementName || b.name,
+        score,
+        total: 5,
+      });
+      if (!cp.logged) {
+        flushEntries.push({
+          date: session.date,
+          timestamp: new Date().toISOString(),
+          elementId: cp.elementId,
+          elementName: b.elementName || b.name,
+          score,
+          total: 5,
+          kind: 'technical',
+          blockType: b.type,
+        });
+      }
+    });
+
+    if (b.distanceTest) {
+      const recorded = b.distanceTest.shots.filter((s) => s.recorded);
+      wedgeShots += recorded.length;
+      recorded.forEach((s) => {
+        const n = parseFloat(s.ballSpeed);
+        if (!isNaN(n)) wedgeSpeeds.push(n);
+      });
+      // Completed blocks already wrote their entries when they completed
+      if (!b.completed) {
+        flushEntries.push(...buildWedgeHistory(b, b.distanceTest.shots, session.date));
+      }
+    }
+  });
+
+  const record: SessionRecord = {
+    id: uid('sess'),
+    date: session.date,
+    completedAt: new Date().toISOString(),
+    week,
+    phase: phase.phase,
+    phaseDesc: phase.desc,
+    shotBudget: session.shotBudget,
+    plannedShots: session.blocks.reduce((sum, b) => sum + b.shots, 0),
+    blocksCompleted: session.blocks.filter((b) => b.completed).length,
+    blocksTotal: session.blocks.length,
+    blocks: session.blocks.map((b) => ({
+      id: b.id,
+      name: b.name,
+      type: b.type,
+      shots: b.shots,
+      completed: b.completed,
+    })),
+    checkpoints,
+    wedgeShots,
+    avgBallSpeed: wedgeSpeeds.length
+      ? wedgeSpeeds.reduce((a, b) => a + b, 0) / wedgeSpeeds.length
+      : null,
+  };
+
+  return { record, flushEntries };
+}
+
+function countSuccesses(cp: Checkpoint): number {
+  return cp.swings.filter((s) => s === true).length;
 }

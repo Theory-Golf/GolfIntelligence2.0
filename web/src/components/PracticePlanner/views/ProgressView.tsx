@@ -2,18 +2,20 @@
 
 import { useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { STATUS, fmtDateShort, getElementStatus, stddev } from '../logic';
-import type { HistoryEntry, WeekConfig } from '../types';
+import { STATUS, fmtDate, fmtDateShort, getElementStatus, stddev } from '../logic';
+import type { HistoryEntry, SessionRecord, WeekConfig } from '../types';
 import StatusPill from '../parts/StatusPill';
 
 export default function ProgressView({
   history,
+  sessions,
   weekConfig,
   onExport,
   onImport,
   onClearAll,
 }: {
   history: HistoryEntry[];
+  sessions: SessionRecord[];
   weekConfig: WeekConfig | null;
   onExport: () => void;
   onImport: (file: File) => void;
@@ -21,7 +23,7 @@ export default function ProgressView({
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
 
-  if (history.length === 0) {
+  if (history.length === 0 && sessions.length === 0) {
     return (
       <div className="border border-dashed border-border bg-muted/40 p-8 text-center">
         <div className="font-display text-xl font-bold uppercase tracking-wide text-foreground">
@@ -56,7 +58,9 @@ export default function ProgressView({
 
   const techElements = elementIds.filter((id) => byElement[id].kind === 'technical');
   const totalCheckpoints = history.filter((h) => h.kind === 'technical').length;
-  const totalSessions = new Set(history.map((h) => h.date)).size;
+  // Saved session records are the source of truth; fall back to distinct dates
+  // for history written before sessions were recorded.
+  const totalSessions = sessions.length || new Set(history.map((h) => h.date)).size;
   const masteredCount = techElements.filter((id) => getElementStatus(history, id) === 'mastered').length;
 
   return (
@@ -67,6 +71,42 @@ export default function ProgressView({
         <Stat label="Elements" value={String(techElements.length)} />
         <Stat label="Mastered" value={String(masteredCount)} highlight />
       </div>
+
+      {sessions.length > 0 && (
+        <div className="border border-border bg-card p-4">
+          <div className="mb-3 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+            Completed Sessions
+          </div>
+          <div className="space-y-2">
+            {sessions
+              .slice()
+              .reverse()
+              .slice(0, 10)
+              .map((s) => (
+                <div
+                  key={s.id}
+                  className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-border pb-2 last:border-0 last:pb-0"
+                >
+                  <span className="font-display text-sm font-bold uppercase tracking-wide text-foreground">
+                    {fmtDate(s.date)}
+                  </span>
+                  <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+                    Wk {s.week} · {s.phase}
+                  </span>
+                  <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+                    {s.plannedShots} shots · {s.blocksCompleted}/{s.blocksTotal} blocks ·{' '}
+                    {s.checkpoints.length} checkpoint{s.checkpoints.length === 1 ? '' : 's'}
+                  </span>
+                </div>
+              ))}
+          </div>
+          {sessions.length > 10 && (
+            <div className="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+              + {sessions.length - 10} earlier sessions
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="border border-border bg-card p-4">
         <div className="mb-3 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">

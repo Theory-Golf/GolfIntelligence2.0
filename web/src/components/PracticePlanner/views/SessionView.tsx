@@ -20,8 +20,8 @@ export type SessionHandlers = {
   onCompleteWedge: (blockId: string) => void;
   onToggleShowAllShots: (blockId: string) => void;
   onToggleSimple: (blockId: string) => void;
-  onEndSession: () => void;
-  onResetSession: () => void;
+  onCompleteSession: () => void;
+  onDiscardSession: () => void;
 };
 
 export default function SessionView({
@@ -40,8 +40,8 @@ export default function SessionView({
   if (!weekConfig.ironElements.some((e) => e.name)) {
     return (
       <EmptyHelper title="Set your technical focus first">
-        Head to the Setup tab and add the elements your coach has you working on. Then come back
-        here to plan and run a session.
+        Go back to step 1 and add the elements your coach has you working on. Then come back here
+        to build and run a session.
       </EmptyHelper>
     );
   }
@@ -49,10 +49,9 @@ export default function SessionView({
   if (!session) {
     return (
       <EmptyHelper title="No session yet">
-        Build a session from the Plan tab. Choose a shot budget and the structure scales to your
-        current mesocycle phase.
+        Choose a shot budget and the structure scales to your current mesocycle phase.
         <div className="mt-4">
-          <Button onClick={onGoToPlan}>Open Plan</Button>
+          <Button onClick={onGoToPlan}>Build a Session</Button>
         </div>
       </EmptyHelper>
     );
@@ -67,7 +66,7 @@ export default function SessionView({
     <div className="space-y-6">
       <header className="space-y-3">
         <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
-          Active Session · {fmtDate(session.date)}
+          Step 03 · Run · {fmtDate(session.date)}
         </p>
         <h3 className="font-display text-3xl font-extrabold uppercase tracking-tight text-foreground sm:text-4xl">
           Run the <span className="text-primary">plan</span>
@@ -81,19 +80,29 @@ export default function SessionView({
         <Meta label="Week" value={String(week)} />
       </div>
 
-      <div className="flex flex-wrap gap-3">
-        <Button variant="outline" size="sm" onClick={handlers.onEndSession}>
-          End Session
-        </Button>
-        <Button variant="ghost" size="sm" onClick={handlers.onResetSession}>
-          Discard & Restart
-        </Button>
-      </div>
-
       <div className="space-y-4">
         {session.blocks.map((b, idx) => (
           <BlockCard key={b.id} block={b} idx={idx} history={history} handlers={handlers} />
         ))}
+      </div>
+
+      {/* Finishing is the saving step — it writes the session to your history. */}
+      <div className="border border-border bg-card p-5">
+        <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+          {completed === session.blocks.length
+            ? 'All blocks complete'
+            : `${completed} of ${session.blocks.length} blocks complete`}
+        </div>
+        <p className="mt-1 max-w-xl text-sm text-muted-foreground">
+          Completing the session saves it — every checkpoint and recorded shot goes to your
+          history, finished or not.
+        </p>
+        <div className="mt-4 flex flex-wrap gap-3">
+          <Button onClick={handlers.onCompleteSession}>Complete Session →</Button>
+          <Button variant="ghost" size="sm" onClick={handlers.onDiscardSession}>
+            Discard Session
+          </Button>
+        </div>
       </div>
     </div>
   );

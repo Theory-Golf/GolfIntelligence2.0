@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
+import SectionHeader from '@/components/playerpath/SectionHeader';
 import { ACTIVITIES, CATEGORIES, TYPES } from '@/data/practiceActivities';
 import type { Activity } from '@/data/practiceActivities';
 
@@ -78,16 +79,55 @@ export default function PracticeLibrary() {
     <section className="px-6 pb-20">
       <div className="mx-auto max-w-5xl">
         {/* ── Header ─────────────────────────────────────────── */}
-        <header className="mb-8 space-y-4">
-          <p className="eyebrow">The Library</p>
-          <h2 className="font-display text-[clamp(32px,5vw,56px)] font-extrabold uppercase leading-[0.95] tracking-tight text-foreground">
-            Browse the <span className="text-primary">work</span>
-          </h2>
-          <p className="max-w-2xl text-base leading-relaxed text-muted-foreground">
-            Every assessment and development activity in one catalog. Filter by segment or type,
-            or flag a performance driver to surface the activities that address it.
+        <SectionHeader
+          index="03"
+          eyebrow="The Library"
+          title={
+            <>
+              Review the <span className="text-primary">drivers</span>
+            </>
+          }
+          lead="Start from your flagged performance drivers — the leaks the analysis says are costing you the most — and the activities that address them rise to the top. Everything else stays browsable by segment and type."
+        />
+
+        {/* ── Flagged drivers ─────────────────────────────────── */}
+        <div className="mb-10 border border-border bg-card p-5 sm:p-6">
+          <div className="mb-1.5 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary">
+              Flagged Drivers
+            </span>
+            <span className="text-xs text-muted-foreground">
+              Toggle a driver to surface the activities that address it
+            </span>
+          </div>
+          <p className="mb-4 max-w-2xl text-xs text-muted-foreground">
+            These will be populated from your Golf Intelligence analysis — the driver set below is a
+            stand-in while that connection is built.
           </p>
-        </header>
+          <div className="flex flex-wrap gap-2">
+            {ALL_DRIVER_IDS.map((id) => (
+              <button
+                key={id}
+                className={`min-h-[44px] border px-3.5 font-mono text-[11px] uppercase tracking-[0.08em] transition-colors duration-150 ${
+                  flaggedDrivers.includes(id)
+                    ? 'border-primary bg-accent text-accent-foreground'
+                    : 'border-border text-muted-foreground hover:border-muted-foreground hover:text-foreground'
+                }`}
+                onClick={() => toggleDriver(id)}
+              >
+                {id}
+              </button>
+            ))}
+            {hasDriverFilter && (
+              <button
+                className="min-h-[44px] pl-2 font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground transition-colors duration-150 hover:text-primary"
+                onClick={() => setFlaggedDrivers([])}
+              >
+                Clear
+              </button>
+            )}
+          </div>
+        </div>
 
         {/* ── Filter bar ─────────────────────────────────────── */}
         <div className="mb-4">
@@ -129,41 +169,6 @@ export default function PracticeLibrary() {
                 {t.label}
               </button>
             ))}
-          </div>
-        </div>
-
-        {/* ── Driver intelligence toggle ──────────────────────── */}
-        <div className="mt-7 border border-border bg-card p-5 sm:p-6">
-          <div className="mb-3.5 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-              Flagged Drivers
-            </span>
-            <span className="text-xs text-muted-foreground">
-              Toggle a driver to surface the activities that address it
-            </span>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {ALL_DRIVER_IDS.map((id) => (
-              <button
-                key={id}
-                className={`min-h-[44px] border px-3.5 font-mono text-[11px] uppercase tracking-[0.08em] transition-colors duration-150 ${
-                  flaggedDrivers.includes(id)
-                    ? 'border-primary bg-accent text-accent-foreground'
-                    : 'border-border text-muted-foreground hover:border-muted-foreground hover:text-foreground'
-                }`}
-                onClick={() => toggleDriver(id)}
-              >
-                {id}
-              </button>
-            ))}
-            {hasDriverFilter && (
-              <button
-                className="min-h-[44px] pl-2 font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground transition-colors duration-150 hover:text-primary"
-                onClick={() => setFlaggedDrivers([])}
-              >
-                Clear
-              </button>
-            )}
           </div>
         </div>
 

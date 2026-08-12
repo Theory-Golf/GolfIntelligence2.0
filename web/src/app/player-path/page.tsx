@@ -1,4 +1,6 @@
-import PlayerPathSections from '@/components/PlayerPathSections';
+import PlayerPathOverview from '@/components/playerpath/Overview';
+import PracticePlanner from '@/components/PracticePlanner';
+import PracticeLibrary from '@/components/PracticeLibrary';
 
 export const metadata = {
   title: 'PlayerPath',
@@ -8,23 +10,18 @@ export const metadata = {
 export default function PlayerPathPage() {
   return (
     <>
-      {/* ── Hero ─────────────────────────────────────────────── */}
-      <section className="px-6 pt-20 pb-12">
-        <div className="max-w-5xl mx-auto">
-          <p className="eyebrow mb-5">Development</p>
-          <h1 className="font-display font-extrabold text-[clamp(40px,7vw,80px)] leading-[0.9] tracking-tight uppercase text-foreground">
-            Player<span className="text-primary">Path</span>
-          </h1>
-          <p className="font-body text-base text-muted-foreground mt-5 max-w-lg leading-relaxed">
-            Every player has a highest-leverage area. PlayerPath surfaces it —
-            quantifying exactly which part of the game is costing the most strokes
-            and mapping a clear development priority.
-          </p>
-        </div>
+      {/* ── 01 · PlayerPath — what it is, what it includes ────── */}
+      <PlayerPathOverview />
+
+      {/* ── 02 · The Plan — build and run a practice session ──── */}
+      <section id="plan" className="scroll-mt-[61px] border-t border-border pt-16">
+        <PracticePlanner />
       </section>
 
-      {/* ── The Plan / The Library ───────────────────────────── */}
-      <PlayerPathSections />
+      {/* ── 03 · The Library — flagged drivers + the catalog ──── */}
+      <section id="library" className="scroll-mt-[61px] border-t border-border pt-16">
+        <PracticeLibrary />
+      </section>
     </>
   );
 }

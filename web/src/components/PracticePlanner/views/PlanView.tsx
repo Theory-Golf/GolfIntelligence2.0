@@ -34,13 +34,13 @@ export default function PlanView({
       <div className="space-y-4">
         <header className="space-y-3">
           <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
-            Step 02 · Plan
+            Step 02 · Build
           </p>
           <h3 className="font-display text-3xl font-extrabold uppercase tracking-tight text-foreground sm:text-4xl">
             Session already <span className="text-primary">in progress</span>
           </h3>
           <p className="max-w-2xl text-sm text-muted-foreground">
-            Continue your current session in the Session tab, or discard it to plan a new one.
+            Pick your session back up, or discard it and build a new one.
             Logged checkpoints stay in history either way.
           </p>
         </header>
@@ -58,7 +58,7 @@ export default function PlanView({
     <div className="space-y-6">
       <header className="space-y-3">
         <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
-          Step 02 · Plan
+          Step 02 · Build
         </p>
         <h3 className="font-display text-3xl font-extrabold uppercase tracking-tight text-foreground sm:text-4xl">
           Plan the
@@ -83,7 +83,7 @@ export default function PlanView({
 
       {setupNeeded ? (
         <div className="border border-dashed border-border bg-muted/40 p-6 text-center text-sm text-muted-foreground">
-          Define at least one iron element in the Setup tab before building a session.
+          Define at least one iron element in step 1 before building a session.
         </div>
       ) : (
         <div className="border border-border bg-card p-4">
