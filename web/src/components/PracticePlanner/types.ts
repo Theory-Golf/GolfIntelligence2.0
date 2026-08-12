@@ -107,12 +107,44 @@ export type HistoryEntry = {
   activityId?: string;
 };
 
+/** A finished session, saved when the player completes it. */
+export type SessionRecord = {
+  id: string;
+  date: string;
+  completedAt: string;
+  /** Mesocycle stage at the moment the session was completed */
+  week: number;
+  phase: string;
+  phaseDesc: string;
+  shotBudget: number;
+  plannedShots: number;
+  blocksCompleted: number;
+  blocksTotal: number;
+  blocks: {
+    id: string;
+    name: string;
+    type: BlockType;
+    shots: number;
+    completed: boolean;
+  }[];
+  checkpoints: {
+    elementId: string;
+    elementName: string;
+    score: number;
+    total: number;
+  }[];
+  wedgeShots: number;
+  avgBallSpeed: number | null;
+};
+
 export type PlannerExport = {
   exportDate: string;
   version: number;
   weekConfig: WeekConfig | null;
   currentSession: Session | null;
   history: HistoryEntry[];
+  /** Added in version 2 — absent in older backups */
+  sessions?: SessionRecord[];
 };
 
 export type StatusKey = 'new' | 'building' | 'acquiring' | 'stable' | 'mastered';

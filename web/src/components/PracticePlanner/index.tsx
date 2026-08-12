@@ -1,34 +1,43 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import SectionHeader from '@/components/playerpath/SectionHeader';
 import { seedWeekConfig, todayISO, uid } from './defaults';
 import {
   buildSessionBlocks,
+  completeWedgeBlock,
   generateWedgeDistances,
+  getMesocyclePhase,
+  getMesocycleWeek,
+  logCheckpoint,
+  recordWedgeShot,
+  summarizeSession,
 } from './logic';
-import { isPlannerExport, storage } from './storage';
+import { EXPORT_VERSION, isPlannerExport, storage } from './storage';
 import type {
   Block,
   Direction,
   HistoryEntry,
   PlannerExport,
-  PracticeIntent,
   Session,
+  SessionRecord,
   WeekConfig,
 } from './types';
 import EmptyState from './parts/EmptyState';
 import SetupView from './views/SetupView';
 import PlanView from './views/PlanView';
 import SessionView, { type SessionHandlers } from './views/SessionView';
+import SessionCompleteView from './views/SessionCompleteView';
 import ProgressView from './views/ProgressView';
 
-type TabKey = 'setup' | 'plan' | 'session' | 'progress';
+/** The Plan is a linear flow, not a tab set: define focus → build → run → done. */
+type Stage = 'setup' | 'build' | 'running' | 'complete';
 
-const TABS: { key: TabKey; label: string }[] = [
-  { key: 'setup', label: 'Setup' },
-  { key: 'plan', label: 'Plan' },
-  { key: 'session', label: 'Session' },
-  { key: 'progress', label: 'Progress' },
+const STEPS: { key: Stage; label: string }[] = [
+  { key: 'setup', label: 'Focus' },
+  { key: 'build', label: 'Build' },
+  { key: 'running', label: 'Run' },
 ];
 
 export default function PracticePlanner() {
@@ -36,17 +45,22 @@ export default function PracticePlanner() {
   const [weekConfig, setWeekConfig] = useState<WeekConfig | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
-  const [tab, setTab] = useState<TabKey>('setup');
+  const [sessions, setSessions] = useState<SessionRecord[]>([]);
+  const [stage, setStage] = useState<Stage>('setup');
+  const [lastCompleted, setLastCompleted] = useState<SessionRecord | null>(null);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const [savedAt, setSavedAt] = useState<number | null>(null);
   const savedTimer = useRef<number | null>(null);
+  const historyRef = useRef<HTMLDivElement>(null);
 
   // Hydrate from localStorage once on the client
   useEffect(() => {
-    const { weekConfig: wc, currentSession: cs, history: h } = storage.loadAll();
+    const { weekConfig: wc, currentSession: cs, history: h, sessions: s } = storage.loadAll();
     setWeekConfig(wc);
     setSession(cs);
     setHistory(h);
-    setTab(cs ? 'session' : wc ? 'plan' : 'setup');
+    setSessions(s);
+    setStage(cs ? 'running' : wc ? 'build' : 'setup');
     setHydrated(true);
   }, []);
 
@@ -66,10 +80,15 @@ export default function PracticePlanner() {
     storage.saveHistory(history);
   }, [history, hydrated]);
 
+  useEffect(() => {
+    if (!hydrated) return;
+    storage.saveSessions(sessions);
+  }, [sessions, hydrated]);
+
   // ── Empty-state handlers ────────────────────────────────────
   const handleGetStarted = useCallback(() => {
     setWeekConfig(seedWeekConfig());
-    setTab('setup');
+    setStage('setup');
   }, []);
 
   const handleImport = useCallback((file: File) => {
@@ -86,7 +105,10 @@ export default function PracticePlanner() {
         setWeekConfig(data.weekConfig ?? null);
         setSession(data.currentSession ?? null);
         setHistory(data.history ?? []);
-        setTab('progress');
+        setSessions(data.sessions ?? []);
+        setLastCompleted(null);
+        setStage(data.currentSession ? 'running' : data.weekConfig ? 'build' : 'setup');
+        setHistoryOpen(true);
       } catch {
         window.alert('Import failed: invalid JSON.');
       }
@@ -97,10 +119,11 @@ export default function PracticePlanner() {
   const handleExport = useCallback(() => {
     const data: PlannerExport = {
       exportDate: new Date().toISOString(),
-      version: 1,
+      version: EXPORT_VERSION,
       weekConfig,
       currentSession: session,
       history,
+      sessions,
     };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -109,16 +132,22 @@ export default function PracticePlanner() {
     a.download = `tg-practice-${todayISO()}.json`;
     a.click();
     URL.revokeObjectURL(url);
-  }, [weekConfig, session, history]);
+  }, [weekConfig, session, history, sessions]);
 
   const handleClearAll = useCallback(() => {
-    if (!window.confirm('Clear ALL data — history, week config, current session? This cannot be undone.')) {
+    if (
+      !window.confirm(
+        'Clear ALL data — history, saved sessions, week config, current session? This cannot be undone.',
+      )
+    ) {
       return;
     }
     setWeekConfig(null);
     setSession(null);
     setHistory([]);
-    setTab('setup');
+    setSessions([]);
+    setLastCompleted(null);
+    setStage('setup');
   }, []);
 
   // ── Setup save ──────────────────────────────────────────────
@@ -135,6 +164,13 @@ export default function PracticePlanner() {
     savedTimer.current = window.setTimeout(() => setSavedAt(null), 2200);
   }, [weekConfig]);
 
+  const openHistory = useCallback(() => {
+    setHistoryOpen(true);
+    window.requestAnimationFrame(() => {
+      historyRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }, []);
+
   // ── Session lifecycle ───────────────────────────────────────
   const handleStartSession = useCallback(
     (shotBudget: number, includeDriver: 'auto' | 'yes' | 'no', ironFocusId: string) => {
@@ -147,45 +183,60 @@ export default function PracticePlanner() {
           b.distanceTest.currentShot = { ballSpeed: '', direction: null };
         }
       });
-      const next: Session = {
+      setSession({
         date: todayISO(),
         shotBudget,
         includeDriver,
         ironFocusId,
         blocks,
-      };
-      setSession(next);
-      setTab('session');
+      });
+      setLastCompleted(null);
+      setStage('running');
     },
     [weekConfig],
   );
 
-  const handleEndSession = useCallback(() => {
-    if (!window.confirm('End this session? Logged progress is already saved to history.')) return;
+  /**
+   * Finish a session: save it as a record, flush anything logged-but-unrecorded,
+   * then show the completion summary. This is the only path that keeps the work.
+   */
+  const handleCompleteSession = useCallback(() => {
+    if (!session) return;
+    const { record, flushEntries } = summarizeSession(session, weekConfig);
+    if (flushEntries.length > 0) {
+      setHistory((h) => [...h, ...flushEntries]);
+    }
+    setSessions((s) => [...s, record]);
+    setLastCompleted(record);
     setSession(null);
-    setTab('plan');
-  }, []);
+    setStage('complete');
+  }, [session, weekConfig]);
 
-  const handleResetSession = useCallback(() => {
-    if (!window.confirm('Discard this session and rebuild it? Logged checkpoints stay in history.'))
+  const handleDiscardSession = useCallback(() => {
+    if (!window.confirm('Discard this session? Anything already logged stays in your history.'))
       return;
     setSession(null);
-    setTab('plan');
+    setStage('build');
   }, []);
 
   // ── Block mutations ─────────────────────────────────────────
-  const updateBlock = useCallback(
-    (blockId: string, updater: (b: Block) => Block) => {
-      setSession((prev) => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          blocks: prev.blocks.map((b) => (b.id === blockId ? updater(b) : b)),
-        };
-      });
-    },
-    [],
-  );
+  const updateBlock = useCallback((blockId: string, updater: (b: Block) => Block) => {
+    setSession((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        blocks: prev.blocks.map((b) => (b.id === blockId ? updater(b) : b)),
+      };
+    });
+  }, []);
+
+  /** Commit a session change and the history it earned in one pass. */
+  const commit = useCallback((next: { session: Session; entries: HistoryEntry[] }) => {
+    setSession(next.session);
+    if (next.entries.length > 0) {
+      setHistory((h) => [...h, ...next.entries]);
+    }
+  }, []);
 
   const handlers: SessionHandlers = useMemo(
     () => ({
@@ -216,34 +267,8 @@ export default function PracticePlanner() {
       },
 
       onLogCheckpoint: (blockId, cpId) => {
-        setSession((prev) => {
-          if (!prev) return prev;
-          let entryToAppend: HistoryEntry | null = null;
-          const blocks = prev.blocks.map((b) => {
-            if (b.id !== blockId || !b.checkpoints) return b;
-            const checkpoints = b.checkpoints.map((cp) => {
-              if (cp.id !== cpId || cp.logged) return cp;
-              const score = cp.swings.filter((s) => s === true).length;
-              entryToAppend = {
-                date: prev.date,
-                timestamp: new Date().toISOString(),
-                elementId: cp.elementId,
-                elementName: b.elementName || b.name,
-                score,
-                total: 5,
-                kind: 'technical',
-                blockType: b.type,
-              };
-              return { ...cp, logged: true, score };
-            });
-            const completed = checkpoints.every((c) => c.logged) ? true : b.completed;
-            return { ...b, checkpoints, completed };
-          });
-          if (entryToAppend) {
-            setHistory((h) => [...h, entryToAppend as HistoryEntry]);
-          }
-          return { ...prev, blocks };
-        });
+        if (!session) return;
+        commit(logCheckpoint(session, blockId, cpId));
       },
 
       onSetGateIntent: (blockId, gateId, intent) => {
@@ -280,45 +305,16 @@ export default function PracticePlanner() {
         updateBlock(blockId, (b) => {
           if (!b.distanceTest) return b;
           const cs = b.distanceTest.currentShot ?? { ballSpeed: '', direction: null as Direction };
-          return { ...b, distanceTest: { ...b.distanceTest, currentShot: { ...cs, direction: dir } } };
+          return {
+            ...b,
+            distanceTest: { ...b.distanceTest, currentShot: { ...cs, direction: dir } },
+          };
         });
       },
 
       onRecordWedge: (blockId) => {
-        setSession((prev) => {
-          if (!prev) return prev;
-          let completionEntries: HistoryEntry[] = [];
-          const blocks = prev.blocks.map((b) => {
-            if (b.id !== blockId || !b.distanceTest) return b;
-            const cs = b.distanceTest.currentShot ?? { ballSpeed: '', direction: null as Direction };
-            const distances = b.distanceTest.distances ?? [];
-            const recordedCount = b.distanceTest.shots.filter((s) => s.recorded).length;
-            const target = distances[recordedCount] ?? 0;
-            const newShot = {
-              target,
-              ballSpeed: cs.ballSpeed || '',
-              direction: cs.direction ?? null,
-              recorded: true,
-              timestamp: new Date().toISOString(),
-            };
-            const shots = [...b.distanceTest.shots, newShot];
-            const nextDistanceTest = {
-              ...b.distanceTest,
-              shots,
-              currentShot: { ballSpeed: '', direction: null as Direction },
-            };
-            // Auto-complete when full
-            if (shots.filter((s) => s.recorded).length >= b.shots) {
-              completionEntries = buildWedgeHistory(b, shots, prev.date);
-              return { ...b, distanceTest: nextDistanceTest, completed: true };
-            }
-            return { ...b, distanceTest: nextDistanceTest };
-          });
-          if (completionEntries.length > 0) {
-            setHistory((h) => [...h, ...completionEntries]);
-          }
-          return { ...prev, blocks };
-        });
+        if (!session) return;
+        commit(recordWedgeShot(session, blockId));
       },
 
       onEditPreviousWedge: (blockId) => {
@@ -340,25 +336,17 @@ export default function PracticePlanner() {
       },
 
       onCompleteWedge: (blockId) => {
-        setSession((prev) => {
-          if (!prev) return prev;
-          let entries: HistoryEntry[] = [];
-          const blocks = prev.blocks.map((b) => {
-            if (b.id !== blockId || b.completed || !b.distanceTest) return b;
-            entries = buildWedgeHistory(b, b.distanceTest.shots, prev.date);
-            return { ...b, completed: true };
-          });
-          if (entries.length > 0) {
-            setHistory((h) => [...h, ...entries]);
-          }
-          return { ...prev, blocks };
-        });
+        if (!session) return;
+        commit(completeWedgeBlock(session, blockId));
       },
 
       onToggleShowAllShots: (blockId) => {
         updateBlock(blockId, (b) => {
           if (!b.distanceTest) return b;
-          return { ...b, distanceTest: { ...b.distanceTest, showAllShots: !b.distanceTest.showAllShots } };
+          return {
+            ...b,
+            distanceTest: { ...b.distanceTest, showAllShots: !b.distanceTest.showAllShots },
+          };
         });
       },
 
@@ -366,30 +354,30 @@ export default function PracticePlanner() {
         updateBlock(blockId, (b) => ({ ...b, completed: !b.completed }));
       },
 
-      onEndSession: handleEndSession,
-      onResetSession: handleResetSession,
+      onCompleteSession: handleCompleteSession,
+      onDiscardSession: handleDiscardSession,
     }),
-    [updateBlock, handleEndSession, handleResetSession],
+    [session, commit, updateBlock, handleCompleteSession, handleDiscardSession],
   );
 
   // ── Render ──────────────────────────────────────────────────
-  const showEmptyState = hydrated && !weekConfig && history.length === 0 && !session;
+  const hasFocus = !!weekConfig && weekConfig.ironElements.some((e) => e.name);
+  const showEmptyState =
+    hydrated && !weekConfig && !session && history.length === 0 && sessions.length === 0;
 
   return (
     <section className="px-6 pb-20">
       <div className="mx-auto max-w-5xl">
-        <header className="mb-8 space-y-4">
-          <p className="eyebrow">The Plan</p>
-          <h2 className="font-display text-[clamp(32px,5vw,56px)] font-extrabold uppercase leading-[0.95] tracking-tight text-foreground">
-            Build the <span className="text-primary">session</span>
-          </h2>
-          <p className="max-w-2xl text-base leading-relaxed text-muted-foreground">
-            A guided practice cycle: set your weekly technical focus, scale a session to your shot
-            budget, run structured blocks with checkpoints and practice-intent gates, then track
-            acquisition over time. Data lives on this device for now — future versions will sync to
-            your player profile and The Library.
-          </p>
-        </header>
+        <SectionHeader
+          index="02"
+          eyebrow="The Plan"
+          title={
+            <>
+              Build the <span className="text-primary">session</span>
+            </>
+          }
+          lead="A guided practice cycle: set your weekly technical focus, scale a session to your shot budget, run structured blocks with checkpoints and practice-intent gates, then track acquisition over time. Data lives on this device for now — future versions will sync to your player profile."
+        />
 
         {!hydrated ? (
           <div className="h-32" aria-hidden />
@@ -397,67 +385,104 @@ export default function PracticePlanner() {
           <EmptyState onGetStarted={handleGetStarted} onImport={handleImport} />
         ) : (
           <>
-            <nav className="mb-8 flex flex-wrap gap-1 border-b border-border" role="tablist">
-              {TABS.map((t) => {
-                const active = t.key === tab;
-                return (
-                  <button
-                    key={t.key}
-                    type="button"
-                    role="tab"
-                    aria-selected={active}
-                    onClick={() => setTab(t.key)}
-                    className={`-mb-px border-b-2 px-4 py-3 font-mono text-[11px] uppercase tracking-[0.22em] transition-colors duration-150 ${
-                      active
-                        ? 'border-primary text-primary'
-                        : 'border-transparent text-muted-foreground hover:text-foreground'
-                    }`}
-                  >
-                    {t.label}
-                  </button>
-                );
-              })}
-            </nav>
+            <StepRail stage={stage} />
 
-            {tab === 'setup' && (
-              <SetupView
-                weekConfig={weekConfig ?? seedEmptyConfig()}
-                setWeekConfig={(next) => setWeekConfig(next)}
-                onSave={handleSaveWeekConfig}
-                savedAt={savedAt}
-              />
+            {stage !== 'setup' && weekConfig && (
+              <FocusStrip weekConfig={weekConfig} onEdit={() => setStage('setup')} />
             )}
-            {tab === 'plan' && weekConfig && (
-              <PlanView
-                weekConfig={weekConfig}
-                currentSession={session}
-                onStart={handleStartSession}
-                onJumpToSession={() => setTab('session')}
-                onDiscard={handleResetSession}
-              />
+
+            {stage === 'setup' && (
+              <div className="space-y-8">
+                <SetupView
+                  weekConfig={weekConfig ?? seedEmptyConfig()}
+                  setWeekConfig={(next) => setWeekConfig(next)}
+                  onSave={handleSaveWeekConfig}
+                  savedAt={savedAt}
+                />
+                <div className="flex flex-wrap items-center gap-3 border-t border-border pt-6">
+                  <Button onClick={() => setStage('build')} disabled={!hasFocus}>
+                    Next · Build the session →
+                  </Button>
+                  {!hasFocus && (
+                    <span className="text-xs text-muted-foreground">
+                      Add at least one iron element to continue.
+                    </span>
+                  )}
+                </div>
+              </div>
             )}
-            {tab === 'plan' && !weekConfig && (
-              <NeedSetupNotice onGo={() => setTab('setup')} />
-            )}
-            {tab === 'session' && weekConfig && (
-              <SessionView
-                session={session}
-                weekConfig={weekConfig}
-                history={history}
-                handlers={handlers}
-                onGoToPlan={() => setTab('plan')}
-              />
-            )}
-            {tab === 'session' && !weekConfig && <NeedSetupNotice onGo={() => setTab('setup')} />}
-            {tab === 'progress' && (
-              <ProgressView
-                history={history}
-                weekConfig={weekConfig}
-                onExport={handleExport}
-                onImport={handleImport}
-                onClearAll={handleClearAll}
-              />
-            )}
+
+            {stage === 'build' &&
+              (weekConfig ? (
+                <PlanView
+                  weekConfig={weekConfig}
+                  currentSession={session}
+                  onStart={handleStartSession}
+                  onJumpToSession={() => setStage('running')}
+                  onDiscard={handleDiscardSession}
+                />
+              ) : (
+                <NeedSetupNotice onGo={() => setStage('setup')} />
+              ))}
+
+            {stage === 'running' &&
+              (weekConfig ? (
+                <SessionView
+                  session={session}
+                  weekConfig={weekConfig}
+                  history={history}
+                  handlers={handlers}
+                  onGoToPlan={() => setStage('build')}
+                />
+              ) : (
+                <NeedSetupNotice onGo={() => setStage('setup')} />
+              ))}
+
+            {stage === 'complete' &&
+              (lastCompleted ? (
+                <SessionCompleteView
+                  record={lastCompleted}
+                  history={history}
+                  onPlanAnother={() => setStage('build')}
+                  onViewHistory={openHistory}
+                />
+              ) : (
+                <NeedSetupNotice onGo={() => setStage('build')} />
+              ))}
+
+            {/* ── History ─────────────────────────────────────── */}
+            <div ref={historyRef} className="mt-12 scroll-mt-[72px] border-t border-border pt-6">
+              <button
+                type="button"
+                onClick={() => setHistoryOpen((o) => !o)}
+                aria-expanded={historyOpen}
+                className="flex w-full items-center justify-between gap-3 py-2 text-left"
+              >
+                <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+                  Your history
+                  {sessions.length > 0 && (
+                    <span className="ml-3 text-foreground">
+                      {sessions.length} session{sessions.length === 1 ? '' : 's'} saved
+                    </span>
+                  )}
+                </span>
+                <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-primary">
+                  {historyOpen ? 'Hide −' : 'Show +'}
+                </span>
+              </button>
+              {historyOpen && (
+                <div className="pt-6">
+                  <ProgressView
+                    history={history}
+                    sessions={sessions}
+                    weekConfig={weekConfig}
+                    onExport={handleExport}
+                    onImport={handleImport}
+                    onClearAll={handleClearAll}
+                  />
+                </div>
+              )}
+            </div>
           </>
         )}
       </div>
@@ -465,36 +490,71 @@ export default function PracticePlanner() {
   );
 }
 
-function buildWedgeHistory(block: Block, shots: { recorded: boolean; ballSpeed: string; direction: Direction; target: number; timestamp: string }[], date: string): HistoryEntry[] {
-  const valid = shots.filter((s) => s.recorded && s.ballSpeed);
-  if (valid.length === 0) return [];
-  const ballSpeeds = valid.map((s) => parseFloat(s.ballSpeed)).filter((n) => !isNaN(n));
-  const avg = ballSpeeds.length ? ballSpeeds.reduce((a, b) => a + b, 0) / ballSpeeds.length : null;
-  const entries: HistoryEntry[] = valid.map((s) => ({
-    date,
-    timestamp: s.timestamp,
-    elementId: 'wedge_distance',
-    elementName: 'Distance Wedges',
-    kind: 'wedge_shot',
-    blockType: block.type,
-    blockSubtype: block.subtype,
-    target: s.target,
-    ballSpeed: parseFloat(s.ballSpeed) || null,
-    direction: s.direction,
-  }));
-  entries.push({
-    date,
-    timestamp: new Date().toISOString(),
-    elementId: 'wedge_distance',
-    elementName: 'Distance Wedges',
-    kind: 'distance',
-    blockType: 'wedge-distance',
-    blockSubtype: block.subtype,
-    score: valid.length,
-    total: block.shots,
-    avgBallSpeed: avg,
-  });
-  return entries;
+/** Progress rail — shows where you are in the flow. Not navigation. */
+function StepRail({ stage }: { stage: Stage }) {
+  const activeIdx = stage === 'complete' ? STEPS.length : STEPS.findIndex((s) => s.key === stage);
+  return (
+    <ol className="mb-8 flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-border pb-4">
+      {STEPS.map((s, i) => {
+        const isActive = i === activeIdx;
+        const isDone = i < activeIdx;
+        return (
+          <li key={s.key} className="flex items-center gap-3">
+            <span
+              className={`flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.22em] ${
+                isActive ? 'text-primary' : isDone ? 'text-foreground' : 'text-muted-foreground'
+              }`}
+            >
+              <span
+                className={`flex size-5 items-center justify-center border text-[10px] ${
+                  isActive
+                    ? 'border-primary bg-primary text-primary-foreground'
+                    : isDone
+                      ? 'border-foreground text-foreground'
+                      : 'border-border text-muted-foreground'
+                }`}
+              >
+                {isDone ? '✓' : i + 1}
+              </span>
+              {s.label}
+            </span>
+            {i < STEPS.length - 1 && (
+              <span aria-hidden className="h-px w-6 bg-border sm:w-10" />
+            )}
+          </li>
+        );
+      })}
+      {stage === 'complete' && (
+        <li className="font-mono text-[11px] uppercase tracking-[0.22em] text-primary">
+          · Complete
+        </li>
+      )}
+    </ol>
+  );
+}
+
+/** Collapsed view of the week's technical focus once it's been set. */
+function FocusStrip({ weekConfig, onEdit }: { weekConfig: WeekConfig; onEdit: () => void }) {
+  const week = getMesocycleWeek(weekConfig);
+  const phase = getMesocyclePhase(week);
+  const elements = weekConfig.ironElements.filter((e) => e.name);
+  return (
+    <div className="mb-8 flex flex-wrap items-center justify-between gap-3 border border-border bg-card px-4 py-3">
+      <div className="min-w-0">
+        <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+          Week {week} · {phase.phase}
+        </div>
+        <div className="mt-0.5 truncate text-sm text-foreground">
+          {elements.length > 0
+            ? elements.map((e) => e.name).join(' · ')
+            : 'No technical focus set'}
+        </div>
+      </div>
+      <Button variant="outline" size="sm" onClick={onEdit}>
+        Edit Focus
+      </Button>
+    </div>
+  );
 }
 
 function seedEmptyConfig(): WeekConfig {
@@ -505,9 +565,7 @@ function seedEmptyConfig(): WeekConfig {
 function NeedSetupNotice({ onGo }: { onGo: () => void }) {
   return (
     <div className="border border-dashed border-border bg-muted/40 p-6 text-center">
-      <p className="text-sm text-muted-foreground">
-        Define your technical focus first.
-      </p>
+      <p className="text-sm text-muted-foreground">Define your technical focus first.</p>
       <button
         type="button"
         onClick={onGo}
