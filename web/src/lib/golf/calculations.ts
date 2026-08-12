@@ -182,24 +182,16 @@ export function calculateTiger5Fails(shots: ProcessedShot[], holeScores: HoleSco
     }
   });
   
-  // Calculate SG on fail holes
-  const failRoundHoles = new Set<string>();
-  failHoleKeys.forEach(key => {
-    // Extract roundId-hole from key (remove fail type suffix)
-    const parts = key.split('-');
-    if (parts.length >= 3) {
-      const roundId = parts[0];
-      const hole = parts[1];
-      failRoundHoles.add(`${roundId}-${hole}`);
-    }
-  });
-  
-  failRoundHoles.forEach(key => {
-    const [roundId, holeStr] = key.split('-');
-    const hole = parseInt(holeStr);
-    const holeShots = shots.filter(s => s.roundId === roundId && s.holeNumber === hole);
-    const holeSG = holeShots.reduce((sum, s) => sum + s.calculatedStrokesGained, 0);
-    sgOnFailHoles += holeSG;
+  // Calculate SG on fail holes. Iterate structured hole scores and pick the
+  // fail holes via failTypeByHole membership. Round IDs are UUIDs that contain
+  // hyphens, so a hole key must never be split on '-' to recover its parts.
+  holeScores.forEach(hole => {
+    const holeKey = `${hole.roundId}-${hole.hole}`;
+    if (!failTypeByHole.has(holeKey)) return;
+    const holeShots = shots.filter(
+      s => s.roundId === hole.roundId && s.holeNumber === hole.hole,
+    );
+    sgOnFailHoles += holeShots.reduce((sum, s) => sum + s.calculatedStrokesGained, 0);
   });
   
   const totalFails = threePutts + bogeyOnPar5 + doubleBogey + bogeyApproach + missedGreen;
@@ -324,11 +316,15 @@ export function calculateRootCause(shots: ProcessedShot[], holeScores: HoleScore
   // Track holes with penalties
   const failHolesWithPenalties = new Set<string>();
 
-  failHoleKeys.forEach(holeKey => {
-    const [roundId, holeStr] = holeKey.split('-');
-    const hole = parseInt(holeStr);
-    const holeShots = shots.filter(s => s.roundId === roundId && s.holeNumber === hole);
-    
+  // Iterate structured hole scores rather than splitting keys — round IDs are
+  // UUIDs containing hyphens, so keys must never be split on '-'.
+  holeScores.forEach(holeScore => {
+    const holeKey = `${holeScore.roundId}-${holeScore.hole}`;
+    if (!failHoleKeys.has(holeKey)) return;
+    const holeShots = shots.filter(
+      s => s.roundId === holeScore.roundId && s.holeNumber === holeScore.hole,
+    );
+
     // Check if hole has penalty
     const hasPenalty = holeShots.some(s => s.hasPenalty);
     if (hasPenalty) {
@@ -2381,35 +2377,33 @@ export function getHoleOutcome(score: number, par: number): HoleOutcome {
 function calculateParMetrics(shots: ProcessedShot[], par: number): ParScoringMetrics {
   // Filter shots for this par
   const parShots = shots.filter(s => s.holePar === par);
-  
-  // Get unique holes for this par
-  const holeKeys = new Set<string>();
+
+  // Group shots by hole. NOTE: round IDs are UUIDs that contain hyphens, so a
+  // key must never be split back on '-' to recover its parts — group the shots
+  // directly and read the group instead.
+  const holeShotsByKey = new Map<string, ProcessedShot[]>();
   parShots.forEach(shot => {
-    holeKeys.add(`${shot.roundId}-${shot.holeNumber}`);
+    const key = `${shot.roundId}#${shot.holeNumber}`;
+    const existing = holeShotsByKey.get(key);
+    if (existing) existing.push(shot);
+    else holeShotsByKey.set(key, [shot]);
   });
-  
+
   // Calculate metrics
-  const totalHoles = holeKeys.size;
+  const totalHoles = holeShotsByKey.size;
   let totalScore = 0;
   let totalSG = 0;
-  
-  holeKeys.forEach(key => {
-    const [roundId, holeStr] = key.split('-');
-    const hole = parseInt(holeStr);
-    const holeShots = parShots.filter(s => s.roundId === roundId && s.holeNumber === hole);
-    
+
+  holeShotsByKey.forEach(holeShots => {
     // Score is number of shots on this hole
-    const score = holeShots.length;
-    totalScore += score;
-    
+    totalScore += holeShots.length;
     // Total SG for this hole
-    const sg = holeShots.reduce((sum, s) => sum + s.calculatedStrokesGained, 0);
-    totalSG += sg;
+    totalSG += holeShots.reduce((sum, s) => sum + s.calculatedStrokesGained, 0);
   });
-  
+
   const avgScore = totalHoles > 0 ? totalScore / totalHoles : 0;
   const avgScoreVsPar = totalHoles > 0 ? (totalScore / totalHoles) - par : 0;
-  
+
   return {
     par,
     totalHoles,
