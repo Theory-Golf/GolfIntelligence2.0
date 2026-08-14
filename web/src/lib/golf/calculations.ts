@@ -1148,13 +1148,6 @@ export function calculateSGSeparators(shots: ProcessedShot[]): SGSeparator[] {
       avgStrokesGained: drivingShots.length > 0 ? drivingSG / drivingShots.length : 0,
     },
     {
-      label: 'Short Shots',
-      description: '0-35 yards',
-      totalShots: shortShots0to35.length,
-      strokesGained: shortShots0to35SG,
-      avgStrokesGained: shortShots0to35.length > 0 ? shortShots0to35SG / shortShots0to35.length : 0,
-    },
-    {
       label: 'Short Approach',
       description: '100-150 yards',
       totalShots: shortApproach100to150.length,
@@ -1174,6 +1167,13 @@ export function calculateSGSeparators(shots: ProcessedShot[]): SGSeparator[] {
       totalShots: putting5to12.length,
       strokesGained: putting5to12SG,
       avgStrokesGained: putting5to12.length > 0 ? putting5to12SG / putting5to12.length : 0,
+    },
+    {
+      label: 'Short Shots',
+      description: '0-35 yards',
+      totalShots: shortShots0to35.length,
+      strokesGained: shortShots0to35SG,
+      avgStrokesGained: shortShots0to35.length > 0 ? shortShots0to35SG / shortShots0to35.length : 0,
     },
   ];
   
