@@ -295,13 +295,16 @@ function ShotEntry({
   // Conditional triggers
   const showClubCategory =
     shotOrder === 1 && startingDistanceNum !== null && startingDistanceNum >= 250;
-  // Miss direction only applies to par 4 / par 5 tee shots.
+  // Miss direction only applies to par 4 / par 5 tee shots. A penalty still
+  // means the tee shot missed left or right even if the ending lie reads
+  // Fairway — that lie reflects where the player dropped after the penalty,
+  // not where the original ball ended up.
   const showMissDirection =
     startingLie === 'Tee' &&
     par !== null &&
     par >= 4 &&
     form.endingLie !== null &&
-    form.endingLie !== 'Fairway';
+    (form.endingLie !== 'Fairway' || form.penalty);
   const showPuttLongShort =
     startingLie === 'Green' &&
     startingDistanceNum !== null &&
