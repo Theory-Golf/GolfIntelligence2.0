@@ -222,6 +222,14 @@
   color: var(--ash);
 }
 
+.lpt-distance-paces {
+  margin-top: 4px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ash);
+}
+
 /* ── BUCKET GRID ───────────────────────────────────────────────── */
 .lpt-bucket-grid {
   display: grid;

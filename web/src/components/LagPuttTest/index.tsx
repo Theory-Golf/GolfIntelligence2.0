@@ -22,25 +22,26 @@ interface SavedSession {
 }
 
 // ── Distance set ─────────────────────────────────────────────────
-// 8 m → 26.25 ft, 22 m → 72.18 ft. Rounded to nearest 3 ft → 27..72.
-const DISTANCE_OPTIONS = [27, 30, 33, 36, 39, 42, 45, 48, 51, 54, 57, 60, 63, 66, 69, 72];
+// Capped at 60 ft — most practice greens don't have room for longer lag putts.
+// 27..60 ft in 3-ft steps.
+const DISTANCE_OPTIONS = [27, 30, 33, 36, 39, 42, 45, 48, 51, 54, 57, 60];
 const NUM_PUTTS = 18;
 
-// ── Score table — buckets in whole feet, mapped to Swedish scoring ──
-// Source ranges (m): 0–0.5 = -1, 0.5–1 = 0, 1–2 = +1, 2–3 = +2, 3+ = +3.
-// Converted by taking each whole-foot bucket's distance in meters.
+// ── Score table — buckets in whole feet ──────────────────────────
+// A "good" lag putt finishes within ~10% of its starting distance; since most
+// putts here start beyond 30 ft, that puts the birdie line at ~3 ft.
 const BUCKET_SCORES: Record<string, number> = {
   holed: -2,
-  '1': -1, // 0.30 m
-  '2': 0,  // 0.61 m
-  '3': 0,  // 0.91 m
-  '4': 1,  // 1.22 m
-  '5': 1,  // 1.52 m
-  '6': 1,  // 1.83 m
-  '7': 2,  // 2.13 m
-  '8': 2,  // 2.44 m
-  '9': 2,  // 2.74 m
-  '10': 3, // 3.05+ m
+  '1': -1,
+  '2': -1,
+  '3': -1,
+  '4': 0,
+  '5': 0,
+  '6': 1,
+  '7': 1,
+  '8': 2,
+  '9': 2,
+  '10': 3,
 };
 
 const BUCKET_LABELS: Array<{ key: number | 'holed'; label: string }> = [
@@ -178,13 +179,13 @@ export default function LagPuttTest() {
           <h2 className="lpt-card-title">Lag Putt Test</h2>
           <p className="lpt-card-copy">
             Adapted from the Swedish Golf Team protocol. Hit 18 putts from random
-            distances between 27 and 72 feet. After each putt, log how far the ball
+            distances between 27 and 60 feet. After each putt, log how far the ball
             finished from the hole — short or long.
           </p>
           <div className="lpt-rules">
             <div className="lpt-rule">
               <span className="lpt-rule-key">01</span>
-              <span className="lpt-rule-text">App generates 18 distances between 27 and 72 ft</span>
+              <span className="lpt-rule-text">App generates 18 distances between 27 and 60 ft</span>
             </div>
             <div className="lpt-rule">
               <span className="lpt-rule-key">02</span>
@@ -202,10 +203,10 @@ export default function LagPuttTest() {
             </thead>
             <tbody>
               <tr><td>Holed</td><td>−2 (Eagle)</td></tr>
-              <tr><td>1 ft</td><td>−1 (Birdie)</td></tr>
-              <tr><td>2–3 ft</td><td>0 (Par)</td></tr>
-              <tr><td>4–6 ft</td><td>+1 (Bogey)</td></tr>
-              <tr><td>7–9 ft</td><td>+2 (Double)</td></tr>
+              <tr><td>1–3 ft</td><td>−1 (Birdie)</td></tr>
+              <tr><td>4–5 ft</td><td>0 (Par)</td></tr>
+              <tr><td>6–7 ft</td><td>+1 (Bogey)</td></tr>
+              <tr><td>8–9 ft</td><td>+2 (Double)</td></tr>
               <tr><td>10+ ft</td><td>+3 (Triple)</td></tr>
             </tbody>
           </table>
@@ -262,6 +263,7 @@ export default function LagPuttTest() {
             <span className="lpt-distance-number">{currentDist}</span>
             <span className="lpt-distance-unit">ft</span>
           </div>
+          <p className="lpt-distance-paces">≈ {Math.round(currentDist / 3)} paces</p>
         </div>
 
         <div className="lpt-card">
