@@ -1276,9 +1276,14 @@ export function calculateDrivingMetrics(shots: ProcessedShot[]): DrivingMetrics 
       fairwayPctDriver: 0,
       fairwayPctNonDriver: 0,
       positiveSGPct: 0,
+      missLeftCount: 0,
+      missRightCount: 0,
+      missRecordedCount: 0,
+      missLeftPct: 0,
+      missRightPct: 0,
     };
   }
-  
+
   // Calculate fairways (drives that ended in Fairway)
   const fairwaysHit = drives.filter(d => d.endingLie === 'Fairway').length;
   const fairwayPct = (fairwaysHit / drives.length) * 100;
@@ -1332,6 +1337,13 @@ export function calculateDrivingMetrics(shots: ProcessedShot[]): DrivingMetrics 
   const positiveDrives = drives.filter(d => d.calculatedStrokesGained > 0).length;
   const positiveSGPct = (positiveDrives / drives.length) * 100;
 
+  // Miss bias: among drives with a recorded miss direction, the L/R split.
+  const missLeftCount = drives.filter(d => d.missDirection === 'Left').length;
+  const missRightCount = drives.filter(d => d.missDirection === 'Right').length;
+  const missRecordedCount = missLeftCount + missRightCount;
+  const missLeftPct = missRecordedCount > 0 ? (missLeftCount / missRecordedCount) * 100 : 0;
+  const missRightPct = missRecordedCount > 0 ? (missRightCount / missRecordedCount) * 100 : 0;
+
   return {
     totalDrives: drives.length,
     fairwaysHit,
@@ -1347,6 +1359,11 @@ export function calculateDrivingMetrics(shots: ProcessedShot[]): DrivingMetrics 
     fairwayPctDriver,
     fairwayPctNonDriver,
     positiveSGPct,
+    missLeftCount,
+    missRightCount,
+    missRecordedCount,
+    missLeftPct,
+    missRightPct,
   };
 }
 
@@ -1573,6 +1590,16 @@ export function calculateProblemDriveMetrics(shots: ProcessedShot[]): ProblemDri
     recoveryCount: 0,
     recoveryPct: 0,
     recoverySG: 0,
+    penaltyMissLeftCount: 0,
+    penaltyMissRightCount: 0,
+    penaltyMissRecordedCount: 0,
+    penaltyMissLeftPct: 0,
+    penaltyMissRightPct: 0,
+    obstructionMissLeftCount: 0,
+    obstructionMissRightCount: 0,
+    obstructionMissRecordedCount: 0,
+    obstructionMissLeftPct: 0,
+    obstructionMissRightPct: 0,
   };
 
   // Get all drives
@@ -1637,6 +1664,23 @@ export function calculateProblemDriveMetrics(shots: ProcessedShot[]): ProblemDri
   const sandPct = (sandCount / drives.length) * 100;
   const recoveryPct = (recoveryCount / drives.length) * 100;
 
+  // Miss direction breakdown for penalty drives — added context for the
+  // player: of the drives that resulted in a penalty, which way did they miss.
+  const penaltyDrives = drives.filter(d => d.hasPenalty);
+  const penaltyMissLeftCount = penaltyDrives.filter(d => d.missDirection === 'Left').length;
+  const penaltyMissRightCount = penaltyDrives.filter(d => d.missDirection === 'Right').length;
+  const penaltyMissRecordedCount = penaltyMissLeftCount + penaltyMissRightCount;
+  const penaltyMissLeftPct = penaltyMissRecordedCount > 0 ? (penaltyMissLeftCount / penaltyMissRecordedCount) * 100 : 0;
+  const penaltyMissRightPct = penaltyMissRecordedCount > 0 ? (penaltyMissRightCount / penaltyMissRecordedCount) * 100 : 0;
+
+  // Miss direction breakdown for obstruction drives (sand + recovery)
+  const obstructionDrives = drives.filter(d => d.endingLie === 'Sand' || d.endingLie === 'Recovery');
+  const obstructionMissLeftCount = obstructionDrives.filter(d => d.missDirection === 'Left').length;
+  const obstructionMissRightCount = obstructionDrives.filter(d => d.missDirection === 'Right').length;
+  const obstructionMissRecordedCount = obstructionMissLeftCount + obstructionMissRightCount;
+  const obstructionMissLeftPct = obstructionMissRecordedCount > 0 ? (obstructionMissLeftCount / obstructionMissRecordedCount) * 100 : 0;
+  const obstructionMissRightPct = obstructionMissRecordedCount > 0 ? (obstructionMissRightCount / obstructionMissRecordedCount) * 100 : 0;
+
   return {
     totalDrives: drives.length,
     totalPenalties,
@@ -1657,6 +1701,16 @@ export function calculateProblemDriveMetrics(shots: ProcessedShot[]): ProblemDri
     recoveryCount,
     recoveryPct,
     recoverySG,
+    penaltyMissLeftCount,
+    penaltyMissRightCount,
+    penaltyMissRecordedCount,
+    penaltyMissLeftPct,
+    penaltyMissRightPct,
+    obstructionMissLeftCount,
+    obstructionMissRightCount,
+    obstructionMissRecordedCount,
+    obstructionMissLeftPct,
+    obstructionMissRightPct,
   };
 }
 

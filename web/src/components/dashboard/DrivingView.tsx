@@ -33,6 +33,18 @@ function getFairwayPctColor(fairwayPct: number): string {
   return 'var(--double)';                         // Red
 }
 
+/**
+ * Get color based on how far the miss-direction split is from an even 50/50.
+ * Target is 50/50 (consistent aim and strike), so smaller deviation is better.
+ * <10pts off even: Green | 10-20pts: Yellow | >20pts: Red
+ */
+function getMissBiasColor(leftPct: number): string {
+  const deviation = Math.abs(leftPct - 50);
+  if (deviation < 10) return 'var(--under)';      // Green
+  if (deviation <= 20) return 'var(--bogey)';     // Yellow
+  return 'var(--double)';                         // Red
+}
+
 export function DrivingView({ metrics, analysis, filteredShots }: { metrics: DrivingMetrics; analysis: DrivingAnalysis; filteredShots: ProcessedShot[] }) {
   const [driveFilter, setDriveFilter] = useState<'all' | 'driver' | 'non-driver'>('all');
 
@@ -70,6 +82,11 @@ export function DrivingView({ metrics, analysis, filteredShots }: { metrics: Dri
         obPenalties: 0,
         otherPenalties: 0,
         sgPenalties: 0,
+        missLeftCount: 0,
+        missRightCount: 0,
+        missRecordedCount: 0,
+        missLeftPct: 0,
+        missRightPct: 0,
       };
     }
 
@@ -104,6 +121,13 @@ export function DrivingView({ metrics, analysis, filteredShots }: { metrics: Dri
     const positiveDrives = drives.filter(d => d.calculatedStrokesGained > 0).length;
     const positiveSGPct = (positiveDrives / totalDrives) * 100;
 
+    // Miss bias: among drives with a recorded miss direction, the L/R split
+    const missLeftCount = drives.filter(d => d.missDirection === 'Left').length;
+    const missRightCount = drives.filter(d => d.missDirection === 'Right').length;
+    const missRecordedCount = missLeftCount + missRightCount;
+    const missLeftPct = missRecordedCount > 0 ? (missLeftCount / missRecordedCount) * 100 : 0;
+    const missRightPct = missRecordedCount > 0 ? (missRightCount / missRecordedCount) * 100 : 0;
+
     return {
       ...metrics,
       totalDrives,
@@ -119,6 +143,11 @@ export function DrivingView({ metrics, analysis, filteredShots }: { metrics: Dri
       obPenalties,
       otherPenalties,
       sgPenalties,
+      missLeftCount,
+      missRightCount,
+      missRecordedCount,
+      missLeftPct,
+      missRightPct,
     };
   }, [filteredDrives, metrics]);
 
@@ -135,6 +164,11 @@ export function DrivingView({ metrics, analysis, filteredShots }: { metrics: Dri
     fairwayPctDriver,
     fairwayPctNonDriver,
     positiveSGPct,
+    missLeftCount,
+    missRightCount,
+    missRecordedCount,
+    missLeftPct,
+    missRightPct,
   } = filteredMetrics;
 
   // Calculate Problem Drive metrics from filtered drives
@@ -216,8 +250,8 @@ export function DrivingView({ metrics, analysis, filteredShots }: { metrics: Dri
         </div>
       </div>
 
-      {/* Hero Cards - 4 metrics */}
-      <div className="grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
+      {/* Hero Cards - 5 metrics */}
+      <div className="grid" style={{ gridTemplateColumns: 'repeat(5, 1fr)', gap: '16px' }}>
 
         {/* Card 1: Penalty Rate */}
         <div className="card-hero is-flagship">
@@ -298,6 +332,29 @@ export function DrivingView({ metrics, analysis, filteredShots }: { metrics: Dri
               </div>
             </div>
           )}
+        </div>
+
+        {/* Card 5: Miss Bias */}
+        <div className="card-hero">
+          <div className="flex justify-between items-center" style={{ marginBottom: '16px' }}>
+            <div className="label" style={{ color: 'var(--ash)' }}>Miss Bias</div>
+          </div>
+          <div
+            className="value-hero"
+            style={{ color: missRecordedCount > 0 ? getMissBiasColor(missLeftPct) : 'var(--chalk)', fontSize: '40px' }}
+          >
+            {missRecordedCount > 0 ? `${missLeftPct.toFixed(0)}% / ${missRightPct.toFixed(0)}%` : '—'}
+          </div>
+          <div className="flex justify-between" style={{ marginTop: '16px' }}>
+            <div>
+              <div className="label" style={{ color: 'var(--ash)', fontSize: '11px' }}>Left / Right</div>
+              <div className="value-stat" style={{ fontSize: '12px' }}>Target 50% / 50%</div>
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <div className="label" style={{ color: 'var(--ash)', fontSize: '11px' }}>Misses</div>
+              <div className="value-stat" style={{ fontSize: '12px' }}>{missRecordedCount}</div>
+            </div>
+          </div>
         </div>
 
       </div>
@@ -639,10 +696,147 @@ function DrivesTableSection({ shots }: { shots: ProcessedShot[] }) {
   );
 }
 
+interface ChildStat {
+  label: string;
+  value: number;
+  pct: number;
+  sg: number;
+  color: string;
+}
+
+interface MissDirectionStat {
+  leftCount: number;
+  rightCount: number;
+  recordedCount: number;
+  leftPct: number;
+  rightPct: number;
+  totalCount: number; // total drives in this group (penalties or obstruction)
+}
+
+/**
+ * A parent hero card spanning the full width, with its child breakdown cards
+ * directly beneath it inside the same bordered group — a visual parent/child
+ * relationship (e.g. Total Penalties -> OB Penalties + Standard Penalties).
+ * Below the group, a miss-direction context row shows which way the ball
+ * missed on the drives that make up this group, when that was recorded.
+ */
+function ProblemDriveGroup({
+  title,
+  description,
+  parentLabel,
+  parentValue,
+  parentPct,
+  parentSG,
+  childStats,
+  missDirection,
+}: {
+  title: string;
+  description?: string;
+  parentLabel: string;
+  parentValue: number;
+  parentPct: number;
+  parentSG: number;
+  childStats: ChildStat[];
+  missDirection: MissDirectionStat;
+}) {
+  return (
+    <div style={{ marginBottom: '24px' }}>
+      <h5 style={{ marginBottom: '4px', color: 'var(--chalk)', fontSize: '14px', fontWeight: 600 }}>
+        {title}
+      </h5>
+      {description && (
+        <p style={{ fontSize: '11px', color: 'var(--ash)', marginBottom: '12px' }}>
+          {description}
+        </p>
+      )}
+
+      {/* Parent + children group, sharing one border to read as one unit */}
+      <div style={{ border: '1px solid var(--pitch)', borderRadius: '4px', overflow: 'hidden' }}>
+        {/* Parent - full width hero */}
+        <div className="card-hero is-flagship" style={{ borderBottom: '1px solid var(--pitch)' }}>
+          <div className="flex justify-between items-center" style={{ marginBottom: '16px' }}>
+            <div className="label" style={{ color: 'var(--scarlet)' }}>{parentLabel}</div>
+            <div style={{ width: '6px', height: '6px', background: 'var(--scarlet)', borderRadius: '50%' }}></div>
+          </div>
+          <div className="value-hero" style={{ color: 'var(--chalk)' }}>{parentValue}</div>
+          <div className="flex justify-between" style={{ marginTop: '16px' }}>
+            <div>
+              <div className="label" style={{ color: 'var(--ash)', fontSize: '11px' }}>% of Drives</div>
+              <div className="value-stat" style={{ fontSize: '18px' }}>{parentPct.toFixed(0)}%</div>
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <div className="label" style={{ color: 'var(--ash)', fontSize: '11px' }}>Total SG</div>
+              <div className="value-stat" style={{ fontSize: '18px', color: getStrokeGainedColor(parentSG) }}>
+                {formatStrokesGained(parentSG)}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Children - breakdown of the parent, visually nested beneath it */}
+        <div className="grid" style={{ gridTemplateColumns: `repeat(${childStats.length}, 1fr)`, gap: '1px', background: 'var(--pitch)' }}>
+          {childStats.map((child) => (
+            <div key={child.label} className="card-stat" style={{ borderLeft: `3px solid ${child.color}` }}>
+              <div className="label" style={{ color: 'var(--ash)', marginBottom: '8px', fontSize: '11px' }}>
+                ↳ {child.label}
+              </div>
+              <div className="value-stat">{child.value}</div>
+              <div style={{ marginTop: '8px' }}>
+                <div className="label" style={{ color: 'var(--ash)', fontSize: '10px' }}>% of Drives</div>
+                <div className="value-stat" style={{ fontSize: '12px' }}>{child.pct.toFixed(0)}%</div>
+              </div>
+              <div style={{ marginTop: '8px' }}>
+                <div className="label" style={{ color: 'var(--ash)', fontSize: '10px' }}>Total SG</div>
+                <div className="value-stat" style={{ fontSize: '12px', color: getStrokeGainedColor(child.sg) }}>
+                  {formatStrokesGained(child.sg)}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Miss direction context - which way the ball missed on these drives */}
+      <div style={{ marginTop: '12px' }}>
+        <div className="label" style={{ color: 'var(--ash)', fontSize: '10px', marginBottom: '8px' }}>
+          Miss Direction
+          {missDirection.recordedCount > 0 && (
+            <span style={{ textTransform: 'none', letterSpacing: 'normal' }}>
+              {' '}&mdash; {missDirection.recordedCount} of {missDirection.totalCount} had a recorded direction
+            </span>
+          )}
+        </div>
+        {missDirection.recordedCount > 0 ? (
+          <div className="grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+            <div className="card-stat" style={{ borderLeft: '3px solid #3D8EF0' }}>
+              <div className="label" style={{ color: 'var(--ash)', marginBottom: '8px', fontSize: '11px' }}>Left</div>
+              <div className="value-stat" style={{ fontSize: '20px' }}>{missDirection.leftPct.toFixed(0)}%</div>
+              <div style={{ marginTop: '8px' }}>
+                <div className="label" style={{ color: 'var(--ash)', fontSize: '10px' }}>Count</div>
+                <div className="value-stat" style={{ fontSize: '12px' }}>{missDirection.leftCount}</div>
+              </div>
+            </div>
+            <div className="card-stat" style={{ borderLeft: '3px solid #F03DAA' }}>
+              <div className="label" style={{ color: 'var(--ash)', marginBottom: '8px', fontSize: '11px' }}>Right</div>
+              <div className="value-stat" style={{ fontSize: '20px' }}>{missDirection.rightPct.toFixed(0)}%</div>
+              <div style={{ marginTop: '8px' }}>
+                <div className="label" style={{ color: 'var(--ash)', fontSize: '10px' }}>Count</div>
+                <div className="value-stat" style={{ fontSize: '12px' }}>{missDirection.rightCount}</div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <p style={{ fontSize: '11px', color: 'var(--ash)' }}>No drives in this group have a recorded miss direction.</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /**
  * Problem Drive Section - Shows penalties and obstruction breakdown
- * - Penalties: Total, OB, Standard
- * - Obstruction: Sand + Recovery (drives ending in sand or recovery lie)
+ * - Penalties: Total (parent) -> OB, Standard (children), + miss direction
+ * - Obstruction: Total (parent) -> Sand, Recovery (children), + miss direction
  */
 function ProblemDriveSection({ metrics }: { metrics: ProblemDriveMetrics }) {
   // Don't render if no drives
@@ -651,8 +845,8 @@ function ProblemDriveSection({ metrics }: { metrics: ProblemDriveMetrics }) {
   }
 
   // Chart colors for the breakdown items
-  const penaltyColors = ['#F03DAA', '#A855F7', '#3D8EF0']; // Magenta, Purple, Blue
-  const obstructionColors = ['#06C8E0', '#D4F000']; // Aqua, Volt
+  const penaltyColors = ['#A855F7', '#3D8EF0']; // Purple, Blue
+  const obstructionColors = ['#D4F000', chartColors[4]]; // Volt, (Recovery accent)
 
   return (
     <div style={{ marginTop: '32px' }}>
@@ -661,132 +855,46 @@ function ProblemDriveSection({ metrics }: { metrics: ProblemDriveMetrics }) {
         Penalties and obstruction breakdown ({metrics.totalDrives} total drives)
       </p>
 
-      {/* Penalties Breakdown */}
-      <div style={{ marginBottom: '24px' }}>
-        <h5 style={{ marginBottom: '12px', color: 'var(--chalk)', fontSize: '14px', fontWeight: 600 }}>
-          Penalties
-        </h5>
-        <div className="grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
-          {/* Total Penalties */}
-          <div className="card-stat" style={{ borderLeft: `3px solid ${penaltyColors[0]}` }}>
-            <div className="label" style={{ color: 'var(--ash)', marginBottom: '8px', fontSize: '11px' }}>
-              Total Penalties
-            </div>
-            <div className="value-stat">{metrics.totalPenalties}</div>
-            <div style={{ marginTop: '8px' }}>
-              <div className="label" style={{ color: 'var(--ash)', fontSize: '10px' }}>% of Drives</div>
-              <div className="value-stat" style={{ fontSize: '12px' }}>{metrics.penaltyPct.toFixed(0)}%</div>
-            </div>
-            <div style={{ marginTop: '8px' }}>
-              <div className="label" style={{ color: 'var(--ash)', fontSize: '10px' }}>Total SG</div>
-              <div className="value-stat" style={{ fontSize: '12px', color: getStrokeGainedColor(metrics.penaltySG) }}>
-                {formatStrokesGained(metrics.penaltySG)}
-              </div>
-            </div>
-          </div>
+      <ProblemDriveGroup
+        title="Penalties"
+        parentLabel="Total Penalties"
+        parentValue={metrics.totalPenalties}
+        parentPct={metrics.penaltyPct}
+        parentSG={metrics.penaltySG}
+        childStats={[
+          { label: 'OB Penalties', value: metrics.obPenalties, pct: metrics.obPenaltyPct, sg: metrics.obPenaltySG, color: penaltyColors[0] },
+          { label: 'Standard Penalties', value: metrics.standardPenalties, pct: metrics.standardPenaltyPct, sg: metrics.standardPenaltySG, color: penaltyColors[1] },
+        ]}
+        missDirection={{
+          leftCount: metrics.penaltyMissLeftCount,
+          rightCount: metrics.penaltyMissRightCount,
+          recordedCount: metrics.penaltyMissRecordedCount,
+          leftPct: metrics.penaltyMissLeftPct,
+          rightPct: metrics.penaltyMissRightPct,
+          totalCount: metrics.totalPenalties,
+        }}
+      />
 
-          {/* OB Penalties */}
-          <div className="card-stat" style={{ borderLeft: `3px solid ${penaltyColors[1]}` }}>
-            <div className="label" style={{ color: 'var(--ash)', marginBottom: '8px', fontSize: '11px' }}>
-              OB Penalties
-            </div>
-            <div className="value-stat">{metrics.obPenalties}</div>
-            <div style={{ marginTop: '8px' }}>
-              <div className="label" style={{ color: 'var(--ash)', fontSize: '10px' }}>% of Drives</div>
-              <div className="value-stat" style={{ fontSize: '12px' }}>{metrics.obPenaltyPct.toFixed(0)}%</div>
-            </div>
-            <div style={{ marginTop: '8px' }}>
-              <div className="label" style={{ color: 'var(--ash)', fontSize: '10px' }}>Total SG</div>
-              <div className="value-stat" style={{ fontSize: '12px', color: getStrokeGainedColor(metrics.obPenaltySG) }}>
-                {formatStrokesGained(metrics.obPenaltySG)}
-              </div>
-            </div>
-          </div>
-
-          {/* Standard Penalties */}
-          <div className="card-stat" style={{ borderLeft: `3px solid ${penaltyColors[2]}` }}>
-            <div className="label" style={{ color: 'var(--ash)', marginBottom: '8px', fontSize: '11px' }}>
-              Standard Penalties
-            </div>
-            <div className="value-stat">{metrics.standardPenalties}</div>
-            <div style={{ marginTop: '8px' }}>
-              <div className="label" style={{ color: 'var(--ash)', fontSize: '10px' }}>% of Drives</div>
-              <div className="value-stat" style={{ fontSize: '12px' }}>{metrics.standardPenaltyPct.toFixed(0)}%</div>
-            </div>
-            <div style={{ marginTop: '8px' }}>
-              <div className="label" style={{ color: 'var(--ash)', fontSize: '10px' }}>Total SG</div>
-              <div className="value-stat" style={{ fontSize: '12px', color: getStrokeGainedColor(metrics.standardPenaltySG) }}>
-                {formatStrokesGained(metrics.standardPenaltySG)}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Obstruction Breakdown */}
-      <div>
-        <h5 style={{ marginBottom: '12px', color: 'var(--chalk)', fontSize: '14px', fontWeight: 600 }}>
-          Obstruction Rate
-        </h5>
-        <p style={{ fontSize: '11px', color: 'var(--ash)', marginBottom: '12px' }}>
-          Drives ending in Sand or Recovery lie
-        </p>
-        <div className="grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
-          {/* Total Obstruction */}
-          <div className="card-stat" style={{ borderLeft: `3px solid ${obstructionColors[0]}` }}>
-            <div className="label" style={{ color: 'var(--ash)', marginBottom: '8px', fontSize: '11px' }}>
-              Total Obstruction
-            </div>
-            <div className="value-stat">{metrics.obstructionCount}</div>
-            <div style={{ marginTop: '8px' }}>
-              <div className="label" style={{ color: 'var(--ash)', fontSize: '10px' }}>% of Drives</div>
-              <div className="value-stat" style={{ fontSize: '12px' }}>{metrics.obstructionPct.toFixed(0)}%</div>
-            </div>
-            <div style={{ marginTop: '8px' }}>
-              <div className="label" style={{ color: 'var(--ash)', fontSize: '10px' }}>Total SG</div>
-              <div className="value-stat" style={{ fontSize: '12px', color: getStrokeGainedColor(metrics.obstructionSG) }}>
-                {formatStrokesGained(metrics.obstructionSG)}
-              </div>
-            </div>
-          </div>
-
-          {/* Sand */}
-          <div className="card-stat" style={{ borderLeft: `3px solid ${obstructionColors[1]}` }}>
-            <div className="label" style={{ color: 'var(--ash)', marginBottom: '8px', fontSize: '11px' }}>
-              Sand
-            </div>
-            <div className="value-stat">{metrics.sandCount}</div>
-            <div style={{ marginTop: '8px' }}>
-              <div className="label" style={{ color: 'var(--ash)', fontSize: '10px' }}>% of Drives</div>
-              <div className="value-stat" style={{ fontSize: '12px' }}>{metrics.sandPct.toFixed(0)}%</div>
-            </div>
-            <div style={{ marginTop: '8px' }}>
-              <div className="label" style={{ color: 'var(--ash)', fontSize: '10px' }}>Total SG</div>
-              <div className="value-stat" style={{ fontSize: '12px', color: getStrokeGainedColor(metrics.sandSG) }}>
-                {formatStrokesGained(metrics.sandSG)}
-              </div>
-            </div>
-          </div>
-
-          {/* Recovery */}
-          <div className="card-stat" style={{ borderLeft: `3px solid ${chartColors[4]}` }}>
-            <div className="label" style={{ color: 'var(--ash)', marginBottom: '8px', fontSize: '11px' }}>
-              Recovery
-            </div>
-            <div className="value-stat">{metrics.recoveryCount}</div>
-            <div style={{ marginTop: '8px' }}>
-              <div className="label" style={{ color: 'var(--ash)', fontSize: '10px' }}>% of Drives</div>
-              <div className="value-stat" style={{ fontSize: '12px' }}>{metrics.recoveryPct.toFixed(0)}%</div>
-            </div>
-            <div style={{ marginTop: '8px' }}>
-              <div className="label" style={{ color: 'var(--ash)', fontSize: '10px' }}>Total SG</div>
-              <div className="value-stat" style={{ fontSize: '12px', color: getStrokeGainedColor(metrics.recoverySG) }}>
-                {formatStrokesGained(metrics.recoverySG)}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <ProblemDriveGroup
+        title="Obstruction Rate"
+        description="Drives ending in Sand or Recovery lie"
+        parentLabel="Total Obstruction"
+        parentValue={metrics.obstructionCount}
+        parentPct={metrics.obstructionPct}
+        parentSG={metrics.obstructionSG}
+        childStats={[
+          { label: 'Sand', value: metrics.sandCount, pct: metrics.sandPct, sg: metrics.sandSG, color: obstructionColors[0] },
+          { label: 'Recovery', value: metrics.recoveryCount, pct: metrics.recoveryPct, sg: metrics.recoverySG, color: obstructionColors[1] },
+        ]}
+        missDirection={{
+          leftCount: metrics.obstructionMissLeftCount,
+          rightCount: metrics.obstructionMissRightCount,
+          recordedCount: metrics.obstructionMissRecordedCount,
+          leftPct: metrics.obstructionMissLeftPct,
+          rightPct: metrics.obstructionMissRightPct,
+          totalCount: metrics.obstructionCount,
+        }}
+      />
     </div>
   );
 }
