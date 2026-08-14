@@ -762,45 +762,43 @@ export function calculateRootCauseByFailType(shots: ProcessedShot[], holeScores:
 /**
  * Classify shot type based on your rules:
  * - Drive: Starting Location = Tee AND Hole Par = 4 or 5
- * - Approach: Starting Location = Fairway, Sand, Rough OR tee with distance <=225 but >=50
+ * - Approach: Starting Location = Fairway, Sand, Rough, or Tee, with distance <= 225 (and > 50, per Short Game rule below)
  * - Recovery: Starting location = Recovery
  * - Short Game: Starting distance <= 50 yards, starting location is not recovery
  * - Putt: Starting location = Green
+ * - Other: Anything that doesn't fit the above (e.g. > 225 yards from Fairway/Sand/Rough/Tee, such as a long par-3 tee shot)
  */
 export function classifyShotType(startLoc: string, startDist: number, holePar: number): ShotType {
-  
+
   // Putt: Starting location = Green
   if (startLoc === 'Green') {
     return 'Putt';
   }
-  
+
   // Recovery: Starting location = Recovery
   if (startLoc === 'Recovery') {
     return 'Recovery';
   }
-  
+
   // Short Game: Starting distance <= 50 yards, starting location is not recovery
   if (startDist <= 50 && startLoc !== 'Recovery') {
     return 'Short Game';
   }
-  
+
   // Drive: Starting Location = Tee AND Hole Par = 4 or 5
   if (startLoc === 'Tee' && (holePar === 4 || holePar === 5)) {
     return 'Drive';
   }
-  
-  // Approach: 
-  // - Starting Location = Fairway, Sand, Rough
-  // - OR tee with distance <=225 but >=50
-  const isApproachLocation = ['Fairway', 'Sand', 'Rough'].includes(startLoc);
-  const isTeeApproach = startLoc === 'Tee' && startDist <= 225 && startDist >= 50;
-  
-  if (isApproachLocation || isTeeApproach) {
+
+  // Approach: Starting Location = Fairway, Sand, Rough, or Tee, with distance <= 225
+  const isApproachLocation = ['Fairway', 'Sand', 'Rough', 'Tee'].includes(startLoc);
+
+  if (isApproachLocation && startDist <= 225) {
     return 'Approach';
   }
-  
-  // Default fallback - treat as Approach
-  return 'Approach';
+
+  // Doesn't fit any category (e.g. > 225 yards)
+  return 'Other';
 }
 
 /**

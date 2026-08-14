@@ -5,7 +5,7 @@
 import type { ClubCategory, Lie, MissDirection, PuttDirection, RoundType } from './db/types';
 
 // Shot type classification
-export type ShotType = 'Drive' | 'Approach' | 'Recovery' | 'Short Game' | 'Putt';
+export type ShotType = 'Drive' | 'Approach' | 'Recovery' | 'Short Game' | 'Putt' | 'Other';
 
 // A shot denormalized with its hole/round/course/player context (from the
 // dashboard_shots Supabase view), plus client-derived fields.

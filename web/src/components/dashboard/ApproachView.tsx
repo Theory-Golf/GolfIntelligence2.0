@@ -130,7 +130,7 @@ export function ApproachView({ metrics, approachByDistance, approachFromRough, a
       {/* Approach by Distance Section */}
       {approachByDistance.length > 0 && (
         <>
-          <h4 style={{ marginTop: '32px', marginBottom: '16px', color: 'var(--ash)' }}>Approach (Fairway and Rough): Approach Skill</h4>
+          <h4 style={{ marginTop: '32px', marginBottom: '16px', color: 'var(--ash)' }}>Approach (Fairway and Tee): Approach Skill</h4>
           <div className="grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
             {approachByDistance.map((bucket) => (
               <div key={bucket.label} className="card">
