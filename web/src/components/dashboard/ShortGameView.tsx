@@ -2,11 +2,45 @@
 
 import { useState, useMemo } from 'react';
 import type { ShortGameMetrics, ShortGameHeatMapData, ProcessedShot } from '@/lib/golf/types';
-import { getStrokeGainedColor, formatStrokesGained, getShotSGColor, chartColors } from '@/lib/golf/tokens';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell } from 'recharts';
+import type { Lie } from '@/lib/golf/db/types';
+import { getStrokeGainedColor, formatStrokesGained, getShotSGColor } from '@/lib/golf/tokens';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+
+// Colors for starting lie - shared convention with other lie-based charts in the app
+const STARTING_LIE_COLORS: Record<Lie, string> = {
+  'Fairway': '#10B981',    // Emerald
+  'Rough': '#A855F7',      // Court Purple
+  'Sand': '#D4F000',       // Volt
+  'Recovery': '#06C8E0',   // Aqua
+  'Tee': '#3D8EF0',        // Royal Blue
+  'Green': '#F03DAA',      // Magenta
+};
+
+// Fixed display order for starting lies (only lies present in the data are shown)
+const STARTING_LIE_ORDER: Lie[] = ['Fairway', 'Rough', 'Sand', 'Recovery', 'Tee', 'Green'];
+
+const LEAVE_BUCKET_DEFS: Array<{ key: string; label: string }> = [
+  { key: '0-4', label: '0-4 ft' },
+  { key: '5-8', label: '5-8 ft' },
+  { key: '9-12', label: '9-12 ft' },
+  { key: '13-20', label: '13-20 ft' },
+  { key: '21+', label: '21+ ft' },
+  { key: 'missed', label: 'Missed Green' },
+];
+
+function getLeaveBucket(shot: ProcessedShot): string {
+  if (shot.endingLie !== 'Green') return 'missed';
+  const d = shot.endingDistance;
+  if (d <= 4) return '0-4';
+  if (d <= 8) return '5-8';
+  if (d <= 12) return '9-12';
+  if (d <= 20) return '13-20';
+  return '21+';
+}
 
 /**
- * Short Game Leave Distribution Section - Shows where short game shots finish on the green
+ * Short Game Leave Distribution Section - Shows where short game shots finish on the green,
+ * stacked by starting lie so it's visible whether a given lie tends to leave shots closer.
  * Buckets: 0-4 ft, 5-8 ft, 9-12 ft, 13-20 ft, 21+ ft, Missed Green
  */
 function ShortGameLeaveDistributionSection({ filteredShots }: { filteredShots: ProcessedShot[] }) {
@@ -15,77 +49,60 @@ function ShortGameLeaveDistributionSection({ filteredShots }: { filteredShots: P
     return filteredShots.filter(shot => shot.shotType === 'Short Game');
   }, [filteredShots]);
 
-  // Calculate leave distribution
+  // Calculate leave distribution, stacked by starting lie
   const leaveDistribution = useMemo(() => {
     const totalShots = shortGameShots.length;
     if (totalShots === 0) {
-      return {
-        buckets: [],
-        totalShortGameShots: 0,
-      };
+      return { buckets: [], lies: [] as Lie[], totalShortGameShots: 0 };
     }
 
-    // Initialize bucket counts
-    const bucketCounts = {
-      '0-4': 0,
-      '5-8': 0,
-      '9-12': 0,
-      '13-20': 0,
-      '21+': 0,
-      'missed': 0,
-    };
+    // Determine which starting lies are actually present, in fixed order
+    const liesPresent = new Set(shortGameShots.map(shot => shot.startingLie));
+    const lies = STARTING_LIE_ORDER.filter(lie => liesPresent.has(lie));
 
-    // Categorize each shot
-    shortGameShots.forEach(shot => {
-      const endingLie = shot.endingLie;
-      const endingDistance = shot.endingDistance;
-
-      // Check if shot missed the green
-      if (endingLie !== 'Green') {
-        bucketCounts['missed']++;
-        return;
-      }
-
-      // Shot is on the green - categorize by distance
-      if (endingDistance <= 4) {
-        bucketCounts['0-4']++;
-      } else if (endingDistance <= 8) {
-        bucketCounts['5-8']++;
-      } else if (endingDistance <= 12) {
-        bucketCounts['9-12']++;
-      } else if (endingDistance <= 20) {
-        bucketCounts['13-20']++;
-      } else {
-        bucketCounts['21+']++;
-      }
+    // count[bucket][lie] = number of shots
+    const counts: Record<string, Record<string, number>> = {};
+    LEAVE_BUCKET_DEFS.forEach(({ key }) => {
+      counts[key] = {};
+      lies.forEach(lie => { counts[key][lie] = 0; });
     });
 
-    // Convert to bucket objects with percentages
-    const buckets = [
-      { label: '0-4 ft', bucket: '0-4', count: bucketCounts['0-4'], percentage: (bucketCounts['0-4'] / totalShots) * 100 },
-      { label: '5-8 ft', bucket: '5-8', count: bucketCounts['5-8'], percentage: (bucketCounts['5-8'] / totalShots) * 100 },
-      { label: '9-12 ft', bucket: '9-12', count: bucketCounts['9-12'], percentage: (bucketCounts['9-12'] / totalShots) * 100 },
-      { label: '13-20 ft', bucket: '13-20', count: bucketCounts['13-20'], percentage: (bucketCounts['13-20'] / totalShots) * 100 },
-      { label: '21+ ft', bucket: '21+', count: bucketCounts['21+'], percentage: (bucketCounts['21+'] / totalShots) * 100 },
-      { label: 'Missed Green', bucket: 'missed', count: bucketCounts['missed'], percentage: (bucketCounts['missed'] / totalShots) * 100 },
-    ];
+    shortGameShots.forEach(shot => {
+      const bucket = getLeaveBucket(shot);
+      counts[bucket][shot.startingLie] = (counts[bucket][shot.startingLie] || 0) + 1;
+    });
 
-    return { buckets, totalShortGameShots: totalShots };
+    const buckets = LEAVE_BUCKET_DEFS.map(({ key, label }) => {
+      const bucketCounts = counts[key];
+      const bucketTotal = Object.values(bucketCounts).reduce((sum, c) => sum + c, 0);
+      const row: Record<string, string | number> = { bucket: key, label, count: bucketTotal, percentage: (bucketTotal / totalShots) * 100 };
+      lies.forEach(lie => {
+        row[lie] = (bucketCounts[lie] / totalShots) * 100;
+        row[`${lie}_count`] = bucketCounts[lie];
+      });
+      return row;
+    });
+
+    return { buckets, lies, totalShortGameShots: totalShots };
   }, [shortGameShots]);
 
-  // Colors for each bucket
-  const BUCKET_COLORS: Record<string, string> = {
-    '0-4': '#22C55E', '5-8': '#4ADE80', '9-12': '#FACC15', '13-20': '#FB923C', '21+': '#F87171', 'missed': '#EF4444',
-  };
-
-  const LeaveTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: typeof leaveDistribution.buckets[0] }> }) => {
+  const LeaveTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: Record<string, string | number> }> }) => {
     if (!active || !payload || !payload.length) return null;
     const data = payload[0].payload;
     return (
       <div style={{ background: 'var(--court)', border: '1px solid var(--scarlet)', borderRadius: '4px', padding: '12px' }}>
         <div style={{ color: 'var(--chalk)', fontWeight: 600, marginBottom: '8px' }}>{data.label}</div>
-        <div style={{ fontSize: '12px', color: 'var(--cement)', marginBottom: '4px' }}>Count: <span style={{ color: 'var(--chalk)' }}>{data.count}</span></div>
-        <div style={{ fontSize: '12px', color: 'var(--cement)' }}>Percentage: <span style={{ color: 'var(--chalk)' }}>{data.percentage.toFixed(0)}%</span></div>
+        <div style={{ fontSize: '12px', color: 'var(--cement)', marginBottom: '8px' }}>Total: <span style={{ color: 'var(--chalk)' }}>{data.count} shots ({(data.percentage as number).toFixed(0)}%)</span></div>
+        {leaveDistribution.lies.map(lie => {
+          const lieCount = (data[`${lie}_count`] as number) || 0;
+          if (lieCount === 0) return null;
+          return (
+            <div key={lie} style={{ fontSize: '12px', color: 'var(--cement)', display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
+              <div style={{ width: '8px', height: '8px', borderRadius: '2px', background: STARTING_LIE_COLORS[lie] }}></div>
+              {lie}: <span style={{ color: 'var(--chalk)' }}>{lieCount} shots ({(data[lie] as number / (data.percentage as number) * 100 || 0).toFixed(0)}% of bucket)</span>
+            </div>
+          );
+        })}
       </div>
     );
   };
@@ -94,30 +111,21 @@ function ShortGameLeaveDistributionSection({ filteredShots }: { filteredShots: P
 
   return (
     <div style={{ marginTop: '32px' }}>
-      <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>Leave Distribution</h4>
-      <p style={{ fontSize: '12px', color: 'var(--ash)', marginBottom: '16px' }}>Where short game shots finish on the green ({leaveDistribution.totalShortGameShots} total shots)</p>
+      <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>Leave Distribution by Starting Lie</h4>
+      <p style={{ fontSize: '12px', color: 'var(--ash)', marginBottom: '16px' }}>Where short game shots finish on the green, broken down by starting lie ({leaveDistribution.totalShortGameShots} total shots)</p>
       <div style={{ background: 'var(--charcoal)', padding: '16px', borderRadius: '4px' }}>
-        <ResponsiveContainer width="100%" height={300}>
+        <ResponsiveContainer width="100%" height={340}>
           <BarChart data={leaveDistribution.buckets} margin={{ top: 20, right: 30, left: 20, bottom: 50 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--ash)" opacity={0.3} />
             <XAxis dataKey="label" stroke="var(--ash)" tick={{ fill: 'var(--ash)', fontSize: 11 }} angle={-45} textAnchor="end" height={60} />
             <YAxis stroke="var(--ash)" tick={{ fill: 'var(--ash)', fontSize: 11 }} tickFormatter={(v) => `${v}%`} domain={[0, 100]} />
             <Tooltip content={<LeaveTooltip />} />
-            <Bar dataKey="percentage" name="% of Shots" radius={[4, 4, 0, 0]}>
-              {leaveDistribution.buckets.map((entry) => (
-                <Cell key={`cell-${entry.bucket}`} fill={BUCKET_COLORS[entry.bucket] || chartColors[0]} />
-              ))}
-            </Bar>
+            <Legend wrapperStyle={{ fontSize: '11px', color: 'var(--ash)' }} />
+            {leaveDistribution.lies.map(lie => (
+              <Bar key={lie} dataKey={lie} name={lie} stackId="lie" fill={STARTING_LIE_COLORS[lie]} radius={[0, 0, 0, 0]} />
+            ))}
           </BarChart>
         </ResponsiveContainer>
-      </div>
-      <div style={{ marginTop: '16px', display: 'flex', gap: '16px', flexWrap: 'wrap', fontSize: '11px', color: 'var(--ash)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: '12px', height: '12px', background: '#22C55E', borderRadius: '2px' }}></div><span>0-4 ft (Best)</span></div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: '12px', height: '12px', background: '#4ADE80', borderRadius: '2px' }}></div><span>5-8 ft</span></div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: '12px', height: '12px', background: '#FACC15', borderRadius: '2px' }}></div><span>9-12 ft</span></div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: '12px', height: '12px', background: '#FB923C', borderRadius: '2px' }}></div><span>13-20 ft</span></div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: '12px', height: '12px', background: '#F87171', borderRadius: '2px' }}></div><span>21+ ft</span></div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: '12px', height: '12px', background: '#EF4444', borderRadius: '2px' }}></div><span>Missed Green</span></div>
       </div>
     </div>
   );
