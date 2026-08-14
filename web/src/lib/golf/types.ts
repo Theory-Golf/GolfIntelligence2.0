@@ -125,6 +125,13 @@ export interface DrivingMetrics {
   fairwayPctNonDriver: number;  // % FW when Did not hit driver = Yes
   // % of drives with SG > 0
   positiveSGPct: number;
+  // Miss bias: among drives with a recorded miss direction, the L/R split.
+  // Target is 50/50 — an even split indicates consistent aim and strike.
+  missLeftCount: number;
+  missRightCount: number;
+  missRecordedCount: number;  // missLeftCount + missRightCount
+  missLeftPct: number;
+  missRightPct: number;
 }
 
 // Strokes Gained Separator by distance category
@@ -362,6 +369,21 @@ export interface ProblemDriveMetrics {
   recoveryCount: number;
   recoveryPct: number;
   recoverySG: number;
+
+  // Miss direction among penalty drives (added context: of the drives that
+  // resulted in a penalty, how many missed left vs right)
+  penaltyMissLeftCount: number;
+  penaltyMissRightCount: number;
+  penaltyMissRecordedCount: number;
+  penaltyMissLeftPct: number;
+  penaltyMissRightPct: number;
+
+  // Miss direction among obstruction drives (sand + recovery)
+  obstructionMissLeftCount: number;
+  obstructionMissRightCount: number;
+  obstructionMissRecordedCount: number;
+  obstructionMissLeftPct: number;
+  obstructionMissRightPct: number;
 }
 
 // Approach distance bucket metrics for Approach by Distance section
