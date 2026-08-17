@@ -52,7 +52,7 @@ export function getHoleScores(shots: ProcessedShot[]): HoleScore[] {
  * 1. 3 Putts: >= 3 putts on a hole
  * 2. Bogey on Par 5: Hole score >= 6 on par 5 holes
  * 3. Double Bogey: Hole score >= par + 2
- * 4. Bogey: Approach < 125 - Approach shot from fairway/rough/sand, starting distance <= 125, 
+ * 4. Bogey: Approach < 125 - Starting distance <= 125 and not from a recovery lie,
  *    hole score >= par + 1, shot # is shot 1 on par 3, shot 2 on par 4, shot 2 or 3 on par 5
  * 5. Missed Green (Short Game): Short game shot ending NOT on green
  */
@@ -122,41 +122,39 @@ export function calculateTiger5Fails(shots: ProcessedShot[], holeScores: HoleSco
   });
   
   // Check Bogey: Approach < 125
-  // Approach from fairway, rough, sand with starting distance <= 125
+  // Starting distance <= 125, not from a recovery lie
   // Shot 1 on par 3, shot 2 on par 4, shot 2 or 3 on par 5
   shots.forEach(shot => {
-    if (shot.shotType === 'Approach') {
-      const startDist = shot.startingDistance;
-      const startLoc = shot.startingLie;
-      const shotNum = shot.shotNumber;
-      const holeKey = `${shot.roundId}-${shot.holeNumber}`;
-      const hole = holeScores.find(h => h.roundId === shot.roundId && h.hole === shot.holeNumber);
-      
-      if (!hole) return;
-      
-      const isValidLocation = ['Fairway', 'Rough', 'Sand'].includes(startLoc);
-      const isValidDistance = startDist <= 125;
-      
-      let isValidShotNum = false;
-      if (hole.par === 3 && shotNum === 1) isValidShotNum = true;
-      if (hole.par === 4 && shotNum === 2) isValidShotNum = true;
-      if (hole.par === 5 && (shotNum === 2 || shotNum === 3)) isValidShotNum = true;
-      
-      // Check if hole score >= par + 1
-      const isBogeyOrWorse = hole.score >= hole.par + 1;
-      
-      if (isValidLocation && isValidDistance && isValidShotNum && isBogeyOrWorse) {
-        if (!failHoleKeys.has(holeKey + '-bogeyApproach')) {
-          bogeyApproach++;
-          // Calculate SG for this hole
-          const holeShots = shots.filter(s => s.roundId === shot.roundId && s.holeNumber === shot.holeNumber);
-          const holeSG = holeShots.reduce((sum, s) => sum + s.calculatedStrokesGained, 0);
-          bogeyApproachSG += holeSG;
-          failHoleKeys.add(holeKey + '-bogeyApproach');
-          failHoleKeys.add(holeKey);
-          if (!failTypeByHole.has(holeKey)) failTypeByHole.set(holeKey, []);
-          failTypeByHole.get(holeKey)!.push('bogeyApproach');
-        }
+    const startDist = shot.startingDistance;
+    const startLoc = shot.startingLie;
+    const shotNum = shot.shotNumber;
+    const holeKey = `${shot.roundId}-${shot.holeNumber}`;
+    const hole = holeScores.find(h => h.roundId === shot.roundId && h.hole === shot.holeNumber);
+
+    if (!hole) return;
+
+    const isValidLocation = startLoc !== 'Recovery';
+    const isValidDistance = startDist <= 125;
+
+    let isValidShotNum = false;
+    if (hole.par === 3 && shotNum === 1) isValidShotNum = true;
+    if (hole.par === 4 && shotNum === 2) isValidShotNum = true;
+    if (hole.par === 5 && (shotNum === 2 || shotNum === 3)) isValidShotNum = true;
+
+    // Check if hole score >= par + 1
+    const isBogeyOrWorse = hole.score >= hole.par + 1;
+
+    if (isValidLocation && isValidDistance && isValidShotNum && isBogeyOrWorse) {
+      if (!failHoleKeys.has(holeKey + '-bogeyApproach')) {
+        bogeyApproach++;
+        // Calculate SG for this hole
+        const holeShots = shots.filter(s => s.roundId === shot.roundId && s.holeNumber === shot.holeNumber);
+        const holeSG = holeShots.reduce((sum, s) => sum + s.calculatedStrokesGained, 0);
+        bogeyApproachSG += holeSG;
+        failHoleKeys.add(holeKey + '-bogeyApproach');
+        failHoleKeys.add(holeKey);
+        if (!failTypeByHole.has(holeKey)) failTypeByHole.set(holeKey, []);
+        failTypeByHole.get(holeKey)!.push('bogeyApproach');
       }
     }
   });
@@ -269,23 +267,21 @@ export function calculateRootCause(shots: ProcessedShot[], holeScores: HoleScore
     const hasBogeyOnPar5 = hole.par === 5 && hole.score >= 6;
     const hasDoubleBogey = hole.score >= hole.par + 2;
     const hasBogeyApproach = holeShots.some(s => {
-      if (s.shotType !== 'Approach') return false;
+      if (s.startingLie === 'Recovery') return false;
       const startDist = s.startingDistance;
-      const startLoc = s.startingLie;
       const shotNum = s.shotNumber;
-      const isValidLocation = ['Fairway', 'Rough', 'Sand'].includes(startLoc);
       const isValidDistance = startDist <= 125;
       let isValidShotNum = false;
       if (hole.par === 3 && shotNum === 1) isValidShotNum = true;
       if (hole.par === 4 && shotNum === 2) isValidShotNum = true;
       if (hole.par === 5 && (shotNum === 2 || shotNum === 3)) isValidShotNum = true;
-      return isValidLocation && isValidDistance && isValidShotNum && hole.score >= hole.par + 1;
+      return isValidDistance && isValidShotNum && hole.score >= hole.par + 1;
     });
     const hasMissedGreen = holeShots.some(s => {
       if (s.shotType !== 'Short Game') return false;
       return s.endingLie !== 'Green';
     });
-    
+
     const isFailHole = has3Putts || hasBogeyOnPar5 || hasDoubleBogey || hasBogeyApproach || hasMissedGreen;
     
     if (isFailHole) {
@@ -386,7 +382,7 @@ export function calculateRootCause(shots: ProcessedShot[], holeScores: HoleScore
  * Filter shots based on Tiger 5 fail type
  * - 3 Putts: only putts
  * - Short Game misses: only short game shots
- * - Bogey <125: only approach and putts
+ * - Bogey <125: only the qualifying shot (1st on par 3, 2nd on par 4, 2nd/3rd on par 5) and putts
  * - Other fails: all shots
  */
 function filterShotsForFailType(failType: string, holeShots: ProcessedShot[]): ProcessedShot[] {
@@ -398,8 +394,15 @@ function filterShotsForFailType(failType: string, holeShots: ProcessedShot[]): P
       // Only short game shots
       return holeShots.filter(s => s.shotType === 'Short Game');
     case 'Bogey: Approach <125':
-      // Only approach and putts
-      return holeShots.filter(s => s.shotType === 'Approach' || s.shotType === 'Putt');
+      // Only the qualifying shot and putts
+      return holeShots.filter(s => {
+        if (s.shotType === 'Putt') return true;
+        const shotNum = s.shotNumber;
+        if (s.holePar === 3 && shotNum === 1) return true;
+        if (s.holePar === 4 && shotNum === 2) return true;
+        if (s.holePar === 5 && (shotNum === 2 || shotNum === 3)) return true;
+        return false;
+      });
     default:
       // All shots
       return holeShots;
@@ -466,19 +469,17 @@ export function calculateTiger5FailDetails(shots: ProcessedShot[], holeScores: H
     
     // Check Bogey: Approach <125
     const hasBogeyApproach = holeShots.some(s => {
-      if (s.shotType !== 'Approach') return false;
+      if (s.startingLie === 'Recovery') return false;
       const startDist = s.startingDistance;
-      const startLoc = s.startingLie;
       const shotNum = s.shotNumber;
-      const isValidLocation = ['Fairway', 'Rough', 'Sand'].includes(startLoc);
       const isValidDistance = startDist <= 125;
       let isValidShotNum = false;
       if (hole.par === 3 && shotNum === 1) isValidShotNum = true;
       if (hole.par === 4 && shotNum === 2) isValidShotNum = true;
       if (hole.par === 5 && (shotNum === 2 || shotNum === 3)) isValidShotNum = true;
-      return isValidLocation && isValidDistance && isValidShotNum && hole.score >= hole.par + 1;
+      return isValidDistance && isValidShotNum && hole.score >= hole.par + 1;
     });
-    
+
     if (hasBogeyApproach) {
       details.bogeyApproach.push({
         date,
@@ -562,17 +563,15 @@ export function calculateTiger5Trend(shots: ProcessedShot[], holeScores: HoleSco
       
       // Check bogey approach
       const hasBogeyApproach = holeShots.some(s => {
-        if (s.shotType !== 'Approach') return false;
+        if (s.startingLie === 'Recovery') return false;
         const startDist = s.startingDistance;
-        const startLoc = s.startingLie;
         const shotNum = s.shotNumber;
-        const isValidLocation = ['Fairway', 'Rough', 'Sand'].includes(startLoc);
         const isValidDistance = startDist <= 125;
         let isValidShotNum = false;
         if (hole.par === 3 && shotNum === 1) isValidShotNum = true;
         if (hole.par === 4 && shotNum === 2) isValidShotNum = true;
         if (hole.par === 5 && (shotNum === 2 || shotNum === 3)) isValidShotNum = true;
-        return isValidLocation && isValidDistance && isValidShotNum && hole.score >= hole.par + 1;
+        return isValidDistance && isValidShotNum && hole.score >= hole.par + 1;
       });
       if (hasBogeyApproach) bogeyApproach++;
       
@@ -667,17 +666,15 @@ export function calculateRootCauseByFailType(shots: ProcessedShot[], holeScores:
     const isBogeyOnPar5 = hole.par === 5 && hole.score >= 6;
     const isDoubleBogey = hole.score >= hole.par + 2;
     const hasBogeyApproach = holeShots.some(s => {
-      if (s.shotType !== 'Approach') return false;
+      if (s.startingLie === 'Recovery') return false;
       const sDist = s.startingDistance;
-      const sLoc = s.startingLie;
       const sNum = s.shotNumber;
-      const isValidLocation = ['Fairway', 'Rough', 'Sand'].includes(sLoc);
       const isValidDistance = sDist <= 125;
       let isValidShotNum = false;
       if (hole.par === 3 && sNum === 1) isValidShotNum = true;
       if (hole.par === 4 && sNum === 2) isValidShotNum = true;
       if (hole.par === 5 && (sNum === 2 || sNum === 3)) isValidShotNum = true;
-      return isValidLocation && isValidDistance && isValidShotNum && hole.score >= hole.par + 1;
+      return isValidDistance && isValidShotNum && hole.score >= hole.par + 1;
     });
     const hasMissedGreen = holeShots.some(s => {
       if (s.shotType !== 'Short Game') return false;
@@ -2743,21 +2740,19 @@ function isTiger5FailHole(hole: HoleScore, shots: ProcessedShot[]): boolean {
   if (hole.score >= hole.par + 2) return true;
   
   // Check for Bogey: Approach < 125
-  const approachShots = holeShots.filter(s => s.shotType === 'Approach');
-  for (const approach of approachShots) {
-    const startDist = approach.startingDistance;
-    const startLoc = approach.startingLie;
-    const shotNum = approach.shotNumber;
-    
-    const isValidLocation = ['Fairway', 'Rough', 'Sand'].includes(startLoc);
+  const candidateShots = holeShots.filter(s => s.startingLie !== 'Recovery');
+  for (const shot of candidateShots) {
+    const startDist = shot.startingDistance;
+    const shotNum = shot.shotNumber;
+
     const isValidDistance = startDist <= 125;
-    
+
     let isValidShotNum = false;
     if (hole.par === 3 && shotNum === 1) isValidShotNum = true;
     if (hole.par === 4 && shotNum === 2) isValidShotNum = true;
     if (hole.par === 5 && (shotNum === 2 || shotNum === 3)) isValidShotNum = true;
-    
-    if (isValidLocation && isValidDistance && isValidShotNum && hole.score >= hole.par + 1) {
+
+    if (isValidDistance && isValidShotNum && hole.score >= hole.par + 1) {
       return true;
     }
   }
