@@ -5,7 +5,7 @@ import LagPuttTest from '@/components/LagPuttTest';
 export const metadata = {
   title: 'Lag Putt Test — PlayerPath',
   description:
-    'Adapted from the Swedish Golf Team protocol. 18 putts from 27–72 ft, scored by proximity. Compare your speed control to tour and amateur benchmarks.',
+    'Adapted from the Swedish Golf Team protocol. 18 putts from 27–60 ft, scored by proximity. Compare your speed control to tour and amateur benchmarks.',
 };
 
 export default function LagPuttTestPage() {
@@ -24,7 +24,7 @@ export default function LagPuttTestPage() {
             Lag Putt<span className="text-primary">Test</span>
           </h1>
           <p className="font-body text-base text-muted-foreground mt-5 max-w-lg leading-relaxed">
-            18 putts from 27–72 ft. Scored on how far each putt finishes from
+            18 putts from 27–60 ft. Scored on how far each putt finishes from
             the hole. Total score is compared against tour and amateur
             benchmarks — lower is better.
           </p>
