@@ -194,70 +194,70 @@ export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: {
         </div>
       </div>
 
-      {/* Section Heading for Distribution */}
-      <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>Hole Outcome Distribution</h4>
-
       {/* Donut Chart and Bogey Rate on Same Row */}
       {holeOutcomes.length > 0 && (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '24px' }}>
           {/* Donut Chart - Hole Outcome Distribution */}
-          <div style={{ background: 'var(--charcoal)', padding: '16px', borderRadius: '4px' }}>
-            <p style={{ fontSize: '11px', color: 'var(--ash)', marginBottom: '16px' }}>
-              Distribution of scores vs par across {totalHoles} holes
-            </p>
-            <ResponsiveContainer width="100%" height={280}>
-              <PieChart>
-                <Pie
-                  data={donutData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={100}
-                  paddingAngle={2}
-                  dataKey="value"
-                  nameKey="name"
-                  label={({ percent }: { percent?: number }) => `${((percent ?? 0) * 100).toFixed(0)}%`}
-                  labelLine={false}
-                >
-                  {donutData.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={OUTCOME_COLORS[entry.name as HoleOutcome] || '#6B7280'}
-                      stroke="var(--charcoal)"
-                      strokeWidth={2}
-                    />
-                  ))}
-                </Pie>
-                {/* Center text showing total holes */}
-                <text
-                  x="50%"
-                  y="46%"
-                  textAnchor="middle"
-                  dominantBaseline="middle"
-                  fill="var(--chalk)"
-                  style={{ fontSize: '24px', fontWeight: 'bold' }}
-                >
-                  {totalHoles}
-                </text>
-                <text
-                  x="50%"
-                  y="58%"
-                  textAnchor="middle"
-                  dominantBaseline="middle"
-                  fill="var(--ash)"
-                  style={{ fontSize: '11px' }}
-                >
-                  holes
-                </text>
-                <Tooltip content={<DonutTooltip />} />
-                <Legend
-                  layout="vertical"
-                  align="right"
-                  verticalAlign="middle"
-                  formatter={(value) => <span style={{ color: 'var(--ash)', fontSize: '11px' }}>{value}</span>}
-                />
-              </PieChart>
-            </ResponsiveContainer>
+          <div>
+            <h5 style={{ marginBottom: '12px', color: 'var(--ash)', fontSize: '14px' }}>Outcome Distribution</h5>
+            <div style={{ background: 'var(--charcoal)', padding: '16px', borderRadius: '4px' }}>
+              <p style={{ fontSize: '11px', color: 'var(--ash)', marginBottom: '16px' }}>
+                Distribution of scores vs par across {totalHoles} holes
+              </p>
+              <ResponsiveContainer width="100%" height={280}>
+                <PieChart>
+                  <Pie
+                    data={donutData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={100}
+                    paddingAngle={2}
+                    dataKey="value"
+                    nameKey="name"
+                    label={({ percent }: { percent?: number }) => `${((percent ?? 0) * 100).toFixed(0)}%`}
+                    labelLine={false}
+                  >
+                    {donutData.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={OUTCOME_COLORS[entry.name as HoleOutcome] || '#6B7280'}
+                        stroke="var(--charcoal)"
+                        strokeWidth={2}
+                      />
+                    ))}
+                  </Pie>
+                  {/* Center text showing total holes */}
+                  <text
+                    x="50%"
+                    y="46%"
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    fill="var(--chalk)"
+                    style={{ fontSize: '24px', fontWeight: 'bold' }}
+                  >
+                    {totalHoles}
+                  </text>
+                  <text
+                    x="50%"
+                    y="58%"
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    fill="var(--ash)"
+                    style={{ fontSize: '11px' }}
+                  >
+                    holes
+                  </text>
+                  <Tooltip content={<DonutTooltip />} />
+                  <Legend
+                    layout="vertical"
+                    align="right"
+                    verticalAlign="middle"
+                    formatter={(value) => <span style={{ color: 'var(--ash)', fontSize: '11px' }}>{value}</span>}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
           </div>
 
           {/* Bogey Rate Stacked Bar Chart */}
