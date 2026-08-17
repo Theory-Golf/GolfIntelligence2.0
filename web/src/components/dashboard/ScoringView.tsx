@@ -192,6 +192,9 @@ export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: {
             </div>
           </div>
         </div>
+
+        {/* Mental Resilience Definitions - Collapsible */}
+        <MentalResilienceDefinitions />
       </div>
 
       {/* Donut Chart and Bogey Rate on Same Row */}
@@ -427,6 +430,72 @@ export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: {
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+/**
+ * Mental Resilience Definitions - Collapsible plain-language explainer for the
+ * five cards above, written for coaches and players (not the underlying formulas).
+ */
+function MentalResilienceDefinitions() {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const definitions: { term: string; description: string }[] = [
+    {
+      term: 'Bounce Back %',
+      description: 'How often a bad hole gets answered right away. After a bogey or worse, this is how often the very next hole comes back as a par or better instead of the mistake carrying over.',
+    },
+    {
+      term: 'Drop Off %',
+      description: 'How often momentum gets lost. After a birdie, this is how often the very next hole turns into a bogey or worse instead of keeping the good play going.',
+    },
+    {
+      term: 'Gas Pedal %',
+      description: 'How often a good hole leads to another good hole. After a birdie or better, this is how often the next hole is also a birdie or better — a sign of pushing an advantage instead of easing up.',
+    },
+    {
+      term: 'Bogey Train %',
+      description: 'How often trouble compounds. After a bogey or worse, this is how often the next hole is also a bogey or worse — back-to-back mistakes instead of a stop-the-bleeding response.',
+    },
+    {
+      term: 'Drive after T5 Fail',
+      description: "How a costly mistake hole affects the next tee shot. This compares driving performance on the hole right after a big blow-up (a 3-putt, a double bogey, or similar) to the player's normal driving, showing whether a bad hole rattles the very next swing.",
+    },
+  ];
+
+  return (
+    <div style={{ marginTop: '16px' }}>
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          width: '100%',
+          padding: '12px 16px',
+          background: 'var(--charcoal)',
+          border: '1px solid var(--ash)',
+          borderRadius: '4px',
+          color: 'var(--chalk)',
+          cursor: 'pointer',
+          fontSize: '14px',
+        }}
+      >
+        <span style={{ fontWeight: 600 }}>What do these mean?</span>
+        <span style={{ fontSize: '12px', color: 'var(--ash)' }}>{isExpanded ? '▲' : '▼'}</span>
+      </button>
+
+      {isExpanded && (
+        <div style={{ marginTop: '12px', padding: '16px', background: 'var(--charcoal)', borderRadius: '4px' }}>
+          {definitions.map(({ term, description }) => (
+            <div key={term} style={{ marginBottom: '14px' }}>
+              <div style={{ color: 'var(--chalk)', fontSize: '13px', fontWeight: 600, marginBottom: '4px' }}>{term}</div>
+              <div style={{ color: 'var(--ash)', fontSize: '12px', lineHeight: 1.5 }}>{description}</div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
