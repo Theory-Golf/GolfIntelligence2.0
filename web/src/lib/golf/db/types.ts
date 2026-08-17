@@ -98,3 +98,36 @@ export type ShotInsert = Omit<ShotRow, 'created_at' | 'updated_at'>;
 export type RoundUpdate = Partial<RoundInsert> & { id: string };
 export type HoleUpdate = Partial<HoleInsert> & { id: string };
 export type ShotUpdate = Partial<ShotInsert> & { id: string };
+
+export type DrillType =
+  | 'inside-ten'
+  | 'inside-twenty'
+  | 'winners-circle'
+  | 'lag-putt-test'
+  | 'line-test'
+  | 'driver-standard'
+  | 'wedge-standard'
+  | 'approach-standard'
+  | 'round-simulation'
+  | 'practice-planner';
+
+export interface DrillSessionRow {
+  id: string;
+  player_id: string;
+  drill_type: DrillType;
+  payload: unknown;
+  client_id: string;
+  played_at: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export type DrillSessionInsert = Omit<DrillSessionRow, 'id' | 'created_at' | 'updated_at'> & {
+  id?: string;
+};
+
+export interface DrillSessionDelete {
+  player_id: string;
+  drill_type: DrillType;
+  client_id: string;
+}

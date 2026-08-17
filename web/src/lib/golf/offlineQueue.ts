@@ -9,6 +9,8 @@ import {
   upsertShot,
   updateShot,
   deleteShot,
+  upsertDrillSession,
+  deleteDrillSession,
 } from './db/index';
 import type {
   RoundInsert,
@@ -17,6 +19,8 @@ import type {
   HoleUpdate,
   ShotInsert,
   ShotUpdate,
+  DrillSessionInsert,
+  DrillSessionDelete,
 } from './db/types';
 import { createId } from './utils/uuid';
 
@@ -30,7 +34,9 @@ export type QueueEntry =
   | { id: string; type: 'updateHole'; payload: HoleUpdate; createdAt: string; attempts: number }
   | { id: string; type: 'upsertShot'; payload: ShotInsert; createdAt: string; attempts: number }
   | { id: string; type: 'updateShot'; payload: ShotUpdate; createdAt: string; attempts: number }
-  | { id: string; type: 'deleteShot'; payload: { id: string }; createdAt: string; attempts: number };
+  | { id: string; type: 'deleteShot'; payload: { id: string }; createdAt: string; attempts: number }
+  | { id: string; type: 'upsertDrillSession'; payload: DrillSessionInsert; createdAt: string; attempts: number }
+  | { id: string; type: 'deleteDrillSession'; payload: DrillSessionDelete; createdAt: string; attempts: number };
 
 export type QueueEntryInput =
   | { type: 'upsertRound'; payload: RoundInsert }
@@ -39,7 +45,9 @@ export type QueueEntryInput =
   | { type: 'updateHole'; payload: HoleUpdate }
   | { type: 'upsertShot'; payload: ShotInsert }
   | { type: 'updateShot'; payload: ShotUpdate }
-  | { type: 'deleteShot'; payload: { id: string } };
+  | { type: 'deleteShot'; payload: { id: string } }
+  | { type: 'upsertDrillSession'; payload: DrillSessionInsert }
+  | { type: 'deleteDrillSession'; payload: DrillSessionDelete };
 
 function readQueue(): QueueEntry[] {
   if (typeof window === 'undefined') return [];
@@ -111,6 +119,12 @@ async function runWrite(input: QueueEntryInput): Promise<void> {
       return;
     case 'deleteShot':
       await deleteShot(input.payload.id);
+      return;
+    case 'upsertDrillSession':
+      await upsertDrillSession(input.payload);
+      return;
+    case 'deleteDrillSession':
+      await deleteDrillSession(input.payload);
       return;
   }
 }

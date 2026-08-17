@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { LS_INSIDE_TEN_SESSIONS } from '@/lib/constants';
+import { useDrillHistory } from '@/lib/golf/useDrillHistory';
 import './InsideTen.css';
 
 // ── Types ─────────────────────────────────────────────────────────
@@ -76,27 +77,6 @@ function todayISO(): string {
 }
 
 // ── Storage ────────────────────────────────────────────────────────
-function loadSessions(): InsideTenSession[] {
-  try {
-    const raw = localStorage.getItem(LS_INSIDE_TEN_SESSIONS);
-    if (!raw) return [];
-    const store = JSON.parse(raw) as { version: number; sessions: InsideTenSession[] };
-    if (store.version !== 1 || !Array.isArray(store.sessions)) {
-      console.warn('[Inside Ten] schema mismatch, resetting store');
-      return [];
-    }
-    return store.sessions;
-  } catch {
-    return [];
-  }
-}
-
-function persistSessions(sessions: InsideTenSession[]): void {
-  try {
-    localStorage.setItem(LS_INSIDE_TEN_SESSIONS, JSON.stringify({ version: 1, sessions }));
-  } catch { /* noop */ }
-}
-
 function buildSession(score: number, date: string): InsideTenSession {
   return {
     id: crypto.randomUUID(),
@@ -109,19 +89,27 @@ function buildSession(score: number, date: string): InsideTenSession {
 }
 
 // ── Main component ─────────────────────────────────────────────────
+const getSessionId = (s: InsideTenSession) => s.id;
+const getSessionPlayedAt = (s: InsideTenSession) => s.date;
+
 export default function InsideTen() {
   const [screen, setScreen]                 = useState<Screen>('home');
-  const [sessions, setSessions]             = useState<InsideTenSession[]>([]);
   const [storageAvailable, setStorageAvail] = useState(true);
   const [score, setScore]                   = useState(12);
   const [sessionDate, setSessionDate]       = useState<string>(todayISO);
   const [result, setResult]                 = useState<ResultState | null>(null);
 
+  const { sessions, record } = useDrillHistory<InsideTenSession>({
+    drillType: 'inside-ten',
+    lsKey: LS_INSIDE_TEN_SESSIONS,
+    getId: getSessionId,
+    getPlayedAt: getSessionPlayedAt,
+  });
+
   useEffect(() => {
     try {
       localStorage.setItem('_it_probe', '1');
       localStorage.removeItem('_it_probe');
-      setSessions(loadSessions());
     } catch {
       setStorageAvail(false);
     }
@@ -141,9 +129,7 @@ export default function InsideTen() {
     const prevLast = sessions.length > 0 ? sessions[0].score : null;
 
     const newSession = buildSession(score, sessionDate);
-    const updated = [newSession, ...sessions];
-    persistSessions(updated);
-    setSessions(updated);
+    record(newSession);
     setResult({ session: newSession, prevBest, prevAvg5, prevLast });
     setScreen('result');
   }
