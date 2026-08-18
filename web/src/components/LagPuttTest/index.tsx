@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { LS_LAG_PUTT_SESSIONS } from '@/lib/constants';
+import { useDrillHistory } from '@/lib/golf/useDrillHistory';
 import './LagPuttTest.css';
 
 type Direction = 'short' | 'long';
@@ -103,10 +104,8 @@ function generateDistances(): number[] {
   return [...pool, ...extras];
 }
 
-const storage = {
-  get<T>(k: string): T | null { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) as T : null; } catch { return null; } },
-  set(k: string, v: unknown) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* noop */ } },
-};
+const getSessionId = (s: SavedSession) => String(s.id);
+const getSessionPlayedAt = (s: SavedSession) => s.date;
 
 // ── Component ────────────────────────────────────────────────────
 export default function LagPuttTest() {
@@ -116,12 +115,13 @@ export default function LagPuttTest() {
   const [puttIdx, setPuttIdx] = useState(0);
   const [selectedBucket, setSelectedBucket] = useState<number | 'holed' | null>(null);
   const [selectedDir, setSelectedDir] = useState<Direction | null>(null);
-  const [history, setHistory] = useState<SavedSession[]>([]);
 
-  useEffect(() => {
-    const saved = storage.get<SavedSession[]>(LS_LAG_PUTT_SESSIONS);
-    if (saved) setHistory(saved);
-  }, []);
+  const { sessions: history, record } = useDrillHistory<SavedSession>({
+    drillType: 'lag-putt-test',
+    lsKey: LS_LAG_PUTT_SESSIONS,
+    getId: getSessionId,
+    getPlayedAt: getSessionPlayedAt,
+  });
 
   function startSession() {
     setDistances(generateDistances());
@@ -159,9 +159,7 @@ export default function LagPuttTest() {
         total,
         putts: next,
       };
-      const updatedHistory = [session, ...history].slice(0, 50);
-      setHistory(updatedHistory);
-      storage.set(LS_LAG_PUTT_SESSIONS, updatedHistory);
+      record(session);
       setScreen('results');
     } else {
       setPuttIdx(puttIdx + 1);

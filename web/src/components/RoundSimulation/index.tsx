@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { LS_PUTTING_SESSIONS, LS_PUTTING_PUTTERS } from '@/lib/constants';
+import { useDrillHistory } from '@/lib/golf/useDrillHistory';
 import './RoundSimulation.css';
 
 // ── Types ────────────────────────────────────────────────────────
@@ -290,6 +291,9 @@ function SGTrendChart({ sessions, height = 100 }: { sessions: SavedSession[]; he
   );
 }
 
+const getSessionId = (s: SavedSession) => String(s.id);
+const getSessionPlayedAt = (s: SavedSession) => s.date;
+
 // ── Main component ───────────────────────────────────────────────
 export default function RoundSimulation() {
   const [screen, setScreen] = useState<string>('welcome');
@@ -303,16 +307,19 @@ export default function RoundSimulation() {
     secondPuttDistance: null,
     secondPuttMade: null,
   });
-  const [pastSessions, setPastSessions] = useState<SavedSession[]>([]);
+  const { sessions: pastSessions, record } = useDrillHistory<SavedSession>({
+    drillType: 'round-simulation',
+    lsKey: LS_PUTTING_SESSIONS,
+    getId: getSessionId,
+    getPlayedAt: getSessionPlayedAt,
+  });
   const [summaryTab, setSummaryTab] = useState<string>('overview');
   const [sessionSetup, setSessionSetup] = useState<SessionSetup>({ putter: '', ballMarking: 'none' });
   const [savedPutters, setSavedPutters] = useState<string[]>([]);
 
-  // Load persisted data
+  // Load saved putters (session history now comes from useDrillHistory)
   useEffect(() => {
     try {
-      const sessions = localStorage.getItem(LS_PUTTING_SESSIONS);
-      if (sessions) setPastSessions(JSON.parse(sessions));
       const putters = localStorage.getItem(LS_PUTTING_PUTTERS);
       if (putters) setSavedPutters(JSON.parse(putters));
     } catch (_) {}
@@ -327,16 +334,14 @@ export default function RoundSimulation() {
   }
 
   function saveSession(sessionStats: SessionStats): void {
-    const newSession = {
+    const newSession: SavedSession = {
       id: Date.now(),
       date: new Date().toISOString(),
       putter: sessionSetup.putter,
       ballMarking: sessionSetup.ballMarking,
       stats: sessionStats,
     };
-    const updated = [newSession, ...pastSessions].slice(0, 50);
-    setPastSessions(updated);
-    try { localStorage.setItem(LS_PUTTING_SESSIONS, JSON.stringify(updated)); } catch (_) {}
+    record(newSession);
   }
 
   function startSession() {

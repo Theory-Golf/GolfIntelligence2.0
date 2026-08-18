@@ -1,6 +1,12 @@
 'use client';
 
-import { LS_INSIDE_TEN_SESSIONS, LS_INSIDE_TWENTY_SESSIONS } from '@/lib/constants';
+import {
+  LS_INSIDE_TEN_SESSIONS,
+  LS_INSIDE_TWENTY_SESSIONS,
+  LS_LAG_PUTT_SESSIONS,
+  LS_LINE_TEST_SESSIONS,
+  LS_PUTTING_SESSIONS,
+} from '@/lib/constants';
 import { createBrowserClient } from './db/client';
 import { upsertDrillSession } from './db/drillSessions';
 import type { DrillType } from './db/types';
@@ -28,6 +34,24 @@ const MIGRATABLE_DRILLS: DrillMigrationConfig[] = [
     getId: (s) => (s as { id: string }).id,
     getPlayedAt: (s) => (s as { date: string }).date,
   },
+  {
+    drillType: 'lag-putt-test',
+    lsKey: LS_LAG_PUTT_SESSIONS,
+    getId: (s) => String((s as { id: number }).id),
+    getPlayedAt: (s) => (s as { date: string }).date,
+  },
+  {
+    drillType: 'line-test',
+    lsKey: LS_LINE_TEST_SESSIONS,
+    getId: (s) => (s as { session_id: string }).session_id,
+    getPlayedAt: (s) => (s as { timestamp: string }).timestamp,
+  },
+  {
+    drillType: 'round-simulation',
+    lsKey: LS_PUTTING_SESSIONS,
+    getId: (s) => String((s as { id: number }).id),
+    getPlayedAt: (s) => (s as { date: string }).date,
+  },
 ];
 
 function migratedKey(lsKey: string): string {
@@ -46,8 +70,14 @@ async function migrateOne(config: DrillMigrationConfig, playerId: string): Promi
   }
 
   try {
-    const store = JSON.parse(raw) as { sessions: unknown[] };
-    const sessions = Array.isArray(store.sessions) ? store.sessions : [];
+    const parsed = JSON.parse(raw);
+    // Some drills predate the {version, sessions} envelope and store a
+    // bare array directly -- support both on read.
+    const sessions: unknown[] = Array.isArray(parsed)
+      ? parsed
+      : Array.isArray((parsed as { sessions?: unknown[] })?.sessions)
+        ? (parsed as { sessions: unknown[] }).sessions
+        : [];
     for (const session of sessions) {
       await upsertDrillSession({
         player_id: playerId,

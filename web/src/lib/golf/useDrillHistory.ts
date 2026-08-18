@@ -26,7 +26,15 @@ export function useDrillHistory<T>({
   getId,
   getPlayedAt,
 }: UseDrillHistoryOptions<T>) {
-  const [sessions, setSessions] = useState<T[]>(() => loadLocal<T>(lsKey, version));
+  // Start empty and load localStorage in an effect (not a useState
+  // initializer) -- these pages are statically prerendered, so reading
+  // localStorage synchronously during the first client render would
+  // mismatch the server-rendered (empty) HTML.
+  const [sessions, setSessions] = useState<T[]>([]);
+
+  useEffect(() => {
+    setSessions(loadLocal<T>(lsKey, version));
+  }, [lsKey, version]);
 
   const record = useCallback(
     (session: T) => {
@@ -78,7 +86,12 @@ function loadLocal<T>(lsKey: string, version: number): T[] {
   try {
     const raw = window.localStorage.getItem(lsKey);
     if (!raw) return [];
-    const store = JSON.parse(raw) as Envelope<T>;
+    const parsed = JSON.parse(raw);
+    // Some drills (Lag Putt Test, Round Simulation) predate the
+    // {version, sessions} envelope and store a bare array. Read both;
+    // record()/saveLocal always writes the canonical envelope going forward.
+    if (Array.isArray(parsed)) return parsed as T[];
+    const store = parsed as Envelope<T>;
     if (store.version !== version || !Array.isArray(store.sessions)) return [];
     return store.sessions;
   } catch {

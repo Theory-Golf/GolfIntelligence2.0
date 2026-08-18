@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, X } from 'lucide-react';
 import { CLUB_OPTIONS, DEFAULT_CLUBS } from '@/components/WeatherYardageCard/StepMyBag';
 import { LS_CLUBS, LS_LINE_TEST_SESSIONS } from '@/lib/constants';
+import { useDrillHistory } from '@/lib/golf/useDrillHistory';
 
 // ── Domain ───────────────────────────────────────────────────────────
 
@@ -367,24 +368,8 @@ function buildSession(
   };
 }
 
-// ── Session storage (lineTest:sessions) ──────────────────────────────
-
-const loadSessions = (): SessionResult[] => {
-  if (typeof window === 'undefined') return [];
-  try {
-    const raw = localStorage.getItem(LS_LINE_TEST_SESSIONS);
-    return raw ? (JSON.parse(raw) as SessionResult[]) : [];
-  } catch {
-    return [];
-  }
-};
-
-const saveSessions = (s: SessionResult[]) => {
-  if (typeof window === 'undefined') return;
-  try {
-    localStorage.setItem(LS_LINE_TEST_SESSIONS, JSON.stringify(s));
-  } catch {}
-};
+const getSessionId = (s: SessionResult) => s.session_id;
+const getSessionPlayedAt = (s: SessionResult) => s.timestamp;
 
 // ── Insights ─────────────────────────────────────────────────────────
 
@@ -1638,16 +1623,15 @@ interface ActiveSession {
 }
 
 export default function LineTest() {
-  const [hydrated, setHydrated] = useState(false);
   const [screen, setScreen] = useState<Screen>('home');
-  const [sessions, setSessions] = useState<SessionResult[]>([]);
+  const { sessions, record } = useDrillHistory<SessionResult>({
+    drillType: 'line-test',
+    lsKey: LS_LINE_TEST_SESSIONS,
+    getId: getSessionId,
+    getPlayedAt: getSessionPlayedAt,
+  });
   const [active, setActive] = useState<ActiveSession | null>(null);
   const [lastResult, setLastResult] = useState<SessionResult | null>(null);
-
-  useEffect(() => {
-    setSessions(loadSessions());
-    setHydrated(true);
-  }, []);
 
   const beginFlow = () => {
     setScreen(hasProfile() ? 'setup' : 'profile');
@@ -1681,9 +1665,7 @@ export default function LineTest() {
         active.clubs,
         shots,
       );
-      const next = [...sessions, result];
-      setSessions(next);
-      saveSessions(next);
+      record(result);
       setLastResult(result);
       setActive(null);
       setScreen('result');
@@ -1702,10 +1684,6 @@ export default function LineTest() {
       setScreen('home');
     }
   };
-
-  if (!hydrated) {
-    return <div className="px-6 py-12 max-w-xl mx-auto" />;
-  }
 
   return (
     <section className="px-6 pb-16">
