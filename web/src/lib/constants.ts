@@ -29,3 +29,6 @@ export const LS_INSIDE_TWENTY_SESSIONS = 'theory.golf:player-path:inside-twenty:
 
 // Winners Circle (Putting Hub)
 export const LS_WINNERS_CIRCLE_RUNS = 'theory.golf:player-path:winners-circle:v1';
+
+// ── Driver Standard ──────────────────────────────────────────────────
+export const LS_DRIVER_STANDARD = 'driver-standard:v1';

@@ -6,6 +6,8 @@ import {
   LS_LAG_PUTT_SESSIONS,
   LS_LINE_TEST_SESSIONS,
   LS_PUTTING_SESSIONS,
+  LS_WINNERS_CIRCLE_RUNS,
+  LS_DRIVER_STANDARD,
 } from '@/lib/constants';
 import { createBrowserClient } from './db/client';
 import { upsertDrillSession } from './db/drillSessions';
@@ -14,8 +16,22 @@ import type { DrillType } from './db/types';
 interface DrillMigrationConfig {
   drillType: DrillType;
   lsKey: string;
+  // Pulls the array of session objects out of the raw parsed JSON at
+  // lsKey. Defaults to extractEnvelopeSessions for drills that store a
+  // flat array (bare, or wrapped in {sessions:[...]} / {runs:[...]}).
+  // Drills whose history is nested inside a larger state blob (e.g.
+  // Driver Standard's PersistedState.history) pass a custom extractor.
+  extractSessions?: (parsed: unknown) => unknown[];
   getId: (session: unknown) => string;
   getPlayedAt: (session: unknown) => string;
+}
+
+function extractEnvelopeSessions(parsed: unknown): unknown[] {
+  if (Array.isArray(parsed)) return parsed;
+  const obj = parsed as { sessions?: unknown[]; runs?: unknown[] } | null;
+  if (Array.isArray(obj?.sessions)) return obj.sessions;
+  if (Array.isArray(obj?.runs)) return obj.runs;
+  return [];
 }
 
 // One entry per drill that has been migrated to Supabase sync (see
@@ -52,6 +68,22 @@ const MIGRATABLE_DRILLS: DrillMigrationConfig[] = [
     getId: (s) => String((s as { id: number }).id),
     getPlayedAt: (s) => (s as { date: string }).date,
   },
+  {
+    drillType: 'winners-circle',
+    lsKey: LS_WINNERS_CIRCLE_RUNS,
+    getId: (s) => (s as { id: string }).id,
+    getPlayedAt: (s) => (s as { date: string }).date,
+  },
+  {
+    drillType: 'driver-standard',
+    lsKey: LS_DRIVER_STANDARD,
+    extractSessions: (parsed) => {
+      const obj = parsed as { history?: unknown[] } | null;
+      return Array.isArray(obj?.history) ? obj.history : [];
+    },
+    getId: (s) => String((s as { timestamp: number }).timestamp),
+    getPlayedAt: (s) => new Date((s as { timestamp: number }).timestamp).toISOString(),
+  },
 ];
 
 function migratedKey(lsKey: string): string {
@@ -71,13 +103,7 @@ async function migrateOne(config: DrillMigrationConfig, playerId: string): Promi
 
   try {
     const parsed = JSON.parse(raw);
-    // Some drills predate the {version, sessions} envelope and store a
-    // bare array directly -- support both on read.
-    const sessions: unknown[] = Array.isArray(parsed)
-      ? parsed
-      : Array.isArray((parsed as { sessions?: unknown[] })?.sessions)
-        ? (parsed as { sessions: unknown[] }).sessions
-        : [];
+    const sessions = (config.extractSessions ?? extractEnvelopeSessions)(parsed);
     for (const session of sessions) {
       await upsertDrillSession({
         player_id: playerId,

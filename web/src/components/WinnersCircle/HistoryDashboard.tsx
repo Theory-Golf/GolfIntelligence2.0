@@ -1,13 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { Trash2 } from 'lucide-react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ReferenceLine,
 } from 'recharts';
-import { loadRuns, persistRuns, type WinnersCircleRun } from '.';
+import { LS_WINNERS_CIRCLE_RUNS } from '@/lib/constants';
+import { useDrillHistory } from '@/lib/golf/useDrillHistory';
+import type { WinnersCircleRun } from '.';
 import './WinnersCircle.css';
 
 const STANDARD_MAKES = 20;
@@ -38,22 +40,24 @@ function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: 
   );
 }
 
-export default function HistoryDashboard() {
-  const [runs, setRuns] = useState<WinnersCircleRun[]>([]);
-  const [pendingDelete, setPendingDelete] = useState<string | null>(null);
+const getRunId = (r: WinnersCircleRun) => r.id;
+const getRunPlayedAt = (r: WinnersCircleRun) => r.date;
 
-  useEffect(() => {
-    setRuns(loadRuns());
-  }, []);
+export default function HistoryDashboard() {
+  const { sessions: runs, remove } = useDrillHistory<WinnersCircleRun>({
+    drillType: 'winners-circle',
+    lsKey: LS_WINNERS_CIRCLE_RUNS,
+    getId: getRunId,
+    getPlayedAt: getRunPlayedAt,
+  });
+  const [pendingDelete, setPendingDelete] = useState<string | null>(null);
 
   function handleDelete(id: string) {
     if (pendingDelete !== id) {
       setPendingDelete(id);
       return;
     }
-    const updated = runs.filter(r => r.id !== id);
-    persistRuns(updated);
-    setRuns(updated);
+    remove(id);
     setPendingDelete(null);
   }
 

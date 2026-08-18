@@ -14,6 +14,8 @@ import {
   StatRow,
   bandClasses,
 } from '@/components/playerpath/ui';
+import { LS_DRIVER_STANDARD } from '@/lib/constants';
+import { syncDrillSession } from '@/lib/golf/useDrillHistory';
 
 // ── Domain ───────────────────────────────────────────────────────────
 
@@ -85,12 +87,10 @@ const emptyTrack = (tier = 1): TrackState => ({
   dismissedPatterns: [],
 });
 
-const LS_KEY = 'driver-standard:v1';
-
 const loadState = (): PersistedState => {
   if (typeof window === 'undefined') return defaultState();
   try {
-    const raw = localStorage.getItem(LS_KEY);
+    const raw = localStorage.getItem(LS_DRIVER_STANDARD);
     if (!raw) return defaultState();
     return JSON.parse(raw) as PersistedState;
   } catch {
@@ -100,8 +100,11 @@ const loadState = (): PersistedState => {
 
 const saveState = (s: PersistedState) => {
   if (typeof window === 'undefined') return;
-  try { localStorage.setItem(LS_KEY, JSON.stringify(s)); } catch {}
+  try { localStorage.setItem(LS_DRIVER_STANDARD, JSON.stringify(s)); } catch {}
 };
+
+const getSessionId = (s: SessionRecord) => String(s.timestamp);
+const getSessionPlayedAt = (s: SessionRecord) => new Date(s.timestamp).toISOString();
 
 const defaultState = (): PersistedState => ({
   initialized: false,
@@ -1060,6 +1063,13 @@ export default function DriverStandard() {
       shapeBreakdown,
       timestamp: Date.now(),
     };
+
+    void syncDrillSession({
+      drillType: 'driver-standard',
+      session: sessionRecord,
+      getId: getSessionId,
+      getPlayedAt: getSessionPlayedAt,
+    });
 
     setState({
       ...state,
