@@ -2,6 +2,8 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { LS_WEDGE_STANDARD_HISTORY } from '@/lib/constants';
+import { useDrillHistory } from '@/lib/golf/useDrillHistory';
 import './WedgeStandard.css';
 
 // ── Storage helpers ──────────────────────────────────────────────
@@ -85,6 +87,9 @@ const ICONS = {
   trash:      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M3 6h18m-2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>,
 };
 
+const getSessionId = (s) => String(s.id);
+const getSessionPlayedAt = (s) => s.date;
+
 // ── Main component ───────────────────────────────────────────────
 export default function WedgeStandard() {
   const [screen, setScreen] = useState('home');
@@ -107,15 +112,19 @@ export default function WedgeStandard() {
   const [creativeRounds, setCreativeRounds] = useState(3);
 
   // History
-  const [history, setHistory] = useState([]);
+  const { sessions: history, record: recordSession, remove: removeSession } = useDrillHistory({
+    drillType: 'wedge-standard',
+    lsKey: LS_WEDGE_STANDARD_HISTORY,
+    getId: getSessionId,
+    getPlayedAt: getSessionPlayedAt,
+  });
   const [lifetimeStats, setLifetimeStats] = useState({ totalSessions: 0, totalShots: 0, avgPoints: 0, bestSession: 0, totalPoints: 0 });
   const [expandedId, setExpandedId] = useState(null);
 
-  // Load persisted data
+  // Load persisted data (session history now comes from useDrillHistory)
   useEffect(() => {
     const w = storage.get('wm-wedges');   if (w) setWedges(w);
     const l = storage.get('wm-level');    if (l) setChallengeLevel(l);
-    const h = storage.get('wm-history'); if (h) setHistory(h);
     const s = storage.get('wm-stats');   if (s) setLifetimeStats(s);
     const c = storage.get('wm-creative');
     if (c) { setCreativeTargets(c.targets || [80, 95, 110]); setCreativeRounds(c.rounds || 3); }
@@ -125,8 +134,7 @@ export default function WedgeStandard() {
   function saveLevel(l)  { setChallengeLevel(l); storage.set('wm-level', l); }
 
   function saveSession(data) {
-    const updated = [data, ...history].slice(0, 50);
-    setHistory(updated);
+    recordSession(data);
     const newStats = {
       totalSessions: lifetimeStats.totalSessions + 1,
       totalShots:    lifetimeStats.totalShots + data.shots.length,
@@ -135,16 +143,14 @@ export default function WedgeStandard() {
       bestSession:   Math.max(lifetimeStats.bestSession, data.avgPoints),
     };
     setLifetimeStats(newStats);
-    storage.set('wm-history', updated);
     storage.set('wm-stats', newStats);
   }
 
   function clearHistory() {
     if (!confirm('Clear all session history?')) return;
-    setHistory([]);
+    history.forEach((s) => removeSession(getSessionId(s)));
     const reset = { totalSessions: 0, totalShots: 0, avgPoints: 0, bestSession: 0, totalPoints: 0 };
     setLifetimeStats(reset);
-    storage.del('wm-history');
     storage.set('wm-stats', reset);
   }
 

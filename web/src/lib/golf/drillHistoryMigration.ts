@@ -8,6 +8,8 @@ import {
   LS_PUTTING_SESSIONS,
   LS_WINNERS_CIRCLE_RUNS,
   LS_DRIVER_STANDARD,
+  LS_WEDGE_STANDARD_HISTORY,
+  LS_APPROACH_STANDARD_SESSIONS,
 } from '@/lib/constants';
 import { createBrowserClient } from './db/client';
 import { upsertDrillSession } from './db/drillSessions';
@@ -83,6 +85,18 @@ const MIGRATABLE_DRILLS: DrillMigrationConfig[] = [
     },
     getId: (s) => String((s as { timestamp: number }).timestamp),
     getPlayedAt: (s) => new Date((s as { timestamp: number }).timestamp).toISOString(),
+  },
+  {
+    drillType: 'wedge-standard',
+    lsKey: LS_WEDGE_STANDARD_HISTORY,
+    getId: (s) => String((s as { id: number }).id),
+    getPlayedAt: (s) => (s as { date: string }).date,
+  },
+  {
+    drillType: 'approach-standard',
+    lsKey: LS_APPROACH_STANDARD_SESSIONS,
+    getId: (s) => (s as { id: string }).id,
+    getPlayedAt: (s) => (s as { startedAt: string }).startedAt,
   },
 ];
 

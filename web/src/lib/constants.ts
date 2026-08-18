@@ -32,3 +32,9 @@ export const LS_WINNERS_CIRCLE_RUNS = 'theory.golf:player-path:winners-circle:v1
 
 // ── Driver Standard ──────────────────────────────────────────────────
 export const LS_DRIVER_STANDARD = 'driver-standard:v1';
+
+// ── Wedge Standard ───────────────────────────────────────────────────
+export const LS_WEDGE_STANDARD_HISTORY = 'wm-history';
+
+// ── Approach Standard ────────────────────────────────────────────────
+export const LS_APPROACH_STANDARD_SESSIONS = 'as_sessions';
