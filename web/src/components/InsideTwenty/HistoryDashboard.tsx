@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { Trash2 } from 'lucide-react';
 import {
@@ -9,6 +9,7 @@ import {
   PieChart, Pie, Cell, Legend,
 } from 'recharts';
 import { LS_INSIDE_TWENTY_SESSIONS } from '@/lib/constants';
+import { useDrillHistory } from '@/lib/golf/useDrillHistory';
 import '../InsideTen/InsideTen.css';
 import './InsideTwenty.css';
 
@@ -36,23 +37,8 @@ function tierForScore(score: number): TierName {
   return 'developing';
 }
 
-function loadSessions(): InsideTwentySession[] {
-  try {
-    const raw = localStorage.getItem(LS_INSIDE_TWENTY_SESSIONS);
-    if (!raw) return [];
-    const store = JSON.parse(raw) as { version: number; sessions: InsideTwentySession[] };
-    if (store.version !== 1 || !Array.isArray(store.sessions)) return [];
-    return store.sessions;
-  } catch {
-    return [];
-  }
-}
-
-function persistSessions(sessions: InsideTwentySession[]): void {
-  try {
-    localStorage.setItem(LS_INSIDE_TWENTY_SESSIONS, JSON.stringify({ version: 1, sessions }));
-  } catch { /* noop */ }
-}
+const getSessionId = (s: InsideTwentySession) => s.id;
+const getSessionPlayedAt = (s: InsideTwentySession) => s.date;
 
 function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number }>; label?: string }) {
   if (!active || !payload?.length) return null;
@@ -81,21 +67,20 @@ function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: 
 }
 
 export default function HistoryDashboard() {
-  const [sessions, setSessions] = useState<InsideTwentySession[]>([]);
+  const { sessions, remove } = useDrillHistory<InsideTwentySession>({
+    drillType: 'inside-twenty',
+    lsKey: LS_INSIDE_TWENTY_SESSIONS,
+    getId: getSessionId,
+    getPlayedAt: getSessionPlayedAt,
+  });
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
-
-  useEffect(() => {
-    setSessions(loadSessions());
-  }, []);
 
   function handleDelete(id: string) {
     if (pendingDelete !== id) {
       setPendingDelete(id);
       return;
     }
-    const updated = sessions.filter(s => s.id !== id);
-    persistSessions(updated);
-    setSessions(updated);
+    remove(id);
     setPendingDelete(null);
   }
 

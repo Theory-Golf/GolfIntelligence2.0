@@ -1,6 +1,6 @@
 'use client';
 
-import { LS_INSIDE_TEN_SESSIONS } from '@/lib/constants';
+import { LS_INSIDE_TEN_SESSIONS, LS_INSIDE_TWENTY_SESSIONS } from '@/lib/constants';
 import { createBrowserClient } from './db/client';
 import { upsertDrillSession } from './db/drillSessions';
 import type { DrillType } from './db/types';
@@ -19,6 +19,12 @@ const MIGRATABLE_DRILLS: DrillMigrationConfig[] = [
   {
     drillType: 'inside-ten',
     lsKey: LS_INSIDE_TEN_SESSIONS,
+    getId: (s) => (s as { id: string }).id,
+    getPlayedAt: (s) => (s as { date: string }).date,
+  },
+  {
+    drillType: 'inside-twenty',
+    lsKey: LS_INSIDE_TWENTY_SESSIONS,
     getId: (s) => (s as { id: string }).id,
     getPlayedAt: (s) => (s as { date: string }).date,
   },
