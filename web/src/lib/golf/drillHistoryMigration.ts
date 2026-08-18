@@ -11,6 +11,7 @@ import {
   LS_WEDGE_STANDARD_HISTORY,
   LS_APPROACH_STANDARD_SESSIONS,
 } from '@/lib/constants';
+import { SESSIONS_STORAGE_KEY as LS_PRACTICE_PLANNER_SESSIONS } from '@/components/PracticePlanner/storage';
 import { createBrowserClient } from './db/client';
 import { upsertDrillSession } from './db/drillSessions';
 import type { DrillType } from './db/types';
@@ -97,6 +98,12 @@ const MIGRATABLE_DRILLS: DrillMigrationConfig[] = [
     lsKey: LS_APPROACH_STANDARD_SESSIONS,
     getId: (s) => (s as { id: string }).id,
     getPlayedAt: (s) => (s as { startedAt: string }).startedAt,
+  },
+  {
+    drillType: 'practice-planner',
+    lsKey: LS_PRACTICE_PLANNER_SESSIONS,
+    getId: (s) => (s as { id: string }).id,
+    getPlayedAt: (s) => (s as { completedAt: string }).completedAt,
   },
 ];
 

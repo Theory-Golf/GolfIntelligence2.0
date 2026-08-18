@@ -4,6 +4,10 @@ const KEY_PREFIX = 'tg_practice_';
 
 export const EXPORT_VERSION = 2;
 
+// Exported so drillHistoryMigration.ts can read the same key when
+// uploading pre-existing local session history to Supabase.
+export const SESSIONS_STORAGE_KEY = KEY_PREFIX + 'sessions';
+
 type StorageMap = {
   weekConfig: WeekConfig;
   currentSession: Session;
