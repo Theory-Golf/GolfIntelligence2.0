@@ -12,6 +12,7 @@ const NAV_LINKS = [
   { href: '/golf-intelligence/round/new', label: 'Round Entry' },
   { href: '/golf-intelligence', label: 'Golf Intelligence' },
   { href: '/player-path', label: 'PlayerPath' },
+  { href: '/ethos', label: 'Ethos' },
   { href: '/resources', label: 'Resources' },
   { href: '/contact', label: 'Contact' },
 ];
