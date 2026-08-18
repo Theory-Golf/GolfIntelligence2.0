@@ -10,6 +10,8 @@ import {
   PrimaryButton,
   SecondaryButton,
 } from '@/components/playerpath/ui';
+import { LS_APPROACH_STANDARD_SESSIONS } from '@/lib/constants';
+import { syncDrillSession } from '@/lib/golf/useDrillHistory';
 
 // ── Storage helpers ──────────────────────────────────────────────
 const storage = {
@@ -18,7 +20,7 @@ const storage = {
 };
 
 const LS_PLAYER   = 'as_player';
-const LS_SESSIONS = 'as_sessions';
+const LS_SESSIONS = LS_APPROACH_STANDARD_SESSIONS;
 
 // ── Domain constants ─────────────────────────────────────────────
 
@@ -1085,6 +1087,15 @@ export default function ApproachStandard() {
     const sessionWithMovement = { ...completed, movement };
     const newSessions = [...sessions, sessionWithMovement];
     setSessions(newSessions);
+    // Sync only at creation -- later local-only mutations (e.g.
+    // promptShownAfter below) aren't re-synced, same tradeoff as
+    // Driver Standard.
+    void syncDrillSession({
+      drillType: 'approach-standard',
+      session: sessionWithMovement,
+      getId: (s) => s.id,
+      getPlayedAt: (s) => s.startedAt,
+    });
 
     let newPlayer = { ...player };
     if (movement.movement === 'PROMOTE' || movement.movement === 'EXPRESS_PROMOTE') {

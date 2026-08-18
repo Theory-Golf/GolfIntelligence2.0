@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { LS_WINNERS_CIRCLE_RUNS } from '@/lib/constants';
+import { useDrillHistory } from '@/lib/golf/useDrillHistory';
 import './WinnersCircle.css';
 
 // ── Types ─────────────────────────────────────────────────────────
@@ -108,27 +109,8 @@ function formatDate(date: string): string {
   return new Date(date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
-// ── Storage ────────────────────────────────────────────────────────
-export function loadRuns(): WinnersCircleRun[] {
-  try {
-    const raw = localStorage.getItem(LS_WINNERS_CIRCLE_RUNS);
-    if (!raw) return [];
-    const store = JSON.parse(raw) as { version: number; runs: WinnersCircleRun[] };
-    if (store.version !== 1 || !Array.isArray(store.runs)) {
-      console.warn('[Winners Circle] schema mismatch, resetting store');
-      return [];
-    }
-    return store.runs;
-  } catch {
-    return [];
-  }
-}
-
-export function persistRuns(runs: WinnersCircleRun[]): void {
-  try {
-    localStorage.setItem(LS_WINNERS_CIRCLE_RUNS, JSON.stringify({ version: 1, runs }));
-  } catch { /* noop */ }
-}
+const getRunId = (r: WinnersCircleRun) => r.id;
+const getRunPlayedAt = (r: WinnersCircleRun) => r.date;
 
 // ── Tee glyph ──────────────────────────────────────────────────────
 type TeeStatus = 'lost' | 'missed' | 'made' | 'pending' | 'current';
@@ -176,16 +158,21 @@ function TeeRow({ state }: { state: DrillState }) {
 // ── Main component ─────────────────────────────────────────────────
 export default function WinnersCircle() {
   const [screen, setScreen]                 = useState<Screen>('home');
-  const [runs, setRuns]                     = useState<WinnersCircleRun[]>([]);
   const [storageAvailable, setStorageAvail] = useState(true);
   const [putts, setPutts]                   = useState<boolean[]>([]);
   const [result, setResult]                 = useState<ResultState | null>(null);
+
+  const { sessions: runs, record } = useDrillHistory<WinnersCircleRun>({
+    drillType: 'winners-circle',
+    lsKey: LS_WINNERS_CIRCLE_RUNS,
+    getId: getRunId,
+    getPlayedAt: getRunPlayedAt,
+  });
 
   useEffect(() => {
     try {
       localStorage.setItem('_wc_probe', '1');
       localStorage.removeItem('_wc_probe');
-      setRuns(loadRuns());
     } catch {
       setStorageAvail(false);
     }
@@ -209,9 +196,7 @@ export default function WinnersCircle() {
 
   function handleSave() {
     if (!result || result.saved) return;
-    const updated = [result.run, ...runs];
-    persistRuns(updated);
-    setRuns(updated);
+    record(result.run);
     setResult({ ...result, saved: true });
   }
 

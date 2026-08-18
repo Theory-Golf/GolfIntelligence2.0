@@ -26,7 +26,15 @@ export function useDrillHistory<T>({
   getId,
   getPlayedAt,
 }: UseDrillHistoryOptions<T>) {
-  const [sessions, setSessions] = useState<T[]>(() => loadLocal<T>(lsKey, version));
+  // Start empty and load localStorage in an effect (not a useState
+  // initializer) -- these pages are statically prerendered, so reading
+  // localStorage synchronously during the first client render would
+  // mismatch the server-rendered (empty) HTML.
+  const [sessions, setSessions] = useState<T[]>([]);
+
+  useEffect(() => {
+    setSessions(loadLocal<T>(lsKey, version));
+  }, [lsKey, version]);
 
   const record = useCallback(
     (session: T) => {
@@ -35,7 +43,7 @@ export function useDrillHistory<T>({
         saveLocal(lsKey, version, next);
         return next;
       });
-      void syncOne({ drillType, session, getId, getPlayedAt });
+      void syncDrillSession({ drillType, session, getId, getPlayedAt });
     },
     [drillType, lsKey, version, getId, getPlayedAt],
   );
@@ -78,9 +86,17 @@ function loadLocal<T>(lsKey: string, version: number): T[] {
   try {
     const raw = window.localStorage.getItem(lsKey);
     if (!raw) return [];
-    const store = JSON.parse(raw) as Envelope<T>;
-    if (store.version !== version || !Array.isArray(store.sessions)) return [];
-    return store.sessions;
+    const parsed = JSON.parse(raw);
+    // Some drills (Lag Putt Test, Round Simulation) predate the
+    // {version, sessions} envelope and store a bare array; Winners Circle's
+    // envelope names the array "runs" instead of "sessions". Read all three;
+    // record()/saveLocal always writes the canonical envelope going forward.
+    if (Array.isArray(parsed)) return parsed as T[];
+    const store = parsed as Envelope<T> & { runs?: T[] };
+    if (store.version !== version) return [];
+    if (Array.isArray(store.sessions)) return store.sessions;
+    if (Array.isArray(store.runs)) return store.runs;
+    return [];
   } catch {
     return [];
   }
@@ -95,7 +111,11 @@ function saveLocal<T>(lsKey: string, version: number, sessions: T[]): void {
   }
 }
 
-async function syncOne<T>(args: {
+// Exported for drills whose local history doesn't live in its own flat
+// {version, sessions} localStorage key (e.g. it's nested inside a larger
+// state blob, like Driver Standard's PersistedState.history) -- they manage
+// their own local read/write and call this directly to sync one session.
+export async function syncDrillSession<T>(args: {
   drillType: DrillType;
   session: T;
   getId: (s: T) => string;

@@ -15,6 +15,7 @@ import {
   summarizeSession,
 } from './logic';
 import { EXPORT_VERSION, isPlannerExport, storage } from './storage';
+import { syncDrillSession } from '@/lib/golf/useDrillHistory';
 import type {
   Block,
   Direction,
@@ -207,6 +208,15 @@ export default function PracticePlanner() {
       setHistory((h) => [...h, ...flushEntries]);
     }
     setSessions((s) => [...s, record]);
+    // Sync only sessions completed in this browser -- imported backups
+    // (handleImport) and clears (handleClearAll) stay local-only, same
+    // tradeoff as Driver Standard / Approach Standard.
+    void syncDrillSession({
+      drillType: 'practice-planner',
+      session: record,
+      getId: (r) => r.id,
+      getPlayedAt: (r) => r.completedAt,
+    });
     setLastCompleted(record);
     setSession(null);
     setStage('complete');
@@ -376,7 +386,7 @@ export default function PracticePlanner() {
               Build the <span className="text-primary">session</span>
             </>
           }
-          lead="A guided practice cycle: set your weekly technical focus, scale a session to your shot budget, run structured blocks with checkpoints and practice-intent gates, then track acquisition over time. Data lives on this device for now — future versions will sync to your player profile."
+          lead="A guided practice cycle: set your weekly technical focus, scale a session to your shot budget, run structured blocks with checkpoints and practice-intent gates, then track acquisition over time. Completed sessions sync to your player profile when you're signed in; your weekly plan and in-progress session stay on this device."
         />
 
         {!hydrated ? (
