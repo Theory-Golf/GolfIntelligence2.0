@@ -43,6 +43,12 @@
   --color-c4: #D4F000;
   --color-c5: #F03DAA;
 
+  /* Ethos paper segment colors (Driving / Approach / Short Game / Putting) */
+  --color-seg-drive: #E040A0;
+  --color-seg-approach: #D4A800;
+  --color-seg-shortgame: #00B870;
+  --color-seg-putting: #3D8EF0;
+
   /* Radius */
   --radius-sm: 2px;
   --radius-md: 4px;

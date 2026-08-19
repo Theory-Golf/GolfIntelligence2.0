@@ -1,8 +1,31 @@
+import { isValidElement, type ReactNode } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import type { Components } from 'react-markdown';
 import EthosLineChart from './EthosLineChart';
 import { parseChartSpec } from './chartSpec';
+import ThresholdChips from './ThresholdChips';
+import { parseThresholdSpec } from './thresholdSpec';
+
+const DRIVER_CODE_PATTERN = /^(SG|D|A|P)(\d)\.\s+(.*)$/;
+
+const SEGMENT_COLOR: Record<string, string> = {
+  D: 'var(--color-seg-drive)',
+  A: 'var(--color-seg-approach)',
+  SG: 'var(--color-seg-shortgame)',
+  P: 'var(--color-seg-putting)',
+};
+
+function extractText(node: ReactNode): string {
+  if (typeof node === 'string') return node;
+  if (typeof node === 'number') return String(node);
+  if (Array.isArray(node)) return node.map(extractText).join('');
+  if (isValidElement(node)) {
+    const props = node.props as { children?: ReactNode };
+    return extractText(props.children);
+  }
+  return '';
+}
 
 const components: Components = {
   h2: ({ children }) => (
@@ -10,11 +33,31 @@ const components: Components = {
       {children}
     </h2>
   ),
-  h3: ({ children }) => (
-    <h3 className="font-display font-bold text-lg tracking-[0.02em] uppercase text-foreground mt-8 mb-3">
-      {children}
-    </h3>
-  ),
+  h3: ({ children }) => {
+    const match = DRIVER_CODE_PATTERN.exec(extractText(children));
+    if (match) {
+      const [, prefix, digit, rest] = match;
+      return (
+        <h3 className="flex items-baseline gap-4 mt-10 mb-4">
+          <span
+            className="font-display font-extrabold text-4xl leading-none shrink-0"
+            style={{ color: SEGMENT_COLOR[prefix] }}
+          >
+            {prefix}
+            {digit}
+          </span>
+          <span className="font-display font-bold text-lg tracking-[0.02em] uppercase text-foreground">
+            {rest}
+          </span>
+        </h3>
+      );
+    }
+    return (
+      <h3 className="font-display font-bold text-lg tracking-[0.02em] uppercase text-foreground mt-8 mb-3">
+        {children}
+      </h3>
+    );
+  },
   p: ({ children }) => (
     <p className="font-body text-base text-muted-foreground leading-relaxed mb-5">{children}</p>
   ),
@@ -67,6 +110,11 @@ const components: Components = {
     if (match?.[1] === 'chart') {
       const spec = parseChartSpec(raw);
       return spec ? <EthosLineChart spec={spec} /> : null;
+    }
+
+    if (match?.[1] === 'thresholds') {
+      const spec = parseThresholdSpec(raw);
+      return spec ? <ThresholdChips spec={spec} /> : null;
     }
 
     if (match) {
