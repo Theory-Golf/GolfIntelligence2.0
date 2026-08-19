@@ -4,7 +4,7 @@
  */
 
 import type { ProcessedShot, ShotType, ShotCategory, Tiger5Metrics, RoundSummary, Tiger5Fail, HoleScore, RootCauseMetrics, Tiger5FailDetail, Tiger5FailDetails, RootCauseByFailTypeList, RootCauseByFailType, Tiger5TrendDataPoint, SGSeparator, SGShotCategory, SGRoundData, DrivingMetrics, DriveEndingLocationData, DriveDistanceRange, DrivingAnalysis, DriveEndingLocationType, ProblemDriveMetrics, ApproachMetrics, ApproachDistanceBucket, ApproachHeatMapCell, ApproachHeatMapData, PuttingMetrics, PuttingDistanceBucket, LagPuttingMetrics, LagDistanceDistribution, ScoringMetrics, ParScoringMetrics, HoleOutcomeData, HoleOutcome, MentalMetrics, BogeyRateByPar, BirdieOpportunityMetrics, ScoringRootCause, BirdieAndBogeyMetrics, ShortGameMetrics, ShortGameHeatMapCell, ShortGameHeatMapData, CoachTableMetrics, CoachTablePlayerMetrics } from './types';
-import type { BenchmarkType } from './benchmarks';
+import type { BenchmarkSelection } from './benchmarks';
 import { calculateStrokesGained } from './benchmarks';
 import type { DashboardShotRow } from './db/dashboard';
 
@@ -802,7 +802,7 @@ export function classifyShotType(startLoc: string, startDist: number, holePar: n
  * Process dashboard_shots view rows into enhanced shots with computed fields.
  * Par comes straight from the holes table (user input at round entry).
  */
-export function processShots(rows: DashboardShotRow[], benchmark: BenchmarkType = 'pgaTour'): ProcessedShot[] {
+export function processShots(rows: DashboardShotRow[], benchmark: BenchmarkSelection = { gender: 'male', tier: 'pgaTour' }): ProcessedShot[] {
   return rows.map(row => {
     const calculatedSG = calculateStrokesGained(
       benchmark,
@@ -2536,7 +2536,7 @@ export function calculateScoringMetrics(shots: ProcessedShot[]): ScoringMetrics 
  * All calculations are round-independent: each round is treated separately
  * Previous hole outcomes from Round N do NOT carry over to Round N+1
  */
-export function calculateMentalMetrics(shots: ProcessedShot[], _benchmark: BenchmarkType): MentalMetrics {
+export function calculateMentalMetrics(shots: ProcessedShot[], _benchmark: BenchmarkSelection): MentalMetrics {
   // Get hole scores
   const holeScores = getHoleScores(shots);
   
@@ -3274,7 +3274,7 @@ export function calculateShortGameHeatMapData(shots: ProcessedShot[], totalRound
  */
 export function calculateCoachTableMetrics(
   processedShots: ProcessedShot[],
-  benchmark: BenchmarkType
+  benchmark: BenchmarkSelection
 ): CoachTableMetrics {
   if (processedShots.length === 0) {
     return { players: [], calculatedAt: new Date() };
