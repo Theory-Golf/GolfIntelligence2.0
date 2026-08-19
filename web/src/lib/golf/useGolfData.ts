@@ -4,7 +4,8 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import type { ProcessedShot, Tiger5Metrics, RoundSummary, FilterState, FilterOptions, FilterOption, DrivingMetrics, DrivingAnalysis, ProblemDriveMetrics, ApproachMetrics, ApproachDistanceBucket, ApproachHeatMapData, PuttingMetrics, PuttingDistanceBucket, LagPuttingMetrics, ScoringMetrics, MentalMetrics, BirdieAndBogeyMetrics, ShortGameMetrics, ShortGameHeatMapData, PerformanceDriversResult, PlayerPathMetrics, PerformanceDriversResultV2, CoachTableMetrics } from './types';
-import type { BenchmarkType } from './benchmarks';
+import type { Gender, BenchmarkTier } from './benchmarks';
+import { createBrowserClient } from './db/client';
 import { processShots, calculateTiger5Metrics, getRoundSummaries, calculateDrivingMetrics, calculateDrivingAnalysis, calculateProblemDriveMetrics, calculateApproachMetrics, calculateApproachByDistance, calculateApproachFromRough, calculateApproachHeatMapData, calculatePuttingMetrics, calculatePuttingByDistance, calculateLagPuttingMetrics, calculateScoringMetrics, calculateMentalMetrics, calculateBirdieAndBogeyMetrics, calculateShortGameMetrics, calculateShortGameHeatMapData } from './calculations';
 import { calculatePerformanceDrivers } from './performanceDrivers';
 import { calculatePlayerPathMetrics, calculatePerformanceDriversV2 } from './playerPathCalculations';
@@ -43,8 +44,10 @@ interface UseGolfDataResult {
   filters: FilterState;
   setFilters: (filters: FilterState) => void;
   clearFilters: () => void;
-  benchmark: BenchmarkType;
-  setBenchmark: (benchmark: BenchmarkType) => void;
+  benchmarkGender: Gender;
+  setBenchmarkGender: (gender: Gender) => void;
+  benchmarkTier: BenchmarkTier;
+  setBenchmarkTier: (tier: BenchmarkTier) => void;
   isLoading: boolean;
   error: string | null;
   lastUpdated: Date | null;
@@ -94,10 +97,17 @@ const emptyOptions: FilterOptions = { players: [], courses: [], roundTypes: [], 
 export function useGolfData(): UseGolfDataResult {
   const [rows, setRows] = useState<DashboardShotRow[]>([]);
   const [filters, setFilters] = useState<FilterState>(initialFilters);
-  const [benchmark, setBenchmark] = useState<BenchmarkType>('eliteCollege');
+  const [benchmarkTier, setBenchmarkTier] = useState<BenchmarkTier>('eliteCollege');
+  const [benchmarkGender, setBenchmarkGender] = useState<Gender>('male');
+  const [genderTouched, setGenderTouched] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+
+  const setBenchmarkGenderManual = useCallback((gender: Gender) => {
+    setGenderTouched(true);
+    setBenchmarkGender(gender);
+  }, []);
 
   useEffect(() => {
     async function loadData() {
@@ -119,6 +129,34 @@ export function useGolfData(): UseGolfDataResult {
 
     loadData();
   }, []);
+
+  // Default the benchmark gender from the signed-in player's profile, once,
+  // unless the viewer has already picked one manually.
+  useEffect(() => {
+    if (genderTouched) return;
+    let cancelled = false;
+
+    async function loadProfileGender() {
+      const supabase = createBrowserClient();
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) return;
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('gender')
+        .eq('id', userData.user.id)
+        .single();
+      if (!cancelled && !genderTouched && (profile?.gender === 'male' || profile?.gender === 'female')) {
+        setBenchmarkGender(profile.gender);
+      }
+    }
+
+    loadProfileGender();
+    return () => {
+      cancelled = true;
+    };
+  }, [genderTouched]);
+
+  const benchmark = useMemo(() => ({ gender: benchmarkGender, tier: benchmarkTier }), [benchmarkGender, benchmarkTier]);
 
   // Process shots when raw data or benchmark changes
   const processedShots = useMemo(() => {
@@ -343,8 +381,10 @@ export function useGolfData(): UseGolfDataResult {
     filters,
     setFilters,
     clearFilters,
-    benchmark,
-    setBenchmark,
+    benchmarkGender,
+    setBenchmarkGender: setBenchmarkGenderManual,
+    benchmarkTier,
+    setBenchmarkTier,
     isLoading,
     error,
     lastUpdated,

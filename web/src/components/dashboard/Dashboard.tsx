@@ -8,8 +8,8 @@
 import { useState, lazy, Suspense } from 'react';
 import '@/styles/dashboard.css';
 import { useGolfData } from '@/lib/golf/useGolfData';
-import { getBenchmarkOptions } from '@/lib/golf/benchmarks';
-import type { BenchmarkType } from '@/lib/golf/benchmarks';
+import { getBenchmarkTierOptions, getGenderOptions } from '@/lib/golf/benchmarks';
+import type { BenchmarkTier, Gender } from '@/lib/golf/benchmarks';
 import { DashboardNav } from './DashboardNav';
 import { FilterBar } from './FilterBar';
 
@@ -67,14 +67,21 @@ export default function Dashboard() {
     filters,
     setFilters,
     clearFilters,
-    benchmark,
-    setBenchmark,
+    benchmarkGender,
+    setBenchmarkGender,
+    benchmarkTier,
+    setBenchmarkTier,
   } = useGolfData();
 
-  const benchmarkOptions = getBenchmarkOptions();
+  const benchmarkTierOptions = getBenchmarkTierOptions();
+  const genderOptions = getGenderOptions();
 
-  const handleBenchmarkChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setBenchmark(e.target.value as BenchmarkType);
+  const handleBenchmarkGenderChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setBenchmarkGender(e.target.value as Gender);
+  };
+
+  const handleBenchmarkTierChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setBenchmarkTier(e.target.value as BenchmarkTier);
   };
 
   return (
@@ -85,16 +92,28 @@ export default function Dashboard() {
           <h1><span style={{ fontFamily: 'var(--font-body)' }}>Golf</span> <em>Intelligence</em></h1>
           <p className="subtitle">By: Theory Golf</p>
         </div>
-        {/* Benchmark Selector */}
+        {/* Benchmark Selectors */}
         <div className="benchmark-selector">
-          <label htmlFor="benchmark-select">Benchmark:</label>
+          <label htmlFor="benchmark-gender-select">Benchmark:</label>
           <select
-            id="benchmark-select"
-            value={benchmark}
-            onChange={handleBenchmarkChange}
+            id="benchmark-gender-select"
+            value={benchmarkGender}
+            onChange={handleBenchmarkGenderChange}
             className="benchmark-dropdown"
           >
-            {benchmarkOptions.map(opt => (
+            {genderOptions.map(opt => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+          <select
+            id="benchmark-tier-select"
+            value={benchmarkTier}
+            onChange={handleBenchmarkTierChange}
+            className="benchmark-dropdown"
+          >
+            {benchmarkTierOptions.map(opt => (
               <option key={opt.value} value={opt.value}>
                 {opt.label}
               </option>
