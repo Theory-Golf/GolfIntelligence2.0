@@ -49,8 +49,9 @@ export default function PracticeLibrary() {
     );
   }
 
-  // Derive filtered + annotated activity list
-  const { relevant, others } = useMemo(() => {
+  // Derive filtered + annotated activity list. Undeveloped activities (no
+  // route yet) always sort to the bottom, regardless of driver relevance.
+  const { relevant, others, inDevelopment } = useMemo(() => {
     const flaggedSet = new Set(flaggedDrivers);
 
     const filtered = ACTIVITIES.filter((a) => {
@@ -59,20 +60,23 @@ export default function PracticeLibrary() {
       return catMatch && typeMatch;
     });
 
+    const developed = filtered.filter((a) => ACTIVITY_ROUTES[a.id]);
+    const undeveloped = filtered.filter((a) => !ACTIVITY_ROUTES[a.id]);
+
     if (flaggedSet.size === 0) {
-      return { relevant: [], others: filtered };
+      return { relevant: [], others: developed, inDevelopment: undeveloped };
     }
 
-    const rel = filtered.filter((a) =>
+    const rel = developed.filter((a) =>
       a.connected_drivers.some((cd) => flaggedSet.has(cd.driver_id))
     );
-    const oth = filtered.filter(
+    const oth = developed.filter(
       (a) => !a.connected_drivers.some((cd) => flaggedSet.has(cd.driver_id))
     );
-    return { relevant: rel, others: oth };
+    return { relevant: rel, others: oth, inDevelopment: undeveloped };
   }, [activeCategory, activeType, flaggedDrivers]);
 
-  const totalVisible = relevant.length + others.length;
+  const totalVisible = relevant.length + others.length + inDevelopment.length;
   const hasDriverFilter = flaggedDrivers.length > 0;
 
   return (
@@ -215,6 +219,15 @@ export default function PracticeLibrary() {
                 variant={hasDriverFilter ? 'dimmed' : 'normal'}
               />
             ))}
+            {/* In-development activities always sort last */}
+            {inDevelopment.map((activity) => (
+              <ActivityCard
+                key={activity.id}
+                activity={activity}
+                flaggedDrivers={flaggedDrivers}
+                variant="in-development"
+              />
+            ))}
           </div>
         )}
       </div>
@@ -227,13 +240,14 @@ export default function PracticeLibrary() {
 interface ActivityCardProps {
   activity: Activity;
   flaggedDrivers: string[];
-  variant: 'relevant' | 'dimmed' | 'normal';
+  variant: 'relevant' | 'dimmed' | 'normal' | 'in-development';
 }
 
 function ActivityCard({ activity, flaggedDrivers, variant }: ActivityCardProps) {
   const flaggedSet = new Set(flaggedDrivers);
   const isRelevant = variant === 'relevant';
   const isDimmed = variant === 'dimmed';
+  const isInDevelopment = variant === 'in-development';
   const isAssessment = activity.type === 'skill_assessment';
   const route = ACTIVITY_ROUTES[activity.id];
 
@@ -243,6 +257,7 @@ function ActivityCard({ activity, flaggedDrivers, variant }: ActivityCardProps) 
       ? 'bg-surface before:absolute before:inset-y-0 before:left-0 before:w-[3px] before:bg-primary'
       : '',
     isDimmed ? 'opacity-45' : '',
+    isInDevelopment ? 'grayscale opacity-40' : '',
     route ? 'group cursor-pointer no-underline hover:bg-surface' : '',
   ]
     .filter(Boolean)
@@ -255,15 +270,22 @@ function ActivityCard({ activity, flaggedDrivers, variant }: ActivityCardProps) 
         <span className="font-display text-base font-bold uppercase leading-tight tracking-[0.03em] text-foreground">
           {activity.name}
         </span>
-        <span
-          className={`shrink-0 whitespace-nowrap px-2 py-[3px] font-mono text-[9px] uppercase tracking-[0.18em] ${
-            isAssessment
-              ? 'bg-accent text-accent-foreground'
-              : 'bg-secondary text-muted-foreground'
-          }`}
-        >
-          {isAssessment ? 'Assessment' : 'Development'}
-        </span>
+        <div className="flex shrink-0 flex-col items-end gap-1.5">
+          <span
+            className={`whitespace-nowrap px-2 py-[3px] font-mono text-[9px] uppercase tracking-[0.18em] ${
+              isAssessment
+                ? 'bg-accent text-accent-foreground'
+                : 'bg-secondary text-muted-foreground'
+            }`}
+          >
+            {isAssessment ? 'Assessment' : 'Development'}
+          </span>
+          {isInDevelopment && (
+            <span className="whitespace-nowrap border border-border px-2 py-[3px] font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground">
+              In Development
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Description */}
