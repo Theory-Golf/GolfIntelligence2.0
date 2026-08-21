@@ -5,6 +5,7 @@ import type { ShortGameMetrics, ShortGameHeatMapData, ProcessedShot } from '@/li
 import type { Lie } from '@/lib/golf/db/types';
 import { getStrokeGainedColor, formatStrokesGained, getShotSGColor } from '@/lib/golf/tokens';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { useMediaQuery, MOBILE_QUERY } from '@/lib/useMediaQuery';
 
 // Colors for starting lie - shared convention with other lie-based charts in the app
 const STARTING_LIE_COLORS: Record<Lie, string> = {
@@ -44,6 +45,7 @@ function getLeaveBucket(shot: ProcessedShot): string {
  * Buckets: 0-4 ft, 5-8 ft, 9-12 ft, 13-20 ft, 21+ ft, Missed Green
  */
 function ShortGameLeaveDistributionSection({ filteredShots }: { filteredShots: ProcessedShot[] }) {
+  const isNarrow = useMediaQuery(MOBILE_QUERY);
   // Filter to short game shots only
   const shortGameShots = useMemo(() => {
     return filteredShots.filter(shot => shot.shotType === 'Short Game');
@@ -114,10 +116,10 @@ function ShortGameLeaveDistributionSection({ filteredShots }: { filteredShots: P
       <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>Leave Distribution by Starting Lie</h4>
       <p style={{ fontSize: '12px', color: 'var(--ash)', marginBottom: '16px' }}>Where short game shots finish on the green, broken down by starting lie ({leaveDistribution.totalShortGameShots} total shots)</p>
       <div style={{ background: 'var(--charcoal)', padding: '16px', borderRadius: '4px' }}>
-        <ResponsiveContainer width="100%" height={340}>
-          <BarChart data={leaveDistribution.buckets} margin={{ top: 20, right: 30, left: 20, bottom: 50 }}>
+        <ResponsiveContainer width="100%" height={isNarrow ? 260 : 340}>
+          <BarChart data={leaveDistribution.buckets} margin={isNarrow ? { top: 12, right: 8, left: 0, bottom: 8 } : { top: 20, right: 30, left: 20, bottom: 50 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--ash)" opacity={0.3} />
-            <XAxis dataKey="label" stroke="var(--ash)" tick={{ fill: 'var(--ash)', fontSize: 11 }} angle={-45} textAnchor="end" height={60} />
+            <XAxis dataKey="label" stroke="var(--ash)" tick={{ fill: 'var(--ash)', fontSize: isNarrow ? 9 : 11 }} interval={isNarrow ? 'preserveStartEnd' : 0} minTickGap={isNarrow ? 20 : 0} angle={isNarrow ? 0 : -45} textAnchor={isNarrow ? 'middle' : 'end'} height={isNarrow ? 24 : 60} />
             <YAxis stroke="var(--ash)" tick={{ fill: 'var(--ash)', fontSize: 11 }} tickFormatter={(v) => `${v}%`} domain={[0, 100]} />
             <Tooltip content={<LeaveTooltip />} />
             <Legend wrapperStyle={{ fontSize: '11px', color: 'var(--ash)' }} />
