@@ -19,8 +19,8 @@ Branch: `claude/golf-dashboard-mobile-v8go5e`. Commit prefix: `mobile(N):`.
 - [x] **3** — drawer CSS: `@media (max-width: 767px)` block, backdrop, fab, close, desktop guards
 - [x] **4** — `Dashboard.tsx`: `filtersOpen`, close-on-tab-change, scroll lock, trigger
 - [x] **5** — `FilterBar.tsx`: `isOpen`/`onClose`, backdrop, close button, `:56` gate fix
-- [ ] **6** — density CSS: `.gi-table-scroll`, mobile padding, header stack, nav snap + fade
-- [ ] **7** — wrap 11 unwrapped tables, `min-width` on all 17 (one commit each)
+- [x] **6** — density CSS: `.gi-table-scroll`, mobile padding, header stack, nav snap + fade
+- [x] **7** — wrap 11 unwrapped tables, `min-width` on all 17 (one commit each)
 - [ ] **8** — sticky rework: `--gi-navbar-h`/`--gi-nav-h`, `.header` static, z-order, touch targets
 - [ ] **9** — `web/src/lib/useMediaQuery.ts`
 - [ ] **10** — chart props (one commit per file)
