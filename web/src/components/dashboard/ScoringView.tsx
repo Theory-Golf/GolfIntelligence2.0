@@ -83,7 +83,7 @@ export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: {
       <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>Scoring by Par</h4>
 
       {/* Hero Cards - Par 3, Par 4, Par 5 */}
-      <div className="grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '24px' }}>
+      <div className="grid-cards-3" style={{ gap: '16px', marginBottom: '24px' }}>
         {parCards.map((card) => (
           <div
             key={card.label}
@@ -130,7 +130,7 @@ export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: {
         <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>Mental Resilience</h4>
 
         {/* Five Cards */}
-        <div className="grid" style={{ gridTemplateColumns: 'repeat(5, 1fr)', gap: '12px' }}>
+        <div className="grid-tiles-5" style={{ gap: '12px' }}>
           {/* Card 1: Bounce Back % */}
           <div className="card-stat" style={{ borderLeft: '3px solid var(--under)' }}>
             <div className="label" style={{ color: 'var(--ash)', marginBottom: '8px' }}>Bounce Back %</div>
@@ -196,7 +196,7 @@ export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: {
 
       {/* Donut Chart and Bogey Rate on Same Row */}
       {holeOutcomes.length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '24px' }}>
+        <div className="grid-pair" style={{ gap: '24px', marginBottom: '24px' }}>
           {/* Donut Chart - Hole Outcome Distribution */}
           <div>
             <h5 style={{ marginBottom: '12px', color: 'var(--ash)', fontSize: '14px' }}>Outcome Distribution</h5>
@@ -358,7 +358,7 @@ export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: {
         <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>Birdie Opportunities</h4>
 
         {/* Three Hero Cards for Birdie Opportunities */}
-        <div className="grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+        <div className="grid-cards-3" style={{ gap: '16px' }}>
           {/* Card 1: Opportunities */}
           <div
             className="card-hero"
