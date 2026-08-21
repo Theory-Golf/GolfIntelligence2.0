@@ -226,7 +226,7 @@ export function StrokesGainedTrendChart({ filteredShots }: StrokesGainedTrendCha
             <XAxis
               dataKey="label"
               stroke={COLORS.text}
-              tick={{ fill: COLORS.text, fontSize: isNarrow ? 9 : 11 }}
+              tick={{ fill: COLORS.text, fontSize: isNarrow ? 9 : 12 }}
               interval={isNarrow ? 'preserveStartEnd' : 0}
               minTickGap={isNarrow ? 24 : 0}
               angle={isNarrow ? 0 : -45}
@@ -235,7 +235,7 @@ export function StrokesGainedTrendChart({ filteredShots }: StrokesGainedTrendCha
             />
             <YAxis
               stroke={COLORS.text}
-              tick={{ fill: COLORS.text, fontSize: isNarrow ? 9 : 11 }}
+              tick={{ fill: COLORS.text, fontSize: isNarrow ? 9 : 12 }}
               width={isNarrow ? 34 : undefined}
               domain={yAxisDomain}
               tickFormatter={(value) => value.toFixed(1)}

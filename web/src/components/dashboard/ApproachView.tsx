@@ -292,7 +292,7 @@ function ApproachTableSection({ shots }: { shots: ProcessedShot[] }) {
                   <span><strong>Approach Shots:</strong> {roundApproaches.length}</span>
                 </div>
                 <div className="gi-table-scroll">
-                  <table style={{ minWidth: '580px', width: '100%', fontSize: '11px', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+                  <table style={{ minWidth: '580px', width: '100%', fontSize: '13px', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
                     <thead>
                       <tr style={{ borderBottom: '1px solid var(--ash)' }}>
                         <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '8%' }}>Hole</th>
@@ -469,7 +469,7 @@ function ApproachEndingLieSection({ filteredShots }: { filteredShots: ProcessedS
               <XAxis
                 dataKey="lie"
                 stroke="var(--ash)"
-                tick={{ fill: 'var(--ash)', fontSize: 10 }}
+                tick={{ fill: 'var(--ash)', fontSize: isNarrow ? 10 : 12 }}
                 angle={isNarrow ? 0 : -45}
                 textAnchor={isNarrow ? 'middle' : 'end'}
                 height={isNarrow ? 24 : 50}
@@ -511,7 +511,7 @@ function ApproachEndingLieSection({ filteredShots }: { filteredShots: ProcessedS
               <XAxis
                 dataKey="lie"
                 stroke="var(--ash)"
-                tick={{ fill: 'var(--ash)', fontSize: 10 }}
+                tick={{ fill: 'var(--ash)', fontSize: isNarrow ? 10 : 12 }}
                 angle={isNarrow ? 0 : -45}
                 textAnchor={isNarrow ? 'middle' : 'end'}
                 height={isNarrow ? 24 : 50}

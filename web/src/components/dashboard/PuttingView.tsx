@@ -179,7 +179,7 @@ export function PuttingView({ metrics, lagMetrics, filteredShots }: { metrics: P
           <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>Putting by Distance</h4>
           <div style={{ background: 'var(--charcoal)', borderRadius: '4px', overflow: 'hidden' }}>
             <div className="gi-table-scroll">
-              <table style={{ minWidth: '640px', width: '100%', borderCollapse: 'collapse', fontSize: '11px', tableLayout: 'fixed' }}>
+              <table style={{ minWidth: '640px', width: '100%', borderCollapse: 'collapse', fontSize: '13px', tableLayout: 'fixed' }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--pitch)' }}>
                     <th style={{ padding: '10px 12px', textAlign: 'left', color: 'var(--ash)', fontWeight: 600, background: 'var(--obsidian)', width: '140px' }}>
@@ -544,7 +544,7 @@ function PuttsTableSection({ shots }: { shots: ProcessedShot[] }) {
                   <span><strong>Putts:</strong> {roundPutts.length}</span>
                 </div>
                 <div className="gi-table-scroll">
-                  <table style={{ minWidth: '420px', width: '100%', fontSize: '11px', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+                  <table style={{ minWidth: '420px', width: '100%', fontSize: '13px', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
                     <thead>
                       <tr style={{ borderBottom: '1px solid var(--ash)' }}>
                         <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '10%' }}>Hole</th>

@@ -269,8 +269,8 @@ export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: {
               <ResponsiveContainer width="100%" height={isNarrow ? 220 : 280}>
                 <BarChart data={bogeyRates} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--dark)" />
-                  <XAxis dataKey="label" stroke="var(--ash)" fontSize={11} />
-                  <YAxis stroke="var(--ash)" fontSize={11} unit="%" />
+                  <XAxis dataKey="label" stroke="var(--ash)" fontSize={12} />
+                  <YAxis stroke="var(--ash)" fontSize={12} unit="%" />
                   <Tooltip
                     contentStyle={{ background: 'var(--court)', border: '1px solid var(--scarlet)', borderRadius: '4px' }}
                     labelStyle={{ color: 'var(--chalk)' }}
@@ -311,8 +311,8 @@ export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: {
                 margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--dark)" />
-                <XAxis type="number" stroke="var(--ash)" fontSize={11} />
-                <YAxis dataKey="name" type="category" stroke="var(--ash)" fontSize={10} width={isNarrow ? 56 : 80} />
+                <XAxis type="number" stroke="var(--ash)" fontSize={12} />
+                <YAxis dataKey="name" type="category" stroke="var(--ash)" fontSize={isNarrow ? 10 : 12} width={isNarrow ? 56 : 80} />
                 <Tooltip
                   contentStyle={{ background: 'var(--court)', border: '1px solid var(--scarlet)', borderRadius: '4px' }}
                   labelStyle={{ color: 'var(--chalk)' }}
@@ -342,8 +342,8 @@ export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: {
                 margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--dark)" />
-                <XAxis type="number" stroke="var(--ash)" fontSize={11} />
-                <YAxis dataKey="name" type="category" stroke="var(--ash)" fontSize={10} width={isNarrow ? 56 : 80} />
+                <XAxis type="number" stroke="var(--ash)" fontSize={12} />
+                <YAxis dataKey="name" type="category" stroke="var(--ash)" fontSize={isNarrow ? 10 : 12} width={isNarrow ? 56 : 80} />
                 <Tooltip
                   contentStyle={{ background: 'var(--court)', border: '1px solid var(--scarlet)', borderRadius: '4px' }}
                   labelStyle={{ color: 'var(--chalk)' }}

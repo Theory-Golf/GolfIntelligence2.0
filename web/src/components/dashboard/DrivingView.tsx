@@ -648,7 +648,7 @@ function DrivesTableSection({ shots }: { shots: ProcessedShot[] }) {
                   <span><strong>Drives:</strong> {roundDrives.length}</span>
                 </div>
                 <div className="gi-table-scroll">
-                  <table style={{ minWidth: '660px', width: '100%', fontSize: '11px', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+                  <table style={{ minWidth: '660px', width: '100%', fontSize: '13px', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
                     <thead>
                       <tr style={{ borderBottom: '1px solid var(--ash)' }}>
                         <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '8%' }}>Hole</th>

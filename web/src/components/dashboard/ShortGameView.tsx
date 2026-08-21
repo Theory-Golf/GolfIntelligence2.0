@@ -119,7 +119,7 @@ function ShortGameLeaveDistributionSection({ filteredShots }: { filteredShots: P
         <ResponsiveContainer width="100%" height={isNarrow ? 260 : 340}>
           <BarChart data={leaveDistribution.buckets} margin={isNarrow ? { top: 12, right: 8, left: 0, bottom: 8 } : { top: 20, right: 30, left: 20, bottom: 50 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--ash)" opacity={0.3} />
-            <XAxis dataKey="label" stroke="var(--ash)" tick={{ fill: 'var(--ash)', fontSize: isNarrow ? 9 : 11 }} interval={isNarrow ? 'preserveStartEnd' : 0} minTickGap={isNarrow ? 20 : 0} angle={isNarrow ? 0 : -45} textAnchor={isNarrow ? 'middle' : 'end'} height={isNarrow ? 24 : 60} />
+            <XAxis dataKey="label" stroke="var(--ash)" tick={{ fill: 'var(--ash)', fontSize: isNarrow ? 9 : 12 }} interval={isNarrow ? 'preserveStartEnd' : 0} minTickGap={isNarrow ? 20 : 0} angle={isNarrow ? 0 : -45} textAnchor={isNarrow ? 'middle' : 'end'} height={isNarrow ? 24 : 60} />
             <YAxis stroke="var(--ash)" tick={{ fill: 'var(--ash)', fontSize: 11 }} tickFormatter={(v) => `${v}%`} domain={[0, 100]} />
             <Tooltip content={<LeaveTooltip />} />
             <Legend wrapperStyle={{ fontSize: '11px', color: 'var(--ash)' }} />
@@ -167,7 +167,7 @@ function ShortGameTableSection({ filteredShots }: { filteredShots: ProcessedShot
                   <span><strong>Short Game Shots:</strong> {roundShots.length}</span>
                 </div>
                 <div className="gi-table-scroll">
-                  <table style={{ minWidth: '660px', width: '100%', fontSize: '11px', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+                  <table style={{ minWidth: '660px', width: '100%', fontSize: '13px', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
                     <thead>
                       <tr style={{ borderBottom: '1px solid var(--ash)' }}>
                         <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '6%' }}>Shot</th>

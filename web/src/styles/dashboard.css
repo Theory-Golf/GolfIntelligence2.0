@@ -149,7 +149,7 @@
 
 .nav-tab {
   font-family: var(--font-heading);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.15em;
   text-transform: uppercase;
@@ -271,7 +271,12 @@
 
 .value-hero {
   font-family: var(--font-heading);
-  font-size: 72px;
+  /* The brand scale defines this as a clamp (--type-display-xl); the
+     dashboard had flattened it to the maximum, so a 72px number sat
+     in a 358px content box on a phone. The 7vw preferred value keeps
+     it pinned at 72px for viewports >= 1029px, so desktop is
+     unchanged and only narrow screens scale down. */
+  font-size: clamp(36px, 7vw, 72px);
   font-weight: 800;
   line-height: 0.9;
   color: var(--chalk);
@@ -279,7 +284,11 @@
 
 .value-stat {
   font-family: var(--font-heading);
-  font-size: 44px;
+  /* Brand spec for --type-display-sm is clamp(18px, 2.5vw, 28px);
+     44px was well above it. This meets it partway rather than
+     dropping the densest tiles that far in one go. 29 of the 71
+     usages set their own size inline and are unaffected. */
+  font-size: clamp(22px, 3vw, 36px);
   font-weight: 700;
   line-height: 1;
   color: var(--chalk);

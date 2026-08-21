@@ -204,7 +204,7 @@ export function PlayerPathView({ drivers: _drivers, playerPathMetrics, performan
     return (
       <div>
         <div className="gi-table-scroll">
-          <table style={{ minWidth: '340px', width: '100%', fontSize: '10px', borderCollapse: 'collapse' }}>
+          <table style={{ minWidth: '340px', width: '100%', fontSize: '13px', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--ash)' }}>
                 <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>Band</th>
@@ -258,7 +258,7 @@ export function PlayerPathView({ drivers: _drivers, playerPathMetrics, performan
     return (
       <div>
         <div className="gi-table-scroll">
-          <table style={{ minWidth: '340px', width: '100%', fontSize: '10px', borderCollapse: 'collapse' }}>
+          <table style={{ minWidth: '340px', width: '100%', fontSize: '13px', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--ash)' }}>
                 <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>Bucket</th>
@@ -302,7 +302,7 @@ export function PlayerPathView({ drivers: _drivers, playerPathMetrics, performan
       return (
         <div>
           <div className="gi-table-scroll">
-            <table style={{ minWidth: '340px', width: '100%', fontSize: '10px', borderCollapse: 'collapse' }}>
+            <table style={{ minWidth: '340px', width: '100%', fontSize: '13px', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--ash)' }}>
                   <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>Lie</th>
@@ -333,7 +333,7 @@ export function PlayerPathView({ drivers: _drivers, playerPathMetrics, performan
       return (
         <div>
           <div className="gi-table-scroll">
-            <table style={{ minWidth: '340px', width: '100%', fontSize: '10px', borderCollapse: 'collapse' }}>
+            <table style={{ minWidth: '340px', width: '100%', fontSize: '13px', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--ash)' }}>
                   <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>Distance</th>

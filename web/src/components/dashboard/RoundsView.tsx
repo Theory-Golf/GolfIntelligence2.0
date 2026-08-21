@@ -75,7 +75,7 @@ export function RoundsView({ roundSummaries, filteredShots }: { roundSummaries: 
       ) : (
         <div style={{ background: 'var(--charcoal)', borderRadius: '4px', overflow: 'hidden' }}>
           <div className="gi-table-scroll">
-            <table style={{ minWidth: '800px', width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+            <table style={{ minWidth: '800px', width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--pitch)', background: 'var(--obsidian)' }}>
                   <th style={{ ...thStyle, textAlign: 'left' }}>Date</th>
@@ -175,7 +175,7 @@ function RoundRow({
         <tr style={{ borderBottom: '1px solid var(--pitch)', background: 'var(--obsidian)' }}>
           <td colSpan={columnCount} style={{ padding: '16px' }}>
             <div className="gi-table-scroll">
-              <table style={{ minWidth: '880px', borderCollapse: 'collapse', fontSize: '11px', margin: '0 auto' }}>
+              <table style={{ minWidth: '880px', borderCollapse: 'collapse', fontSize: '13px', margin: '0 auto' }}>
                 <thead>
                   <tr>
                     <th style={{ ...thStyle, textAlign: 'left', padding: '6px 10px' }}>Hole</th>

@@ -431,7 +431,7 @@ function RootCauseByFailTypeSection({ rootCauseByFailType, totalFails }: { rootC
                   {failType.label} ({data.totalCount})
                 </h5>
                 <div className="gi-table-scroll">
-                  <table style={{ minWidth: '500px', width: '100%', fontSize: '11px', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+                  <table style={{ minWidth: '500px', width: '100%', fontSize: '13px', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
                     <thead>
                       <tr style={{ borderBottom: '1px solid var(--ash)' }}>
                         <th style={{ textAlign: 'left', padding: '6px', color: 'var(--ash)', width: '35%' }}>Root Cause</th>
@@ -526,7 +526,7 @@ function Tiger5FailDetailsSection({ failDetails }: { failDetails: Tiger5FailDeta
                       <span><strong>Score:</strong> {detail.score}</span>
                     </div>
                     <div className="gi-table-scroll">
-                      <table style={{ minWidth: '660px', width: '100%', fontSize: '11px', borderCollapse: 'collapse' }}>
+                      <table style={{ minWidth: '660px', width: '100%', fontSize: '13px', borderCollapse: 'collapse' }}>
                         <thead>
                           <tr style={{ borderBottom: '1px solid var(--ash)' }}>
                             <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>Shot #</th>
@@ -600,7 +600,7 @@ function Tiger5TrendSection({ trendData }: { trendData: Tiger5TrendDataPoint[] }
             <XAxis
               dataKey="label"
               stroke="var(--ash)"
-              tick={{ fill: 'var(--ash)', fontSize: 10 }}
+              tick={{ fill: 'var(--ash)', fontSize: isNarrow ? 10 : 12 }}
               interval={isNarrow ? 'preserveStartEnd' : 0}
               minTickGap={isNarrow ? 24 : 0}
               angle={isNarrow ? 0 : -45}
@@ -697,7 +697,7 @@ function PotentialScoreSection({
             <XAxis
               dataKey="label"
               stroke="var(--ash)"
-              tick={{ fill: 'var(--ash)', fontSize: 10 }}
+              tick={{ fill: 'var(--ash)', fontSize: isNarrow ? 10 : 12 }}
               interval={isNarrow ? 'preserveStartEnd' : 0}
               minTickGap={isNarrow ? 24 : 0}
               angle={isNarrow ? 0 : -45}
