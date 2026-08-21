@@ -385,7 +385,7 @@ export function PlayerPathView({ drivers: _drivers, playerPathMetrics, performan
       </p>
 
       {/* Top 5 Performance Drivers Hero Cards */}
-      <div className="grid" style={{ gridTemplateColumns: 'repeat(5, 1fr)', gap: '16px', marginBottom: '32px' }}>
+      <div className="grid-cards-5" style={{ gap: '16px', marginBottom: '32px' }}>
         {top5Drivers.length > 0 ? top5Drivers.map((driver) => (
           <div
             key={driver.driverId}
