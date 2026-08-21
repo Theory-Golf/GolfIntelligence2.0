@@ -4,8 +4,10 @@ import { useState } from 'react';
 import type { ScoringMetrics, HoleOutcome, MentalMetrics, BirdieAndBogeyMetrics } from '@/lib/golf/types';
 import { getStrokeGainedColor, formatStrokesGained } from '@/lib/golf/tokens';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
+import { useMediaQuery, MOBILE_QUERY } from '@/lib/useMediaQuery';
 
 export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: { metrics: ScoringMetrics; birdieAndBogeyMetrics: BirdieAndBogeyMetrics; mentalMetrics: MentalMetrics }) {
+  const isNarrow = useMediaQuery(MOBILE_QUERY);
   const { holeOutcomes, totalHoles, par3, par4, par5 } = metrics;
   const { bogeyRates, birdieOpportunities, bogeyRootCause, doubleBogeyPlusRootCause, totalBogeys, totalDoubleBogeyPlus } = birdieAndBogeyMetrics;
 
@@ -204,14 +206,14 @@ export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: {
               <p style={{ fontSize: '11px', color: 'var(--ash)', marginBottom: '16px' }}>
                 Distribution of scores vs par across {totalHoles} holes
               </p>
-              <ResponsiveContainer width="100%" height={280}>
+              <ResponsiveContainer width="100%" height={isNarrow ? 220 : 280}>
                 <PieChart>
                   <Pie
                     data={donutData}
                     cx="50%"
                     cy="50%"
-                    innerRadius={60}
-                    outerRadius={100}
+                    innerRadius="42%"
+                    outerRadius="70%"
                     paddingAngle={2}
                     dataKey="value"
                     nameKey="name"
@@ -264,7 +266,7 @@ export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: {
           <div>
             <h5 style={{ marginBottom: '12px', color: 'var(--ash)', fontSize: '14px' }}>Bogey & Double Bogey+ Rate by Par</h5>
             <div style={{ background: 'var(--charcoal)', padding: '16px', borderRadius: '4px' }}>
-              <ResponsiveContainer width="100%" height={280}>
+              <ResponsiveContainer width="100%" height={isNarrow ? 220 : 280}>
                 <BarChart data={bogeyRates} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--dark)" />
                   <XAxis dataKey="label" stroke="var(--ash)" fontSize={11} />
@@ -310,7 +312,7 @@ export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: {
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--dark)" />
                 <XAxis type="number" stroke="var(--ash)" fontSize={11} />
-                <YAxis dataKey="name" type="category" stroke="var(--ash)" fontSize={10} width={80} />
+                <YAxis dataKey="name" type="category" stroke="var(--ash)" fontSize={10} width={isNarrow ? 56 : 80} />
                 <Tooltip
                   contentStyle={{ background: 'var(--court)', border: '1px solid var(--scarlet)', borderRadius: '4px' }}
                   labelStyle={{ color: 'var(--chalk)' }}
@@ -341,7 +343,7 @@ export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: {
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--dark)" />
                 <XAxis type="number" stroke="var(--ash)" fontSize={11} />
-                <YAxis dataKey="name" type="category" stroke="var(--ash)" fontSize={10} width={80} />
+                <YAxis dataKey="name" type="category" stroke="var(--ash)" fontSize={10} width={isNarrow ? 56 : 80} />
                 <Tooltip
                   contentStyle={{ background: 'var(--court)', border: '1px solid var(--scarlet)', borderRadius: '4px' }}
                   labelStyle={{ color: 'var(--chalk)' }}
