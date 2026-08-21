@@ -60,9 +60,19 @@ create trigger drill_sessions_set_updated_at
 -- ============================================================
 -- Row-level security
 --
--- Writes are self-only. Reads go through can_access_player (0001), so a
--- coach on the same team can see their players' practice results — the same
--- rule the rounds/shots tables use in 0002.
+-- Writes are self-only.
+--
+-- Reads go through can_access_player (0001): the player themself, or a coach
+-- on the same team. That is DELIBERATE, not inherited by accident from the
+-- rounds/shots policies in 0002. A coach being able to see whether a player
+-- actually ran their prescribed assessments is the accountability half of
+-- PlayerPath — the reason practice is scored and saved at all.
+--
+-- It is currently inert: team_members is empty and no application code reads
+-- it. Coach visibility switches on by itself the moment the Golf Intelligence
+-- dashboard populates team_members for its coach/team roles. That is expected.
+--
+-- Do not narrow this to `player_id = auth.uid()` without a product decision.
 -- ============================================================
 alter table public.drill_sessions enable row level security;
 

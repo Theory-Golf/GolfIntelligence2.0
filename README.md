@@ -52,3 +52,34 @@ See `web/.env.example` for required variables:
 | `/resources/standard-yardage-card` | Standard yardage card |
 | `/resources/approach-aim-optimizer` | Approach aim optimizer |
 | `/contact` | Contact form |
+
+## Schema notes
+
+Read these before touching `supabase/migrations/` or building coach/team features.
+
+**The repo describes 4 of ~17 production tables.** `supabase/migrations/` covers `profiles`,
+`teams`, `team_members`, and `drill_sessions`. Missing: `players`, `coaches`, `coach_players`,
+`schools`, `ethos_papers`, `courses`, `holes`, `rounds`, `shots`, and three `*_edits` audit
+tables — all created outside the repo. A clean checkout cannot rebuild the database. Baselining
+the live schema is outstanding work.
+
+**There are two coach–player models, and only one is wired up.**
+
+| Model | Used by | Rows |
+|-------|---------|------|
+| `team_members` + `profiles.role = 'coach'` | `can_access_player()`, and therefore every RLS policy | 0 |
+| `coaches` + `coach_players` | nothing | 0 |
+
+No application code reads `profiles`, `team_members`, `coaches`, `coach_players`, or `.role` —
+the coach/team layer exists only in the database today. Coach and team roles are planned for the
+Golf Intelligence dashboard; that work should build on the first model, since row-level security
+already commits to it. Consolidate rather than adding to the second.
+
+**Coach access to practice data is intentional.** `drill_sessions` reads use the same
+`can_access_player()` rule as `rounds`/`shots`, so populating `team_members` gives coaches
+visibility of their players' practice results as well as their rounds. This is the accountability
+model PlayerPath is built on — see the comment in `0004_drill_sessions.sql` before changing it.
+
+**Player identity.** `drill_sessions.player_id` references `auth.users`, while
+`rounds.player_id` references `players`. Every `players.id` is its auth user's id, so the same
+UUID identifies a player on both sides — use `auth.uid()` when writing either.
