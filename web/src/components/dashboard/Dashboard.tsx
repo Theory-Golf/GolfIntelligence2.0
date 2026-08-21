@@ -6,6 +6,7 @@
  */
 
 import { useState, useEffect, lazy, Suspense } from 'react';
+import Link from 'next/link';
 import '@/styles/dashboard.css';
 import { useGolfData } from '@/lib/golf/useGolfData';
 import { getBenchmarkTierOptions, getGenderOptions } from '@/lib/golf/benchmarks';
@@ -206,7 +207,7 @@ export default function Dashboard() {
             <p style={{ marginTop: '8px', fontSize: '13px', color: 'var(--ash)' }}>
               Enter your first round to see your Golf Intelligence dashboard.
             </p>
-            <a
+            <Link
               href="/golf-intelligence/round/new"
               style={{
                 marginTop: '16px',
@@ -220,7 +221,7 @@ export default function Dashboard() {
               }}
             >
               Enter a round
-            </a>
+            </Link>
           </div>
         )}
 
