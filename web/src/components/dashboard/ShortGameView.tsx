@@ -164,34 +164,36 @@ function ShortGameTableSection({ filteredShots }: { filteredShots: ProcessedShot
                   <span><strong>Course:</strong> {courseStr}</span>
                   <span><strong>Short Game Shots:</strong> {roundShots.length}</span>
                 </div>
-                <table style={{ width: '100%', fontSize: '11px', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
-                  <thead>
-                    <tr style={{ borderBottom: '1px solid var(--ash)' }}>
-                      <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '6%' }}>Shot</th>
-                      <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '6%' }}>Hole</th>
-                      <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '10%' }}>Start Dist</th>
-                      <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '10%' }}>Start Lie</th>
-                      <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '10%' }}>End Dist</th>
-                      <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '12%' }}>End Lie</th>
-                      <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '8%' }}>Penalty</th>
-                      <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '10%' }}>SG</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {roundShots.sort((a, b) => a.holeNumber - b.holeNumber || a.shotNumber - b.shotNumber).map((shot, idx) => (
-                      <tr key={idx} style={{ borderBottom: '1px solid var(--dark)' }}>
-                        <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{shot.shotNumber}</td>
-                        <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{shot.holeNumber}</td>
-                        <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>{shot.startingDistance}</td>
-                        <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{shot.startingLie}</td>
-                        <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>{shot.endingDistance}</td>
-                        <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{shot.endingLie}</td>
-                        <td style={{ padding: '6px', textAlign: 'center', color: shot.hasPenalty ? 'var(--scarlet)' : 'transparent' }}>{shot.hasPenalty ? 'Yes' : ''}</td>
-                        <td style={{ padding: '6px', textAlign: 'center', color: getShotSGColor(shot.calculatedStrokesGained), fontFamily: 'var(--font-mono)' }}>{formatStrokesGained(shot.calculatedStrokesGained)}</td>
+                <div className="gi-table-scroll">
+                  <table style={{ minWidth: '660px', width: '100%', fontSize: '11px', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+                    <thead>
+                      <tr style={{ borderBottom: '1px solid var(--ash)' }}>
+                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '6%' }}>Shot</th>
+                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '6%' }}>Hole</th>
+                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '10%' }}>Start Dist</th>
+                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '10%' }}>Start Lie</th>
+                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '10%' }}>End Dist</th>
+                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '12%' }}>End Lie</th>
+                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '8%' }}>Penalty</th>
+                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '10%' }}>SG</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {roundShots.sort((a, b) => a.holeNumber - b.holeNumber || a.shotNumber - b.shotNumber).map((shot, idx) => (
+                        <tr key={idx} style={{ borderBottom: '1px solid var(--dark)' }}>
+                          <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{shot.shotNumber}</td>
+                          <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{shot.holeNumber}</td>
+                          <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>{shot.startingDistance}</td>
+                          <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{shot.startingLie}</td>
+                          <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>{shot.endingDistance}</td>
+                          <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{shot.endingLie}</td>
+                          <td style={{ padding: '6px', textAlign: 'center', color: shot.hasPenalty ? 'var(--scarlet)' : 'transparent' }}>{shot.hasPenalty ? 'Yes' : ''}</td>
+                          <td style={{ padding: '6px', textAlign: 'center', color: getShotSGColor(shot.calculatedStrokesGained), fontFamily: 'var(--font-mono)' }}>{formatStrokesGained(shot.calculatedStrokesGained)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             );
           })}
@@ -266,8 +268,8 @@ function ShortGameHeatMapSection({ data }: { data: ShortGameHeatMapData }) {
         </label>
       </div>
 
-      <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+      <div className="gi-table-scroll">
+        <table style={{ minWidth: '640px', width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
           <thead>
             <tr>
               <th style={{ padding: '12px', textAlign: 'left', color: 'var(--ash)', fontWeight: '600', borderBottom: '1px solid var(--border)' }}>Starting Lie</th>
