@@ -2,6 +2,15 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import {
+  LS_WEDGE_STANDARD_CREATIVE,
+  LS_WEDGE_STANDARD_HISTORY,
+  LS_WEDGE_STANDARD_LEVEL,
+  LS_WEDGE_STANDARD_STATS,
+  LS_WEDGE_STANDARD_WEDGES,
+} from '@/lib/constants';
+import { derivedClientId } from '@/lib/playerpath/clientId';
+import { drillSessionInput, recordDrillSession } from '@/lib/playerpath/record';
 import './WedgeStandard.css';
 
 // ── Storage helpers ──────────────────────────────────────────────
@@ -113,16 +122,16 @@ export default function WedgeStandard() {
 
   // Load persisted data
   useEffect(() => {
-    const w = storage.get('wm-wedges');   if (w) setWedges(w);
-    const l = storage.get('wm-level');    if (l) setChallengeLevel(l);
-    const h = storage.get('wm-history'); if (h) setHistory(h);
-    const s = storage.get('wm-stats');   if (s) setLifetimeStats(s);
-    const c = storage.get('wm-creative');
+    const w = storage.get(LS_WEDGE_STANDARD_WEDGES);   if (w) setWedges(w);
+    const l = storage.get(LS_WEDGE_STANDARD_LEVEL);    if (l) setChallengeLevel(l);
+    const h = storage.get(LS_WEDGE_STANDARD_HISTORY); if (h) setHistory(h);
+    const s = storage.get(LS_WEDGE_STANDARD_STATS);   if (s) setLifetimeStats(s);
+    const c = storage.get(LS_WEDGE_STANDARD_CREATIVE);
     if (c) { setCreativeTargets(c.targets || [80, 95, 110]); setCreativeRounds(c.rounds || 3); }
   }, []);
 
-  function saveWedges(w) { setWedges(w); storage.set('wm-wedges', w); }
-  function saveLevel(l)  { setChallengeLevel(l); storage.set('wm-level', l); }
+  function saveWedges(w) { setWedges(w); storage.set(LS_WEDGE_STANDARD_WEDGES, w); }
+  function saveLevel(l)  { setChallengeLevel(l); storage.set(LS_WEDGE_STANDARD_LEVEL, l); }
 
   function saveSession(data) {
     const updated = [data, ...history].slice(0, 50);
@@ -135,8 +144,19 @@ export default function WedgeStandard() {
       bestSession:   Math.max(lifetimeStats.bestSession, data.avgPoints),
     };
     setLifetimeStats(newStats);
-    storage.set('wm-history', updated);
-    storage.set('wm-stats', newStats);
+    storage.set(LS_WEDGE_STANDARD_HISTORY, updated);
+    storage.set(LS_WEDGE_STANDARD_STATS, newStats);
+    // Local write first so the session is never lost, then push to the
+    // player's account. Sessions are keyed on a timestamp, so derive a
+    // stable uuid from it — the upload derives the same one.
+    void recordDrillSession(
+      drillSessionInput(
+        'wedge-standard',
+        derivedClientId('wedge-standard', data.id),
+        data.date,
+        { ...data },
+      ),
+    );
   }
 
   function clearHistory() {
@@ -144,8 +164,8 @@ export default function WedgeStandard() {
     setHistory([]);
     const reset = { totalSessions: 0, totalShots: 0, avgPoints: 0, bestSession: 0, totalPoints: 0 };
     setLifetimeStats(reset);
-    storage.del('wm-history');
-    storage.set('wm-stats', reset);
+    storage.del(LS_WEDGE_STANDARD_HISTORY);
+    storage.set(LS_WEDGE_STANDARD_STATS, reset);
   }
 
   function speakTarget(d) {
@@ -467,7 +487,7 @@ export default function WedgeStandard() {
         <button
           className="ws-primary-btn"
           onClick={() => {
-            storage.set('wm-creative', { targets: creativeTargets, rounds: creativeRounds });
+            storage.set(LS_WEDGE_STANDARD_CREATIVE, { targets: creativeTargets, rounds: creativeRounds });
             setPracticeMode('creative');
             startSession();
           }}

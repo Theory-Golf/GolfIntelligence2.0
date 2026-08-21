@@ -1,6 +1,15 @@
+import { LS_PRACTICE_SESSIONS } from '@/lib/constants';
 import type { WeekConfig, Session, SessionRecord, HistoryEntry, PlannerExport } from './types';
 
 const KEY_PREFIX = 'tg_practice_';
+
+// The one-time upload reads completed sessions by their full key, so the two
+// must agree. Fail loudly at import time rather than silently missing rows.
+if (KEY_PREFIX + 'sessions' !== LS_PRACTICE_SESSIONS) {
+  throw new Error(
+    `Practice session storage key drifted: "${KEY_PREFIX}sessions" vs "${LS_PRACTICE_SESSIONS}"`,
+  );
+}
 
 export const EXPORT_VERSION = 2;
 

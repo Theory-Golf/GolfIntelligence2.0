@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { LS_WINNERS_CIRCLE_RUNS } from '@/lib/constants';
+import { drillSessionInput, recordDrillSession } from '@/lib/playerpath/record';
 import './WinnersCircle.css';
 
 // ── Types ─────────────────────────────────────────────────────────
@@ -210,8 +211,21 @@ export default function WinnersCircle() {
   function handleSave() {
     if (!result || result.saved) return;
     const updated = [result.run, ...runs];
+    // Local write first so the run is never lost, then push to the player's
+    // account. The run's own id is the idempotency key, so a queued retry
+    // updates the same row.
     persistRuns(updated);
     setRuns(updated);
+    void recordDrillSession(
+      drillSessionInput('winners-circle', result.run.id, new Date(result.run.timestamp), {
+        date: result.run.date,
+        totalMakes: result.run.totalMakes,
+        maxDistanceReached: result.run.maxDistanceReached,
+        rounds: result.run.rounds,
+        standardCleared: result.run.standardCleared,
+        endedEarly: result.run.endedEarly,
+      }),
+    );
     setResult({ ...result, saved: true });
   }
 

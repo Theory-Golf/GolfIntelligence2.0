@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { LS_INSIDE_TEN_SESSIONS } from '@/lib/constants';
+import { drillSessionInput, recordDrillSession } from '@/lib/playerpath/record';
 import './InsideTen.css';
 
 // ── Types ─────────────────────────────────────────────────────────
@@ -142,8 +143,19 @@ export default function InsideTen() {
 
     const newSession = buildSession(score, sessionDate);
     const updated = [newSession, ...sessions];
+    // Local write first so the result is never lost, then push to the player's
+    // account. The session's own id is the idempotency key, so a queued retry
+    // updates the same row.
     persistSessions(updated);
     setSessions(updated);
+    void recordDrillSession(
+      drillSessionInput('inside-ten', newSession.id, new Date(newSession.timestamp), {
+        date: newSession.date,
+        score: newSession.score,
+        sg: newSession.sg,
+        tier: newSession.tier,
+      }),
+    );
     setResult({ session: newSession, prevBest, prevAvg5, prevLast });
     setScreen('result');
   }

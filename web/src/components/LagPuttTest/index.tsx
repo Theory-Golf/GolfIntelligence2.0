@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { LS_LAG_PUTT_SESSIONS } from '@/lib/constants';
+import { newClientId } from '@/lib/playerpath/clientId';
+import { drillSessionInput, recordDrillSession } from '@/lib/playerpath/record';
 import './LagPuttTest.css';
 
 type Direction = 'short' | 'long';
@@ -16,6 +18,9 @@ interface PuttResult {
 
 interface SavedSession {
   id: number;
+  /** Idempotency key for the account-level row. Absent on sessions saved
+   *  before practice results synced; the upload derives one in that case. */
+  clientId?: string;
   date: string;
   total: number;
   putts: PuttResult[];
@@ -154,13 +159,22 @@ export default function LagPuttTest() {
       const total = next.reduce((s, r) => s + r.score, 0);
       const session: SavedSession = {
         id: Date.now(),
+        clientId: newClientId(),
         date: new Date().toISOString(),
         total,
         putts: next,
       };
       const updatedHistory = [session, ...history].slice(0, 50);
+      // Local write first so the result is never lost, then push to the
+      // player's account; the clientId makes a queued retry update, not add.
       setHistory(updatedHistory);
       storage.set(LS_LAG_PUTT_SESSIONS, updatedHistory);
+      void recordDrillSession(
+        drillSessionInput('lag-putt-test', session.clientId!, session.date, {
+          total: session.total,
+          putts: session.putts,
+        }),
+      );
       setScreen('results');
     } else {
       setPuttIdx(puttIdx + 1);

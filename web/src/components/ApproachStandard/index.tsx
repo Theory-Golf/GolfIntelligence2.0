@@ -10,6 +10,12 @@ import {
   PrimaryButton,
   SecondaryButton,
 } from '@/components/playerpath/ui';
+import {
+  LS_APPROACH_STANDARD_PLAYER,
+  LS_APPROACH_STANDARD_SESSIONS,
+} from '@/lib/constants';
+import { derivedClientId } from '@/lib/playerpath/clientId';
+import { drillSessionInput, recordDrillSession } from '@/lib/playerpath/record';
 
 // ── Storage helpers ──────────────────────────────────────────────
 const storage = {
@@ -17,8 +23,8 @@ const storage = {
   set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (_) {} },
 };
 
-const LS_PLAYER   = 'as_player';
-const LS_SESSIONS = 'as_sessions';
+const LS_PLAYER   = LS_APPROACH_STANDARD_PLAYER;
+const LS_SESSIONS = LS_APPROACH_STANDARD_SESSIONS;
 
 // ── Domain constants ─────────────────────────────────────────────
 
@@ -1084,7 +1090,18 @@ export default function ApproachStandard() {
     const movement = evaluatePeriodization(player, sessions, completed);
     const sessionWithMovement = { ...completed, movement };
     const newSessions = [...sessions, sessionWithMovement];
+    // The sessions effect persists this locally; push to the player's account
+    // too. Sessions are keyed on `s-<timestamp>`, so derive a stable uuid
+    // from that — the upload derives the same one.
     setSessions(newSessions);
+    void recordDrillSession(
+      drillSessionInput(
+        'approach-standard',
+        derivedClientId('approach-standard', completed.id),
+        completed.completedAt,
+        { ...sessionWithMovement },
+      ),
+    );
 
     let newPlayer = { ...player };
     if (movement.movement === 'PROMOTE' || movement.movement === 'EXPRESS_PROMOTE') {

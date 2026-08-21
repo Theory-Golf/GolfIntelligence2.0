@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import SectionHeader from '@/components/playerpath/SectionHeader';
+import { derivedClientId } from '@/lib/playerpath/clientId';
+import { drillSessionInput, recordDrillSession } from '@/lib/playerpath/record';
 import { seedWeekConfig, todayISO, uid } from './defaults';
 import {
   buildSessionBlocks,
@@ -210,6 +212,17 @@ export default function PracticePlanner() {
     setLastCompleted(record);
     setSession(null);
     setStage('complete');
+    // Local write first (the effects above persist it), then push to the
+    // player's account so the session follows them off this device. The
+    // record's own id is the idempotency key.
+    void recordDrillSession(
+      drillSessionInput(
+        'practice-session',
+        derivedClientId('practice-session', record.id),
+        record.completedAt,
+        { ...record },
+      ),
+    );
   }, [session, weekConfig]);
 
   const handleDiscardSession = useCallback(() => {

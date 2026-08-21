@@ -1,4 +1,5 @@
 import PlayerPathOverview from '@/components/playerpath/Overview';
+import PracticeSync from '@/components/playerpath/PracticeSync';
 import PracticePlanner from '@/components/PracticePlanner';
 import PracticeLibrary from '@/components/PracticeLibrary';
 
@@ -10,6 +11,9 @@ export const metadata = {
 export default function PlayerPathPage() {
   return (
     <>
+      {/* Flushes queued practice writes and uploads pre-sync local history. */}
+      <PracticeSync />
+
       {/* ── 01 · PlayerPath — what it is, what it includes ────── */}
       <PlayerPathOverview />
 

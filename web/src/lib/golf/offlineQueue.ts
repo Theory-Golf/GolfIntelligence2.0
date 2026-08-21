@@ -18,6 +18,8 @@ import type {
   ShotInsert,
   ShotUpdate,
 } from './db/types';
+import { saveDrillSession } from '@/lib/playerpath/db';
+import type { DrillSessionInsert } from '@/lib/playerpath/db';
 import { createId } from './utils/uuid';
 
 const STORAGE_KEY = 'tg_offline_queue';
@@ -30,7 +32,16 @@ export type QueueEntry =
   | { id: string; type: 'updateHole'; payload: HoleUpdate; createdAt: string; attempts: number }
   | { id: string; type: 'upsertShot'; payload: ShotInsert; createdAt: string; attempts: number }
   | { id: string; type: 'updateShot'; payload: ShotUpdate; createdAt: string; attempts: number }
-  | { id: string; type: 'deleteShot'; payload: { id: string }; createdAt: string; attempts: number };
+  | { id: string; type: 'deleteShot'; payload: { id: string }; createdAt: string; attempts: number }
+  // PlayerPath practice results. Safe to retry: the row upserts on
+  // (player_id, drill_type, client_id), so a flush never duplicates.
+  | {
+      id: string;
+      type: 'upsertDrillSession';
+      payload: DrillSessionInsert;
+      createdAt: string;
+      attempts: number;
+    };
 
 export type QueueEntryInput =
   | { type: 'upsertRound'; payload: RoundInsert }
@@ -39,7 +50,8 @@ export type QueueEntryInput =
   | { type: 'updateHole'; payload: HoleUpdate }
   | { type: 'upsertShot'; payload: ShotInsert }
   | { type: 'updateShot'; payload: ShotUpdate }
-  | { type: 'deleteShot'; payload: { id: string } };
+  | { type: 'deleteShot'; payload: { id: string } }
+  | { type: 'upsertDrillSession'; payload: DrillSessionInsert };
 
 function readQueue(): QueueEntry[] {
   if (typeof window === 'undefined') return [];
@@ -111,6 +123,9 @@ async function runWrite(input: QueueEntryInput): Promise<void> {
       return;
     case 'deleteShot':
       await deleteShot(input.payload.id);
+      return;
+    case 'upsertDrillSession':
+      await saveDrillSession(input.payload);
       return;
   }
 }

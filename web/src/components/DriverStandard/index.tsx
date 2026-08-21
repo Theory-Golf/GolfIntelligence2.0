@@ -14,6 +14,9 @@ import {
   StatRow,
   bandClasses,
 } from '@/components/playerpath/ui';
+import { LS_DRIVER_STANDARD } from '@/lib/constants';
+import { derivedClientId } from '@/lib/playerpath/clientId';
+import { drillSessionInput, recordDrillSession } from '@/lib/playerpath/record';
 
 // ── Domain ───────────────────────────────────────────────────────────
 
@@ -85,7 +88,7 @@ const emptyTrack = (tier = 1): TrackState => ({
   dismissedPatterns: [],
 });
 
-const LS_KEY = 'driver-standard:v1';
+const LS_KEY = LS_DRIVER_STANDARD;
 
 const loadState = (): PersistedState => {
   if (typeof window === 'undefined') return defaultState();
@@ -1069,6 +1072,20 @@ export default function DriverStandard() {
         [track]: newTrackState,
       },
     });
+
+    // Local write first (the state effect persists it), then push to the
+    // player's account. Records are keyed on a timestamp, so derive a stable
+    // uuid from it — the upload derives the same one.
+    void recordDrillSession(
+      drillSessionInput(
+        'driver-standard',
+        // Keyed on timestamp alone: the stored history records carry no
+        // track, so the one-time upload must derive the same value.
+        derivedClientId('driver-standard', sessionRecord.timestamp),
+        new Date(sessionRecord.timestamp),
+        { track, ...sessionRecord },
+      ),
+    );
 
     setLastResult({
       hits: finalHits,

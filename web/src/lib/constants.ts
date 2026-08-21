@@ -29,3 +29,26 @@ export const LS_INSIDE_TWENTY_SESSIONS = 'theory.golf:player-path:inside-twenty:
 
 // Winners Circle (Putting Hub)
 export const LS_WINNERS_CIRCLE_RUNS = 'theory.golf:player-path:winners-circle:v1';
+
+// ── Standards tools ────────────────────────────────────────────────────
+// These keys were hard-coded inside their components. The VALUES must not
+// change — players have history stored under them, and the one-time upload
+// in lib/playerpath/migrateLocal.ts reads them. New keys should follow the
+// `theory.golf:player-path:<tool>:v1` convention above.
+export const LS_DRIVER_STANDARD = 'driver-standard:v1';
+export const LS_WEDGE_STANDARD_WEDGES = 'wm-wedges';
+export const LS_WEDGE_STANDARD_LEVEL = 'wm-level';
+export const LS_WEDGE_STANDARD_HISTORY = 'wm-history';
+export const LS_WEDGE_STANDARD_STATS = 'wm-stats';
+export const LS_WEDGE_STANDARD_CREATIVE = 'wm-creative';
+export const LS_APPROACH_STANDARD_PLAYER = 'as_player';
+export const LS_APPROACH_STANDARD_SESSIONS = 'as_sessions';
+
+// ── Practice planner (The Plan) ────────────────────────────────────────
+// Written by components/PracticePlanner/storage.ts under the tg_practice_
+// prefix. Declared here so the one-time upload can read completed sessions.
+export const LS_PRACTICE_SESSIONS = 'tg_practice_sessions';
+
+// ── Practice sync ──────────────────────────────────────────────────────
+// Set once local practice history has been uploaded to the player's account.
+export const LS_PRACTICE_MIGRATED = 'tg_practice_migrated_v1';

@@ -2,6 +2,8 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { LS_PUTTING_SESSIONS, LS_PUTTING_PUTTERS } from '@/lib/constants';
+import { derivedClientId } from '@/lib/playerpath/clientId';
+import { drillSessionInput, recordDrillSession } from '@/lib/playerpath/record';
 import './RoundSimulation.css';
 
 // ── Types ────────────────────────────────────────────────────────
@@ -337,6 +339,21 @@ export default function RoundSimulation() {
     const updated = [newSession, ...pastSessions].slice(0, 50);
     setPastSessions(updated);
     try { localStorage.setItem(LS_PUTTING_SESSIONS, JSON.stringify(updated)); } catch (_) {}
+    // Local write first so the session is never lost, then push to the
+    // player's account. Sessions are keyed on a timestamp, so derive a stable
+    // uuid from it — the upload derives the same one.
+    void recordDrillSession(
+      drillSessionInput(
+        'round-simulation',
+        derivedClientId('round-simulation', newSession.id),
+        newSession.date,
+        {
+          putter: newSession.putter,
+          ballMarking: newSession.ballMarking,
+          stats: newSession.stats,
+        },
+      ),
+    );
   }
 
   function startSession() {

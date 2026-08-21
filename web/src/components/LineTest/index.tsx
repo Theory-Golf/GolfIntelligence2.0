@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, X } from 'lucide-react';
 import { CLUB_OPTIONS, DEFAULT_CLUBS } from '@/components/WeatherYardageCard/StepMyBag';
 import { LS_CLUBS, LS_LINE_TEST_SESSIONS } from '@/lib/constants';
+import { derivedClientId } from '@/lib/playerpath/clientId';
+import { drillSessionInput, recordDrillSession } from '@/lib/playerpath/record';
 
 // ── Domain ───────────────────────────────────────────────────────────
 
@@ -1682,8 +1684,20 @@ export default function LineTest() {
         shots,
       );
       const next = [...sessions, result];
+      // Local write first so the result is never lost, then push to the
+      // player's account. session_id falls back to a non-UUID string when
+      // crypto.randomUUID is unavailable, so derive the key from it — the
+      // upload derives the same value, keeping both paths idempotent.
       setSessions(next);
       saveSessions(next);
+      void recordDrillSession(
+        drillSessionInput(
+          'line-test',
+          derivedClientId('line-test', result.session_id),
+          result.timestamp,
+          { ...result },
+        ),
+      );
       setLastResult(result);
       setActive(null);
       setScreen('result');
