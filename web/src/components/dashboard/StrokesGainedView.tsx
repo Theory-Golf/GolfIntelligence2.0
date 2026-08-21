@@ -329,8 +329,8 @@ export function StrokesGainedView({ metrics, filteredShots }: { metrics: Tiger5M
         </div>
 
         <div style={{ background: 'var(--charcoal)', borderRadius: '4px', overflow: 'hidden' }}>
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px' }}>
+          <div className="gi-table-scroll">
+            <table style={{ minWidth: '520px', width: '100%', borderCollapse: 'collapse', fontSize: '11px' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--pitch)' }}>
                   <th style={{ padding: '10px 12px', textAlign: 'left', color: 'var(--ash)', fontWeight: 600, background: 'var(--obsidian)', position: 'sticky', left: 0, zIndex: 1 }}>
