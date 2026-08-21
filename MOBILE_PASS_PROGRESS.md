@@ -25,7 +25,7 @@ Branch: `claude/golf-dashboard-mobile-v8go5e`. Commit prefix: `mobile(N):`.
 - [x] **9** — `web/src/lib/useMediaQuery.ts`
 - [x] **10** — chart props (one commit per file)
 - [x] **11** — `barSize` → `maxBarSize`
-- [ ] **12a** — sticky first column: `CoachingView` + 2 heat maps
+- [x] **12a** — sticky first column: `CoachingView` + 2 heat maps
 - [ ] **12b** — type scale: `.value-*` clamps, `.nav-tab` 12px, tables 13px, ticks 12px
 - [ ] **cleanup** — dead CSS, stale comments, duplicated tokens, delete this file
 
