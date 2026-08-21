@@ -8,6 +8,7 @@ import { useState } from 'react';
 import type { PuttingMetrics, LagPuttingMetrics, ProcessedShot } from '@/lib/golf/types';
 import { getStrokeGainedColor, formatStrokesGained, getShotSGColor, chartColors } from '@/lib/golf/tokens';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { useMediaQuery, MOBILE_QUERY } from '@/lib/useMediaQuery';
 
 export function PuttingView({ metrics, lagMetrics, filteredShots }: { metrics: PuttingMetrics; lagMetrics: LagPuttingMetrics; filteredShots: ProcessedShot[] }) {
   const {
@@ -319,6 +320,7 @@ export function PuttingView({ metrics, lagMetrics, filteredShots }: { metrics: P
  * Lag Putting Section - Card and two donut charts for lag putts (>20 ft)
  */
 function LagPuttingSection({ metrics }: { metrics: LagPuttingMetrics }) {
+  const isNarrow = useMediaQuery(MOBILE_QUERY);
   const { avgLeaveDistance, totalLagPutts, threePuttsByStartDistance, leaveDistanceDistribution } = metrics;
 
   // Format data for donut charts
@@ -398,8 +400,8 @@ function LagPuttingSection({ metrics }: { metrics: LagPuttingMetrics }) {
                   data={threePuttsData}
                   cx="50%"
                   cy="50%"
-                  innerRadius={50}
-                  outerRadius={80}
+                  innerRadius="45%"
+                  outerRadius="72%"
                   paddingAngle={2}
                   dataKey="value"
                   nameKey="name"
@@ -437,8 +439,8 @@ function LagPuttingSection({ metrics }: { metrics: LagPuttingMetrics }) {
                   data={leaveDistanceData}
                   cx="50%"
                   cy="50%"
-                  innerRadius={50}
-                  outerRadius={80}
+                  innerRadius="45%"
+                  outerRadius="72%"
                   paddingAngle={2}
                   dataKey="value"
                   nameKey="name"
