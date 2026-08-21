@@ -645,48 +645,50 @@ function DrivesTableSection({ shots }: { shots: ProcessedShot[] }) {
                   <span><strong>Course:</strong> {courseStr}</span>
                   <span><strong>Drives:</strong> {roundDrives.length}</span>
                 </div>
-                <table style={{ width: '100%', fontSize: '11px', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
-                  <thead>
-                    <tr style={{ borderBottom: '1px solid var(--ash)' }}>
-                      <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '8%' }}>Hole</th>
-                      <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '10%' }}>Non Driver</th>
-                      <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '11%' }}>Start Dist</th>
-                      <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '11%' }}>End Dist</th>
-                      <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '15%' }}>End Lie</th>
-                      <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '10%' }}>Penalty</th>
-                      <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '11%' }}>Driver Dist</th>
-                      <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '12%' }}>SG</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {roundDrives
-                      .sort((a, b) => a.holeNumber - b.holeNumber)
-                      .map((drive, idx) => (
-                        <tr key={idx} style={{ borderBottom: '1px solid var(--dark)' }}>
-                          <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{drive.holeNumber}</td>
-                          <td style={{ padding: '6px', textAlign: 'center', color: drive.clubCategory === 'Non-driver' ? 'var(--bogey)' : 'var(--chalk)' }}>
-                            {drive.clubCategory === 'Non-driver' ? 'Yes' : ''}
-                          </td>
-                          <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>
-                            {drive.startingDistance}
-                          </td>
-                          <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>
-                            {drive.endingDistance}
-                          </td>
-                          <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{drive.endingLie}</td>
-                          <td style={{ padding: '6px', textAlign: 'center', color: drive.hasPenalty ? 'var(--scarlet)' : 'transparent' }}>
-                            {drive.hasPenalty ? 'Yes' : ''}
-                          </td>
-                          <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>
-                            {drive.startingDistance - drive.endingDistance}
-                          </td>
-                          <td style={{ padding: '6px', textAlign: 'center', color: getShotSGColor(drive.calculatedStrokesGained), fontFamily: 'var(--font-mono)' }}>
-                            {formatStrokesGained(drive.calculatedStrokesGained)}
-                          </td>
-                        </tr>
-                      ))}
-                  </tbody>
-                </table>
+                <div className="gi-table-scroll">
+                  <table style={{ minWidth: '660px', width: '100%', fontSize: '11px', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+                    <thead>
+                      <tr style={{ borderBottom: '1px solid var(--ash)' }}>
+                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '8%' }}>Hole</th>
+                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '10%' }}>Non Driver</th>
+                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '11%' }}>Start Dist</th>
+                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '11%' }}>End Dist</th>
+                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '15%' }}>End Lie</th>
+                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '10%' }}>Penalty</th>
+                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '11%' }}>Driver Dist</th>
+                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '12%' }}>SG</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {roundDrives
+                        .sort((a, b) => a.holeNumber - b.holeNumber)
+                        .map((drive, idx) => (
+                          <tr key={idx} style={{ borderBottom: '1px solid var(--dark)' }}>
+                            <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{drive.holeNumber}</td>
+                            <td style={{ padding: '6px', textAlign: 'center', color: drive.clubCategory === 'Non-driver' ? 'var(--bogey)' : 'var(--chalk)' }}>
+                              {drive.clubCategory === 'Non-driver' ? 'Yes' : ''}
+                            </td>
+                            <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>
+                              {drive.startingDistance}
+                            </td>
+                            <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>
+                              {drive.endingDistance}
+                            </td>
+                            <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{drive.endingLie}</td>
+                            <td style={{ padding: '6px', textAlign: 'center', color: drive.hasPenalty ? 'var(--scarlet)' : 'transparent' }}>
+                              {drive.hasPenalty ? 'Yes' : ''}
+                            </td>
+                            <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>
+                              {drive.startingDistance - drive.endingDistance}
+                            </td>
+                            <td style={{ padding: '6px', textAlign: 'center', color: getShotSGColor(drive.calculatedStrokesGained), fontFamily: 'var(--font-mono)' }}>
+                              {formatStrokesGained(drive.calculatedStrokesGained)}
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             );
           })}
