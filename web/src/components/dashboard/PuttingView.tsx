@@ -177,8 +177,8 @@ export function PuttingView({ metrics, lagMetrics, filteredShots }: { metrics: P
         <div style={{ marginTop: '32px' }}>
           <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>Putting by Distance</h4>
           <div style={{ background: 'var(--charcoal)', borderRadius: '4px', overflow: 'hidden' }}>
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px', tableLayout: 'fixed' }}>
+            <div className="gi-table-scroll">
+              <table style={{ minWidth: '640px', width: '100%', borderCollapse: 'collapse', fontSize: '11px', tableLayout: 'fixed' }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--pitch)' }}>
                     <th style={{ padding: '10px 12px', textAlign: 'left', color: 'var(--ash)', fontWeight: 600, background: 'var(--obsidian)', width: '140px' }}>
@@ -541,43 +541,45 @@ function PuttsTableSection({ shots }: { shots: ProcessedShot[] }) {
                   <span><strong>Course:</strong> {courseStr}</span>
                   <span><strong>Putts:</strong> {roundPutts.length}</span>
                 </div>
-                <table style={{ width: '100%', fontSize: '11px', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
-                  <thead>
-                    <tr style={{ borderBottom: '1px solid var(--ash)' }}>
-                      <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '10%' }}>Hole</th>
-                      <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '14%' }}>Start Dist</th>
-                      <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '14%' }}>End Dist</th>
-                      <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '14%' }}>Result</th>
-                      <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '14%' }}>SG</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {roundPutts
-                      .sort((a, b) => a.holeNumber - b.holeNumber)
-                      .map((putt, idx) => (
-                        <tr key={idx} style={{ borderBottom: '1px solid var(--dark)' }}>
-                          <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{putt.holeNumber}</td>
-                          <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>
-                            {putt.startingDistance}
-                          </td>
-                          <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>
-                            {putt.endingDistance}
-                          </td>
-                          <td style={{
-                            padding: '6px',
-                            textAlign: 'center',
-                            color: putt.endingDistance === 0 ? 'var(--under)' : putt.puttLongShort === 'Long' ? 'var(--double)' : 'var(--chalk)',
-                            fontWeight: putt.endingDistance === 0 ? 600 : 400
-                          }}>
-                            {putt.endingDistance === 0 ? 'Made' : (putt.puttLongShort || '-')}
-                          </td>
-                          <td style={{ padding: '6px', textAlign: 'center', color: getShotSGColor(putt.calculatedStrokesGained), fontFamily: 'var(--font-mono)' }}>
-                            {formatStrokesGained(putt.calculatedStrokesGained)}
-                          </td>
-                        </tr>
-                      ))}
-                  </tbody>
-                </table>
+                <div className="gi-table-scroll">
+                  <table style={{ minWidth: '420px', width: '100%', fontSize: '11px', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+                    <thead>
+                      <tr style={{ borderBottom: '1px solid var(--ash)' }}>
+                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '10%' }}>Hole</th>
+                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '14%' }}>Start Dist</th>
+                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '14%' }}>End Dist</th>
+                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '14%' }}>Result</th>
+                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '14%' }}>SG</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {roundPutts
+                        .sort((a, b) => a.holeNumber - b.holeNumber)
+                        .map((putt, idx) => (
+                          <tr key={idx} style={{ borderBottom: '1px solid var(--dark)' }}>
+                            <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{putt.holeNumber}</td>
+                            <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>
+                              {putt.startingDistance}
+                            </td>
+                            <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>
+                              {putt.endingDistance}
+                            </td>
+                            <td style={{
+                              padding: '6px',
+                              textAlign: 'center',
+                              color: putt.endingDistance === 0 ? 'var(--under)' : putt.puttLongShort === 'Long' ? 'var(--double)' : 'var(--chalk)',
+                              fontWeight: putt.endingDistance === 0 ? 600 : 400
+                            }}>
+                              {putt.endingDistance === 0 ? 'Made' : (putt.puttLongShort || '-')}
+                            </td>
+                            <td style={{ padding: '6px', textAlign: 'center', color: getShotSGColor(putt.calculatedStrokesGained), fontFamily: 'var(--font-mono)' }}>
+                              {formatStrokesGained(putt.calculatedStrokesGained)}
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             );
           })}
