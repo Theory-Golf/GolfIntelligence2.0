@@ -429,28 +429,30 @@ function RootCauseByFailTypeSection({ rootCauseByFailType, totalFails }: { rootC
                 <h5 style={{ marginBottom: '12px', color: 'var(--chalk)', fontSize: '13px', fontWeight: 600 }}>
                   {failType.label} ({data.totalCount})
                 </h5>
-                <table style={{ width: '100%', fontSize: '11px', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
-                  <thead>
-                    <tr style={{ borderBottom: '1px solid var(--ash)' }}>
-                      <th style={{ textAlign: 'left', padding: '6px', color: 'var(--ash)', width: '35%' }}>Root Cause</th>
-                      <th style={{ textAlign: 'right', padding: '6px', color: 'var(--ash)', width: '15%' }}>Count</th>
-                      <th style={{ textAlign: 'right', padding: '6px', color: 'var(--ash)', width: '20%' }}>% of Fail Type</th>
-                      <th style={{ textAlign: 'right', padding: '6px', color: 'var(--ash)', width: '15%' }}>% of Total</th>
-                      <th style={{ textAlign: 'right', padding: '6px', color: 'var(--ash)', width: '15%' }}>Total SG</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {rootCauseItems.map((item, idx) => (
-                      <tr key={idx} style={{ borderBottom: '1px solid var(--dark)' }}>
-                        <td style={{ padding: '6px', color: 'var(--chalk)' }}>{item.label}</td>
-                        <td style={{ padding: '6px', textAlign: 'right', color: 'var(--chalk)' }}>{item.count}</td>
-                        <td style={{ padding: '6px', textAlign: 'right', color: 'var(--ash)' }}>{item.percentageOfFailType.toFixed(0)}%</td>
-                        <td style={{ padding: '6px', textAlign: 'right', color: 'var(--ash)' }}>{item.percentageOfTotal.toFixed(0)}%</td>
-                        <td style={{ padding: '6px', textAlign: 'right', color: getStrokeGainedColor(item.sgTotal || 0) }}>{formatStrokesGained(item.sgTotal || 0)}</td>
+                <div className="gi-table-scroll">
+                  <table style={{ minWidth: '500px', width: '100%', fontSize: '11px', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+                    <thead>
+                      <tr style={{ borderBottom: '1px solid var(--ash)' }}>
+                        <th style={{ textAlign: 'left', padding: '6px', color: 'var(--ash)', width: '35%' }}>Root Cause</th>
+                        <th style={{ textAlign: 'right', padding: '6px', color: 'var(--ash)', width: '15%' }}>Count</th>
+                        <th style={{ textAlign: 'right', padding: '6px', color: 'var(--ash)', width: '20%' }}>% of Fail Type</th>
+                        <th style={{ textAlign: 'right', padding: '6px', color: 'var(--ash)', width: '15%' }}>% of Total</th>
+                        <th style={{ textAlign: 'right', padding: '6px', color: 'var(--ash)', width: '15%' }}>Total SG</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {rootCauseItems.map((item, idx) => (
+                        <tr key={idx} style={{ borderBottom: '1px solid var(--dark)' }}>
+                          <td style={{ padding: '6px', color: 'var(--chalk)' }}>{item.label}</td>
+                          <td style={{ padding: '6px', textAlign: 'right', color: 'var(--chalk)' }}>{item.count}</td>
+                          <td style={{ padding: '6px', textAlign: 'right', color: 'var(--ash)' }}>{item.percentageOfFailType.toFixed(0)}%</td>
+                          <td style={{ padding: '6px', textAlign: 'right', color: 'var(--ash)' }}>{item.percentageOfTotal.toFixed(0)}%</td>
+                          <td style={{ padding: '6px', textAlign: 'right', color: getStrokeGainedColor(item.sgTotal || 0) }}>{formatStrokesGained(item.sgTotal || 0)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             );
           })}
@@ -522,34 +524,36 @@ function Tiger5FailDetailsSection({ failDetails }: { failDetails: Tiger5FailDeta
                       <span><strong>Hole:</strong> {detail.hole} (Par {detail.par})</span>
                       <span><strong>Score:</strong> {detail.score}</span>
                     </div>
-                    <table style={{ width: '100%', fontSize: '11px', borderCollapse: 'collapse' }}>
-                      <thead>
-                        <tr style={{ borderBottom: '1px solid var(--ash)' }}>
-                          <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>Shot #</th>
-                          <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>Start Lie</th>
-                          <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>Start Dist</th>
-                          <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>End Lie</th>
-                          <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>End Dist</th>
-                          <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>Penalty</th>
-                          <th style={{ textAlign: 'right', padding: '4px', color: 'var(--ash)' }}>SG</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {detail.shots.map((shot, shotIdx) => (
-                          <tr key={shotIdx} style={{ borderBottom: '1px solid var(--charcoal)' }}>
-                            <td style={{ padding: '4px' }}>{shot.shotNumber}</td>
-                            <td style={{ padding: '4px' }}>{shot.startingLie}</td>
-                            <td style={{ padding: '4px' }}>{shot.startingDistance}</td>
-                            <td style={{ padding: '4px' }}>{shot.endingLie}</td>
-                            <td style={{ padding: '4px' }}>{shot.endingDistance}</td>
-                            <td style={{ padding: '4px' }}>{shot.hasPenalty ? 'Yes' : ''}</td>
-                            <td style={{ padding: '4px', textAlign: 'right', color: getShotSGColor(shot.calculatedStrokesGained) }}>
-                              {formatStrokesGained(shot.calculatedStrokesGained)}
-                            </td>
+                    <div className="gi-table-scroll">
+                      <table style={{ minWidth: '660px', width: '100%', fontSize: '11px', borderCollapse: 'collapse' }}>
+                        <thead>
+                          <tr style={{ borderBottom: '1px solid var(--ash)' }}>
+                            <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>Shot #</th>
+                            <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>Start Lie</th>
+                            <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>Start Dist</th>
+                            <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>End Lie</th>
+                            <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>End Dist</th>
+                            <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>Penalty</th>
+                            <th style={{ textAlign: 'right', padding: '4px', color: 'var(--ash)' }}>SG</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody>
+                          {detail.shots.map((shot, shotIdx) => (
+                            <tr key={shotIdx} style={{ borderBottom: '1px solid var(--charcoal)' }}>
+                              <td style={{ padding: '4px' }}>{shot.shotNumber}</td>
+                              <td style={{ padding: '4px' }}>{shot.startingLie}</td>
+                              <td style={{ padding: '4px' }}>{shot.startingDistance}</td>
+                              <td style={{ padding: '4px' }}>{shot.endingLie}</td>
+                              <td style={{ padding: '4px' }}>{shot.endingDistance}</td>
+                              <td style={{ padding: '4px' }}>{shot.hasPenalty ? 'Yes' : ''}</td>
+                              <td style={{ padding: '4px', textAlign: 'right', color: getShotSGColor(shot.calculatedStrokesGained) }}>
+                                {formatStrokesGained(shot.calculatedStrokesGained)}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 ))}
               </div>
