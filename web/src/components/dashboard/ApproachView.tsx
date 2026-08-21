@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { getStrokeGainedColor, formatStrokesGained, getShotSGColor, chartColors } from '@/lib/golf/tokens';
+import { useMediaQuery, MOBILE_QUERY } from '@/lib/useMediaQuery';
 import type { ApproachMetrics, ApproachDistanceBucket, ApproachHeatMapData, ProcessedShot } from '@/lib/golf/types';
 
 export function ApproachView({ metrics, approachByDistance, approachFromRough, approachHeatMapData, filteredShots }: { metrics: ApproachMetrics; approachByDistance: ApproachDistanceBucket[]; approachFromRough: ApproachDistanceBucket[]; approachHeatMapData: ApproachHeatMapData; filteredShots: ProcessedShot[] }) {
@@ -341,6 +342,7 @@ function ApproachTableSection({ shots }: { shots: ProcessedShot[] }) {
  * Approach Ending Lie Section - Shows ending lie distribution and SG by ending lie
  */
 function ApproachEndingLieSection({ filteredShots }: { filteredShots: ProcessedShot[] }) {
+  const isNarrow = useMediaQuery(MOBILE_QUERY);
   // Filter to approach shots only
   const approachShots = useMemo(() => {
     return filteredShots.filter(shot => shot.shotType === 'Approach');
@@ -458,7 +460,7 @@ function ApproachEndingLieSection({ filteredShots }: { filteredShots: ProcessedS
           <p style={{ fontSize: '11px', color: 'var(--ash)', marginBottom: '16px' }}>
             Distribution of where approach shots end up
           </p>
-          <ResponsiveContainer width="100%" height={280}>
+          <ResponsiveContainer width="100%" height={isNarrow ? 220 : 280}>
             <BarChart
               data={endingLieData}
               margin={{ top: 10, right: 30, left: 20, bottom: 50 }}
@@ -468,9 +470,9 @@ function ApproachEndingLieSection({ filteredShots }: { filteredShots: ProcessedS
                 dataKey="lie"
                 stroke="var(--ash)"
                 tick={{ fill: 'var(--ash)', fontSize: 10 }}
-                angle={-45}
-                textAnchor="end"
-                height={50}
+                angle={isNarrow ? 0 : -45}
+                textAnchor={isNarrow ? 'middle' : 'end'}
+                height={isNarrow ? 24 : 50}
               />
               <YAxis
                 stroke="var(--ash)"
@@ -500,7 +502,7 @@ function ApproachEndingLieSection({ filteredShots }: { filteredShots: ProcessedS
           <p style={{ fontSize: '11px', color: 'var(--ash)', marginBottom: '16px' }}>
             Strokes Gained performance by ending location
           </p>
-          <ResponsiveContainer width="100%" height={280}>
+          <ResponsiveContainer width="100%" height={isNarrow ? 220 : 280}>
             <BarChart
               data={endingLieData}
               margin={{ top: 10, right: 30, left: 20, bottom: 50 }}
@@ -510,9 +512,9 @@ function ApproachEndingLieSection({ filteredShots }: { filteredShots: ProcessedS
                 dataKey="lie"
                 stroke="var(--ash)"
                 tick={{ fill: 'var(--ash)', fontSize: 10 }}
-                angle={-45}
-                textAnchor="end"
-                height={50}
+                angle={isNarrow ? 0 : -45}
+                textAnchor={isNarrow ? 'middle' : 'end'}
+                height={isNarrow ? 24 : 50}
               />
               <YAxis
                 stroke="var(--ash)"
