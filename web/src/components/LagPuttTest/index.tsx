@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { LS_LAG_PUTT_SESSIONS } from '@/lib/constants';
 import { useDrillHistory } from '@/lib/golf/useDrillHistory';
 import './LagPuttTest.css';
@@ -28,21 +28,21 @@ interface SavedSession {
 const DISTANCE_OPTIONS = [27, 30, 33, 36, 39, 42, 45, 48, 51, 54, 57, 60];
 const NUM_PUTTS = 18;
 
-// ── Score table — buckets in whole feet ──────────────────────────
-// A "good" lag putt finishes within ~10% of its starting distance; since most
-// putts here start beyond 30 ft, that puts the birdie line at ~3 ft.
+// ── Score table — buckets in whole feet, mapped to Swedish scoring ──
+// Source ranges (m): 0–0.5 = -1, 0.5–1 = 0, 1–2 = +1, 2–3 = +2, 3+ = +3.
+// Converted by taking each whole-foot bucket's distance in meters.
 const BUCKET_SCORES: Record<string, number> = {
   holed: -2,
-  '1': -1,
-  '2': -1,
-  '3': -1,
-  '4': 0,
-  '5': 0,
-  '6': 1,
-  '7': 1,
-  '8': 2,
-  '9': 2,
-  '10': 3,
+  '1': -1, // 0.30 m
+  '2': 0,  // 0.61 m
+  '3': 0,  // 0.91 m
+  '4': 1,  // 1.22 m
+  '5': 1,  // 1.52 m
+  '6': 1,  // 1.83 m
+  '7': 2,  // 2.13 m
+  '8': 2,  // 2.44 m
+  '9': 2,  // 2.74 m
+  '10': 3, // 3.05+ m
 };
 
 const BUCKET_LABELS: Array<{ key: number | 'holed'; label: string }> = [
@@ -107,8 +107,12 @@ function generateDistances(): number[] {
 const getSessionId = (s: SavedSession) => String(s.id);
 const getSessionPlayedAt = (s: SavedSession) => s.date;
 
+interface LagPuttTestProps {
+  onScreenChange?: (screen: 'home' | 'play' | 'results') => void;
+}
+
 // ── Component ────────────────────────────────────────────────────
-export default function LagPuttTest() {
+export default function LagPuttTest({ onScreenChange }: LagPuttTestProps = {}) {
   const [screen, setScreen] = useState<'home' | 'play' | 'results'>('home');
   const [distances, setDistances] = useState<number[]>([]);
   const [results, setResults] = useState<PuttResult[]>([]);
@@ -122,6 +126,10 @@ export default function LagPuttTest() {
     getId: getSessionId,
     getPlayedAt: getSessionPlayedAt,
   });
+
+  useEffect(() => {
+    onScreenChange?.(screen);
+  }, [screen, onScreenChange]);
 
   function startSession() {
     setDistances(generateDistances());
@@ -201,10 +209,10 @@ export default function LagPuttTest() {
             </thead>
             <tbody>
               <tr><td>Holed</td><td>−2 (Eagle)</td></tr>
-              <tr><td>1–3 ft</td><td>−1 (Birdie)</td></tr>
-              <tr><td>4–5 ft</td><td>0 (Par)</td></tr>
-              <tr><td>6–7 ft</td><td>+1 (Bogey)</td></tr>
-              <tr><td>8–9 ft</td><td>+2 (Double)</td></tr>
+              <tr><td>1 ft</td><td>−1 (Birdie)</td></tr>
+              <tr><td>2–3 ft</td><td>0 (Par)</td></tr>
+              <tr><td>4–6 ft</td><td>+1 (Bogey)</td></tr>
+              <tr><td>7–9 ft</td><td>+2 (Double)</td></tr>
               <tr><td>10+ ft</td><td>+3 (Triple)</td></tr>
             </tbody>
           </table>
@@ -287,11 +295,8 @@ export default function LagPuttTest() {
               );
             })}
           </div>
-        </div>
 
-        {selectedBucket !== null && selectedBucket !== 'holed' && (
-          <div className="lpt-card">
-            <p className="lpt-card-eyebrow">Direction</p>
+          {selectedBucket !== null && selectedBucket !== 'holed' && (
             <div className="lpt-dir-row">
               <button
                 className={`lpt-dir-btn${selectedDir === 'short' ? ' is-selected' : ''}`}
@@ -306,8 +311,8 @@ export default function LagPuttTest() {
                 Long
               </button>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
         <button
           className="lpt-primary-btn"
