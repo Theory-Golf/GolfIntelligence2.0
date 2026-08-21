@@ -204,7 +204,7 @@ export function CoachingView({ metrics }: { metrics: CoachTableMetrics }) {
       {/* Table */}
       <div style={{ background: 'var(--charcoal)', borderRadius: '4px', overflow: 'hidden' }}>
         <div className="gi-table-scroll" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
-          <table style={{ minWidth: '1400px', width: '100%', borderCollapse: 'collapse', fontSize: '11px' }}>
+          <table className="gi-sticky-col gi-sticky-col-zebra" style={{ minWidth: '1400px', width: '100%', borderCollapse: 'collapse', fontSize: '11px' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--pitch)', background: 'var(--obsidian)', position: 'sticky', top: 0, zIndex: 10 }}>
                 {columns.map(column => (

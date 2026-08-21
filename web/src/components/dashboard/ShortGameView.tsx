@@ -271,7 +271,7 @@ function ShortGameHeatMapSection({ data }: { data: ShortGameHeatMapData }) {
       </div>
 
       <div className="gi-table-scroll">
-        <table style={{ minWidth: '640px', width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+        <table className="gi-sticky-col" style={{ minWidth: '640px', width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
           <thead>
             <tr>
               <th style={{ padding: '12px', textAlign: 'left', color: 'var(--ash)', fontWeight: '600', borderBottom: '1px solid var(--border)' }}>Starting Lie</th>

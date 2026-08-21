@@ -944,3 +944,32 @@
     max-height: none;
   }
 }
+
+/* ── Sticky First Column ──────────────────────────────────
+   For tables wide enough to scroll, pin the identifying column
+   so the numbers still have a label attached once you scroll.
+
+   The pinned cell needs an opaque background of its own or the
+   scrolled columns show straight through it. Two variants,
+   because the tables differ: the default paints a fixed colour,
+   while -zebra takes the row's own background, which is what
+   striped tables like the coach comparison need. */
+.gi-sticky-col th:first-child,
+.gi-sticky-col td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: var(--gi-sticky-col-bg, var(--obsidian));
+  box-shadow: inset -1px 0 0 var(--pitch);
+}
+
+/* Above its own row's other cells; the header row sets its own
+   stacking context, so this only has to beat its siblings. */
+.gi-sticky-col thead th:first-child {
+  z-index: 3;
+}
+
+.gi-sticky-col-zebra th:first-child,
+.gi-sticky-col-zebra td:first-child {
+  background: inherit;
+}
