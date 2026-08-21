@@ -451,6 +451,13 @@
 
 /* ── Filter Sidebar ───────────────────────────────────── */
 .filter-sidebar {
+  /* border-box so the declared width and height are the OUTER box.
+     Under content-box the 20px padding and 1px border made this
+     321px wide against .main-with-sidebar's 280px margin, putting
+     41px of dashboard content underneath the sidebar (25px in the
+     collapsed state), and made the mobile drawer's 100dvh resolve
+     to 884px in an 844px viewport. */
+  box-sizing: border-box;
   width: 280px;
   background: var(--obsidian);
   border-right: 1px solid var(--pitch);
