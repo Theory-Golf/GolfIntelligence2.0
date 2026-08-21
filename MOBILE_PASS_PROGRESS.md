@@ -15,7 +15,7 @@ Branch: `claude/golf-dashboard-mobile-v8go5e`. Commit prefix: `mobile(N):`.
 ## Steps
 
 - [x] **1** — grid ladder CSS in `dashboard.css` + `overflow-x: clip` on `.app`
-- [ ] **2** — swap 23 inline grids to ladder classes (8 files, one commit each)
+- [x] **2** — swap 23 inline grids to ladder classes (8 files, one commit each)
 - [ ] **3** — drawer CSS: `@media (max-width: 767px)` block, backdrop, fab, close, desktop guards
 - [ ] **4** — `Dashboard.tsx`: `filtersOpen`, close-on-tab-change, scroll lock, trigger
 - [ ] **5** — `FilterBar.tsx`: `isOpen`/`onClose`, backdrop, close button, `:56` gate fix
