@@ -57,11 +57,30 @@ See `web/.env.example` for required variables:
 
 Read these before touching `supabase/migrations/` or building coach/team features.
 
-**The repo describes 4 of ~17 production tables.** `supabase/migrations/` covers `profiles`,
-`teams`, `team_members`, and `drill_sessions`. Missing: `players`, `coaches`, `coach_players`,
-`schools`, `ethos_papers`, `courses`, `holes`, `rounds`, `shots`, and three `*_edits` audit
-tables — all created outside the repo. A clean checkout cannot rebuild the database. Baselining
-the live schema is outstanding work.
+**The migrations rebuild the database.** `supabase/migrations/` was catching up
+to a schema that had largely been created by hand in the dashboard; `0000_baseline.sql`
+is the snapshot that closed that gap. Applying `0000` through `0005` to an empty database
+reproduces production exactly — 17 tables, 173 columns, 86 constraints, 25 indexes,
+8 functions, 10 triggers, 42 policies, 1 view. Every file is idempotent, so re-running
+against the live project is a no-op.
+
+To verify after a schema change, rebuild locally and diff the catalogs against production:
+
+```bash
+createdb tg && psql -d tg -c "create schema auth" \
+  -c "create table auth.users (id uuid primary key, email text, raw_user_meta_data jsonb)" \
+  -c "create function auth.uid() returns uuid language sql stable as \$\$ select null::uuid \$\$"
+for f in supabase/migrations/*.sql; do psql -d tg -v ON_ERROR_STOP=1 -f "$f"; done
+```
+
+Regenerate TypeScript types for the schema with Supabase's `generate_typescript_types`.
+The hand-written row types in `web/src/lib/{golf,playerpath}/db/types.ts` were last
+checked against generated output and matched.
+
+**Two known lints, both pre-existing.** `set_updated_at`, `set_drill_sessions_updated_at`,
+and `shots_no_play_after_holed` have a mutable `search_path`; several `SECURITY DEFINER`
+functions are executable by `anon` via RPC. Neither was introduced by recent work — see
+`get_advisors` for the current list.
 
 **There are two coach–player models, and only one is wired up.**
 
