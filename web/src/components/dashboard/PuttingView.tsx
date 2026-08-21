@@ -62,7 +62,7 @@ export function PuttingView({ metrics, lagMetrics, filteredShots }: { metrics: P
       <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>Putting Performance</h4>
 
       {/* Hero Cards - 5 metrics in a grid */}
-      <div className="grid" style={{ gridTemplateColumns: 'repeat(5, 1fr)', gap: '16px' }}>
+      <div className="grid-cards-5" style={{ gap: '16px' }}>
 
         {/* Card 1: Total SG Putting */}
         <div className="card-hero is-flagship">
@@ -368,7 +368,7 @@ function LagPuttingSection({ metrics }: { metrics: LagPuttingMetrics }) {
       <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>Lag Putting</h4>
 
       {/* Card and First Chart Row */}
-      <div className="grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+      <div className="grid-cards-2" style={{ gap: '16px' }}>
 
         {/* Card: Avg. Leave Distance */}
         <div className="card-hero">
