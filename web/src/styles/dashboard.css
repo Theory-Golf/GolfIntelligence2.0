@@ -23,6 +23,10 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  /* `clip`, never `hidden`: overflow-x: hidden computes overflow-y
+     to auto, which creates a scroll container and silently breaks
+     position: sticky for every descendant (the tab strip). */
+  overflow-x: clip;
 }
 
 /* ── Header ───────────────────────────────────────────── */
@@ -344,6 +348,72 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 2px;
+}
+
+/* ── Responsive Grid Ladders ──────────────────────────────
+   Mobile-first. Each class sets only `display` and
+   `grid-template-columns`, so the per-call-site inline `gap`,
+   `margin` and `background` on each grid keep working.
+
+   Column counts at >=1024px match the previous hardcoded inline
+   values exactly, so desktop layout is unchanged.
+
+   minmax(0, 1fr) rather than 1fr: `1fr` means minmax(auto, 1fr),
+   and that auto min-content floor is what makes these grids
+   overflow a narrow viewport instead of shrinking within it.
+
+   tiles = compact .card-stat (a label and a number). Floors at
+           2-up, which stays scannable on a phone.
+   cards = .card-hero (large values or paragraphs). Floors at
+           1-up, since they are unreadable any narrower. */
+.grid-tiles-3, .grid-tiles-4, .grid-tiles-5, .grid-tiles-7,
+.grid-cards-2, .grid-cards-3, .grid-cards-5,
+.grid-autofit, .grid-pair {
+  display: grid;
+}
+
+/* Base: < 640px */
+.grid-tiles-3,
+.grid-tiles-4,
+.grid-tiles-5,
+.grid-tiles-7 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+.grid-cards-2,
+.grid-cards-3,
+.grid-cards-5,
+.grid-pair { grid-template-columns: minmax(0, 1fr); }
+
+/* Dynamic child counts (see DrivingView ProblemDriveGroup).
+   min(100%, 160px) keeps the track floor from exceeding the
+   container when it is narrower than 160px. */
+.grid-autofit { grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr)); }
+
+@media (min-width: 640px) {
+  .grid-tiles-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid-tiles-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid-tiles-5 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .grid-tiles-7 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+  .grid-cards-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid-cards-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid-cards-5 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* Chart pairs stack later than stat grids — two recharts
+   containers side by side are unreadable below a tablet. */
+@media (min-width: 768px) {
+  .grid-pair { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (min-width: 1024px) {
+  .grid-tiles-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .grid-tiles-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .grid-tiles-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .grid-tiles-7 { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+
+  .grid-cards-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid-cards-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .grid-cards-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 }
 
 /* ── Scrollbar ────────────────────────────────────────── */
