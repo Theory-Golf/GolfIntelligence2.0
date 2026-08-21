@@ -37,7 +37,7 @@ export function Tiger5View({ metrics, lastUpdated }: { metrics: Tiger5Metrics; l
       <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>Tiger 5 Performance</h4>
 
       {/* Hero Cards - Section 1: Tiger 5 Fails, Average Score, Rounds */}
-      <div className="grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+      <div className="grid-cards-3" style={{ gap: '16px' }}>
         {/* Card 1: Total Tiger 5 Fails */}
         <HeroCardWithSubValues
           label="Tiger 5 Fails"
@@ -69,7 +69,7 @@ export function Tiger5View({ metrics, lastUpdated }: { metrics: Tiger5Metrics; l
       </div>
 
       {/* Stat Cards - Tiger 5 Fail Breakdown */}
-      <div className="grid" style={{ gridTemplateColumns: 'repeat(5, 1fr)', gap: '12px', marginTop: '24px' }}>
+      <div className="grid-tiles-5" style={{ gap: '12px', marginTop: '24px' }}>
         {getSortedTiger5Cards(tiger5Fails, totalRounds).map((card) => (
           <StatCardWithSG
             key={card.label}
@@ -712,7 +712,7 @@ function PotentialScoreSection({
       </div>
 
       {/* Summary Stat Cards */}
-      <div className="grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginTop: '16px' }}>
+      <div className="grid-tiles-3" style={{ gap: '16px', marginTop: '16px' }}>
         <div className="card-stat" style={{ borderLeft: '3px solid var(--pitch)' }}>
           <div className="label" style={{ color: 'var(--ash)', marginBottom: '8px' }}>Average Score</div>
           <div className="value-stat" style={{ color: 'var(--pitch)' }}>{avgActualScore.toFixed(1)}</div>
@@ -798,7 +798,7 @@ function RootCauseSection({ rootCause, totalFailHoles }: { rootCause: RootCauseM
       <p style={{ fontSize: '12px', color: 'var(--ash)', marginBottom: '16px' }}>
         Shot with lowest SG on each Tiger 5 fail hole ({totalFailHoles} total fails)
       </p>
-      <div className="grid" style={{ gridTemplateColumns: 'repeat(7, 1fr)', gap: '12px' }}>
+      <div className="grid-tiles-7" style={{ gap: '12px' }}>
         {rootCauseCards.map((card) => {
           const percentage = totalFailHoles > 0 ? (card.value / totalFailHoles) * 100 : 0;
           return (
