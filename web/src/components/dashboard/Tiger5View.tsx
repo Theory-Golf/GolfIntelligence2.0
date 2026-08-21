@@ -10,6 +10,7 @@ import type {
   RootCauseByFailTypeList,
 } from '@/lib/golf/types';
 import { getStrokeGainedColor, getShotSGColor, formatStrokesGained } from '@/lib/golf/tokens';
+import { useMediaQuery, MOBILE_QUERY } from '@/lib/useMediaQuery';
 import {
   ComposedChart,
   Bar,
@@ -518,7 +519,7 @@ function Tiger5FailDetailsSection({ failDetails }: { failDetails: Tiger5FailDeta
                 </h5>
                 {failType.details.map((detail, idx) => (
                   <div key={idx} style={{ marginBottom: '16px', padding: '12px', background: 'var(--charcoal)', borderRadius: '4px' }}>
-                    <div style={{ display: 'flex', gap: '24px', marginBottom: '12px', fontSize: '12px', color: 'var(--chalk)' }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 16px', marginBottom: '12px', fontSize: '12px', color: 'var(--chalk)' }}>
                       <span><strong>Date:</strong> {detail.date}</span>
                       <span><strong>Course:</strong> {detail.course}</span>
                       <span><strong>Hole:</strong> {detail.hole} (Par {detail.par})</span>
@@ -569,6 +570,7 @@ function Tiger5FailDetailsSection({ failDetails }: { failDetails: Tiger5FailDeta
  * Tiger 5 Trend Section - Dual axis chart with stacked bars and line
  */
 function Tiger5TrendSection({ trendData }: { trendData: Tiger5TrendDataPoint[] }) {
+  const isNarrow = useMediaQuery(MOBILE_QUERY);
   if (trendData.length === 0) {
     return null;
   }
@@ -592,17 +594,18 @@ function Tiger5TrendSection({ trendData }: { trendData: Tiger5TrendDataPoint[] }
     <div style={{ marginTop: '24px' }}>
       <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>Tiger 5 Trend</h4>
       <div style={{ background: 'var(--charcoal)', padding: '16px', borderRadius: '4px' }}>
-        <ResponsiveContainer width="100%" height={300}>
+        <ResponsiveContainer width="100%" height={isNarrow ? 240 : 300}>
           <ComposedChart data={formattedData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--ash)" opacity={0.3} />
             <XAxis
               dataKey="label"
               stroke="var(--ash)"
               tick={{ fill: 'var(--ash)', fontSize: 10 }}
-              interval={0}
-              angle={-45}
-              textAnchor="end"
-              height={60}
+              interval={isNarrow ? 'preserveStartEnd' : 0}
+              minTickGap={isNarrow ? 24 : 0}
+              angle={isNarrow ? 0 : -45}
+              textAnchor={isNarrow ? 'middle' : 'end'}
+              height={isNarrow ? 24 : 60}
             />
             <YAxis
               yAxisId="left"
@@ -649,6 +652,9 @@ function PotentialScoreSection({
   tiger5Fails: Tiger5Fail;
   totalRounds: number;
 }) {
+  // Called before the early return below — hooks must run unconditionally.
+  const isNarrow = useMediaQuery(MOBILE_QUERY);
+
   if (trendData.length === 0 || tiger5Fails.totalFails === 0) {
     return null;
   }
@@ -685,17 +691,18 @@ function PotentialScoreSection({
 
       {/* Chart */}
       <div style={{ background: 'var(--charcoal)', padding: '16px', borderRadius: '4px' }}>
-        <ResponsiveContainer width="100%" height={300}>
+        <ResponsiveContainer width="100%" height={isNarrow ? 240 : 300}>
           <ComposedChart data={potentialData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--ash)" opacity={0.3} />
             <XAxis
               dataKey="label"
               stroke="var(--ash)"
               tick={{ fill: 'var(--ash)', fontSize: 10 }}
-              interval={0}
-              angle={-45}
-              textAnchor="end"
-              height={60}
+              interval={isNarrow ? 'preserveStartEnd' : 0}
+              minTickGap={isNarrow ? 24 : 0}
+              angle={isNarrow ? 0 : -45}
+              textAnchor={isNarrow ? 'middle' : 'end'}
+              height={isNarrow ? 24 : 60}
             />
             <YAxis
               stroke="var(--ash)"
