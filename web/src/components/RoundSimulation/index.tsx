@@ -294,9 +294,15 @@ function SGTrendChart({ sessions, height = 100 }: { sessions: SavedSession[]; he
 const getSessionId = (s: SavedSession) => String(s.id);
 const getSessionPlayedAt = (s: SavedSession) => s.date;
 
+type Screen = 'welcome' | 'setup' | 'putt-setup' | 'second-putt' | 'summary' | 'history';
+
+interface RoundSimulationProps {
+  onScreenChange?: (screen: Screen) => void;
+}
+
 // ── Main component ───────────────────────────────────────────────
-export default function RoundSimulation() {
-  const [screen, setScreen] = useState<string>('welcome');
+export default function RoundSimulation({ onScreenChange }: RoundSimulationProps = {}) {
+  const [screen, setScreen] = useState<Screen>('welcome');
   const [session, setSession] = useState<PuttSetup[]>([]);
   const [currentHole, setCurrentHole] = useState<number>(0);
   const [results, setResults] = useState<PuttResult[]>([]);
@@ -324,6 +330,10 @@ export default function RoundSimulation() {
       if (putters) setSavedPutters(JSON.parse(putters));
     } catch (_) {}
   }, []);
+
+  useEffect(() => {
+    onScreenChange?.(screen);
+  }, [screen, onScreenChange]);
 
   function savePutter(name: string): void {
     if (name && !savedPutters.includes(name)) {

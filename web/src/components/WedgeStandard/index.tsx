@@ -90,9 +90,15 @@ const ICONS = {
 const getSessionId = (s) => String(s.id);
 const getSessionPlayedAt = (s) => s.date;
 
+type Screen = 'home' | 'setup' | 'practice' | 'creative' | 'history' | 'results';
+
+interface WedgeStandardProps {
+  onScreenChange?: (screen: Screen) => void;
+}
+
 // ── Main component ───────────────────────────────────────────────
-export default function WedgeStandard() {
-  const [screen, setScreen] = useState('home');
+export default function WedgeStandard({ onScreenChange }: WedgeStandardProps = {}) {
+  const [screen, setScreen] = useState<Screen>('home');
   const [wedges, setWedges] = useState(DEFAULT_WEDGES);
   const [challengeLevel, setChallengeLevel] = useState(1);
   const [practiceMode, setPracticeMode] = useState('premier');
@@ -129,6 +135,10 @@ export default function WedgeStandard() {
     const c = storage.get('wm-creative');
     if (c) { setCreativeTargets(c.targets || [80, 95, 110]); setCreativeRounds(c.rounds || 3); }
   }, []);
+
+  useEffect(() => {
+    onScreenChange?.(screen);
+  }, [screen, onScreenChange]);
 
   function saveWedges(w) { setWedges(w); storage.set('wm-wedges', w); }
   function saveLevel(l)  { setChallengeLevel(l); storage.set('wm-level', l); }

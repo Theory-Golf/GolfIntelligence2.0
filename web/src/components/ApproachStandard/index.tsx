@@ -1026,13 +1026,23 @@ function SessionHistory({ player, sessions, patterns, onBack, onApplyPrescriptio
 
 // ── Main component ───────────────────────────────────────────────
 
-export default function ApproachStandard() {
+type Screen = 'TIER_SELECT' | 'SETUP' | 'SHOT' | 'RESULT' | 'HISTORY';
+
+interface ApproachStandardProps {
+  onScreenChange?: (screen: Screen) => void;
+}
+
+export default function ApproachStandard({ onScreenChange }: ApproachStandardProps = {}) {
   const [player, setPlayer] = useState(null);
   const [sessions, setSessions] = useState([]);
-  const [screen, setScreen] = useState('TIER_SELECT');
+  const [screen, setScreen] = useState<Screen>('TIER_SELECT');
   const [currentSession, setCurrentSession] = useState(null);
   const [lastMovement, setLastMovement] = useState(null);
   const [showShapePrompt, setShowShapePrompt] = useState(false);
+
+  useEffect(() => {
+    onScreenChange?.(screen);
+  }, [screen, onScreenChange]);
 
   // Restore from localStorage on mount
   useEffect(() => {

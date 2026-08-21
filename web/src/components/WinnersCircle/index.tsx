@@ -156,11 +156,19 @@ function TeeRow({ state }: { state: DrillState }) {
 }
 
 // ── Main component ─────────────────────────────────────────────────
-export default function WinnersCircle() {
+interface WinnersCircleProps {
+  onScreenChange?: (screen: Screen) => void;
+}
+
+export default function WinnersCircle({ onScreenChange }: WinnersCircleProps = {}) {
   const [screen, setScreen]                 = useState<Screen>('home');
   const [storageAvailable, setStorageAvail] = useState(true);
   const [putts, setPutts]                   = useState<boolean[]>([]);
   const [result, setResult]                 = useState<ResultState | null>(null);
+
+  useEffect(() => {
+    onScreenChange?.(screen);
+  }, [screen, onScreenChange]);
 
   const { sessions: runs, record } = useDrillHistory<WinnersCircleRun>({
     drillType: 'winners-circle',

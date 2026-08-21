@@ -76,12 +76,20 @@ const getSessionId = (s: InsideTwentySession) => s.id;
 const getSessionPlayedAt = (s: InsideTwentySession) => s.date;
 
 // ── Main component ─────────────────────────────────────────────────
-export default function InsideTwenty() {
+interface InsideTwentyProps {
+  onScreenChange?: (screen: Screen) => void;
+}
+
+export default function InsideTwenty({ onScreenChange }: InsideTwentyProps = {}) {
   const [screen, setScreen]                 = useState<Screen>('home');
   const [storageAvailable, setStorageAvail] = useState(true);
   const [score, setScore]                   = useState(9);
   const [sessionDate, setSessionDate]       = useState<string>(todayISO);
   const [result, setResult]                 = useState<ResultState | null>(null);
+
+  useEffect(() => {
+    onScreenChange?.(screen);
+  }, [screen, onScreenChange]);
 
   const { sessions, record } = useDrillHistory<InsideTwentySession>({
     drillType: 'inside-twenty',

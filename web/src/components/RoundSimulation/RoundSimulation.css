@@ -8,7 +8,7 @@
 .rs-wrapper {
   max-width: 576px;
   margin: 0 auto;
-  padding: 0 24px 64px;
+  padding: 0 24px 24px;
 }
 
 /* ── TOP NAV ───────────────────────────────────────────────────── */
@@ -16,7 +16,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 
 .rs-back-btn {
@@ -53,7 +53,7 @@
 .rs-progress-track {
   height: 2px;
   background: var(--border-color);
-  margin-bottom: 24px;
+  margin-bottom: 14px;
   overflow: hidden;
 }
 
@@ -67,8 +67,8 @@
 .rs-card {
   background: var(--card);
   border: 1px solid var(--border-color);
-  padding: 24px;
-  margin-bottom: 16px;
+  padding: 16px;
+  margin-bottom: 12px;
 }
 
 .rs-card-title {
@@ -77,19 +77,19 @@
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--ash);
-  margin-bottom: 20px;
+  margin-bottom: 12px;
   text-align: center;
 }
 
 /* ── DISTANCE DISPLAY ──────────────────────────────────────────── */
 .rs-distance-block {
   text-align: center;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 
 .rs-distance-value {
   font-family: var(--font-display);
-  font-size: 80px;
+  font-size: 60px;
   font-weight: 800;
   line-height: 1;
   color: var(--foreground);
@@ -115,7 +115,7 @@
   text-transform: uppercase;
   color: var(--ash);
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
 }
 
 /* ── CONDITIONS ROW ────────────────────────────────────────────── */
@@ -124,7 +124,7 @@
   justify-content: center;
   align-items: center;
   gap: 20px;
-  padding-top: 16px;
+  padding-top: 10px;
   border-top: 1px solid var(--border-color);
 }
 
@@ -156,7 +156,7 @@
 .rs-toggle-section {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 10px;
 }
 
 .rs-toggle-row {
