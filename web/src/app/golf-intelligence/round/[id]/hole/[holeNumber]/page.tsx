@@ -101,6 +101,87 @@ export default function HolePage() {
   );
 }
 
+// py-3 keeps every primary target at 44px.
+const primaryBtn =
+  'w-full rounded-md bg-chalk text-court py-3 font-display font-bold text-sm tracking-[0.2em] uppercase select-none disabled:opacity-40';
+
+/**
+ * Three fixed bands: header, a scrollable body, and a commit zone.
+ *
+ * The page itself is exactly one viewport tall and never scrolls — only the
+ * body does. That means (a) a committing button can never be scrolled onto,
+ * because commits live outside the scroll region, (b) Save is always reachable
+ * without scrolling, and (c) iOS Safari's URL bar never enters its
+ * collapse/expand animation, since the document has nothing to scroll.
+ *
+ * `min-h-0` on the body is required: without it a flex child refuses to shrink
+ * below its content and the region silently won't scroll.
+ */
+function Shell({
+  header,
+  commit,
+  children,
+}: {
+  header: React.ReactNode;
+  commit: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="h-svh overflow-hidden bg-background text-foreground">
+      <div className="h-full max-w-md mx-auto px-4 flex flex-col">
+        <div className="flex-none pt-2">{header}</div>
+        <div className="flex-1 min-h-0 relative">
+          <div className="h-full overflow-y-auto py-1.5 flex flex-col gap-2">
+            {children}
+          </div>
+          {/* Fades the cut-off row at the boundary so an overflowing body reads
+              as scrollable rather than clipped. Invisible when it doesn't. */}
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-5 bg-gradient-to-t from-background to-transparent" />
+        </div>
+        <div className="flex-none pt-2 pb-1.5 flex flex-col gap-2 border-t border-border">
+          {commit}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * A distance field: label and the running value share one line, with the
+ * keypad beneath. The value used to sit in its own bordered box below the
+ * label, which cost a row for no extra information.
+ */
+function DistanceEntry({
+  label,
+  unit,
+  value,
+  onChange,
+}: {
+  label: string;
+  unit: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div>
+      <div className="flex items-baseline justify-between mb-1">
+        <span className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash">
+          {label}
+        </span>
+        <span className="flex items-baseline gap-1.5">
+          <span className="font-mono text-2xl leading-none text-chalk tracking-tight">
+            {value || '—'}
+          </span>
+          <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-ash">
+            {unit}
+          </span>
+        </span>
+      </div>
+      <NumericKeypad value={value} onChange={onChange} />
+    </div>
+  );
+}
+
 // ─── Header ─────────────────────────────────────────────────────────────────
 
 function HeaderImpl({
@@ -555,10 +636,18 @@ function ShotEntry({
   // ── Hole setup: par + hole distance get their own screen ──────────────────
   if (isFreshShot1 && !setupDone) {
     return (
-      <div className="min-h-svh bg-background text-foreground">
-        <div className="max-w-md mx-auto px-4 pt-3 pb-4 flex flex-col gap-3">
-          <Header holeNumber={holeNumber} roundId={roundId} score={score} />
-
+      <Shell header={<Header holeNumber={holeNumber} roundId={roundId} score={score} />}
+        commit={
+          <button
+            type="button"
+            onClick={() => setSetupDone(true)}
+            disabled={!parSet || form.teeDistanceInput === ''}
+            className={primaryBtn}
+          >
+            Start hole →
+          </button>
+        }
+      >
           {/* Hole par */}
           <div>
             <p className="font-mono text-[10px] tracking-[0.25em] uppercase text-ash mb-1">
@@ -597,20 +686,12 @@ function ShotEntry({
           </div>
 
           {/* Hole distance */}
-          <div>
-            <div className="flex items-baseline justify-between mb-1">
-              <span className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash">
-                Hole distance
-              </span>
-              <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-ash">
-                {startingUnit}
-              </span>
-            </div>
-            <NumericKeypad
-              value={form.teeDistanceInput}
-              onChange={setTeeDistance}
-            />
-          </div>
+          <DistanceEntry
+            label="Hole distance"
+            unit={startingUnit}
+            value={form.teeDistanceInput}
+            onChange={setTeeDistance}
+          />
 
           {warning && (
             <WarningCard warning={warning} onDismiss={dismissWarning} />
@@ -629,29 +710,53 @@ function ShotEntry({
             </span>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setSetupDone(true)}
-            disabled={!parSet || form.teeDistanceInput === ''}
-            className="w-full rounded-md bg-chalk text-court py-3 font-display font-bold text-sm tracking-[0.2em] uppercase disabled:opacity-40"
-          >
-            Start hole →
-          </button>
-        </div>
-      </div>
+      </Shell>
     );
   }
 
   return (
-    <div className="min-h-svh bg-background text-foreground">
-      <div className="max-w-md mx-auto px-4 pt-3 pb-4 flex flex-col gap-3">
-        <Header holeNumber={holeNumber} roundId={roundId} score={score} />
-
-        <div className="flex flex-col gap-3">
+    <Shell
+      header={<Header holeNumber={holeNumber} roundId={roundId} score={score} />}
+      commit={
+        <>
+          {/* Both committing actions live here, outside the scroll region, and
+              fire on a completed tap. A drag that turns into a scroll is
+              cancelled by the browser before click, so neither can be
+              triggered by reaching in to scroll. */}
+          <button
+            type="button"
+            onClick={onHoled}
+            disabled={!parSet || saving}
+            className={
+              'w-full rounded-md border py-3 font-display font-bold text-sm tracking-[0.2em] uppercase select-none disabled:opacity-40 ' +
+              (holedSaving
+                ? 'bg-chalk border-chalk text-pitch'
+                : 'bg-obsidian border-border text-chalk active:bg-pitch active:border-chalk')
+            }
+          >
+            {holedSaving ? 'Holed ✓' : 'Holed'}
+          </button>
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={!canSave}
+            className={primaryBtn}
+          >
+            {mode === 'edit'
+              ? 'Save edit · Back'
+              : mode === 'insert'
+                ? 'Insert shot · Back'
+                : 'Save shot · Next →'}
+          </button>
+        </>
+      }
+    >
           {/* Shot path + starting context on one compact block */}
           <div>
-            {!isFreshShot1 && hole && (
-              <div className="mb-2">
+            {/* In edit mode on shot 1 there is no path yet, and an empty one
+                renders a lone "shot 1 ›" marker that costs a row for nothing. */}
+            {!isFreshShot1 && hole && completedShots.length > 0 && (
+              <div className="mb-1">
                 <ShotPath shots={completedShots} activeShotNumber={shotOrder} />
               </div>
             )}
@@ -680,33 +785,23 @@ function ShotEntry({
           </div>
 
           {/* Ending distance + keypad */}
-          <div>
-            <div className="flex items-baseline justify-between mb-1">
-              <span className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash">
-                Ending distance
-              </span>
-              <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-ash">
-                {endingUnit}
-              </span>
-            </div>
-            <NumericKeypad
-              value={form.endingDistance}
-              onChange={setEndingDistance}
-            />
-          </div>
+          <DistanceEntry
+            label="Ending distance"
+            unit={endingUnit}
+            value={form.endingDistance}
+            onChange={setEndingDistance}
+          />
 
-          {/* Ending lie */}
+          {/* Ending lie — the penalty toggle rides on this label line rather
+              than taking a row of its own. */}
           <div>
-            <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash mb-1">
-              Ending lie
-            </p>
-            <LieGrid
-              selected={form.endingLie}
-              onChange={setEndingLie}
-              showHoled
-              onHoled={onHoled}
-              holedActive={holedSaving}
-            />
+            <div className="flex items-center justify-between mb-0.5">
+              <span className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash">
+                Ending lie
+              </span>
+              <PenaltyToggle on={form.penalty} onChange={setPenalty} />
+            </div>
+            <LieGrid selected={form.endingLie} onChange={setEndingLie} />
           </div>
 
           <ConditionalBlock show={showClubCategory}>
@@ -736,23 +831,7 @@ function ShotEntry({
             />
           </ConditionalBlock>
 
-          <PenaltyToggle on={form.penalty} onChange={setPenalty} />
-
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={!canSave}
-            className="w-full rounded-md bg-chalk text-court py-3 font-display font-bold text-sm tracking-[0.2em] uppercase disabled:opacity-40"
-          >
-            {mode === 'edit'
-              ? 'Save edit · Back'
-              : mode === 'insert'
-                ? 'Insert shot · Back'
-                : 'Save shot · Next →'}
-          </button>
-        </div>
-      </div>
-    </div>
+    </Shell>
   );
 }
 
@@ -770,11 +849,11 @@ function ChoiceRow<T extends string>({
   onSelect: (value: T) => void;
 }) {
   return (
-    <>
-      <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash mb-1">
+    <div className="flex items-center gap-3">
+      <span className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash shrink-0 w-20">
         {label}
-      </p>
-      <div className="grid grid-cols-2 gap-2">
+      </span>
+      <div className="grid grid-cols-2 gap-2 flex-1">
         {options.map((o) => (
           <button
             key={o}
@@ -785,7 +864,7 @@ function ChoiceRow<T extends string>({
               onSelect(o);
             }}
             className={
-              'rounded-md border py-2 font-display font-bold text-sm tracking-[0.15em] uppercase select-none touch-manipulation ' +
+              'rounded-md border py-2 min-h-11 font-display font-bold text-sm tracking-[0.15em] uppercase select-none touch-manipulation ' +
               (selected === o
                 ? 'border-scarlet bg-scarlet-tint text-chalk'
                 : 'border-border bg-shadow text-ash')
@@ -795,7 +874,7 @@ function ChoiceRow<T extends string>({
           </button>
         ))}
       </div>
-    </>
+    </div>
   );
 }
 
@@ -850,6 +929,8 @@ function WarningCard({
   );
 }
 
+// A compact chip that rides on the "Ending lie" label line instead of taking a
+// full row. 44px tall so it stays a legitimate touch target at that size.
 function PenaltyToggle({
   on,
   onChange,
@@ -861,31 +942,27 @@ function PenaltyToggle({
     <button
       type="button"
       onClick={() => onChange(!on)}
-      className="w-full flex items-center justify-between border border-border bg-shadow rounded-md px-3 py-2"
+      aria-pressed={on}
+      className={
+        'flex items-center gap-2 rounded-md border px-3 h-11 select-none ' +
+        (on
+          ? 'border-scarlet bg-scarlet-tint'
+          : 'border-border bg-shadow')
+      }
     >
-      <span className="flex items-center gap-2">
-        <span
-          className={
-            'inline-block w-3 h-3 rounded-sm border ' +
-            (on ? 'bg-scarlet border-scarlet' : 'border-ash')
-          }
-        />
-        <span className="font-display font-bold text-[12px] tracking-[0.2em] uppercase text-ash">
-          Penalty on this shot
-        </span>
-      </span>
       <span
         className={
-          'relative inline-block w-10 h-5 rounded-full transition-colors ' +
-          (on ? 'bg-scarlet' : 'bg-pitch')
+          'inline-block w-3 h-3 rounded-sm border ' +
+          (on ? 'bg-scarlet border-scarlet' : 'border-ash')
+        }
+      />
+      <span
+        className={
+          'font-display font-bold text-[11px] tracking-[0.2em] uppercase ' +
+          (on ? 'text-chalk' : 'text-ash')
         }
       >
-        <span
-          className={
-            'absolute top-0.5 w-4 h-4 rounded-full bg-chalk transition-all ' +
-            (on ? 'left-[22px]' : 'left-0.5')
-          }
-        />
+        Penalty
       </span>
     </button>
   );
