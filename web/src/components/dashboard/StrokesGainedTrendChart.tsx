@@ -10,6 +10,7 @@ import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
 import type { ProcessedShot, SGShotCategory } from '@/lib/golf/types';
 import { calculateMovingAverage, getRoundSGByShotType } from '@/lib/golf/calculations';
 import { formatStrokesGained, getStrokeGainedColor } from '@/lib/golf/tokens';
+import { useMediaQuery, MOBILE_QUERY } from '@/lib/useMediaQuery';
 
 interface StrokesGainedTrendChartProps {
   filteredShots: ProcessedShot[];
@@ -39,6 +40,7 @@ const COLORS = {
 };
 
 export function StrokesGainedTrendChart({ filteredShots }: StrokesGainedTrendChartProps) {
+  const isNarrow = useMediaQuery(MOBILE_QUERY);
   const [selectedCategory, setSelectedCategory] = useState<SGShotCategory>('Driving');
   const [movingAverageWindow, setMovingAverageWindow] = useState<number>(5);
 
@@ -202,7 +204,7 @@ export function StrokesGainedTrendChart({ filteredShots }: StrokesGainedTrendCha
         </div>
 
         {/* Summary Stats */}
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: '24px', fontSize: '12px' }}>
+        <div style={{ marginLeft: isNarrow ? 0 : 'auto', display: 'flex', flexWrap: 'wrap', gap: '8px 24px', fontSize: '12px' }}>
           <div>
             <span style={{ color: 'var(--ash)' }}>Total Rounds: </span>
             <span style={{ color: 'var(--chalk)', fontWeight: 600 }}>{roundData.length}</span>
@@ -218,24 +220,26 @@ export function StrokesGainedTrendChart({ filteredShots }: StrokesGainedTrendCha
 
       {/* Chart */}
       <div style={{ background: 'var(--charcoal)', padding: '16px', borderRadius: '4px' }}>
-        <ResponsiveContainer width="100%" height={350}>
-          <ComposedChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 50 }}>
+        <ResponsiveContainer width="100%" height={isNarrow ? 260 : 350}>
+          <ComposedChart data={chartData} margin={isNarrow ? { top: 12, right: 8, left: 0, bottom: 8 } : { top: 20, right: 30, left: 20, bottom: 50 }}>
             <CartesianGrid strokeDasharray="3 3" stroke={COLORS.grid} opacity={0.3} />
             <XAxis
               dataKey="label"
               stroke={COLORS.text}
-              tick={{ fill: COLORS.text, fontSize: 11 }}
-              interval={0}
-              angle={-45}
-              textAnchor="end"
-              height={60}
+              tick={{ fill: COLORS.text, fontSize: isNarrow ? 9 : 11 }}
+              interval={isNarrow ? 'preserveStartEnd' : 0}
+              minTickGap={isNarrow ? 24 : 0}
+              angle={isNarrow ? 0 : -45}
+              textAnchor={isNarrow ? 'middle' : 'end'}
+              height={isNarrow ? 24 : 60}
             />
             <YAxis
               stroke={COLORS.text}
-              tick={{ fill: COLORS.text, fontSize: 11 }}
+              tick={{ fill: COLORS.text, fontSize: isNarrow ? 9 : 11 }}
+              width={isNarrow ? 34 : undefined}
               domain={yAxisDomain}
               tickFormatter={(value) => value.toFixed(1)}
-              label={{
+              label={isNarrow ? undefined : {
                 value: 'Strokes Gained',
                 angle: -90,
                 position: 'insideLeft',
@@ -260,7 +264,7 @@ export function StrokesGainedTrendChart({ filteredShots }: StrokesGainedTrendCha
               dataKey="strokesGained"
               name="Strokes Gained"
               fill={COLORS.bar}
-              barSize={20}
+              maxBarSize={20}
               radius={[2, 2, 0, 0]}
             />
             {/* Line for moving average */}
@@ -279,7 +283,7 @@ export function StrokesGainedTrendChart({ filteredShots }: StrokesGainedTrendCha
       </div>
 
       {/* Legend explanation */}
-      <div style={{ marginTop: '12px', fontSize: '11px', color: 'var(--ash)', display: 'flex', gap: '24px' }}>
+      <div style={{ marginTop: '12px', fontSize: '11px', color: 'var(--ash)', display: 'flex', flexWrap: 'wrap', gap: '8px 24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <div style={{ width: '12px', height: '12px', background: COLORS.bar, borderRadius: '2px' }}></div>
           <span>Actual SG per round</span>
