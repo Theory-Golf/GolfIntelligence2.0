@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { LS_WINNERS_CIRCLE_RUNS } from '@/lib/constants';
+import { isAvailable } from '@/lib/playerpath/storage';
+import { fmtDateShort } from '@/lib/playerpath/format';
 import { drillSessionInput, recordDrillSession } from '@/lib/playerpath/record';
 import './WinnersCircle.css';
 
@@ -105,9 +107,7 @@ function todayISO(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-function formatDate(date: string): string {
-  return new Date(date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-}
+const formatDate = fmtDateShort;
 
 // ── Storage ────────────────────────────────────────────────────────
 export function loadRuns(): WinnersCircleRun[] {
@@ -183,11 +183,9 @@ export default function WinnersCircle() {
   const [result, setResult]                 = useState<ResultState | null>(null);
 
   useEffect(() => {
-    try {
-      localStorage.setItem('_wc_probe', '1');
-      localStorage.removeItem('_wc_probe');
+    if (isAvailable()) {
       setRuns(loadRuns());
-    } catch {
+    } else {
       setStorageAvail(false);
     }
   }, []);

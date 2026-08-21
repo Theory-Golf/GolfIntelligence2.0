@@ -57,6 +57,7 @@ export type BlockType =
   | 'wedge-distance'
   | 'iron-technical'
   | 'driver'
+  | 'assessment'
   | 'cooldown';
 
 export type Block = {
@@ -73,6 +74,12 @@ export type Block = {
   practiceGates?: PracticeGate[];
   practiceCount?: number;
   distanceTest?: DistanceTest;
+  /**
+   * For `assessment` blocks: the catalog activity to run, which is also its
+   * `drill_type` in `drill_sessions`. The game records its own score there —
+   * the session only tracks that the test was run.
+   */
+  activityId?: string;
   completed: boolean;
 };
 
@@ -135,6 +142,17 @@ export type SessionRecord = {
   }[];
   wedgeShots: number;
   avgBallSpeed: number | null;
+  /**
+   * Assessments the session prescribed. Records only that the test was run —
+   * the game writes its own score to `drill_sessions`, and duplicating it
+   * here would create two numbers for one attempt that could disagree.
+   * Optional: sessions saved before assessment blocks existed lack it.
+   */
+  assessments?: {
+    activityId: string;
+    name: string;
+    completed: boolean;
+  }[];
 };
 
 export type PlannerExport = {

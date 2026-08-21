@@ -389,7 +389,7 @@ export default function PracticePlanner() {
               Build the <span className="text-primary">session</span>
             </>
           }
-          lead="A guided practice cycle: set your weekly technical focus, scale a session to your shot budget, run structured blocks with checkpoints and practice-intent gates, then track acquisition over time. Data lives on this device for now — future versions will sync to your player profile."
+          lead="A guided practice cycle: set your weekly technical focus, scale a session to your shot budget, run structured blocks with checkpoints and practice-intent gates, then track acquisition over time. From week three the plan starts prescribing scored assessments — everything you complete saves to your player profile."
         />
 
         {!hydrated ? (

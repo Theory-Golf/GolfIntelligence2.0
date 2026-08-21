@@ -2,9 +2,11 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { LS_LAG_PUTT_SESSIONS } from '@/lib/constants';
+import { storage } from '@/lib/playerpath/storage';
 import { newClientId } from '@/lib/playerpath/clientId';
 import { drillSessionInput, recordDrillSession } from '@/lib/playerpath/record';
 import './LagPuttTest.css';
+import { fmtDateShort } from '@/lib/playerpath/format';
 
 type Direction = 'short' | 'long';
 
@@ -107,10 +109,7 @@ function generateDistances(): number[] {
   return [...pool, ...extras];
 }
 
-const storage = {
-  get<T>(k: string): T | null { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) as T : null; } catch { return null; } },
-  set(k: string, v: unknown) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* noop */ } },
-};
+
 
 // ── Component ────────────────────────────────────────────────────
 export default function LagPuttTest() {
@@ -210,19 +209,21 @@ export default function LagPuttTest() {
             </div>
           </div>
 
-          <table className="lpt-table">
-            <thead>
-              <tr><th>Result</th><th>Score</th></tr>
-            </thead>
-            <tbody>
-              <tr><td>Holed</td><td>−2 (Eagle)</td></tr>
-              <tr><td>1 ft</td><td>−1 (Birdie)</td></tr>
-              <tr><td>2–3 ft</td><td>0 (Par)</td></tr>
-              <tr><td>4–6 ft</td><td>+1 (Bogey)</td></tr>
-              <tr><td>7–9 ft</td><td>+2 (Double)</td></tr>
-              <tr><td>10+ ft</td><td>+3 (Triple)</td></tr>
-            </tbody>
-          </table>
+          <div className="lpt-table-scroll">
+            <table className="lpt-table">
+              <thead>
+                <tr><th>Result</th><th>Score</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Holed</td><td>−2 (Eagle)</td></tr>
+                <tr><td>1 ft</td><td>−1 (Birdie)</td></tr>
+                <tr><td>2–3 ft</td><td>0 (Par)</td></tr>
+                <tr><td>4–6 ft</td><td>+1 (Bogey)</td></tr>
+                <tr><td>7–9 ft</td><td>+2 (Double)</td></tr>
+                <tr><td>10+ ft</td><td>+3 (Triple)</td></tr>
+              </tbody>
+            </table>
+          </div>
 
           <button className="lpt-primary-btn" onClick={startSession}>
             Start Session
@@ -236,7 +237,7 @@ export default function LagPuttTest() {
               {history.slice(0, 5).map((s) => (
                 <li key={s.id} className="lpt-history-row">
                   <span className="lpt-history-date">
-                    {new Date(s.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    {fmtDateShort(s.date)}
                   </span>
                   <span className="lpt-history-total">
                     {s.total > 0 ? `+${s.total}` : s.total}

@@ -37,9 +37,16 @@ See `web/.env.example` for required variables:
 |-------|-------------|
 | `/` | Marketing home |
 | `/golf-intelligence` | Analytics dashboard |
-| `/player-path` | Practice & development |
-| `/player-path/round-simulation` | Round simulation tool |
-| `/player-path/wedge-standard` | Wedge standards |
+| `/player-path` | PlayerPath — overview, The Plan, practice by segment |
+| `/player-path/driver-standard` | Driver Standard (driving) |
+| `/player-path/approach-standard` | Approach Standard (approach) |
+| `/player-path/line-test` | Line Test (approach) |
+| `/player-path/wedge-standard` | Wedge Standard (wedge) |
+| `/player-path/round-simulation` | Round Simulation (putting) |
+| `/player-path/lag-putt-test` | Lag Putt Test (putting) |
+| `/player-path/putting/inside-ten` | Inside Ten (+ `/history`) |
+| `/player-path/putting/inside-twenty` | Inside Twenty (+ `/history`) |
+| `/player-path/putting/winners-circle` | Winners Circle (+ `/history`) |
 | `/resources` | Tools index |
 | `/resources/weather-yardage-card` | Weather-adjusted yardage card |
 | `/resources/standard-yardage-card` | Standard yardage card |

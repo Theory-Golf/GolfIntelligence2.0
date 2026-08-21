@@ -17,30 +17,62 @@ export interface Activity {
   connected_drivers: ConnectedDriver[];
 }
 
-export interface CategoryOption {
-  id: string;
+export type ActivityCategory = Activity['category'];
+
+export interface SegmentOption {
+  id: ActivityCategory;
   label: string;
 }
 
-export interface TypeOption {
-  id: string;
-  label: string;
+/**
+ * Game segments in causal-chain order — the sequence the PlayerPath framework
+ * uses, where each stage inherits its constraints from the one before it.
+ *
+ * `short_game` is intentionally absent: no activity carries that category yet.
+ * The segment list renders only non-empty groups, so adding one here is all
+ * that is needed when short-game activities exist.
+ */
+export const SEGMENTS: SegmentOption[] = [
+  { id: 'driving',  label: 'Driving' },
+  { id: 'approach', label: 'Approach' },
+  { id: 'wedge',    label: 'Wedge' },
+  { id: 'putting',  label: 'Putting' },
+];
+
+/**
+ * Routes for activities that have a built tool. An activity missing from this
+ * map is still in development: it renders greyed out and is never selected as
+ * a session's assessment block.
+ *
+ * The keys double as `drill_type` values in `drill_sessions`, so a practice
+ * result joins straight back to its catalog entry.
+ */
+export const ACTIVITY_ROUTES: Record<string, string> = {
+  'round-simulation':  '/player-path/round-simulation',
+  'lag-putt-test':     '/player-path/lag-putt-test',
+  'inside-ten':        '/player-path/putting/inside-ten',
+  'inside-twenty':     '/player-path/putting/inside-twenty',
+  'winners-circle':    '/player-path/putting/winners-circle',
+  'wedge-standard':    '/player-path/wedge-standard',
+  'approach-standard': '/player-path/approach-standard',
+  'driver-standard':   '/player-path/driver-standard',
+  'line-test':         '/player-path/line-test',
+};
+
+/** History views, where a tool has one. */
+export const ACTIVITY_HISTORY_ROUTES: Record<string, string> = {
+  'inside-ten':     '/player-path/putting/inside-ten/history',
+  'inside-twenty':  '/player-path/putting/inside-twenty/history',
+  'winners-circle': '/player-path/putting/winners-circle/history',
+};
+
+export function isBuilt(activityId: string): boolean {
+  return activityId in ACTIVITY_ROUTES;
 }
 
-export const CATEGORIES: CategoryOption[] = [
-  { id: 'all',        label: 'All' },
-  { id: 'putting',    label: 'Putting' },
-  { id: 'wedge',      label: 'Wedge' },
-  { id: 'approach',   label: 'Approach' },
-  { id: 'short_game', label: 'Short Game' },
-  { id: 'driving',    label: 'Driving' },
-];
-
-export const TYPES: TypeOption[] = [
-  { id: 'all',               label: 'All' },
-  { id: 'skill_assessment',  label: 'Assessment' },
-  { id: 'skill_development', label: 'Development' },
-];
+export function activityById(id: string): Activity | undefined {
+  return ACTIVITIES.find((a) => a.id === id);
+}
 
 export const ACTIVITIES: Activity[] = [
   // ── PUTTING ──────────────────────────────────────────────────────────

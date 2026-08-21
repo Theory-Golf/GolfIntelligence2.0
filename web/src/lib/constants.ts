@@ -48,6 +48,7 @@ export const LS_APPROACH_STANDARD_SESSIONS = 'as_sessions';
 // Written by components/PracticePlanner/storage.ts under the tg_practice_
 // prefix. Declared here so the one-time upload can read completed sessions.
 export const LS_PRACTICE_SESSIONS = 'tg_practice_sessions';
+export const LS_PRACTICE_CURRENT_SESSION = 'tg_practice_currentSession';
 
 // ── Practice sync ──────────────────────────────────────────────────────
 // Set once local practice history has been uploaded to the player's account.

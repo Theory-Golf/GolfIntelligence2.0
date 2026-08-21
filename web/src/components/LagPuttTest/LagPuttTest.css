@@ -522,3 +522,13 @@
   .lpt-bucket-grid { grid-template-columns: repeat(2, 1fr); }
   .lpt-summary-grid { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* ── Mobile: keep the scoring table inside its own scroll box. ── */
+.lpt-table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.lpt-table-scroll .lpt-table {
+  min-width: 260px;
+}

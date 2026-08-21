@@ -9,6 +9,7 @@ import {
 } from 'recharts';
 import { loadRuns, persistRuns, type WinnersCircleRun } from '.';
 import './WinnersCircle.css';
+import { fmtDateShort } from '@/lib/playerpath/format';
 
 const STANDARD_MAKES = 20;
 
@@ -179,7 +180,7 @@ export default function HistoryDashboard() {
             return (
               <div className="wc-log-row" key={r.id}>
                 <span className="wc-log-date">
-                  {new Date(r.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })}
+                  {fmtDateShort(r.date)}
                 </span>
                 <span className="wc-log-score">{r.totalMakes}</span>
                 <span className="wc-log-dist">{r.maxDistanceReached} ft</span>

@@ -11,6 +11,7 @@ import {
 import { LS_INSIDE_TWENTY_SESSIONS } from '@/lib/constants';
 import '../InsideTen/InsideTen.css';
 import './InsideTwenty.css';
+import { fmtDateShort } from '@/lib/playerpath/format';
 
 type TierName = 'elite' | 'tour' | 'competitive' | 'developing';
 
@@ -262,7 +263,7 @@ export default function HistoryDashboard() {
             return (
               <div className="it-log-row" key={s.id}>
                 <span className="it-log-date">
-                  {new Date(s.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })}
+                  {fmtDateShort(s.date)}
                 </span>
                 <span className="it-log-score">{s.score}/18</span>
                 <span className="it-log-tier-badge" style={{ color: cfg.color, gridColumn: '3 / 5' }}>{cfg.label}</span>

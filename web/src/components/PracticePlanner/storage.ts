@@ -1,4 +1,4 @@
-import { LS_PRACTICE_SESSIONS } from '@/lib/constants';
+import { LS_PRACTICE_CURRENT_SESSION, LS_PRACTICE_SESSIONS } from '@/lib/constants';
 import type { WeekConfig, Session, SessionRecord, HistoryEntry, PlannerExport } from './types';
 
 const KEY_PREFIX = 'tg_practice_';
@@ -8,6 +8,12 @@ const KEY_PREFIX = 'tg_practice_';
 if (KEY_PREFIX + 'sessions' !== LS_PRACTICE_SESSIONS) {
   throw new Error(
     `Practice session storage key drifted: "${KEY_PREFIX}sessions" vs "${LS_PRACTICE_SESSIONS}"`,
+  );
+}
+// The resume bar on game pages checks this key to know a session is running.
+if (KEY_PREFIX + 'currentSession' !== LS_PRACTICE_CURRENT_SESSION) {
+  throw new Error(
+    `Current-session storage key drifted: "${KEY_PREFIX}currentSession" vs "${LS_PRACTICE_CURRENT_SESSION}"`,
   );
 }
 

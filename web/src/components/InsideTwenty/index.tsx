@@ -3,9 +3,11 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { LS_INSIDE_TWENTY_SESSIONS } from '@/lib/constants';
+import { isAvailable } from '@/lib/playerpath/storage';
 import { drillSessionInput, recordDrillSession } from '@/lib/playerpath/record';
 import '../InsideTen/InsideTen.css';
 import './InsideTwenty.css';
+import { fmtDateShort } from '@/lib/playerpath/format';
 
 // ── Types ─────────────────────────────────────────────────────────
 type TierName = 'elite' | 'tour' | 'competitive' | 'developing';
@@ -103,11 +105,9 @@ export default function InsideTwenty() {
   const [result, setResult]                 = useState<ResultState | null>(null);
 
   useEffect(() => {
-    try {
-      localStorage.setItem('_i20_probe', '1');
-      localStorage.removeItem('_i20_probe');
+    if (isAvailable()) {
       setSessions(loadSessions());
-    } catch {
+    } else {
       setStorageAvail(false);
     }
   }, []);
@@ -182,26 +182,28 @@ function HomeScreen({ sessions, storageAvailable, onStart }: {
           three putts per group with one ball, no retries. Track makes in your head across all 18 putts.
           When the drill is done, enter the total. One number. That is the test.
         </p>
-        <table className="it-ladder-table">
-          <thead>
-            <tr>
-              <th>Group</th>
-              <th>Putt 1</th>
-              <th>Putt 2</th>
-              <th>Putt 3</th>
-            </tr>
-          </thead>
-          <tbody>
-            {GROUPS.map(({ group, putts }) => (
-              <tr key={group}>
-                <td>{group}</td>
-                <td><span>{putts[0]} ft</span></td>
-                <td><span>{putts[1]} ft</span></td>
-                <td><span>{putts[2]} ft</span></td>
+        <div className="it-ladder-scroll">
+          <table className="it-ladder-table">
+            <thead>
+              <tr>
+                <th>Group</th>
+                <th>Putt 1</th>
+                <th>Putt 2</th>
+                <th>Putt 3</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {GROUPS.map(({ group, putts }) => (
+                <tr key={group}>
+                  <td>{group}</td>
+                  <td><span>{putts[0]} ft</span></td>
+                  <td><span>{putts[1]} ft</span></td>
+                  <td><span>{putts[2]} ft</span></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
         <div className="it-rules">
           {[
             'One ball per putt — misses are not retried.',
@@ -263,7 +265,7 @@ function HomeScreen({ sessions, storageAvailable, onStart }: {
               return (
                 <div className="it-recent-row" key={s.id}>
                   <span className="it-recent-date">
-                    {new Date(s.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    {fmtDateShort(s.date)}
                   </span>
                   <span className="it-recent-score">
                     {s.score}<span>/18</span>

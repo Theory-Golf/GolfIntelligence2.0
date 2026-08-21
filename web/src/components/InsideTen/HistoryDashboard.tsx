@@ -10,6 +10,7 @@ import {
 } from 'recharts';
 import { LS_INSIDE_TEN_SESSIONS } from '@/lib/constants';
 import './InsideTen.css';
+import { fmtDateShort } from '@/lib/playerpath/format';
 
 type TierName = 'elite' | 'tour' | 'competitive' | 'developing';
 
@@ -288,7 +289,7 @@ export default function HistoryDashboard() {
             return (
               <div className="it-log-row" key={s.id}>
                 <span className="it-log-date">
-                  {new Date(s.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })}
+                  {fmtDateShort(s.date)}
                 </span>
                 <span className="it-log-score">{s.score}/18</span>
                 <span className="it-log-sg" style={{ color: cfg.color }}>{formatSG(s.sg)}</span>

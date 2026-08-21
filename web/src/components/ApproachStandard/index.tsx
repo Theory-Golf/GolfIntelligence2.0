@@ -14,14 +14,11 @@ import {
   LS_APPROACH_STANDARD_PLAYER,
   LS_APPROACH_STANDARD_SESSIONS,
 } from '@/lib/constants';
+import { storage } from '@/lib/playerpath/storage';
 import { derivedClientId } from '@/lib/playerpath/clientId';
 import { drillSessionInput, recordDrillSession } from '@/lib/playerpath/record';
 
 // ── Storage helpers ──────────────────────────────────────────────
-const storage = {
-  get: (k) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch { return null; } },
-  set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (_) {} },
-};
 
 const LS_PLAYER   = LS_APPROACH_STANDARD_PLAYER;
 const LS_SESSIONS = LS_APPROACH_STANDARD_SESSIONS;

@@ -9,16 +9,13 @@ import {
   LS_WEDGE_STANDARD_STATS,
   LS_WEDGE_STANDARD_WEDGES,
 } from '@/lib/constants';
+import { storage } from '@/lib/playerpath/storage';
+import { fmtDateLong } from '@/lib/playerpath/format';
 import { derivedClientId } from '@/lib/playerpath/clientId';
 import { drillSessionInput, recordDrillSession } from '@/lib/playerpath/record';
 import './WedgeStandard.css';
 
 // ── Storage helpers ──────────────────────────────────────────────
-const storage = {
-  get: (k) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch { return null; } },
-  set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (_) {} },
-  del: (k) => { try { localStorage.removeItem(k); } catch (_) {} },
-};
 
 // ── Default wedge set ────────────────────────────────────────────
 const DEFAULT_WEDGES = [
@@ -70,9 +67,7 @@ function getLevelConfig(level) {
   };
 }
 
-function fmtDate(d) {
-  return new Date(d).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-}
+const fmtDate = fmtDateLong;
 
 // ── Inline SVG icons ─────────────────────────────────────────────
 const ICONS = {
