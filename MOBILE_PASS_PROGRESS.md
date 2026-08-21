@@ -21,10 +21,10 @@ Branch: `claude/golf-dashboard-mobile-v8go5e`. Commit prefix: `mobile(N):`.
 - [x] **5** — `FilterBar.tsx`: `isOpen`/`onClose`, backdrop, close button, `:56` gate fix
 - [x] **6** — density CSS: `.gi-table-scroll`, mobile padding, header stack, nav snap + fade
 - [x] **7** — wrap 11 unwrapped tables, `min-width` on all 17 (one commit each)
-- [ ] **8** — sticky rework: `--gi-navbar-h`/`--gi-nav-h`, `.header` static, z-order, touch targets
-- [ ] **9** — `web/src/lib/useMediaQuery.ts`
-- [ ] **10** — chart props (one commit per file)
-- [ ] **11** — `barSize` → `maxBarSize`
+- [x] **8** — sticky rework: `--gi-navbar-h`/`--gi-nav-h`, `.header` static, z-order, touch targets
+- [x] **9** — `web/src/lib/useMediaQuery.ts`
+- [x] **10** — chart props (one commit per file)
+- [x] **11** — `barSize` → `maxBarSize`
 - [ ] **12a** — sticky first column: `CoachingView` + 2 heat maps
 - [ ] **12b** — type scale: `.value-*` clamps, `.nav-tab` 12px, tables 13px, ticks 12px
 - [ ] **cleanup** — dead CSS, stale comments, duplicated tokens, delete this file
