@@ -651,3 +651,145 @@
     padding-right: 20px;
   }
 }
+
+/* ── Mobile Filter Drawer ─────────────────────────────────
+   Below 768px the 280px fixed sidebar becomes an off-canvas
+   drawer. Everything here is scoped to the mobile query or to
+   elements that do not render on desktop, so the desktop rail
+   at .filter-sidebar / .main-with-sidebar is untouched.
+
+   Stacking, from the back: backdrop 290, drawer 300, trigger
+   310. All sit above the dashboard header (100), the tab strip
+   (90) and the site Navbar (z-50), so an open drawer covers the
+   full viewport as expected. */
+.filter-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 290;
+  background: rgba(0, 0, 0, 0.55);
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.filter-fab {
+  position: fixed;
+  left: 16px;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  z-index: 310;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 18px;
+  background: var(--scarlet);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.filter-fab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.3);
+  font-size: 10px;
+}
+
+/* Shown only inside the mobile block below. */
+.filter-close {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: none;
+  border: 1px solid var(--pitch);
+  border-radius: 4px;
+  color: var(--ash);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.filter-close:hover {
+  border-color: var(--scarlet);
+  color: var(--scarlet);
+}
+
+/* Applied to <body> while the drawer is open. */
+.gi-scroll-lock {
+  overflow: hidden;
+}
+
+@media (max-width: 767px) {
+  .filter-sidebar {
+    top: 0;
+    bottom: auto;
+    height: 100dvh;
+    width: min(86vw, 320px);
+    z-index: 300;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+  }
+
+  .filter-sidebar.is-open {
+    transform: translateX(0);
+  }
+
+  /* There is no 48px rail on mobile, only open and closed. The
+     collapsed state can still arrive from a desktop session, so
+     it must not shrink the drawer or hide its header. */
+  .filter-sidebar.is-collapsed {
+    width: min(86vw, 320px);
+    padding: 20px;
+  }
+
+  .filter-sidebar.is-collapsed .filter-sidebar-header {
+    justify-content: space-between;
+    border-bottom: 1px solid var(--pitch);
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+  }
+
+  .filter-sidebar.is-collapsed .filter-sidebar-header h3 {
+    display: block;
+  }
+
+  .filter-toggle { display: none; }
+  .filter-close  { display: inline-flex; }
+
+  /* Content reclaims the full width. Both selectors carry two
+     classes: .main.sidebar-collapsed is (0,2,0), so a one-class
+     .main-with-sidebar override would lose to it even here. */
+  .main.main-with-sidebar,
+  .main.sidebar-collapsed {
+    margin-left: 0;
+  }
+}
+
+/* Hard guard: none of the mobile affordances may leak onto desktop. */
+@media (min-width: 768px) {
+  .filter-backdrop,
+  .filter-fab {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .filter-sidebar {
+    transition: none;
+  }
+}
