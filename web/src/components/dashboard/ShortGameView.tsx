@@ -403,7 +403,7 @@ export function ShortGameView({ metrics, shortGameHeatMapData, filteredShots }: 
       <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>Short Game Performance</h4>
 
       {/* Hero Cards - 4 metrics */}
-      <div className="grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
+      <div className="grid-cards-4" style={{ gap: '16px' }}>
 
         {/* Card 1: Total SG - Short Game */}
         <div className="card-hero is-flagship">
