@@ -1,28 +1,42 @@
 /**
  * Golf Intelligence Dashboard — Layout & Component Styles
  * Imported only on the /golf-intelligence route
- * Design tokens live in tokens.css (shared with marketing site)
+ * Design tokens live in app/globals.css (shared with the marketing site)
  */
 
-/* ── Missing token alias (used in dashboard, not in tokens.css) ── */
+/* ── Dashboard-only aliases ───────────────────────────────
+   --space-* and --transition-* used to be redeclared here with the
+   same values already in globals.css:172-183. Only the two names
+   that genuinely do not exist upstream remain. */
 :root {
   --charcoal: var(--shadow);
   --font-heading: var(--font-display, 'Barlow Condensed', sans-serif);
-  --space-xs: 4px;
-  --space-sm: 8px;
-  --space-md: 16px;
-  --space-lg: 24px;
-  --space-xl: 32px;
-  --space-xxl: 48px;
-  --transition-fast: 0.15s ease;
-  --transition-medium: 0.25s ease;
 }
 
 /* ── App Layout ───────────────────────────────────────── */
 .app {
+  /* Chrome heights, measured. These replace the 60px / 110px magic
+     numbers that used to be written straight into .nav and
+     .filter-sidebar and did not match anything real.
+
+     --gi-navbar-h tracks the site Navbar, which is sticky top-0 on
+     this route: h-[61px] plus a 1px border (Navbar.tsx). If that
+     changes, change this.
+
+     --gi-header-h is the dashboard header. Its h1 is a clamp, so
+     this is a floor rather than an exact value; the header is
+     sticky, so being a few px under only affects how much of the
+     scrolled content peeks above the tab strip. */
+  --gi-navbar-h: 62px;
+  --gi-header-h: 113px;
+  --gi-nav-h: 47px;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  /* `clip`, never `hidden`: overflow-x: hidden computes overflow-y
+     to auto, which creates a scroll container and silently breaks
+     position: sticky for every descendant (the tab strip). */
+  overflow-x: clip;
 }
 
 /* ── Header ───────────────────────────────────────────── */
@@ -31,8 +45,11 @@
   border-bottom: 1px solid var(--pitch);
   padding: 16px 40px;
   position: sticky;
-  top: 0;
-  z-index: 100;
+  /* Was top: 0 with z-index 100 against the site Navbar's sticky
+     top-0 / z-50 — so on any scroll this painted straight over the
+     site navigation. Sit below it instead. */
+  top: var(--gi-navbar-h);
+  z-index: 40;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -113,8 +130,8 @@
   border-bottom: 1px solid var(--pitch);
   padding: 0 40px;
   position: sticky;
-  top: 60px;
-  z-index: 90;
+  top: calc(var(--gi-navbar-h) + var(--gi-header-h));
+  z-index: 39;
   overflow-x: auto;
 }
 
@@ -127,7 +144,7 @@
 
 .nav-tab {
   font-family: var(--font-heading);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.15em;
   text-transform: uppercase;
@@ -249,7 +266,12 @@
 
 .value-hero {
   font-family: var(--font-heading);
-  font-size: 72px;
+  /* The brand scale defines this as a clamp (--type-display-xl); the
+     dashboard had flattened it to the maximum, so a 72px number sat
+     in a 358px content box on a phone. The 7vw preferred value keeps
+     it pinned at 72px for viewports >= 1029px, so desktop is
+     unchanged and only narrow screens scale down. */
+  font-size: clamp(36px, 7vw, 72px);
   font-weight: 800;
   line-height: 0.9;
   color: var(--chalk);
@@ -257,7 +279,11 @@
 
 .value-stat {
   font-family: var(--font-heading);
-  font-size: 44px;
+  /* Brand spec for --type-display-sm is clamp(18px, 2.5vw, 28px);
+     44px was well above it. This meets it partway rather than
+     dropping the densest tiles that far in one go. 29 of the 71
+     usages set their own size inline and are unaffected. */
+  font-size: clamp(22px, 3vw, 36px);
   font-weight: 700;
   line-height: 1;
   color: var(--chalk);
@@ -306,44 +332,99 @@
 
 /* ── Utility Classes ──────────────────────────────────── */
 .text-center { text-align: center; }
-.text-right { text-align: right; }
 .flex { display: flex; }
 .flex-col { flex-direction: column; }
 .items-center { align-items: center; }
 .justify-between { justify-content: space-between; }
 .gap-sm { gap: var(--space-sm); }
-.gap-md { gap: var(--space-md); }
-.gap-lg { gap: var(--space-lg); }
-.mt-sm { margin-top: var(--space-sm); }
-.mt-md { margin-top: var(--space-md); }
-.mt-lg { margin-top: var(--space-lg); }
-.mb-sm { margin-bottom: var(--space-sm); }
-.mb-md { margin-bottom: var(--space-md); }
-.mb-lg { margin-bottom: var(--space-lg); }
 .w-full { width: 100%; }
-.h-full { height: 100%; }
 
 /* ── Grid Layouts ─────────────────────────────────────── */
 .grid {
   display: grid;
 }
 
-.grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
-.grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
-.grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
-.grid-gap-2 { gap: 2px; }
+/* NOTE: the utility classes in this file (.flex, .items-center,
+   .justify-between, .w-full ...) share names with Tailwind utilities
+   but are declared outside any @layer, so they outrank Tailwind's
+   layered ones — including responsive variants like md:flex-row.
+   This file only loads on /golf-intelligence, so the collision is
+   confined to the dashboard, but it is why the responsive grid work
+   above uses its own class names rather than Tailwind's. */
 
-.grid-hero {
+
+/* ── Responsive Grid Ladders ──────────────────────────────
+   Mobile-first. Each class sets only `display` and
+   `grid-template-columns`, so the per-call-site inline `gap`,
+   `margin` and `background` on each grid keep working.
+
+   Column counts at >=1024px match the previous hardcoded inline
+   values exactly, so desktop layout is unchanged.
+
+   minmax(0, 1fr) rather than 1fr: `1fr` means minmax(auto, 1fr),
+   and that auto min-content floor is what makes these grids
+   overflow a narrow viewport instead of shrinking within it.
+
+   tiles = compact .card-stat (a label and a number). Floors at
+           2-up, which stays scannable on a phone.
+   cards = .card-hero (large values or paragraphs). Floors at
+           1-up, since they are unreadable any narrower. */
+.grid-tiles-2, .grid-tiles-3, .grid-tiles-4, .grid-tiles-5, .grid-tiles-7,
+.grid-cards-2, .grid-cards-3, .grid-cards-4, .grid-cards-5,
+.grid-autofit, .grid-pair {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2px;
-  margin-bottom: 24px;
 }
 
-.grid-stats {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 2px;
+/* Base: < 640px */
+/* Two compact tiles fit a phone at any width, so this one never
+   reflows — it exists so the column count is declared in CSS
+   alongside the rest rather than inline. */
+.grid-tiles-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+.grid-tiles-3,
+.grid-tiles-4,
+.grid-tiles-5,
+.grid-tiles-7 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+.grid-cards-2,
+.grid-cards-3,
+.grid-cards-4,
+.grid-cards-5,
+.grid-pair { grid-template-columns: minmax(0, 1fr); }
+
+/* Dynamic child counts (see DrivingView ProblemDriveGroup).
+   min(100%, 160px) keeps the track floor from exceeding the
+   container when it is narrower than 160px. */
+.grid-autofit { grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr)); }
+
+@media (min-width: 640px) {
+  .grid-tiles-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid-tiles-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid-tiles-5 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .grid-tiles-7 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+  .grid-cards-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid-cards-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid-cards-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid-cards-5 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* Chart pairs stack later than stat grids — two recharts
+   containers side by side are unreadable below a tablet. */
+@media (min-width: 768px) {
+  .grid-pair { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (min-width: 1024px) {
+  .grid-tiles-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .grid-tiles-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .grid-tiles-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .grid-tiles-7 { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+
+  .grid-cards-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid-cards-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .grid-cards-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .grid-cards-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 }
 
 /* ── Scrollbar ────────────────────────────────────────── */
@@ -373,6 +454,13 @@
 
 /* ── Filter Sidebar ───────────────────────────────────── */
 .filter-sidebar {
+  /* border-box so the declared width and height are the OUTER box.
+     Under content-box the 20px padding and 1px border made this
+     321px wide against .main-with-sidebar's 280px margin, putting
+     41px of dashboard content underneath the sidebar (25px in the
+     collapsed state), and made the mobile drawer's 100dvh resolve
+     to 884px in an 844px viewport. */
+  box-sizing: border-box;
   width: 280px;
   background: var(--obsidian);
   border-right: 1px solid var(--pitch);
@@ -381,7 +469,10 @@
   transition: width 0.3s ease, transform 0.3s ease;
   flex-shrink: 0;
   position: fixed;
-  top: 110px;
+  /* Was 110px, which lands inside the header (which ends at 175px),
+     so the sidebar covered the lower half of the title at scroll 0.
+     Start below the whole sticky stack. */
+  top: calc(var(--gi-navbar-h) + var(--gi-header-h) + var(--gi-nav-h));
   left: 0;
   bottom: 0;
   z-index: 200;
@@ -558,18 +649,297 @@
   color: var(--scarlet);
 }
 
-/* ── Responsive ───────────────────────────────────────── */
-@media (max-width: 900px) {
-  .grid-hero {
-    grid-template-columns: 1fr;
+
+/* ── Mobile Filter Drawer ─────────────────────────────────
+   Below 768px the 280px fixed sidebar becomes an off-canvas
+   drawer. Everything here is scoped to the mobile query or to
+   elements that do not render on desktop, so the desktop rail
+   at .filter-sidebar / .main-with-sidebar is untouched.
+
+   Stacking, from the back: backdrop 290, drawer 300, trigger
+   310. All sit above the dashboard header (100), the tab strip
+   (90) and the site Navbar (z-50), so an open drawer covers the
+   full viewport as expected. */
+.filter-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 290;
+  background: rgba(0, 0, 0, 0.55);
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.filter-fab {
+  position: fixed;
+  left: 16px;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  z-index: 310;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 18px;
+  background: var(--scarlet);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.filter-fab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.3);
+  font-size: 10px;
+}
+
+/* Shown only inside the mobile block below. */
+.filter-close {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: none;
+  border: 1px solid var(--pitch);
+  border-radius: 4px;
+  color: var(--ash);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.filter-close:hover {
+  border-color: var(--scarlet);
+  color: var(--scarlet);
+}
+
+/* Applied to <body> while the drawer is open. */
+.gi-scroll-lock {
+  overflow: hidden;
+}
+
+@media (max-width: 767px) {
+  .filter-sidebar {
+    top: 0;
+    bottom: auto;
+    height: 100dvh;
+    width: min(86vw, 320px);
+    z-index: 300;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
   }
 
-  .grid-stats {
-    grid-template-columns: repeat(2, 1fr);
+  .filter-sidebar.is-open {
+    transform: translateX(0);
   }
 
-  .header, .nav, .main {
-    padding-left: 20px;
-    padding-right: 20px;
+  /* There is no 48px rail on mobile, only open and closed. The
+     collapsed state can still arrive from a desktop session, so
+     it must not shrink the drawer or hide its header. */
+  .filter-sidebar.is-collapsed {
+    width: min(86vw, 320px);
+    padding: 20px;
   }
+
+  .filter-sidebar.is-collapsed .filter-sidebar-header {
+    justify-content: space-between;
+    border-bottom: 1px solid var(--pitch);
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+  }
+
+  .filter-sidebar.is-collapsed .filter-sidebar-header h3 {
+    display: block;
+  }
+
+  .filter-toggle { display: none; }
+  .filter-close  { display: inline-flex; }
+
+  /* Content reclaims the full width. Both selectors carry two
+     classes: .main.sidebar-collapsed is (0,2,0), so a one-class
+     .main-with-sidebar override would lose to it even here. */
+  .main.main-with-sidebar,
+  .main.sidebar-collapsed {
+    margin-left: 0;
+  }
+}
+
+/* Hard guard: none of the mobile affordances may leak onto desktop. */
+@media (min-width: 768px) {
+  .filter-backdrop,
+  .filter-fab {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .filter-sidebar {
+    transition: none;
+  }
+}
+
+/* ── Horizontal Table Scroller ────────────────────────────
+   Wide tables scroll inside their own card instead of widening
+   the page. Pair with a min-width on the table itself: a table
+   at width:100% inside an overflow container never overflows,
+   it just squeezes, so the scroller alone does nothing. */
+.gi-table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  /* Without this, swiping a table sideways on iOS triggers browser
+     back-navigation as soon as the scroll reaches its end. */
+  overscroll-behavior-x: contain;
+}
+
+/* ── Mobile Density ───────────────────────────────────────
+   Chrome padding on a 390px screen costs about a quarter of the
+   viewport. These reclaim it without touching desktop. */
+@media (max-width: 767px) {
+  .main,
+  .main.main-with-sidebar {
+    padding: 16px;
+  }
+
+  .card-hero {
+    padding: 16px 16px 14px;
+  }
+
+  .card {
+    padding: 16px;
+  }
+
+  .card-stat {
+    padding: 14px 14px;
+  }
+
+  /* The title and the benchmark selects sit in one justify-between
+     row, which on a phone squeezes the h1 until it wraps under the
+     dropdowns. Stack them instead. */
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+  }
+
+  .header-content {
+    max-width: none;
+    width: 100%;
+  }
+
+  .benchmark-selector {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .benchmark-dropdown {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .nav {
+    padding: 0 16px;
+    /* Ten tabs never fit; make it read as scrollable. The mask fades
+       the right edge of the visible box, which is what a reader needs
+       to see there is more, and it moves with the scroll port rather
+       than the content the way an ::after would. */
+    -webkit-mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 28px), transparent 100%);
+    mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 28px), transparent 100%);
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+  }
+
+  .nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-tab {
+    scroll-snap-align: start;
+    padding: 14px 16px;
+  }
+
+  /* The header is a title and two benchmark selects — set-once
+     configuration, not navigation — and it is the tallest of the
+     three bars. Letting it scroll away leaves the site navbar plus
+     the tab strip as the only persistent chrome, which on an 844px
+     phone is the difference between 105px and 239px. */
+  .header {
+    position: static;
+    z-index: auto;
+  }
+
+  .nav {
+    top: var(--gi-navbar-h);
+  }
+
+  /* Touch targets. 14px checkboxes with 4px padding are well under
+     the 44px the rest of the app uses (Navbar's mobile rows are
+     min-h-[52px]). */
+  .filter-option {
+    min-height: 44px;
+    padding: 8px 0;
+  }
+
+  .filter-option input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+
+  .filter-option input[type="checkbox"]:checked::after {
+    font-size: 13px;
+  }
+
+  .filter-option-text {
+    font-size: 14px;
+  }
+
+  /* The drawer already scrolls; a 200px nested scroller inside it
+     just makes the options harder to reach. */
+  .filter-options {
+    max-height: none;
+  }
+}
+
+/* ── Sticky First Column ──────────────────────────────────
+   For tables wide enough to scroll, pin the identifying column
+   so the numbers still have a label attached once you scroll.
+
+   The pinned cell needs an opaque background of its own or the
+   scrolled columns show straight through it. Two variants,
+   because the tables differ: the default paints a fixed colour,
+   while -zebra takes the row's own background, which is what
+   striped tables like the coach comparison need. */
+.gi-sticky-col th:first-child,
+.gi-sticky-col td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: var(--gi-sticky-col-bg, var(--obsidian));
+  box-shadow: inset -1px 0 0 var(--pitch);
+}
+
+/* Above its own row's other cells; the header row sets its own
+   stacking context, so this only has to beat its siblings. */
+.gi-sticky-col thead th:first-child {
+  z-index: 3;
+}
+
+.gi-sticky-col-zebra th:first-child,
+.gi-sticky-col-zebra td:first-child {
+  background: inherit;
 }

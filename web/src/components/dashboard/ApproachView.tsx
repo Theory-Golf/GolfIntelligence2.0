@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { getStrokeGainedColor, formatStrokesGained, getShotSGColor, chartColors } from '@/lib/golf/tokens';
+import { useMediaQuery, MOBILE_QUERY } from '@/lib/useMediaQuery';
 import type { ApproachMetrics, ApproachDistanceBucket, ApproachHeatMapData, ProcessedShot } from '@/lib/golf/types';
 
 export function ApproachView({ metrics, approachByDistance, approachFromRough, approachHeatMapData, filteredShots }: { metrics: ApproachMetrics; approachByDistance: ApproachDistanceBucket[]; approachFromRough: ApproachDistanceBucket[]; approachHeatMapData: ApproachHeatMapData; filteredShots: ProcessedShot[] }) {
@@ -52,7 +53,7 @@ export function ApproachView({ metrics, approachByDistance, approachFromRough, a
       <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>Approach Performance</h4>
 
       {/* Hero Cards - 3 metrics */}
-      <div className="grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+      <div className="grid-cards-3" style={{ gap: '16px' }}>
 
         {/* Card 1: Total SG Approach */}
         <div className="card-hero is-flagship">
@@ -131,7 +132,7 @@ export function ApproachView({ metrics, approachByDistance, approachFromRough, a
       {approachByDistance.length > 0 && (
         <>
           <h4 style={{ marginTop: '32px', marginBottom: '16px', color: 'var(--ash)' }}>Approach (Fairway and Tee): Approach Skill</h4>
-          <div className="grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
+          <div className="grid-cards-4" style={{ gap: '16px' }}>
             {approachByDistance.map((bucket) => (
               <div key={bucket.label} className="card">
                 <div className="flex justify-between items-center" style={{ marginBottom: '8px' }}>
@@ -173,7 +174,7 @@ export function ApproachView({ metrics, approachByDistance, approachFromRough, a
       {approachFromRough.length > 0 && (
         <>
           <h4 style={{ marginTop: '32px', marginBottom: '16px', color: 'var(--ash)' }}>Approach from Rough: Rough Skill</h4>
-          <div className="grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
+          <div className="grid-cards-4" style={{ gap: '16px' }}>
             {approachFromRough.map((bucket) => (
               <div key={bucket.label} className="card">
                 <div className="flex justify-between items-center" style={{ marginBottom: '8px' }}>
@@ -290,42 +291,44 @@ function ApproachTableSection({ shots }: { shots: ProcessedShot[] }) {
                   <span><strong>Course:</strong> {courseStr}</span>
                   <span><strong>Approach Shots:</strong> {roundApproaches.length}</span>
                 </div>
-                <table style={{ width: '100%', fontSize: '11px', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
-                  <thead>
-                    <tr style={{ borderBottom: '1px solid var(--ash)' }}>
-                      <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '8%' }}>Hole</th>
-                      <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '12%' }}>Start Dist</th>
-                      <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '12%' }}>Start Lie</th>
-                      <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '12%' }}>End Dist</th>
-                      <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '12%' }}>End Lie</th>
-                      <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '10%' }}>Penalty</th>
-                      <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '12%' }}>SG</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {roundApproaches
-                      .sort((a, b) => a.holeNumber - b.holeNumber)
-                      .map((approach, idx) => (
-                        <tr key={idx} style={{ borderBottom: '1px solid var(--dark)' }}>
-                          <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{approach.holeNumber}</td>
-                          <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>
-                            {approach.startingDistance}
-                          </td>
-                          <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{approach.startingLie}</td>
-                          <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>
-                            {approach.endingDistance}
-                          </td>
-                          <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{approach.endingLie}</td>
-                          <td style={{ padding: '6px', textAlign: 'center', color: approach.hasPenalty ? 'var(--scarlet)' : 'transparent' }}>
-                            {approach.hasPenalty ? 'Yes' : ''}
-                          </td>
-                          <td style={{ padding: '6px', textAlign: 'center', color: getShotSGColor(approach.calculatedStrokesGained), fontFamily: 'var(--font-mono)' }}>
-                            {formatStrokesGained(approach.calculatedStrokesGained)}
-                          </td>
-                        </tr>
-                      ))}
-                  </tbody>
-                </table>
+                <div className="gi-table-scroll">
+                  <table style={{ minWidth: '580px', width: '100%', fontSize: '13px', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+                    <thead>
+                      <tr style={{ borderBottom: '1px solid var(--ash)' }}>
+                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '8%' }}>Hole</th>
+                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '12%' }}>Start Dist</th>
+                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '12%' }}>Start Lie</th>
+                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '12%' }}>End Dist</th>
+                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '12%' }}>End Lie</th>
+                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '10%' }}>Penalty</th>
+                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '12%' }}>SG</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {roundApproaches
+                        .sort((a, b) => a.holeNumber - b.holeNumber)
+                        .map((approach, idx) => (
+                          <tr key={idx} style={{ borderBottom: '1px solid var(--dark)' }}>
+                            <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{approach.holeNumber}</td>
+                            <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>
+                              {approach.startingDistance}
+                            </td>
+                            <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{approach.startingLie}</td>
+                            <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>
+                              {approach.endingDistance}
+                            </td>
+                            <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{approach.endingLie}</td>
+                            <td style={{ padding: '6px', textAlign: 'center', color: approach.hasPenalty ? 'var(--scarlet)' : 'transparent' }}>
+                              {approach.hasPenalty ? 'Yes' : ''}
+                            </td>
+                            <td style={{ padding: '6px', textAlign: 'center', color: getShotSGColor(approach.calculatedStrokesGained), fontFamily: 'var(--font-mono)' }}>
+                              {formatStrokesGained(approach.calculatedStrokesGained)}
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             );
           })}
@@ -339,6 +342,7 @@ function ApproachTableSection({ shots }: { shots: ProcessedShot[] }) {
  * Approach Ending Lie Section - Shows ending lie distribution and SG by ending lie
  */
 function ApproachEndingLieSection({ filteredShots }: { filteredShots: ProcessedShot[] }) {
+  const isNarrow = useMediaQuery(MOBILE_QUERY);
   // Filter to approach shots only
   const approachShots = useMemo(() => {
     return filteredShots.filter(shot => shot.shotType === 'Approach');
@@ -447,7 +451,7 @@ function ApproachEndingLieSection({ filteredShots }: { filteredShots: ProcessedS
     <div style={{ marginTop: '32px' }}>
       <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>Approach Ending Lie</h4>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+      <div className="grid-pair" style={{ gap: '24px' }}>
         {/* Chart 1: Ending Lie as % of Total Approach Shots */}
         <div style={{ background: 'var(--charcoal)', padding: '16px', borderRadius: '4px' }}>
           <h5 style={{ marginBottom: '8px', color: 'var(--chalk)', fontSize: '14px', fontWeight: 600 }}>
@@ -456,7 +460,7 @@ function ApproachEndingLieSection({ filteredShots }: { filteredShots: ProcessedS
           <p style={{ fontSize: '11px', color: 'var(--ash)', marginBottom: '16px' }}>
             Distribution of where approach shots end up
           </p>
-          <ResponsiveContainer width="100%" height={280}>
+          <ResponsiveContainer width="100%" height={isNarrow ? 220 : 280}>
             <BarChart
               data={endingLieData}
               margin={{ top: 10, right: 30, left: 20, bottom: 50 }}
@@ -465,10 +469,10 @@ function ApproachEndingLieSection({ filteredShots }: { filteredShots: ProcessedS
               <XAxis
                 dataKey="lie"
                 stroke="var(--ash)"
-                tick={{ fill: 'var(--ash)', fontSize: 10 }}
-                angle={-45}
-                textAnchor="end"
-                height={50}
+                tick={{ fill: 'var(--ash)', fontSize: isNarrow ? 10 : 12 }}
+                angle={isNarrow ? 0 : -45}
+                textAnchor={isNarrow ? 'middle' : 'end'}
+                height={isNarrow ? 24 : 50}
               />
               <YAxis
                 stroke="var(--ash)"
@@ -498,7 +502,7 @@ function ApproachEndingLieSection({ filteredShots }: { filteredShots: ProcessedS
           <p style={{ fontSize: '11px', color: 'var(--ash)', marginBottom: '16px' }}>
             Strokes Gained performance by ending location
           </p>
-          <ResponsiveContainer width="100%" height={280}>
+          <ResponsiveContainer width="100%" height={isNarrow ? 220 : 280}>
             <BarChart
               data={endingLieData}
               margin={{ top: 10, right: 30, left: 20, bottom: 50 }}
@@ -507,10 +511,10 @@ function ApproachEndingLieSection({ filteredShots }: { filteredShots: ProcessedS
               <XAxis
                 dataKey="lie"
                 stroke="var(--ash)"
-                tick={{ fill: 'var(--ash)', fontSize: 10 }}
-                angle={-45}
-                textAnchor="end"
-                height={50}
+                tick={{ fill: 'var(--ash)', fontSize: isNarrow ? 10 : 12 }}
+                angle={isNarrow ? 0 : -45}
+                textAnchor={isNarrow ? 'middle' : 'end'}
+                height={isNarrow ? 24 : 50}
               />
               <YAxis
                 stroke="var(--ash)"
@@ -607,8 +611,8 @@ function ApproachHeatMapSection({ data }: { data: ApproachHeatMapData }) {
       </div>
 
       {/* Heat Map Table */}
-      <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+      <div className="gi-table-scroll">
+        <table className="gi-sticky-col" style={{ minWidth: '640px', width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
           <thead>
             <tr>
               <th style={{ padding: '12px', textAlign: 'left', color: 'var(--ash)', fontWeight: '600', borderBottom: '1px solid var(--border)' }}>Starting Lie</th>

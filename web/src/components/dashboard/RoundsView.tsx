@@ -74,8 +74,8 @@ export function RoundsView({ roundSummaries, filteredShots }: { roundSummaries: 
         </div>
       ) : (
         <div style={{ background: 'var(--charcoal)', borderRadius: '4px', overflow: 'hidden' }}>
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+          <div className="gi-table-scroll">
+            <table style={{ minWidth: '800px', width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--pitch)', background: 'var(--obsidian)' }}>
                   <th style={{ ...thStyle, textAlign: 'left' }}>Date</th>
@@ -174,61 +174,63 @@ function RoundRow({
       {isExpanded && holeScores && (
         <tr style={{ borderBottom: '1px solid var(--pitch)', background: 'var(--obsidian)' }}>
           <td colSpan={columnCount} style={{ padding: '16px' }}>
-            <table style={{ borderCollapse: 'collapse', fontSize: '11px', margin: '0 auto' }}>
-              <thead>
-                <tr>
-                  <th style={{ ...thStyle, textAlign: 'left', padding: '6px 10px' }}>Hole</th>
-                  {holeScores.map(h => (
-                    <th key={h.hole} style={{ ...thStyle, padding: '6px 10px' }}>{h.hole}</th>
-                  ))}
-                  <th style={{ ...thStyle, padding: '6px 10px' }}>Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style={{ ...tdStyle, textAlign: 'left', color: 'var(--ash)', padding: '6px 10px' }}>Par</td>
-                  {holeScores.map(h => (
-                    <td key={h.hole} style={{ ...tdStyle, color: 'var(--ash)', padding: '6px 10px' }}>{h.par}</td>
-                  ))}
-                  <td style={{ ...tdStyle, color: 'var(--ash)', padding: '6px 10px' }}>
-                    {holeScores.reduce((sum, h) => sum + h.par, 0)}
-                  </td>
-                </tr>
-                <tr>
-                  <td style={{ ...tdStyle, textAlign: 'left', color: 'var(--ash)', padding: '6px 10px' }}>Score</td>
-                  {holeScores.map(h => (
-                    <td
-                      key={h.hole}
-                      style={{
-                        ...tdStyle,
-                        padding: '6px 10px',
-                        fontWeight: 600,
-                        color: OUTCOME_COLORS[getHoleOutcome(h.score, h.par)],
-                      }}
-                    >
-                      {h.score}
+            <div className="gi-table-scroll">
+              <table style={{ minWidth: '880px', borderCollapse: 'collapse', fontSize: '13px', margin: '0 auto' }}>
+                <thead>
+                  <tr>
+                    <th style={{ ...thStyle, textAlign: 'left', padding: '6px 10px' }}>Hole</th>
+                    {holeScores.map(h => (
+                      <th key={h.hole} style={{ ...thStyle, padding: '6px 10px' }}>{h.hole}</th>
+                    ))}
+                    <th style={{ ...thStyle, padding: '6px 10px' }}>Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style={{ ...tdStyle, textAlign: 'left', color: 'var(--ash)', padding: '6px 10px' }}>Par</td>
+                    {holeScores.map(h => (
+                      <td key={h.hole} style={{ ...tdStyle, color: 'var(--ash)', padding: '6px 10px' }}>{h.par}</td>
+                    ))}
+                    <td style={{ ...tdStyle, color: 'var(--ash)', padding: '6px 10px' }}>
+                      {holeScores.reduce((sum, h) => sum + h.par, 0)}
                     </td>
-                  ))}
-                  <td style={{ ...tdStyle, fontWeight: 600, padding: '6px 10px' }}>
-                    {holeScores.reduce((sum, h) => sum + h.score, 0)}
-                  </td>
-                </tr>
-                <tr>
-                  <td style={{ ...tdStyle, textAlign: 'left', color: 'var(--ash)', padding: '6px 10px' }}>SG</td>
-                  {holeScores.map(h => {
-                    const holeSG = h.shots.reduce((sum, s) => sum + s.calculatedStrokesGained, 0);
-                    return (
-                      <td key={h.hole} style={{ ...tdStyle, padding: '6px 10px', color: getStrokeGainedColor(holeSG) }}>
-                        {formatStrokesGained(holeSG)}
+                  </tr>
+                  <tr>
+                    <td style={{ ...tdStyle, textAlign: 'left', color: 'var(--ash)', padding: '6px 10px' }}>Score</td>
+                    {holeScores.map(h => (
+                      <td
+                        key={h.hole}
+                        style={{
+                          ...tdStyle,
+                          padding: '6px 10px',
+                          fontWeight: 600,
+                          color: OUTCOME_COLORS[getHoleOutcome(h.score, h.par)],
+                        }}
+                      >
+                        {h.score}
                       </td>
-                    );
-                  })}
-                  <td style={{ ...tdStyle, padding: '6px 10px', color: getStrokeGainedColor(round.strokesGained) }}>
-                    {formatStrokesGained(round.strokesGained)}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                    ))}
+                    <td style={{ ...tdStyle, fontWeight: 600, padding: '6px 10px' }}>
+                      {holeScores.reduce((sum, h) => sum + h.score, 0)}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style={{ ...tdStyle, textAlign: 'left', color: 'var(--ash)', padding: '6px 10px' }}>SG</td>
+                    {holeScores.map(h => {
+                      const holeSG = h.shots.reduce((sum, s) => sum + s.calculatedStrokesGained, 0);
+                      return (
+                        <td key={h.hole} style={{ ...tdStyle, padding: '6px 10px', color: getStrokeGainedColor(holeSG) }}>
+                          {formatStrokesGained(holeSG)}
+                        </td>
+                      );
+                    })}
+                    <td style={{ ...tdStyle, padding: '6px 10px', color: getStrokeGainedColor(round.strokesGained) }}>
+                      {formatStrokesGained(round.strokesGained)}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </td>
         </tr>
       )}

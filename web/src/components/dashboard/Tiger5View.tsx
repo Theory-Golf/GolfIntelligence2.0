@@ -10,6 +10,7 @@ import type {
   RootCauseByFailTypeList,
 } from '@/lib/golf/types';
 import { getStrokeGainedColor, getShotSGColor, formatStrokesGained } from '@/lib/golf/tokens';
+import { useMediaQuery, MOBILE_QUERY } from '@/lib/useMediaQuery';
 import {
   ComposedChart,
   Bar,
@@ -37,7 +38,7 @@ export function Tiger5View({ metrics, lastUpdated }: { metrics: Tiger5Metrics; l
       <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>Tiger 5 Performance</h4>
 
       {/* Hero Cards - Section 1: Tiger 5 Fails, Average Score, Rounds */}
-      <div className="grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+      <div className="grid-cards-3" style={{ gap: '16px' }}>
         {/* Card 1: Total Tiger 5 Fails */}
         <HeroCardWithSubValues
           label="Tiger 5 Fails"
@@ -69,7 +70,7 @@ export function Tiger5View({ metrics, lastUpdated }: { metrics: Tiger5Metrics; l
       </div>
 
       {/* Stat Cards - Tiger 5 Fail Breakdown */}
-      <div className="grid" style={{ gridTemplateColumns: 'repeat(5, 1fr)', gap: '12px', marginTop: '24px' }}>
+      <div className="grid-tiles-5" style={{ gap: '12px', marginTop: '24px' }}>
         {getSortedTiger5Cards(tiger5Fails, totalRounds).map((card) => (
           <StatCardWithSG
             key={card.label}
@@ -429,28 +430,30 @@ function RootCauseByFailTypeSection({ rootCauseByFailType, totalFails }: { rootC
                 <h5 style={{ marginBottom: '12px', color: 'var(--chalk)', fontSize: '13px', fontWeight: 600 }}>
                   {failType.label} ({data.totalCount})
                 </h5>
-                <table style={{ width: '100%', fontSize: '11px', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
-                  <thead>
-                    <tr style={{ borderBottom: '1px solid var(--ash)' }}>
-                      <th style={{ textAlign: 'left', padding: '6px', color: 'var(--ash)', width: '35%' }}>Root Cause</th>
-                      <th style={{ textAlign: 'right', padding: '6px', color: 'var(--ash)', width: '15%' }}>Count</th>
-                      <th style={{ textAlign: 'right', padding: '6px', color: 'var(--ash)', width: '20%' }}>% of Fail Type</th>
-                      <th style={{ textAlign: 'right', padding: '6px', color: 'var(--ash)', width: '15%' }}>% of Total</th>
-                      <th style={{ textAlign: 'right', padding: '6px', color: 'var(--ash)', width: '15%' }}>Total SG</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {rootCauseItems.map((item, idx) => (
-                      <tr key={idx} style={{ borderBottom: '1px solid var(--dark)' }}>
-                        <td style={{ padding: '6px', color: 'var(--chalk)' }}>{item.label}</td>
-                        <td style={{ padding: '6px', textAlign: 'right', color: 'var(--chalk)' }}>{item.count}</td>
-                        <td style={{ padding: '6px', textAlign: 'right', color: 'var(--ash)' }}>{item.percentageOfFailType.toFixed(0)}%</td>
-                        <td style={{ padding: '6px', textAlign: 'right', color: 'var(--ash)' }}>{item.percentageOfTotal.toFixed(0)}%</td>
-                        <td style={{ padding: '6px', textAlign: 'right', color: getStrokeGainedColor(item.sgTotal || 0) }}>{formatStrokesGained(item.sgTotal || 0)}</td>
+                <div className="gi-table-scroll">
+                  <table style={{ minWidth: '500px', width: '100%', fontSize: '13px', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+                    <thead>
+                      <tr style={{ borderBottom: '1px solid var(--ash)' }}>
+                        <th style={{ textAlign: 'left', padding: '6px', color: 'var(--ash)', width: '35%' }}>Root Cause</th>
+                        <th style={{ textAlign: 'right', padding: '6px', color: 'var(--ash)', width: '15%' }}>Count</th>
+                        <th style={{ textAlign: 'right', padding: '6px', color: 'var(--ash)', width: '20%' }}>% of Fail Type</th>
+                        <th style={{ textAlign: 'right', padding: '6px', color: 'var(--ash)', width: '15%' }}>% of Total</th>
+                        <th style={{ textAlign: 'right', padding: '6px', color: 'var(--ash)', width: '15%' }}>Total SG</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {rootCauseItems.map((item, idx) => (
+                        <tr key={idx} style={{ borderBottom: '1px solid var(--dark)' }}>
+                          <td style={{ padding: '6px', color: 'var(--chalk)' }}>{item.label}</td>
+                          <td style={{ padding: '6px', textAlign: 'right', color: 'var(--chalk)' }}>{item.count}</td>
+                          <td style={{ padding: '6px', textAlign: 'right', color: 'var(--ash)' }}>{item.percentageOfFailType.toFixed(0)}%</td>
+                          <td style={{ padding: '6px', textAlign: 'right', color: 'var(--ash)' }}>{item.percentageOfTotal.toFixed(0)}%</td>
+                          <td style={{ padding: '6px', textAlign: 'right', color: getStrokeGainedColor(item.sgTotal || 0) }}>{formatStrokesGained(item.sgTotal || 0)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             );
           })}
@@ -516,40 +519,42 @@ function Tiger5FailDetailsSection({ failDetails }: { failDetails: Tiger5FailDeta
                 </h5>
                 {failType.details.map((detail, idx) => (
                   <div key={idx} style={{ marginBottom: '16px', padding: '12px', background: 'var(--charcoal)', borderRadius: '4px' }}>
-                    <div style={{ display: 'flex', gap: '24px', marginBottom: '12px', fontSize: '12px', color: 'var(--chalk)' }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 16px', marginBottom: '12px', fontSize: '12px', color: 'var(--chalk)' }}>
                       <span><strong>Date:</strong> {detail.date}</span>
                       <span><strong>Course:</strong> {detail.course}</span>
                       <span><strong>Hole:</strong> {detail.hole} (Par {detail.par})</span>
                       <span><strong>Score:</strong> {detail.score}</span>
                     </div>
-                    <table style={{ width: '100%', fontSize: '11px', borderCollapse: 'collapse' }}>
-                      <thead>
-                        <tr style={{ borderBottom: '1px solid var(--ash)' }}>
-                          <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>Shot #</th>
-                          <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>Start Lie</th>
-                          <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>Start Dist</th>
-                          <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>End Lie</th>
-                          <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>End Dist</th>
-                          <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>Penalty</th>
-                          <th style={{ textAlign: 'right', padding: '4px', color: 'var(--ash)' }}>SG</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {detail.shots.map((shot, shotIdx) => (
-                          <tr key={shotIdx} style={{ borderBottom: '1px solid var(--charcoal)' }}>
-                            <td style={{ padding: '4px' }}>{shot.shotNumber}</td>
-                            <td style={{ padding: '4px' }}>{shot.startingLie}</td>
-                            <td style={{ padding: '4px' }}>{shot.startingDistance}</td>
-                            <td style={{ padding: '4px' }}>{shot.endingLie}</td>
-                            <td style={{ padding: '4px' }}>{shot.endingDistance}</td>
-                            <td style={{ padding: '4px' }}>{shot.hasPenalty ? 'Yes' : ''}</td>
-                            <td style={{ padding: '4px', textAlign: 'right', color: getShotSGColor(shot.calculatedStrokesGained) }}>
-                              {formatStrokesGained(shot.calculatedStrokesGained)}
-                            </td>
+                    <div className="gi-table-scroll">
+                      <table style={{ minWidth: '660px', width: '100%', fontSize: '13px', borderCollapse: 'collapse' }}>
+                        <thead>
+                          <tr style={{ borderBottom: '1px solid var(--ash)' }}>
+                            <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>Shot #</th>
+                            <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>Start Lie</th>
+                            <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>Start Dist</th>
+                            <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>End Lie</th>
+                            <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>End Dist</th>
+                            <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>Penalty</th>
+                            <th style={{ textAlign: 'right', padding: '4px', color: 'var(--ash)' }}>SG</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody>
+                          {detail.shots.map((shot, shotIdx) => (
+                            <tr key={shotIdx} style={{ borderBottom: '1px solid var(--charcoal)' }}>
+                              <td style={{ padding: '4px' }}>{shot.shotNumber}</td>
+                              <td style={{ padding: '4px' }}>{shot.startingLie}</td>
+                              <td style={{ padding: '4px' }}>{shot.startingDistance}</td>
+                              <td style={{ padding: '4px' }}>{shot.endingLie}</td>
+                              <td style={{ padding: '4px' }}>{shot.endingDistance}</td>
+                              <td style={{ padding: '4px' }}>{shot.hasPenalty ? 'Yes' : ''}</td>
+                              <td style={{ padding: '4px', textAlign: 'right', color: getShotSGColor(shot.calculatedStrokesGained) }}>
+                                {formatStrokesGained(shot.calculatedStrokesGained)}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -565,6 +570,7 @@ function Tiger5FailDetailsSection({ failDetails }: { failDetails: Tiger5FailDeta
  * Tiger 5 Trend Section - Dual axis chart with stacked bars and line
  */
 function Tiger5TrendSection({ trendData }: { trendData: Tiger5TrendDataPoint[] }) {
+  const isNarrow = useMediaQuery(MOBILE_QUERY);
   if (trendData.length === 0) {
     return null;
   }
@@ -588,17 +594,18 @@ function Tiger5TrendSection({ trendData }: { trendData: Tiger5TrendDataPoint[] }
     <div style={{ marginTop: '24px' }}>
       <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>Tiger 5 Trend</h4>
       <div style={{ background: 'var(--charcoal)', padding: '16px', borderRadius: '4px' }}>
-        <ResponsiveContainer width="100%" height={300}>
+        <ResponsiveContainer width="100%" height={isNarrow ? 240 : 300}>
           <ComposedChart data={formattedData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--ash)" opacity={0.3} />
             <XAxis
               dataKey="label"
               stroke="var(--ash)"
-              tick={{ fill: 'var(--ash)', fontSize: 10 }}
-              interval={0}
-              angle={-45}
-              textAnchor="end"
-              height={60}
+              tick={{ fill: 'var(--ash)', fontSize: isNarrow ? 10 : 12 }}
+              interval={isNarrow ? 'preserveStartEnd' : 0}
+              minTickGap={isNarrow ? 24 : 0}
+              angle={isNarrow ? 0 : -45}
+              textAnchor={isNarrow ? 'middle' : 'end'}
+              height={isNarrow ? 24 : 60}
             />
             <YAxis
               yAxisId="left"
@@ -645,6 +652,9 @@ function PotentialScoreSection({
   tiger5Fails: Tiger5Fail;
   totalRounds: number;
 }) {
+  // Called before the early return below — hooks must run unconditionally.
+  const isNarrow = useMediaQuery(MOBILE_QUERY);
+
   if (trendData.length === 0 || tiger5Fails.totalFails === 0) {
     return null;
   }
@@ -681,17 +691,18 @@ function PotentialScoreSection({
 
       {/* Chart */}
       <div style={{ background: 'var(--charcoal)', padding: '16px', borderRadius: '4px' }}>
-        <ResponsiveContainer width="100%" height={300}>
+        <ResponsiveContainer width="100%" height={isNarrow ? 240 : 300}>
           <ComposedChart data={potentialData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--ash)" opacity={0.3} />
             <XAxis
               dataKey="label"
               stroke="var(--ash)"
-              tick={{ fill: 'var(--ash)', fontSize: 10 }}
-              interval={0}
-              angle={-45}
-              textAnchor="end"
-              height={60}
+              tick={{ fill: 'var(--ash)', fontSize: isNarrow ? 10 : 12 }}
+              interval={isNarrow ? 'preserveStartEnd' : 0}
+              minTickGap={isNarrow ? 24 : 0}
+              angle={isNarrow ? 0 : -45}
+              textAnchor={isNarrow ? 'middle' : 'end'}
+              height={isNarrow ? 24 : 60}
             />
             <YAxis
               stroke="var(--ash)"
@@ -712,7 +723,7 @@ function PotentialScoreSection({
       </div>
 
       {/* Summary Stat Cards */}
-      <div className="grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginTop: '16px' }}>
+      <div className="grid-tiles-3" style={{ gap: '16px', marginTop: '16px' }}>
         <div className="card-stat" style={{ borderLeft: '3px solid var(--pitch)' }}>
           <div className="label" style={{ color: 'var(--ash)', marginBottom: '8px' }}>Average Score</div>
           <div className="value-stat" style={{ color: 'var(--pitch)' }}>{avgActualScore.toFixed(1)}</div>
@@ -798,7 +809,7 @@ function RootCauseSection({ rootCause, totalFailHoles }: { rootCause: RootCauseM
       <p style={{ fontSize: '12px', color: 'var(--ash)', marginBottom: '16px' }}>
         Shot with lowest SG on each Tiger 5 fail hole ({totalFailHoles} total fails)
       </p>
-      <div className="grid" style={{ gridTemplateColumns: 'repeat(7, 1fr)', gap: '12px' }}>
+      <div className="grid-tiles-7" style={{ gap: '12px' }}>
         {rootCauseCards.map((card) => {
           const percentage = totalFailHoles > 0 ? (card.value / totalFailHoles) * 100 : 0;
           return (

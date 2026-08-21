@@ -5,6 +5,7 @@ import type { ShortGameMetrics, ShortGameHeatMapData, ProcessedShot } from '@/li
 import type { Lie } from '@/lib/golf/db/types';
 import { getStrokeGainedColor, formatStrokesGained, getShotSGColor } from '@/lib/golf/tokens';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { useMediaQuery, MOBILE_QUERY } from '@/lib/useMediaQuery';
 
 // Colors for starting lie - shared convention with other lie-based charts in the app
 const STARTING_LIE_COLORS: Record<Lie, string> = {
@@ -44,6 +45,7 @@ function getLeaveBucket(shot: ProcessedShot): string {
  * Buckets: 0-4 ft, 5-8 ft, 9-12 ft, 13-20 ft, 21+ ft, Missed Green
  */
 function ShortGameLeaveDistributionSection({ filteredShots }: { filteredShots: ProcessedShot[] }) {
+  const isNarrow = useMediaQuery(MOBILE_QUERY);
   // Filter to short game shots only
   const shortGameShots = useMemo(() => {
     return filteredShots.filter(shot => shot.shotType === 'Short Game');
@@ -114,10 +116,10 @@ function ShortGameLeaveDistributionSection({ filteredShots }: { filteredShots: P
       <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>Leave Distribution by Starting Lie</h4>
       <p style={{ fontSize: '12px', color: 'var(--ash)', marginBottom: '16px' }}>Where short game shots finish on the green, broken down by starting lie ({leaveDistribution.totalShortGameShots} total shots)</p>
       <div style={{ background: 'var(--charcoal)', padding: '16px', borderRadius: '4px' }}>
-        <ResponsiveContainer width="100%" height={340}>
-          <BarChart data={leaveDistribution.buckets} margin={{ top: 20, right: 30, left: 20, bottom: 50 }}>
+        <ResponsiveContainer width="100%" height={isNarrow ? 260 : 340}>
+          <BarChart data={leaveDistribution.buckets} margin={isNarrow ? { top: 12, right: 8, left: 0, bottom: 8 } : { top: 20, right: 30, left: 20, bottom: 50 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--ash)" opacity={0.3} />
-            <XAxis dataKey="label" stroke="var(--ash)" tick={{ fill: 'var(--ash)', fontSize: 11 }} angle={-45} textAnchor="end" height={60} />
+            <XAxis dataKey="label" stroke="var(--ash)" tick={{ fill: 'var(--ash)', fontSize: isNarrow ? 9 : 12 }} interval={isNarrow ? 'preserveStartEnd' : 0} minTickGap={isNarrow ? 20 : 0} angle={isNarrow ? 0 : -45} textAnchor={isNarrow ? 'middle' : 'end'} height={isNarrow ? 24 : 60} />
             <YAxis stroke="var(--ash)" tick={{ fill: 'var(--ash)', fontSize: 11 }} tickFormatter={(v) => `${v}%`} domain={[0, 100]} />
             <Tooltip content={<LeaveTooltip />} />
             <Legend wrapperStyle={{ fontSize: '11px', color: 'var(--ash)' }} />
@@ -164,34 +166,36 @@ function ShortGameTableSection({ filteredShots }: { filteredShots: ProcessedShot
                   <span><strong>Course:</strong> {courseStr}</span>
                   <span><strong>Short Game Shots:</strong> {roundShots.length}</span>
                 </div>
-                <table style={{ width: '100%', fontSize: '11px', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
-                  <thead>
-                    <tr style={{ borderBottom: '1px solid var(--ash)' }}>
-                      <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '6%' }}>Shot</th>
-                      <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '6%' }}>Hole</th>
-                      <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '10%' }}>Start Dist</th>
-                      <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '10%' }}>Start Lie</th>
-                      <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '10%' }}>End Dist</th>
-                      <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '12%' }}>End Lie</th>
-                      <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '8%' }}>Penalty</th>
-                      <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '10%' }}>SG</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {roundShots.sort((a, b) => a.holeNumber - b.holeNumber || a.shotNumber - b.shotNumber).map((shot, idx) => (
-                      <tr key={idx} style={{ borderBottom: '1px solid var(--dark)' }}>
-                        <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{shot.shotNumber}</td>
-                        <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{shot.holeNumber}</td>
-                        <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>{shot.startingDistance}</td>
-                        <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{shot.startingLie}</td>
-                        <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>{shot.endingDistance}</td>
-                        <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{shot.endingLie}</td>
-                        <td style={{ padding: '6px', textAlign: 'center', color: shot.hasPenalty ? 'var(--scarlet)' : 'transparent' }}>{shot.hasPenalty ? 'Yes' : ''}</td>
-                        <td style={{ padding: '6px', textAlign: 'center', color: getShotSGColor(shot.calculatedStrokesGained), fontFamily: 'var(--font-mono)' }}>{formatStrokesGained(shot.calculatedStrokesGained)}</td>
+                <div className="gi-table-scroll">
+                  <table style={{ minWidth: '660px', width: '100%', fontSize: '13px', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+                    <thead>
+                      <tr style={{ borderBottom: '1px solid var(--ash)' }}>
+                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '6%' }}>Shot</th>
+                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '6%' }}>Hole</th>
+                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '10%' }}>Start Dist</th>
+                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '10%' }}>Start Lie</th>
+                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '10%' }}>End Dist</th>
+                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '12%' }}>End Lie</th>
+                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '8%' }}>Penalty</th>
+                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '10%' }}>SG</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {roundShots.sort((a, b) => a.holeNumber - b.holeNumber || a.shotNumber - b.shotNumber).map((shot, idx) => (
+                        <tr key={idx} style={{ borderBottom: '1px solid var(--dark)' }}>
+                          <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{shot.shotNumber}</td>
+                          <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{shot.holeNumber}</td>
+                          <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>{shot.startingDistance}</td>
+                          <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{shot.startingLie}</td>
+                          <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>{shot.endingDistance}</td>
+                          <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{shot.endingLie}</td>
+                          <td style={{ padding: '6px', textAlign: 'center', color: shot.hasPenalty ? 'var(--scarlet)' : 'transparent' }}>{shot.hasPenalty ? 'Yes' : ''}</td>
+                          <td style={{ padding: '6px', textAlign: 'center', color: getShotSGColor(shot.calculatedStrokesGained), fontFamily: 'var(--font-mono)' }}>{formatStrokesGained(shot.calculatedStrokesGained)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             );
           })}
@@ -266,8 +270,8 @@ function ShortGameHeatMapSection({ data }: { data: ShortGameHeatMapData }) {
         </label>
       </div>
 
-      <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+      <div className="gi-table-scroll">
+        <table className="gi-sticky-col" style={{ minWidth: '640px', width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
           <thead>
             <tr>
               <th style={{ padding: '12px', textAlign: 'left', color: 'var(--ash)', fontWeight: '600', borderBottom: '1px solid var(--border)' }}>Starting Lie</th>
@@ -403,7 +407,7 @@ export function ShortGameView({ metrics, shortGameHeatMapData, filteredShots }: 
       <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>Short Game Performance</h4>
 
       {/* Hero Cards - 4 metrics */}
-      <div className="grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
+      <div className="grid-cards-4" style={{ gap: '16px' }}>
 
         {/* Card 1: Total SG - Short Game */}
         <div className="card-hero is-flagship">
