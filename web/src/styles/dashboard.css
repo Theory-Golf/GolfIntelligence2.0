@@ -800,3 +800,84 @@
     transition: none;
   }
 }
+
+/* ── Horizontal Table Scroller ────────────────────────────
+   Wide tables scroll inside their own card instead of widening
+   the page. Pair with a min-width on the table itself: a table
+   at width:100% inside an overflow container never overflows,
+   it just squeezes, so the scroller alone does nothing. */
+.gi-table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  /* Without this, swiping a table sideways on iOS triggers browser
+     back-navigation as soon as the scroll reaches its end. */
+  overscroll-behavior-x: contain;
+}
+
+/* ── Mobile Density ───────────────────────────────────────
+   Chrome padding on a 390px screen costs about a quarter of the
+   viewport. These reclaim it without touching desktop. */
+@media (max-width: 767px) {
+  .main,
+  .main.main-with-sidebar {
+    padding: 16px;
+  }
+
+  .card-hero {
+    padding: 16px 16px 14px;
+  }
+
+  .card {
+    padding: 16px;
+  }
+
+  .card-stat {
+    padding: 14px 14px;
+  }
+
+  /* The title and the benchmark selects sit in one justify-between
+     row, which on a phone squeezes the h1 until it wraps under the
+     dropdowns. Stack them instead. */
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+  }
+
+  .header-content {
+    max-width: none;
+    width: 100%;
+  }
+
+  .benchmark-selector {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .benchmark-dropdown {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .nav {
+    padding: 0 16px;
+    /* Ten tabs never fit; make it read as scrollable. The mask fades
+       the right edge of the visible box, which is what a reader needs
+       to see there is more, and it moves with the scroll port rather
+       than the content the way an ::after would. */
+    -webkit-mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 28px), transparent 100%);
+    mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 28px), transparent 100%);
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+  }
+
+  .nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-tab {
+    scroll-snap-align: start;
+    padding: 14px 16px;
+  }
+}
