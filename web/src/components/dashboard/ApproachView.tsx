@@ -290,42 +290,44 @@ function ApproachTableSection({ shots }: { shots: ProcessedShot[] }) {
                   <span><strong>Course:</strong> {courseStr}</span>
                   <span><strong>Approach Shots:</strong> {roundApproaches.length}</span>
                 </div>
-                <table style={{ width: '100%', fontSize: '11px', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
-                  <thead>
-                    <tr style={{ borderBottom: '1px solid var(--ash)' }}>
-                      <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '8%' }}>Hole</th>
-                      <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '12%' }}>Start Dist</th>
-                      <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '12%' }}>Start Lie</th>
-                      <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '12%' }}>End Dist</th>
-                      <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '12%' }}>End Lie</th>
-                      <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '10%' }}>Penalty</th>
-                      <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '12%' }}>SG</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {roundApproaches
-                      .sort((a, b) => a.holeNumber - b.holeNumber)
-                      .map((approach, idx) => (
-                        <tr key={idx} style={{ borderBottom: '1px solid var(--dark)' }}>
-                          <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{approach.holeNumber}</td>
-                          <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>
-                            {approach.startingDistance}
-                          </td>
-                          <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{approach.startingLie}</td>
-                          <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>
-                            {approach.endingDistance}
-                          </td>
-                          <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{approach.endingLie}</td>
-                          <td style={{ padding: '6px', textAlign: 'center', color: approach.hasPenalty ? 'var(--scarlet)' : 'transparent' }}>
-                            {approach.hasPenalty ? 'Yes' : ''}
-                          </td>
-                          <td style={{ padding: '6px', textAlign: 'center', color: getShotSGColor(approach.calculatedStrokesGained), fontFamily: 'var(--font-mono)' }}>
-                            {formatStrokesGained(approach.calculatedStrokesGained)}
-                          </td>
-                        </tr>
-                      ))}
-                  </tbody>
-                </table>
+                <div className="gi-table-scroll">
+                  <table style={{ minWidth: '580px', width: '100%', fontSize: '11px', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+                    <thead>
+                      <tr style={{ borderBottom: '1px solid var(--ash)' }}>
+                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '8%' }}>Hole</th>
+                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '12%' }}>Start Dist</th>
+                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '12%' }}>Start Lie</th>
+                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '12%' }}>End Dist</th>
+                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '12%' }}>End Lie</th>
+                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '10%' }}>Penalty</th>
+                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '12%' }}>SG</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {roundApproaches
+                        .sort((a, b) => a.holeNumber - b.holeNumber)
+                        .map((approach, idx) => (
+                          <tr key={idx} style={{ borderBottom: '1px solid var(--dark)' }}>
+                            <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{approach.holeNumber}</td>
+                            <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>
+                              {approach.startingDistance}
+                            </td>
+                            <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{approach.startingLie}</td>
+                            <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>
+                              {approach.endingDistance}
+                            </td>
+                            <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{approach.endingLie}</td>
+                            <td style={{ padding: '6px', textAlign: 'center', color: approach.hasPenalty ? 'var(--scarlet)' : 'transparent' }}>
+                              {approach.hasPenalty ? 'Yes' : ''}
+                            </td>
+                            <td style={{ padding: '6px', textAlign: 'center', color: getShotSGColor(approach.calculatedStrokesGained), fontFamily: 'var(--font-mono)' }}>
+                              {formatStrokesGained(approach.calculatedStrokesGained)}
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             );
           })}
@@ -607,8 +609,8 @@ function ApproachHeatMapSection({ data }: { data: ApproachHeatMapData }) {
       </div>
 
       {/* Heat Map Table */}
-      <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+      <div className="gi-table-scroll">
+        <table style={{ minWidth: '640px', width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
           <thead>
             <tr>
               <th style={{ padding: '12px', textAlign: 'left', color: 'var(--ash)', fontWeight: '600', borderBottom: '1px solid var(--border)' }}>Starting Lie</th>
