@@ -251,7 +251,7 @@ export function DrivingView({ metrics, analysis, filteredShots }: { metrics: Dri
       </div>
 
       {/* Hero Cards - 5 metrics */}
-      <div className="grid" style={{ gridTemplateColumns: 'repeat(5, 1fr)', gap: '16px' }}>
+      <div className="grid-cards-5" style={{ gap: '16px' }}>
 
         {/* Card 1: Penalty Rate */}
         <div className="card-hero is-flagship">
@@ -470,7 +470,7 @@ function DrivingAnalysisSection({ analysis, totalDrives }: { analysis: DrivingAn
     <div style={{ marginTop: '32px' }}>
       <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>Driving Analysis</h4>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+      <div className="grid-pair" style={{ gap: '24px' }}>
         {/* Donut Chart - Drive Ending Locations */}
         {endingLocations.length > 0 && (
           <div style={{ background: 'var(--charcoal)', padding: '16px', borderRadius: '4px' }}>
@@ -774,7 +774,7 @@ function ProblemDriveGroup({
         </div>
 
         {/* Children - breakdown of the parent, visually nested beneath it */}
-        <div className="grid" style={{ gridTemplateColumns: `repeat(${childStats.length}, 1fr)`, gap: '1px', background: 'var(--pitch)' }}>
+        <div className="grid-autofit" style={{ gap: '1px', background: 'var(--pitch)' }}>
           {childStats.map((child) => (
             <div key={child.label} className="card-stat" style={{ borderLeft: `3px solid ${child.color}` }}>
               <div className="label" style={{ color: 'var(--ash)', marginBottom: '8px', fontSize: '11px' }}>
@@ -807,7 +807,7 @@ function ProblemDriveGroup({
           )}
         </div>
         {missDirection.recordedCount > 0 ? (
-          <div className="grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+          <div className="grid-tiles-2" style={{ gap: '12px' }}>
             <div className="card-stat" style={{ borderLeft: '3px solid #3D8EF0' }}>
               <div className="label" style={{ color: 'var(--ash)', marginBottom: '8px', fontSize: '11px' }}>Left</div>
               <div className="value-stat" style={{ fontSize: '20px' }}>{missDirection.leftPct.toFixed(0)}%</div>
