@@ -8,6 +8,7 @@ import {
 import type { DrivingMetrics, DrivingAnalysis, ProcessedShot, ProblemDriveMetrics } from '@/lib/golf/types';
 import { getStrokeGainedColor, formatStrokesGained, getShotSGColor, chartColors } from '@/lib/golf/tokens';
 import { calculateProblemDriveMetrics, isOutOfBounds } from '@/lib/golf/calculations';
+import { useMediaQuery, MOBILE_QUERY } from '@/lib/useMediaQuery';
 
 /**
  * Get color based on penalty rate (lower is better)
@@ -375,6 +376,7 @@ export function DrivingView({ metrics, analysis, filteredShots }: { metrics: Dri
  * Driving Analysis Section - Donut and Bar charts for drive analysis
  */
 function DrivingAnalysisSection({ analysis, totalDrives }: { analysis: DrivingAnalysis; totalDrives: number }) {
+  const isNarrow = useMediaQuery(MOBILE_QUERY);
   const { endingLocations } = analysis;
 
   // Map location types to chart colors - each location has a distinct color
@@ -480,14 +482,14 @@ function DrivingAnalysisSection({ analysis, totalDrives }: { analysis: DrivingAn
             <p style={{ fontSize: '11px', color: 'var(--ash)', marginBottom: '16px' }}>
               Percentage breakdown of where drives end up
             </p>
-            <ResponsiveContainer width="100%" height={280}>
+            <ResponsiveContainer width="100%" height={isNarrow ? 220 : 280}>
               <PieChart>
                 <Pie
                   data={donutData}
                   cx="50%"
                   cy="50%"
-                  innerRadius={60}
-                  outerRadius={90}
+                  innerRadius="46%"
+                  outerRadius="70%"
                   paddingAngle={2}
                   dataKey="value"
                   nameKey="name"
@@ -535,7 +537,7 @@ function DrivingAnalysisSection({ analysis, totalDrives }: { analysis: DrivingAn
             <p style={{ fontSize: '11px', color: 'var(--ash)', marginBottom: '16px' }}>
               Total Strokes Gained by where drives end up
             </p>
-            <ResponsiveContainer width="100%" height={280}>
+            <ResponsiveContainer width="100%" height={isNarrow ? 220 : 280}>
               <BarChart
                 data={endingLocations}
                 layout="vertical"
@@ -553,7 +555,7 @@ function DrivingAnalysisSection({ analysis, totalDrives }: { analysis: DrivingAn
                   dataKey="location"
                   stroke="var(--ash)"
                   tick={{ fill: 'var(--ash)', fontSize: 11 }}
-                  width={80}
+                  width={isNarrow ? 56 : 80}
                 />
                 <Tooltip content={<LocationSGTooltip />} />
                 <Legend
