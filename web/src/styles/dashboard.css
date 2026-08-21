@@ -20,6 +20,21 @@
 
 /* ── App Layout ───────────────────────────────────────── */
 .app {
+  /* Chrome heights, measured. These replace the 60px / 110px magic
+     numbers that used to be written straight into .nav and
+     .filter-sidebar and did not match anything real.
+
+     --gi-navbar-h tracks the site Navbar, which is sticky top-0 on
+     this route: h-[61px] plus a 1px border (Navbar.tsx). If that
+     changes, change this.
+
+     --gi-header-h is the dashboard header. Its h1 is a clamp, so
+     this is a floor rather than an exact value; the header is
+     sticky, so being a few px under only affects how much of the
+     scrolled content peeks above the tab strip. */
+  --gi-navbar-h: 62px;
+  --gi-header-h: 113px;
+  --gi-nav-h: 47px;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -35,8 +50,11 @@
   border-bottom: 1px solid var(--pitch);
   padding: 16px 40px;
   position: sticky;
-  top: 0;
-  z-index: 100;
+  /* Was top: 0 with z-index 100 against the site Navbar's sticky
+     top-0 / z-50 — so on any scroll this painted straight over the
+     site navigation. Sit below it instead. */
+  top: var(--gi-navbar-h);
+  z-index: 40;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -117,8 +135,8 @@
   border-bottom: 1px solid var(--pitch);
   padding: 0 40px;
   position: sticky;
-  top: 60px;
-  z-index: 90;
+  top: calc(var(--gi-navbar-h) + var(--gi-header-h));
+  z-index: 39;
   overflow-x: auto;
 }
 
@@ -466,7 +484,10 @@
   transition: width 0.3s ease, transform 0.3s ease;
   flex-shrink: 0;
   position: fixed;
-  top: 110px;
+  /* Was 110px, which lands inside the header (which ends at 175px),
+     so the sidebar covered the lower half of the title at scroll 0.
+     Start below the whole sticky stack. */
+  top: calc(var(--gi-navbar-h) + var(--gi-header-h) + var(--gi-nav-h));
   left: 0;
   bottom: 0;
   z-index: 200;
@@ -879,5 +900,47 @@
   .nav-tab {
     scroll-snap-align: start;
     padding: 14px 16px;
+  }
+
+  /* The header is a title and two benchmark selects — set-once
+     configuration, not navigation — and it is the tallest of the
+     three bars. Letting it scroll away leaves the site navbar plus
+     the tab strip as the only persistent chrome, which on an 844px
+     phone is the difference between 105px and 239px. */
+  .header {
+    position: static;
+    z-index: auto;
+  }
+
+  .nav {
+    top: var(--gi-navbar-h);
+  }
+
+  /* Touch targets. 14px checkboxes with 4px padding are well under
+     the 44px the rest of the app uses (Navbar's mobile rows are
+     min-h-[52px]). */
+  .filter-option {
+    min-height: 44px;
+    padding: 8px 0;
+  }
+
+  .filter-option input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+
+  .filter-option input[type="checkbox"]:checked::after {
+    font-size: 13px;
+  }
+
+  .filter-option-text {
+    font-size: 14px;
+  }
+
+  /* The drawer already scrolls; a 200px nested scroller inside it
+     just makes the options harder to reach. */
+  .filter-options {
+    max-height: none;
   }
 }
