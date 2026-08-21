@@ -863,10 +863,18 @@ type Screen =
   | 'promotion'
   | 'history';
 
-export default function DriverStandard() {
+interface DriverStandardProps {
+  onScreenChange?: (screen: Screen) => void;
+}
+
+export default function DriverStandard({ onScreenChange }: DriverStandardProps = {}) {
   const [hydrated, setHydrated] = useState(false);
   const [state, setStateRaw] = useState<PersistedState>(defaultState);
   const [screen, setScreen] = useState<Screen>('welcome');
+
+  useEffect(() => {
+    onScreenChange?.(screen);
+  }, [screen, onScreenChange]);
 
   // Active session
   const [sessionLength, setSessionLength] = useState<'mini' | 'standard'>('standard');

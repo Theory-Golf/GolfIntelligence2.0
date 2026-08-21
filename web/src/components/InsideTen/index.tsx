@@ -92,12 +92,20 @@ function buildSession(score: number, date: string): InsideTenSession {
 const getSessionId = (s: InsideTenSession) => s.id;
 const getSessionPlayedAt = (s: InsideTenSession) => s.date;
 
-export default function InsideTen() {
+interface InsideTenProps {
+  onScreenChange?: (screen: Screen) => void;
+}
+
+export default function InsideTen({ onScreenChange }: InsideTenProps = {}) {
   const [screen, setScreen]                 = useState<Screen>('home');
   const [storageAvailable, setStorageAvail] = useState(true);
   const [score, setScore]                   = useState(12);
   const [sessionDate, setSessionDate]       = useState<string>(todayISO);
   const [result, setResult]                 = useState<ResultState | null>(null);
+
+  useEffect(() => {
+    onScreenChange?.(screen);
+  }, [screen, onScreenChange]);
 
   const { sessions, record } = useDrillHistory<InsideTenSession>({
     drillType: 'inside-ten',

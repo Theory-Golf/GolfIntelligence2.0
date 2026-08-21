@@ -1622,7 +1622,11 @@ interface ActiveSession {
   shots: RawShot[];
 }
 
-export default function LineTest() {
+interface LineTestProps {
+  onScreenChange?: (screen: Screen) => void;
+}
+
+export default function LineTest({ onScreenChange }: LineTestProps = {}) {
   const [screen, setScreen] = useState<Screen>('home');
   const { sessions, record } = useDrillHistory<SessionResult>({
     drillType: 'line-test',
@@ -1632,6 +1636,10 @@ export default function LineTest() {
   });
   const [active, setActive] = useState<ActiveSession | null>(null);
   const [lastResult, setLastResult] = useState<SessionResult | null>(null);
+
+  useEffect(() => {
+    onScreenChange?.(screen);
+  }, [screen, onScreenChange]);
 
   const beginFlow = () => {
     setScreen(hasProfile() ? 'setup' : 'profile');
