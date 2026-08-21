@@ -52,7 +52,7 @@ export function ApproachView({ metrics, approachByDistance, approachFromRough, a
       <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>Approach Performance</h4>
 
       {/* Hero Cards - 3 metrics */}
-      <div className="grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+      <div className="grid-cards-3" style={{ gap: '16px' }}>
 
         {/* Card 1: Total SG Approach */}
         <div className="card-hero is-flagship">
@@ -131,7 +131,7 @@ export function ApproachView({ metrics, approachByDistance, approachFromRough, a
       {approachByDistance.length > 0 && (
         <>
           <h4 style={{ marginTop: '32px', marginBottom: '16px', color: 'var(--ash)' }}>Approach (Fairway and Tee): Approach Skill</h4>
-          <div className="grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
+          <div className="grid-cards-4" style={{ gap: '16px' }}>
             {approachByDistance.map((bucket) => (
               <div key={bucket.label} className="card">
                 <div className="flex justify-between items-center" style={{ marginBottom: '8px' }}>
@@ -173,7 +173,7 @@ export function ApproachView({ metrics, approachByDistance, approachFromRough, a
       {approachFromRough.length > 0 && (
         <>
           <h4 style={{ marginTop: '32px', marginBottom: '16px', color: 'var(--ash)' }}>Approach from Rough: Rough Skill</h4>
-          <div className="grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
+          <div className="grid-cards-4" style={{ gap: '16px' }}>
             {approachFromRough.map((bucket) => (
               <div key={bucket.label} className="card">
                 <div className="flex justify-between items-center" style={{ marginBottom: '8px' }}>
@@ -447,7 +447,7 @@ function ApproachEndingLieSection({ filteredShots }: { filteredShots: ProcessedS
     <div style={{ marginTop: '32px' }}>
       <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>Approach Ending Lie</h4>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+      <div className="grid-pair" style={{ gap: '24px' }}>
         {/* Chart 1: Ending Lie as % of Total Approach Shots */}
         <div style={{ background: 'var(--charcoal)', padding: '16px', borderRadius: '4px' }}>
           <h5 style={{ marginBottom: '8px', color: 'var(--chalk)', fontSize: '14px', fontWeight: 600 }}>
