@@ -197,7 +197,7 @@ export function StrokesGainedView({ metrics, filteredShots }: { metrics: Tiger5M
       </div>
 
       {/* Stat Cards - SG by Shot Type */}
-      <div className="grid" style={{ gridTemplateColumns: 'repeat(5, 1fr)', gap: '12px', marginTop: '24px' }}>
+      <div className="grid-tiles-5" style={{ gap: '12px', marginTop: '24px' }}>
         {statCards.map((card) => {
           const cat = card.category;
           if (!cat || cat.totalShots === 0) return null;
@@ -259,7 +259,7 @@ export function StrokesGainedView({ metrics, filteredShots }: { metrics: Tiger5M
           SG breakdown by distance categories
         </p>
 
-        <div className="grid" style={{ gridTemplateColumns: 'repeat(5, 1fr)', gap: '12px' }}>
+        <div className="grid-tiles-5" style={{ gap: '12px' }}>
           {sgSeparators.map((separator) => {
             return (
               <div
