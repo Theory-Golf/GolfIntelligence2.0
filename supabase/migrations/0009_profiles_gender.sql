@@ -1,4 +1,4 @@
--- 0007_profiles_gender.sql
+-- 0009_profiles_gender.sql
 -- Adds a gender field to player profiles, used to default which strokes
 -- gained benchmark tables (male or female) a player's dashboard applies.
 -- Nullable: existing players default to no gender set, and the dashboard

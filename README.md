@@ -78,6 +78,11 @@ also confirm a different player cannot see the row. It only ever writes rows of
 `drill_type = '_verify'` and deletes them on the way out, including after a
 failure, so real history is never touched.
 
+**Its `client_id` is deliberately not a UUID.** Six drills key sessions off
+`Date.now()`, and this script previously generated a UUID here — which is why it
+passed for the entire period those six could not save at all. If you change that
+line, keep the shape the real drills produce.
+
 **One thing it deliberately doesn't cover:** the browser's own offline
 behaviour, since `navigator.onLine` and the localStorage queue only exist in a
 page. To check that by hand: open a drill, switch DevTools to Offline, finish
@@ -88,12 +93,21 @@ the row should appear exactly once in `drill_sessions`.
 
 Read these before touching `supabase/migrations/` or building coach/team features.
 
-**The migrations rebuild the database.** `supabase/migrations/` was catching up
-to a schema that had largely been created by hand in the dashboard; `0000_baseline.sql`
-is the snapshot that closed that gap. Applying `0000` through `0005` to an empty database
-reproduces production exactly — 17 tables, 173 columns, 86 constraints, 25 indexes,
-8 functions, 10 triggers, 42 policies, 1 view. Every file is idempotent, so re-running
+**The migrations rebuild the database.** `supabase/migrations/` was catching up to a
+schema largely created by hand in the dashboard; `0000_baseline.sql` is the snapshot
+that closed that gap. `0000` through `0009` are applied and recorded, and the recorded
+version of each matches its filename prefix. Every file is idempotent, so re-running
 against the live project is a no-op.
+
+Two conventions worth keeping:
+
+- **One version per file.** `0005_drill_sessions.sql` and a former
+  `0005_ethos_papers.sql` both claimed `0005`. The CLI keys on the version prefix, so
+  only one of them could ever be recorded — the ethos table ended up applied by hand
+  and untracked. It is now `0006_ethos_papers.sql`.
+- **Unapplied SQL does not live in `migrations/`.** Anything proposed but not yet run
+  belongs in `supabase/proposals/`, where `db push` cannot pick it up. See
+  `supabase/proposals/rls-consolidation.sql`.
 
 To verify after a schema change, rebuild locally and diff the catalogs against production:
 
@@ -104,32 +118,77 @@ createdb tg && psql -d tg -c "create schema auth" \
 for f in supabase/migrations/*.sql; do psql -d tg -v ON_ERROR_STOP=1 -f "$f"; done
 ```
 
-Regenerate TypeScript types for the schema with Supabase's `generate_typescript_types`.
-The hand-written row types in `web/src/lib/{golf,playerpath}/db/types.ts` were last
-checked against generated output and matched.
+### Two failures worth not repeating
 
-**Two known lints, both pre-existing.** `set_updated_at`, `set_drill_sessions_updated_at`,
-and `shots_no_play_after_holed` have a mutable `search_path`; several `SECURITY DEFINER`
-functions are executable by `anon` via RPC. Neither was introduced by recent work — see
+Both were live in production for months without surfacing an error, and both are
+the same underlying mistake: a schema assumption the code had already committed to.
+
+**A shared trigger name silently removed player creation.** `rounds.player_id` and
+`courses.player_id` are foreign keys to `players(id)`, and nothing in the app inserts
+into `players` — that row has always come from a trigger on `auth.users`. Two
+functions were written for it, `handle_new_auth_user()` (players, untracked) and
+`handle_new_user()` (profiles, from `0001`), and both were attached under the name
+`on_auth_user_created`. When `0001` ran its `drop trigger if exists` and recreated the
+trigger, it removed the players insert. Every signup between 2026-08-11 and
+`0007_seed_player_on_signup.sql` produced a profiles row and no players row, so the
+first course or round insert failed on the foreign key. `0007` folds both inserts into
+one function; **do not add a second trigger on `auth.users`.**
+
+**A column type rejected six drills' history.** `drill_sessions.client_id` was declared
+`uuid`, but only four drills generate UUID session ids — the other six key off
+`Date.now()`. Every write from those six raised `22P02`, was caught by
+`persistOrQueue`, retried five times, then dead-lettered and dropped with nothing shown
+to the player. Production held sessions for exactly three drill types until
+`0008_drill_sessions_client_id_text.sql` widened the column to `text`.
+
+`scripts/verify-practice-sync.mjs` passed throughout, because it generated its own
+UUID `client_id` instead of the shape the drills actually produce. It now uses a
+`Date.now()`-based id. **A sync test that invents its own key tests nothing.**
+
+### Known mismatch, not yet resolved
+
+`rounds.course_id` is `NOT NULL` in the database, but the round-entry flow and
+`roundSession.tsx` both handle a null course. In practice the flow always creates or
+matches a course before submit, so they have never disagreed at runtime. Whether a
+course-less round should be allowed is a product decision — resolve it by changing one
+side deliberately, not by quietly tightening the type.
+
+### Types
+
+The row types in `web/src/lib/{golf,ethos}/db/types.ts` are hand-written. They drifted
+once already: `RoundRow` was missing seven columns and `CourseRow` three, and because
+the `*Insert` types are derived from the `*Row` types with `Omit`, those columns could
+not be written at all. Regenerate with Supabase's `generate_typescript_types` and diff
+before assuming they still match. Columns with a database default or filled in by the
+server are optional on the `*Insert` types, so adding one to a `*Row` type does not
+force every call site to pass it.
+
+### Lints
+
+`set_updated_at`, `set_drill_sessions_updated_at` and `shots_no_play_after_holed` have
+a mutable `search_path`; several `SECURITY DEFINER` functions are executable by `anon`
+via RPC; leaked-password protection is off in Auth settings. All pre-existing — see
 `get_advisors` for the current list.
 
-**There are two coach–player models, and only one is wired up.**
+### There are two coach–player models, and only one is wired up
 
 | Model | Used by | Rows |
 |-------|---------|------|
-| `team_members` + `profiles.role = 'coach'` | `can_access_player()`, and therefore every RLS policy | 0 |
-| `coaches` + `coach_players` | nothing | 0 |
+| `team_members` + `profiles.role = 'coach'` | `can_access_player()`, and therefore every `_select` policy | 0 |
+| `coaches` + `coach_players` / `coach_teams` | the granular `_update` / `_insert` policies | 0 |
 
-No application code reads `profiles`, `team_members`, `coaches`, `coach_players`, or `.role` —
-the coach/team layer exists only in the database today. Coach and team roles are planned for the
-Golf Intelligence dashboard; that work should build on the first model, since row-level security
-already commits to it. Consolidate rather than adding to the second.
+No application code reads `profiles`, `team_members`, `coaches`, `coach_players`,
+`coach_teams`, or `.role` — nine of seventeen tables are untouched by the app. Coach
+and team roles are planned for the Golf Intelligence dashboard; **pick one model before
+building**, and see `supabase/proposals/rls-consolidation.sql` for what consolidating
+costs. Note in particular that `holes` and `shots` have no explicit DELETE policy.
 
 **Coach access to practice data is intentional.** `drill_sessions` reads use the same
-`can_access_player()` rule as `rounds`/`shots`, so populating `team_members` gives coaches
-visibility of their players' practice results as well as their rounds. This is the accountability
-model PlayerPath is built on — see the comment in `0004_drill_sessions.sql` before changing it.
+`can_access_player()` rule as `rounds`/`shots`, so populating `team_members` gives
+coaches visibility of their players' practice results as well as their rounds. This is
+the accountability model PlayerPath is built on — see the comment in
+`0005_drill_sessions.sql` before changing it.
 
 **Player identity.** `drill_sessions.player_id` references `auth.users`, while
-`rounds.player_id` references `players`. Every `players.id` is its auth user's id, so the same
-UUID identifies a player on both sides — use `auth.uid()` when writing either.
+`rounds.player_id` references `players`. Every `players.id` is its auth user's id, so
+the same UUID identifies a player on both sides — use `auth.uid()` when writing either.

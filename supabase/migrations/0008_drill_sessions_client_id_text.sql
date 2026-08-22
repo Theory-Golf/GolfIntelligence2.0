@@ -1,4 +1,4 @@
--- 0006_drill_sessions_client_id_text.sql
+-- 0008_drill_sessions_client_id_text.sql
 -- drill_sessions.client_id was declared uuid, but not every drill's local
 -- session id is a uuid -- Lag Putt Test and Round Simulation key sessions
 -- off Date.now() (a number), and future drills may use other client-side

@@ -85,7 +85,13 @@ async function signIn(client, email, password, label) {
   return data.user.id;
 }
 
-const clientId = randomUUID();
+// Deliberately NOT a uuid. client_id was declared uuid until 0008 widened it
+// to text, and six drills (Lag Putt Test, Round Simulation, Wedge Standard,
+// Driver Standard, Approach Standard, Practice Planner) key sessions off
+// Date.now(). Because this script used to generate a uuid here, it passed
+// throughout the entire period those six drills could not save at all. Keep
+// this shape: it is the one the real drills produce.
+const clientId = `${Date.now()}-${randomUUID().slice(0, 8)}`;
 let deviceA;
 
 try {
