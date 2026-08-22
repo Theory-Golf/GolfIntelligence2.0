@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import SectionHeader from '@/components/playerpath/SectionHeader';
 import { derivedClientId } from '@/lib/playerpath/clientId';
 import { drillSessionInput, recordDrillSession } from '@/lib/playerpath/record';
+import { syncDrillHistory } from '@/lib/playerpath/history';
 import { seedWeekConfig, todayISO, uid } from './defaults';
 import {
   buildSessionBlocks,
@@ -55,7 +56,8 @@ export default function PracticePlanner() {
   const savedTimer = useRef<number | null>(null);
   const historyRef = useRef<HTMLDivElement>(null);
 
-  // Hydrate from localStorage once on the client
+  // Hydrate from localStorage once on the client, then fold in the account's
+  // completed sessions so ones finished on another device show up here too.
   useEffect(() => {
     const { weekConfig: wc, currentSession: cs, history: h, sessions: s } = storage.loadAll();
     setWeekConfig(wc);
@@ -64,6 +66,24 @@ export default function PracticePlanner() {
     setSessions(s);
     setStage(cs ? 'running' : wc ? 'build' : 'setup');
     setHydrated(true);
+
+    void syncDrillHistory<SessionRecord>({
+      drillType: 'practice-session',
+      local: s,
+      // The whole record is the payload, so it round-trips as-is. A row
+      // without an id can't be de-duplicated; throw so the helper skips it.
+      hydrate: (r) => {
+        const rec = r.payload as unknown as SessionRecord;
+        if (!rec?.id) throw new Error('practice-session row has no record id');
+        return rec;
+      },
+      keyOf: (x) => x.id,
+      sortKey: (x) => Date.parse(x.completedAt),
+    }).then((merged) => {
+      // The helper returns newest-first; this list is kept oldest-first and
+      // reversed at render, so put it back the way the planner expects.
+      if (merged) setSessions(merged.reverse());
+    });
   }, []);
 
   // Persistence side-effects

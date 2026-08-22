@@ -12,6 +12,7 @@ import {
 import { storage } from '@/lib/playerpath/storage';
 import { fmtDateLong } from '@/lib/playerpath/format';
 import { derivedClientId } from '@/lib/playerpath/clientId';
+import { syncDrillHistory } from '@/lib/playerpath/history';
 import { drillSessionInput, recordDrillSession } from '@/lib/playerpath/record';
 import './WedgeStandard.css';
 
@@ -123,6 +124,19 @@ export default function WedgeStandard() {
     const s = storage.get(LS_WEDGE_STANDARD_STATS);   if (s) setLifetimeStats(s);
     const c = storage.get(LS_WEDGE_STANDARD_CREATIVE);
     if (c) { setCreativeTargets(c.targets || [80, 95, 110]); setCreativeRounds(c.rounds || 3); }
+
+    // Fold in sessions logged on the player's other devices.
+    void syncDrillHistory({
+      drillType: 'wedge-standard',
+      local: h || [],
+      hydrate: (r) => r.payload,
+      keyOf: (x) => String(x.id),
+      sortKey: (x) => Date.parse(x.date) || Number(x.id) || 0,
+    }).then((merged) => {
+      if (!merged) return;
+      setHistory(merged);
+      storage.set(LS_WEDGE_STANDARD_HISTORY, merged.slice(0, 50));
+    });
   }, []);
 
   function saveWedges(w) { setWedges(w); storage.set(LS_WEDGE_STANDARD_WEDGES, w); }

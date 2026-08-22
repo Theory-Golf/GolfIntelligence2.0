@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "audit:drill-reads": "node scripts/audit-drill-read-paths.mjs",
     "verify:practice-sync": "node scripts/verify-practice-sync.mjs"
   },
   "dependencies": {

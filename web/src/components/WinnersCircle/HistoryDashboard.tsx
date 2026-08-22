@@ -7,7 +7,7 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ReferenceLine,
 } from 'recharts';
-import { loadRuns, persistRuns, type WinnersCircleRun } from '.';
+import { loadRuns, persistRuns, syncRuns, type WinnersCircleRun } from '.';
 import './WinnersCircle.css';
 import { fmtDateShort } from '@/lib/playerpath/format';
 
@@ -44,7 +44,14 @@ export default function HistoryDashboard() {
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
 
   useEffect(() => {
-    setRuns(loadRuns());
+    // This device's history first, then the account copy folded in.
+    const local = loadRuns();
+    setRuns(local);
+    void syncRuns(local).then((merged) => {
+      if (!merged) return;
+      setRuns(merged);
+      persistRuns(merged);
+    });
   }, []);
 
   function handleDelete(id: string) {

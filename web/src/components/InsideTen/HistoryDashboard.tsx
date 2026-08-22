@@ -8,20 +8,9 @@ import {
   ResponsiveContainer, ReferenceLine,
   PieChart, Pie, Cell, Legend,
 } from 'recharts';
-import { LS_INSIDE_TEN_SESSIONS } from '@/lib/constants';
+import { loadSessions, persistSessions, syncSessions, type InsideTenSession, type TierName } from '.';
 import './InsideTen.css';
 import { fmtDateShort } from '@/lib/playerpath/format';
-
-type TierName = 'elite' | 'tour' | 'competitive' | 'developing';
-
-interface InsideTenSession {
-  id: string;
-  date: string;
-  timestamp: number;
-  score: number;
-  sg: number;
-  tier: TierName;
-}
 
 const SG_TABLE: Record<number, number> = {
   18: 6.28, 17: 5.25, 16: 4.22, 15: 3.19, 14: 2.16, 13: 1.13,
@@ -46,24 +35,6 @@ function tierForScore(score: number): TierName {
 function formatSG(sg: number): string {
   const abs = Math.abs(sg).toFixed(1);
   return sg >= 0 ? `+${abs}` : `-${abs}`;
-}
-
-function loadSessions(): InsideTenSession[] {
-  try {
-    const raw = localStorage.getItem(LS_INSIDE_TEN_SESSIONS);
-    if (!raw) return [];
-    const store = JSON.parse(raw) as { version: number; sessions: InsideTenSession[] };
-    if (store.version !== 1 || !Array.isArray(store.sessions)) return [];
-    return store.sessions;
-  } catch {
-    return [];
-  }
-}
-
-function persistSessions(sessions: InsideTenSession[]): void {
-  try {
-    localStorage.setItem(LS_INSIDE_TEN_SESSIONS, JSON.stringify({ version: 1, sessions }));
-  } catch { /* noop */ }
 }
 
 // Recharts custom tooltip
@@ -99,7 +70,14 @@ export default function HistoryDashboard() {
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
 
   useEffect(() => {
-    setSessions(loadSessions());
+    // This device's history first, then the account copy folded in.
+    const local = loadSessions();
+    setSessions(local);
+    void syncSessions(local).then((merged) => {
+      if (!merged) return;
+      setSessions(merged);
+      persistSessions(merged);
+    });
   }, []);
 
   function handleDelete(id: string) {

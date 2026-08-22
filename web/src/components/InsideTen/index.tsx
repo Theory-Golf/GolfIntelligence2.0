@@ -4,15 +4,16 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { LS_INSIDE_TEN_SESSIONS } from '@/lib/constants';
 import { isAvailable } from '@/lib/playerpath/storage';
+import { playedAtMs, playedOnISO, syncDrillHistory } from '@/lib/playerpath/history';
 import { drillSessionInput, recordDrillSession } from '@/lib/playerpath/record';
 import './InsideTen.css';
 import { fmtDateShort } from '@/lib/playerpath/format';
 
 // ── Types ─────────────────────────────────────────────────────────
-type TierName = 'elite' | 'tour' | 'competitive' | 'developing';
+export type TierName = 'elite' | 'tour' | 'competitive' | 'developing';
 type Screen = 'home' | 'play' | 'result';
 
-interface InsideTenSession {
+export interface InsideTenSession {
   id: string;
   date: string;
   timestamp: number;
@@ -79,7 +80,7 @@ function todayISO(): string {
 }
 
 // ── Storage ────────────────────────────────────────────────────────
-function loadSessions(): InsideTenSession[] {
+export function loadSessions(): InsideTenSession[] {
   try {
     const raw = localStorage.getItem(LS_INSIDE_TEN_SESSIONS);
     if (!raw) return [];
@@ -94,10 +95,32 @@ function loadSessions(): InsideTenSession[] {
   }
 }
 
-function persistSessions(sessions: InsideTenSession[]): void {
+export function persistSessions(sessions: InsideTenSession[]): void {
   try {
     localStorage.setItem(LS_INSIDE_TEN_SESSIONS, JSON.stringify({ version: 1, sessions }));
   } catch { /* noop */ }
+}
+
+/**
+ * Fold the account's sessions into this device's list, so a session played on
+ * another device shows up here. Returns null when the account copy is
+ * unreachable (signed out or offline), in which case `local` still stands.
+ */
+export function syncSessions(local: InsideTenSession[]) {
+  return syncDrillHistory<InsideTenSession>({
+    drillType: 'inside-ten',
+    local,
+    hydrate: (r) => ({
+      id: r.client_id,
+      date: playedOnISO(r),
+      timestamp: playedAtMs(r),
+      score: Number(r.payload.score ?? 0),
+      sg: Number(r.payload.sg ?? 0),
+      tier: (r.payload.tier as TierName) ?? 'developing',
+    }),
+    keyOf: (x) => x.id,
+    sortKey: (x) => x.timestamp,
+  });
 }
 
 function buildSession(score: number, date: string): InsideTenSession {
@@ -121,11 +144,19 @@ export default function InsideTen() {
   const [result, setResult]                 = useState<ResultState | null>(null);
 
   useEffect(() => {
-    if (isAvailable()) {
-      setSessions(loadSessions());
-    } else {
+    if (!isAvailable()) {
       setStorageAvail(false);
+      return;
     }
+    // Show this device's history immediately, then fold in the account copy
+    // so sessions played on another device appear here too.
+    const local = loadSessions();
+    setSessions(local);
+    void syncSessions(local).then((merged) => {
+      if (!merged) return;
+      setSessions(merged);
+      persistSessions(merged);
+    });
   }, []);
 
   function handleStartSession() {

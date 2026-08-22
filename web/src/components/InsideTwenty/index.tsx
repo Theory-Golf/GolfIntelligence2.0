@@ -4,16 +4,17 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { LS_INSIDE_TWENTY_SESSIONS } from '@/lib/constants';
 import { isAvailable } from '@/lib/playerpath/storage';
+import { playedAtMs, playedOnISO, syncDrillHistory } from '@/lib/playerpath/history';
 import { drillSessionInput, recordDrillSession } from '@/lib/playerpath/record';
 import '../InsideTen/InsideTen.css';
 import './InsideTwenty.css';
 import { fmtDateShort } from '@/lib/playerpath/format';
 
 // ── Types ─────────────────────────────────────────────────────────
-type TierName = 'elite' | 'tour' | 'competitive' | 'developing';
+export type TierName = 'elite' | 'tour' | 'competitive' | 'developing';
 type Screen = 'home' | 'play' | 'result';
 
-interface InsideTwentySession {
+export interface InsideTwentySession {
   id: string;
   date: string;
   timestamp: number;
@@ -64,7 +65,7 @@ function todayISO(): string {
 }
 
 // ── Storage ────────────────────────────────────────────────────────
-function loadSessions(): InsideTwentySession[] {
+export function loadSessions(): InsideTwentySession[] {
   try {
     const raw = localStorage.getItem(LS_INSIDE_TWENTY_SESSIONS);
     if (!raw) return [];
@@ -79,10 +80,31 @@ function loadSessions(): InsideTwentySession[] {
   }
 }
 
-function persistSessions(sessions: InsideTwentySession[]): void {
+export function persistSessions(sessions: InsideTwentySession[]): void {
   try {
     localStorage.setItem(LS_INSIDE_TWENTY_SESSIONS, JSON.stringify({ version: 1, sessions }));
   } catch { /* noop */ }
+}
+
+/**
+ * Fold the account's sessions into this device's list, so a session played on
+ * another device shows up here. Returns null when the account copy is
+ * unreachable (signed out or offline), in which case `local` still stands.
+ */
+export function syncSessions(local: InsideTwentySession[]) {
+  return syncDrillHistory<InsideTwentySession>({
+    drillType: 'inside-twenty',
+    local,
+    hydrate: (r) => ({
+      id: r.client_id,
+      date: playedOnISO(r),
+      timestamp: playedAtMs(r),
+      score: Number(r.payload.score ?? 0),
+      tier: (r.payload.tier as TierName) ?? 'developing',
+    }),
+    keyOf: (x) => x.id,
+    sortKey: (x) => x.timestamp,
+  });
 }
 
 function buildSession(score: number, date: string): InsideTwentySession {
@@ -105,11 +127,17 @@ export default function InsideTwenty() {
   const [result, setResult]                 = useState<ResultState | null>(null);
 
   useEffect(() => {
-    if (isAvailable()) {
-      setSessions(loadSessions());
-    } else {
+    if (!isAvailable()) {
       setStorageAvail(false);
+      return;
     }
+    const local = loadSessions();
+    setSessions(local);
+    void syncSessions(local).then((merged) => {
+      if (!merged) return;
+      setSessions(merged);
+      persistSessions(merged);
+    });
   }, []);
 
   function handleStartSession() {

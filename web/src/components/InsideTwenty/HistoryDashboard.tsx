@@ -8,20 +8,10 @@ import {
   ResponsiveContainer, ReferenceLine,
   PieChart, Pie, Cell, Legend,
 } from 'recharts';
-import { LS_INSIDE_TWENTY_SESSIONS } from '@/lib/constants';
+import { loadSessions, persistSessions, syncSessions, type InsideTwentySession, type TierName } from '.';
 import '../InsideTen/InsideTen.css';
 import './InsideTwenty.css';
 import { fmtDateShort } from '@/lib/playerpath/format';
-
-type TierName = 'elite' | 'tour' | 'competitive' | 'developing';
-
-interface InsideTwentySession {
-  id: string;
-  date: string;
-  timestamp: number;
-  score: number;
-  tier: TierName;
-}
 
 const TIER_CONFIG: Record<TierName, { label: string; color: string; hexColor: string }> = {
   elite:       { label: 'Elite',       color: 'var(--sg-strong)', hexColor: '#00C07A' },
@@ -35,24 +25,6 @@ function tierForScore(score: number): TierName {
   if (score >= 9)  return 'tour';
   if (score >= 7)  return 'competitive';
   return 'developing';
-}
-
-function loadSessions(): InsideTwentySession[] {
-  try {
-    const raw = localStorage.getItem(LS_INSIDE_TWENTY_SESSIONS);
-    if (!raw) return [];
-    const store = JSON.parse(raw) as { version: number; sessions: InsideTwentySession[] };
-    if (store.version !== 1 || !Array.isArray(store.sessions)) return [];
-    return store.sessions;
-  } catch {
-    return [];
-  }
-}
-
-function persistSessions(sessions: InsideTwentySession[]): void {
-  try {
-    localStorage.setItem(LS_INSIDE_TWENTY_SESSIONS, JSON.stringify({ version: 1, sessions }));
-  } catch { /* noop */ }
 }
 
 function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number }>; label?: string }) {
@@ -86,7 +58,14 @@ export default function HistoryDashboard() {
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
 
   useEffect(() => {
-    setSessions(loadSessions());
+    // This device's history first, then the account copy folded in.
+    const local = loadSessions();
+    setSessions(local);
+    void syncSessions(local).then((merged) => {
+      if (!merged) return;
+      setSessions(merged);
+      persistSessions(merged);
+    });
   }, []);
 
   function handleDelete(id: string) {

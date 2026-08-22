@@ -16,6 +16,7 @@ import {
 } from '@/components/playerpath/ui';
 import { LS_DRIVER_STANDARD } from '@/lib/constants';
 import { derivedClientId } from '@/lib/playerpath/clientId';
+import { syncDrillHistory } from '@/lib/playerpath/history';
 import { drillSessionInput, recordDrillSession } from '@/lib/playerpath/record';
 
 // ── Domain ───────────────────────────────────────────────────────────
@@ -887,6 +888,17 @@ export default function DriverStandard() {
     setStateRaw(loaded);
     setScreen(loaded.initialized ? 'setup' : 'welcome');
     setHydrated(true);
+    // Fold in sessions logged on the player's other devices.
+    void syncDrillHistory<SessionRecord>({
+      drillType: 'driver-standard',
+      local: loaded.history ?? [],
+      hydrate: (r) => r.payload as unknown as SessionRecord,
+      keyOf: (x) => String(x.timestamp),
+      sortKey: (x) => x.timestamp,
+    }).then((merged) => {
+      if (!merged) return;
+      setStateRaw((prev) => ({ ...prev, history: merged }));
+    });
   }, []);
 
   const setState = (s: PersistedState) => {

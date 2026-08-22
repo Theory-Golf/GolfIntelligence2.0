@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { LS_WINNERS_CIRCLE_RUNS } from '@/lib/constants';
 import { isAvailable } from '@/lib/playerpath/storage';
+import { playedAtMs, playedOnISO, syncDrillHistory } from '@/lib/playerpath/history';
 import { fmtDateShort } from '@/lib/playerpath/format';
 import { drillSessionInput, recordDrillSession } from '@/lib/playerpath/record';
 import './WinnersCircle.css';
@@ -131,6 +132,30 @@ export function persistRuns(runs: WinnersCircleRun[]): void {
   } catch { /* noop */ }
 }
 
+/**
+ * Fold the account's runs into this device's list, so a run played on another
+ * device shows up here. Returns null when the account copy is unreachable
+ * (signed out or offline), in which case `local` still stands.
+ */
+export function syncRuns(local: WinnersCircleRun[]) {
+  return syncDrillHistory<WinnersCircleRun>({
+    drillType: 'winners-circle',
+    local,
+    hydrate: (r) => ({
+      id: r.client_id,
+      date: playedOnISO(r),
+      timestamp: playedAtMs(r),
+      totalMakes: Number(r.payload.totalMakes ?? 0),
+      maxDistanceReached: Number(r.payload.maxDistanceReached ?? 0),
+      rounds: (r.payload.rounds as WinnersCircleRun['rounds']) ?? [],
+      standardCleared: Boolean(r.payload.standardCleared),
+      endedEarly: Boolean(r.payload.endedEarly),
+    }),
+    keyOf: (x) => x.id,
+    sortKey: (x) => x.timestamp,
+  });
+}
+
 // ── Tee glyph ──────────────────────────────────────────────────────
 type TeeStatus = 'lost' | 'missed' | 'made' | 'pending' | 'current';
 
@@ -183,11 +208,17 @@ export default function WinnersCircle() {
   const [result, setResult]                 = useState<ResultState | null>(null);
 
   useEffect(() => {
-    if (isAvailable()) {
-      setRuns(loadRuns());
-    } else {
+    if (!isAvailable()) {
       setStorageAvail(false);
+      return;
     }
+    const local = loadRuns();
+    setRuns(local);
+    void syncRuns(local).then((merged) => {
+      if (!merged) return;
+      setRuns(merged);
+      persistRuns(merged);
+    });
   }, []);
 
   function handleStart() {

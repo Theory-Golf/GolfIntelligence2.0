@@ -3,7 +3,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { LS_LAG_PUTT_SESSIONS } from '@/lib/constants';
 import { storage } from '@/lib/playerpath/storage';
-import { newClientId } from '@/lib/playerpath/clientId';
+import { derivedClientId, newClientId } from '@/lib/playerpath/clientId';
+import { playedAtMs, syncDrillHistory } from '@/lib/playerpath/history';
 import { drillSessionInput, recordDrillSession } from '@/lib/playerpath/record';
 import './LagPuttTest.css';
 import { fmtDateShort } from '@/lib/playerpath/format';
@@ -122,8 +123,29 @@ export default function LagPuttTest() {
   const [history, setHistory] = useState<SavedSession[]>([]);
 
   useEffect(() => {
-    const saved = storage.get<SavedSession[]>(LS_LAG_PUTT_SESSIONS);
-    if (saved) setHistory(saved);
+    const local = storage.get<SavedSession[]>(LS_LAG_PUTT_SESSIONS) ?? [];
+    setHistory(local);
+    // Fold in sessions played on the player's other devices.
+    void syncDrillHistory<SavedSession>({
+      drillType: 'lag-putt-test',
+      local,
+      hydrate: (r) => ({
+        id: Number(r.payload.id ?? playedAtMs(r)),
+        clientId: r.client_id,
+        date: typeof r.payload.date === 'string' ? r.payload.date : r.played_at,
+        total: Number(r.payload.total ?? 0),
+        putts: (r.payload.putts as PuttResult[]) ?? [],
+      }),
+      // Sessions saved before results synced carry no clientId. The upload
+      // gave them the derived one, so derive the same value here or the two
+      // copies of one session would not collapse.
+      keyOf: (x) => x.clientId ?? derivedClientId('lag-putt-test', x.id),
+      sortKey: (x) => Date.parse(x.date) || x.id,
+    }).then((merged) => {
+      if (!merged) return;
+      setHistory(merged);
+      storage.set(LS_LAG_PUTT_SESSIONS, merged.slice(0, 50));
+    });
   }, []);
 
   function startSession() {

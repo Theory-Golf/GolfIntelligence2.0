@@ -16,6 +16,7 @@ import {
 } from '@/lib/constants';
 import { storage } from '@/lib/playerpath/storage';
 import { derivedClientId } from '@/lib/playerpath/clientId';
+import { syncDrillHistory } from '@/lib/playerpath/history';
 import { drillSessionInput, recordDrillSession } from '@/lib/playerpath/record';
 
 // ── Storage helpers ──────────────────────────────────────────────
@@ -1044,6 +1045,17 @@ export default function ApproachStandard() {
       setSessions(savedSessions || []);
       setScreen('SETUP');
     }
+    // Fold in sessions logged on the player's other devices.
+    void syncDrillHistory({
+      drillType: 'approach-standard',
+      local: savedSessions || [],
+      hydrate: (r) => r.payload,
+      keyOf: (x) => String(x.id),
+      sortKey: (x) => Date.parse(x.completedAt || x.startedAt) || 0,
+    }).then((merged) => {
+      if (!merged) return;
+      setSessions(merged);
+    });
   }, []);
 
   // Persist on change

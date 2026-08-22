@@ -5,6 +5,7 @@ import { ArrowLeft, X } from 'lucide-react';
 import { CLUB_OPTIONS, DEFAULT_CLUBS } from '@/components/WeatherYardageCard/StepMyBag';
 import { LS_CLUBS, LS_LINE_TEST_SESSIONS } from '@/lib/constants';
 import { derivedClientId } from '@/lib/playerpath/clientId';
+import { syncDrillHistory } from '@/lib/playerpath/history';
 import { drillSessionInput, recordDrillSession } from '@/lib/playerpath/record';
 
 // ── Domain ───────────────────────────────────────────────────────────
@@ -1647,8 +1648,21 @@ export default function LineTest() {
   const [lastResult, setLastResult] = useState<SessionResult | null>(null);
 
   useEffect(() => {
-    setSessions(loadSessions());
+    const local = loadSessions();
+    setSessions(local);
     setHydrated(true);
+    // The full SessionResult is stored as the payload, so it round-trips.
+    void syncDrillHistory<SessionResult>({
+      drillType: 'line-test',
+      local,
+      hydrate: (r) => r.payload as unknown as SessionResult,
+      keyOf: (x) => x.session_id,
+      sortKey: (x) => Date.parse(x.timestamp) || 0,
+    }).then((merged) => {
+      if (!merged) return;
+      setSessions(merged);
+      saveSessions(merged);
+    });
   }, []);
 
   const beginFlow = () => {

@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { LS_PUTTING_SESSIONS, LS_PUTTING_PUTTERS } from '@/lib/constants';
 import { derivedClientId } from '@/lib/playerpath/clientId';
+import { playedAtMs, syncDrillHistory } from '@/lib/playerpath/history';
 import { drillSessionInput, recordDrillSession } from '@/lib/playerpath/record';
 import './RoundSimulation.css';
 
@@ -315,6 +316,25 @@ export default function RoundSimulation() {
     try {
       const sessions = localStorage.getItem(LS_PUTTING_SESSIONS);
       if (sessions) setPastSessions(JSON.parse(sessions));
+      // Then fold in whatever the player's account has from other devices.
+      void syncDrillHistory<SavedSession>({
+        drillType: 'round-simulation',
+        local: sessions ? JSON.parse(sessions) : [],
+        hydrate: (r) => ({
+          // Rows written before the id was carried fall back to played_at.
+          id: Number(r.payload.id ?? playedAtMs(r)),
+          date: typeof r.payload.date === 'string' ? r.payload.date : r.played_at,
+          putter: String(r.payload.putter ?? ''),
+          ballMarking: String(r.payload.ballMarking ?? ''),
+          stats: r.payload.stats as SessionStats,
+        }),
+        keyOf: (x) => String(x.id),
+        sortKey: (x) => Date.parse(x.date) || Number(x.id),
+      }).then((merged) => {
+        if (!merged) return;
+        setPastSessions(merged);
+        try { localStorage.setItem(LS_PUTTING_SESSIONS, JSON.stringify(merged.slice(0, 50))); } catch (_) {}
+      });
       const putters = localStorage.getItem(LS_PUTTING_PUTTERS);
       if (putters) setSavedPutters(JSON.parse(putters));
     } catch (_) {}
@@ -348,6 +368,10 @@ export default function RoundSimulation() {
         derivedClientId('round-simulation', newSession.id),
         newSession.date,
         {
+          // The local id is the identity this session is de-duplicated by, so
+          // it has to survive the round trip: played_at is a separate clock
+          // read and will not reliably reproduce it.
+          id: newSession.id,
           putter: newSession.putter,
           ballMarking: newSession.ballMarking,
           stats: newSession.stats,
