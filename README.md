@@ -53,6 +53,37 @@ See `web/.env.example` for required variables:
 | `/resources/approach-aim-optimizer` | Approach aim optimizer |
 | `/contact` | Contact form |
 
+## Verifying practice sync
+
+Practice results are written to `drill_sessions` and keyed to the signed-in
+player, so a player's history follows them to any device. The security and
+idempotency guarantees behind that are enforced by row-level security and a
+unique constraint on `(player_id, drill_type, client_id)`, and are verified
+directly in SQL.
+
+What SQL cannot show is the client round trip. Run that from a machine that
+can reach the Supabase project — sandboxed CI and agent environments generally
+cannot, which is why this is a script rather than a test in the suite:
+
+```bash
+cd web
+TG_TEST_EMAIL=you@example.com TG_TEST_PASSWORD=... npm run verify:practice-sync
+```
+
+It signs in, writes a result, then reads it back through a **second,
+independent client signed in as the same player** — the cross-device proof —
+and replays the identical write to confirm an offline-queue flush updates the
+row rather than duplicating it. Add `TG_OTHER_EMAIL` / `TG_OTHER_PASSWORD` to
+also confirm a different player cannot see the row. It only ever writes rows of
+`drill_type = '_verify'` and deletes them on the way out, including after a
+failure, so real history is never touched.
+
+**One thing it deliberately doesn't cover:** the browser's own offline
+behaviour, since `navigator.onLine` and the localStorage queue only exist in a
+page. To check that by hand: open a drill, switch DevTools to Offline, finish
+the drill, confirm the result still renders, then go back online and reload —
+the row should appear exactly once in `drill_sessions`.
+
 ## Schema notes
 
 Read these before touching `supabase/migrations/` or building coach/team features.
