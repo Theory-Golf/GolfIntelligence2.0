@@ -1,3 +1,4 @@
+import { activityById, isBuilt } from '@/data/practiceActivities';
 import {
   WEDGE_DISTANCE_POOL,
   todayISO,
@@ -102,6 +103,34 @@ export function generateWedgeDistances(numShots: number, seedStr: string): numbe
   return result;
 }
 
+/** Shots reserved per assessment block. */
+const ASSESSMENT_SHOTS = 10;
+
+/**
+ * Which assessment games a session should include, given the mesocycle phase.
+ *
+ * Only ever returns activities with a built tool — a block pointing at an
+ * in-development game would be a dead end mid-session. Ordered by leverage:
+ * approach first (the highest-leverage pillar), then whatever else the
+ * session is already touching.
+ */
+function pickAssessments(
+  mode: Phase['mode'],
+  opts: { hasDriver: boolean; hasIrons: boolean },
+): string[] {
+  if (mode === 'technical') return []; // weeks 1–2: pattern building only
+
+  const candidates: string[] = [];
+  if (opts.hasIrons) candidates.push('approach-standard');
+  candidates.push('wedge-standard'); // wedges are in every session
+  if (opts.hasDriver) candidates.push('driver-standard');
+  if (opts.hasIrons) candidates.push('line-test');
+
+  const built = candidates.filter((id) => isBuilt(id));
+  // Weeks 3–4 test one thing; weeks 5–6 test two.
+  return built.slice(0, mode === 'mixed' ? 1 : 2);
+}
+
 export function buildSessionBlocks(
   weekConfig: WeekConfig,
   shotBudget: number,
@@ -154,6 +183,17 @@ export function buildSessionBlocks(
   remaining -= driverShots;
   const cooldownShots = 5;
   remaining -= cooldownShots;
+
+  // Assessment work scales with the mesocycle: none while the pattern is
+  // still being built, one test once it's transferring, two once the point
+  // of the block is execution under pressure. Shots come out of the iron
+  // allocation so the budget still balances.
+  const assessments = pickAssessments(phase.mode, {
+    hasDriver: driverShots > 0,
+    hasIrons: weekConfig.ironElements.some((e) => e.name),
+  });
+  const assessmentShots = assessments.length * ASSESSMENT_SHOTS;
+  remaining -= assessmentShots;
 
   const ironShots = Math.max(20, remaining);
 
@@ -253,6 +293,23 @@ export function buildSessionBlocks(
     });
   }
 
+  // Assessments sit after the technical work and before the cool-down: the
+  // pattern has been rehearsed, and now it gets tested cold.
+  assessments.forEach((activityId) => {
+    const activity = activityById(activityId);
+    blocks.push({
+      id: `assessment_${activityId}`,
+      name: `Test · ${activity?.name ?? activityId}`,
+      type: 'assessment',
+      activityId,
+      shots: ASSESSMENT_SHOTS,
+      instructions:
+        activity?.description ??
+        'Run the assessment and log your result. The game scores itself and keeps its own history.',
+      completed: false,
+    });
+  });
+
   blocks.push({
     id: 'cooldown',
     name: 'Cool-Down',
@@ -316,17 +373,9 @@ export function stddev(arr: number[]): number | null {
   return Math.sqrt(v);
 }
 
-export function fmtDate(iso?: string): string {
-  if (!iso) return '—';
-  const d = new Date(iso + 'T12:00:00');
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-}
-
-export function fmtDateShort(iso?: string): string {
-  if (!iso) return '—';
-  const d = new Date(iso + 'T12:00:00');
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-}
+// Date formatting lives in lib/playerpath/format — re-exported so the
+// planner's existing call sites keep working.
+export { fmtDate, fmtDateShort } from '@/lib/playerpath/format';
 
 export function newCheckpointId(): string {
   return uid('cp');
@@ -533,6 +582,16 @@ export function summarizeSession(
     avgBallSpeed: wedgeSpeeds.length
       ? wedgeSpeeds.reduce((a, b) => a + b, 0) / wedgeSpeeds.length
       : null,
+    // Which assessments the session sent the player to, and whether they came
+    // back and marked them done. Never a score — the game owns that, and it is
+    // already in drill_sessions under its own drill_type.
+    assessments: session.blocks
+      .filter((b) => b.type === 'assessment')
+      .map((b) => ({
+        activityId: b.activityId ?? b.id,
+        name: b.name,
+        completed: b.completed,
+      })),
   };
 
   return { record, flushEntries };

@@ -39,7 +39,7 @@ export default function EmptyState({
         />
       </div>
       <p className="mt-6 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-        Future: link drills to The Library · sync history to your player profile
+        Scored assessments from week three · History synced to your player profile
       </p>
     </div>
   );

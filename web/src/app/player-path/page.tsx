@@ -1,6 +1,6 @@
 import PlayerPathOverview from '@/components/playerpath/Overview';
 import PracticePlanner from '@/components/PracticePlanner';
-import PracticeLibrary from '@/components/PracticeLibrary';
+import PracticeBySegment from '@/components/playerpath/PracticeBySegment';
 
 export const metadata = {
   title: 'PlayerPath',
@@ -10,6 +10,8 @@ export const metadata = {
 export default function PlayerPathPage() {
   return (
     <>
+      {/* Flushes queued practice writes and uploads pre-sync local history. */}
+
       {/* ── 01 · PlayerPath — what it is, what it includes ────── */}
       <PlayerPathOverview />
 
@@ -18,9 +20,9 @@ export default function PlayerPathPage() {
         <PracticePlanner />
       </section>
 
-      {/* ── 03 · The Library — flagged drivers + the catalog ──── */}
-      <section id="library" className="scroll-mt-[61px] border-t border-border pt-16">
-        <PracticeLibrary />
+      {/* ── 03 · Practice — assessment games by game segment ──── */}
+      <section id="practice" className="scroll-mt-[61px] border-t border-border pt-16">
+        <PracticeBySegment />
       </section>
     </>
   );

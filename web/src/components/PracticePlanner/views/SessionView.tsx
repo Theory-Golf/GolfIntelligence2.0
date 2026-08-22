@@ -6,6 +6,7 @@ import type { Block, Direction, HistoryEntry, PracticeIntent, Session, WeekConfi
 import IronTechnicalBlock from '../blocks/IronTechnicalBlock';
 import WedgeDistanceBlock from '../blocks/WedgeDistanceBlock';
 import SimpleBlock from '../blocks/SimpleBlock';
+import AssessmentBlock from '../blocks/AssessmentBlock';
 import StatusPill from '../parts/StatusPill';
 
 export type SessionHandlers = {
@@ -174,6 +175,9 @@ function BlockCard({
             onComplete={handlers.onCompleteWedge}
             onToggleShowAll={handlers.onToggleShowAllShots}
           />
+        )}
+        {block.type === 'assessment' && (
+          <AssessmentBlock block={block} onToggle={handlers.onToggleSimple} />
         )}
         {(block.type === 'warmup' || block.type === 'cooldown') && (
           <SimpleBlock block={block} onToggle={handlers.onToggleSimple} />

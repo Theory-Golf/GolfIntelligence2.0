@@ -121,6 +121,35 @@ export default function SessionCompleteView({
         </div>
       )}
 
+      {/* ── Assessments ──────────────────────────────────────── */}
+      {record.assessments && record.assessments.length > 0 && (
+        <div className="border border-border bg-card p-5">
+          <div className="mb-1 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+            Assessments
+          </div>
+          <p className="mb-3 text-xs text-muted-foreground">
+            Each of these scored itself and saved to your account — open the game to see the
+            numbers and how they trend.
+          </p>
+          <ul className="space-y-2">
+            {record.assessments.map((a) => (
+              <li key={a.activityId} className="flex items-center justify-between gap-3 text-sm">
+                <span className={a.completed ? 'text-foreground' : 'text-muted-foreground'}>
+                  {a.name.replace(/^Test · /, '')}
+                </span>
+                <span
+                  className={`font-mono text-[10px] uppercase tracking-[0.18em] ${
+                    a.completed ? 'text-primary' : 'text-muted-foreground'
+                  }`}
+                >
+                  {a.completed ? 'Run' : 'Not run'}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {/* ── Blocks run ───────────────────────────────────────── */}
       <div className="border border-border bg-card p-5">
         <div className="mb-3 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">

@@ -1,32 +1,37 @@
 import Link from 'next/link';
+import PracticeStrip from './PracticeStrip';
 
-const INCLUDES = [
+/**
+ * The three stages of the loop, in the order a player moves through them.
+ * Diagnosis happens on the dashboard; PlayerPath is where the work gets done.
+ */
+const LOOP = [
   {
     num: '01',
-    name: 'The Driver',
+    name: 'Diagnose',
     body:
-      'Your rounds run through the Golf Intelligence engine. It ranks every leak by strokes lost and root-cause frequency, then flags the handful that are actually upstream of your score.',
-    note: 'Benchmarked vs. PGA Tour · College +3 · Scratch',
-    href: '#library',
-    cta: 'See flagged drivers',
+      'Golf Intelligence reads your rounds. Tiger 5 shows where the scoring damage actually came from, and root-cause analysis traces it upstream to the driver behind it — not the failure you remember most.',
+    note: 'Tiger 5 · Root cause · Benchmarked vs. College +3',
+    href: '/golf-intelligence',
+    cta: 'Open the dashboard',
   },
   {
     num: '02',
-    name: 'The Plan',
+    name: 'Train',
     body:
-      'A structured practice session built around the technical elements you and your coach are working on. It scales to the shots you have, holds you to checkpoints, and tracks whether the change is actually being acquired.',
+      'The Plan builds a full session around what you and your coach are working on. Technical blocks with checkpoints early in the mesocycle, assessment work as you move toward transfer — scaled to the shots you actually have.',
     note: 'Six-week mesocycle · Technical → Transfer',
     href: '#plan',
     cta: 'Build a session',
   },
   {
     num: '03',
-    name: 'The Library',
+    name: 'Test',
     body:
-      'Every assessment and development activity in one catalog, each one mapped to the performance drivers it addresses. Flag a driver and the work that fixes it rises to the top.',
-    note: 'Assessments · Development activities · On-course tests',
-    href: '#library',
-    cta: 'Browse the work',
+      'Or go straight at one segment. Every assessment game scores you against a standard and keeps its own history, so you can see whether the change is holding under pressure.',
+    note: 'Driving · Approach · Wedge · Putting',
+    href: '#practice',
+    cta: 'Work a segment',
   },
 ];
 
@@ -41,16 +46,13 @@ export default function PlayerPathOverview() {
           Player<span className="text-primary">Path</span>
         </h1>
         <p className="mt-5 max-w-xl font-body text-base leading-relaxed text-muted-foreground">
-          Every player has a highest-leverage area. PlayerPath surfaces it — quantifying exactly
-          which part of the game is costing the most strokes — then turns that finding into
-          practice you can actually run.
-        </p>
-        <p className="mt-4 max-w-xl font-body text-base leading-relaxed text-muted-foreground">
-          Not a report. A finding, a causal explanation, and an intervention — in that order.
+          The dashboard tells you what is costing you strokes. PlayerPath is where you do something
+          about it — structured practice built around that finding, and measured the same way a
+          round is.
         </p>
 
         <div className="mt-12 grid grid-cols-1 gap-px border border-border bg-border md:grid-cols-3">
-          {INCLUDES.map((item) => (
+          {LOOP.map((item) => (
             <Link
               key={item.num}
               href={item.href}
@@ -66,12 +68,27 @@ export default function PlayerPathOverview() {
               <span className="mt-auto border-t border-border pt-3 font-mono text-[9px] uppercase tracking-[0.15em] text-muted-foreground">
                 {item.note}
               </span>
-              <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground transition duration-150 group-hover:translate-x-[3px] group-hover:text-primary">
+              {/* Always visible — a phone has no hover to reveal it. */}
+              <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-primary transition duration-150 group-hover:translate-x-[3px]">
                 {item.cta} →
               </span>
             </Link>
           ))}
         </div>
+
+        {/* Why any of this is scored at all. */}
+        <div className="mt-8 border-l-2 border-primary bg-accent/30 px-5 py-4">
+          <p className="max-w-2xl text-sm leading-relaxed text-foreground">
+            <strong className="font-semibold">Practice you can keep score in.</strong>{' '}
+            <span className="text-muted-foreground">
+              Every game here scores you against a standard and saves the result to your account —
+              so a session on the range produces a number the same way a round does. That is what
+              turns practice from time spent into progress you and your coach can see.
+            </span>
+          </p>
+        </div>
+
+        <PracticeStrip />
       </div>
     </section>
   );

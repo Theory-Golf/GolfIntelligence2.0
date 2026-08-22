@@ -111,6 +111,14 @@ export type DrillType =
   | 'round-simulation'
   | 'practice-planner';
 
+/** One drill's activity rolled up across all of a player's sessions. */
+export interface DrillActivitySummary {
+  drillType: DrillType;
+  count: number;
+  /** ISO timestamp of the most recent session. */
+  lastPlayed: string;
+}
+
 export interface DrillSessionRow {
   id: string;
   player_id: string;

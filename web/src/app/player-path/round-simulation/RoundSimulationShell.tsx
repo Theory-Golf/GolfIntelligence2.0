@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
+import ResumeSessionBar from '@/components/playerpath/ResumeSessionBar';
 import RoundSimulation from '@/components/RoundSimulation';
 
 type Screen = 'welcome' | 'setup' | 'putt-setup' | 'second-putt' | 'summary' | 'history';
@@ -14,11 +15,12 @@ export default function RoundSimulationShell() {
 
   return (
     <>
+      {!PLAY_SCREENS.includes(screen) && <ResumeSessionBar />}
       {!PLAY_SCREENS.includes(screen) && (
         <section className="px-6 pt-16 pb-8">
           <div className="max-w-3xl mx-auto">
-            <Link href="/player-path#library" className="inline-flex items-center gap-2 font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground no-underline mb-6 hover:text-primary transition-colors">
-              <ArrowLeft className="size-3" /> Library
+            <Link href="/player-path#practice" className="inline-flex items-center gap-2 font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground no-underline mb-6 hover:text-primary transition-colors">
+              <ArrowLeft className="size-3" /> Practice
             </Link>
             <p className="eyebrow mb-5">Assessment &middot; Putting</p>
             <h1 className="font-display font-extrabold text-[clamp(32px,6vw,64px)] leading-[0.9] tracking-tight uppercase text-foreground">

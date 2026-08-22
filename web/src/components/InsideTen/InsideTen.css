@@ -837,3 +837,25 @@
   text-transform: uppercase;
   color: var(--ash);
 }
+
+/* ── Mobile: the ladder table is 4 columns of numbers and gets tight on a
+   phone. Let it scroll inside its own box rather than pushing the page
+   sideways, and tighten the cells so it usually doesn't need to. ── */
+.it-ladder-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 20px;
+}
+
+.it-ladder-scroll .it-ladder-table {
+  margin-bottom: 0;
+  min-width: 280px;
+}
+
+@media (max-width: 420px) {
+  .it-ladder-table th,
+  .it-ladder-table td {
+    padding: 8px 6px;
+    font-size: 11px;
+  }
+}
