@@ -70,8 +70,11 @@
   margin: 0;
 }
 
-.header h1 em {
-  font-style: italic;
+/* Matches the PlayerPath / marketing headline treatment: one display
+   family (Barlow Condensed 800, uppercase, tight), second word in
+   scarlet. The old rule mixed --font-body with a condensed italic in
+   the same line, which read as two different fonts. */
+.header h1 .header-accent {
   color: var(--scarlet);
 }
 
