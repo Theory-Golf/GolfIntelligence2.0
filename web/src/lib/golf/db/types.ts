@@ -24,7 +24,11 @@ export type ShotSegment =
 
 export interface CourseRow {
   id: string;
-  player_id: string;
+  /** Null for a course a player added for themselves. */
+  school_id: string | null;
+  /** Nullable in the database: a school course has no owning player. */
+  player_id: string | null;
+  created_by: string | null;
   name: string;
   par_hole_1: number;
   par_hole_2: number;
@@ -51,6 +55,12 @@ export interface CourseRow {
 export interface RoundRow {
   id: string;
   player_id: string;
+  // NOTE: rounds.course_id is NOT NULL in the database, but the round-entry
+  // flow and roundSession both handle a null course. In practice the flow
+  // always creates or matches a course before submit, so the two have never
+  // disagreed at runtime. Typed nullable here to match the code that exists;
+  // whether a course-less round should be allowed is a product decision, and
+  // resolving it means changing one side or the other deliberately.
   course_id: string | null;
   played_on: string;
   round_type: RoundType;
@@ -61,6 +71,16 @@ export interface RoundRow {
   weather_wind_mph: number | null;
   weather_wind_dir: string | null;
   weather_precip: number | null;
+  weather_precip_type: string | null;
+  /** Team the player belongs to now. Unused until team features land. */
+  current_team_id: string | null;
+  /** Team the player belonged to when the round was played. */
+  team_id_at_round: string | null;
+  course_difficulty: string | null;
+  notes: string | null;
+  /** Set when the round is submitted from review. Defaults false. */
+  is_complete: boolean;
+  synced_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -90,8 +110,26 @@ export interface ShotRow {
   updated_at: string;
 }
 
-export type CourseInsert = Omit<CourseRow, 'created_at' | 'updated_at'>;
-export type RoundInsert = Omit<RoundRow, 'created_at' | 'updated_at'>;
+// Columns the database fills in, or that carry a default -- omitted from the
+// insert shape and re-added as optional, so adding a column to a Row type
+// never forces every call site to start passing it explicitly.
+type CourseOptionalOnInsert = 'school_id' | 'created_by';
+type RoundOptionalOnInsert =
+  | 'weather_precip_type'
+  | 'current_team_id'
+  | 'team_id_at_round'
+  | 'course_difficulty'
+  | 'notes'
+  | 'is_complete'
+  | 'synced_at';
+
+export type CourseInsert =
+  Omit<CourseRow, 'created_at' | 'updated_at' | CourseOptionalOnInsert> &
+  Partial<Pick<CourseRow, CourseOptionalOnInsert>>;
+
+export type RoundInsert =
+  Omit<RoundRow, 'created_at' | 'updated_at' | RoundOptionalOnInsert> &
+  Partial<Pick<RoundRow, RoundOptionalOnInsert>>;
 export type HoleInsert = Omit<HoleRow, 'created_at' | 'updated_at'>;
 export type ShotInsert = Omit<ShotRow, 'created_at' | 'updated_at'>;
 

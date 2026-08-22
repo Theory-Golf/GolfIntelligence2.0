@@ -1,4 +1,4 @@
--- 0005_ethos_papers.sql
+-- 0006_ethos_papers.sql
 -- Public research-paper library ("Ethos"). Papers are inserted directly via
 -- the Supabase dashboard / service role -- no in-app authoring UI exists yet.
 -- PDFs (and any inline figures referenced from body_markdown) live in the

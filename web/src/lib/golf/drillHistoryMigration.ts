@@ -122,10 +122,24 @@ async function migrateOne(config: DrillMigrationConfig, playerId: string): Promi
     return;
   }
 
+  let sessions: unknown[];
   try {
-    const parsed = JSON.parse(raw);
-    const sessions = (config.extractSessions ?? extractEnvelopeSessions)(parsed);
-    for (const session of sessions) {
+    sessions = (config.extractSessions ?? extractEnvelopeSessions)(JSON.parse(raw));
+  } catch (err) {
+    // Unparseable localStorage — retrying can't help, and leaving the marker
+    // unset would re-attempt this on every page load forever.
+    console.error(`[drillHistoryMigration] unreadable local history for ${config.drillType}`, err);
+    window.localStorage.setItem(marker, new Date().toISOString());
+    return;
+  }
+
+  // Upload session-by-session rather than aborting the drill on the first
+  // failure. One malformed local row used to block every session behind it,
+  // and because the marker stayed unset the whole backlog was re-attempted on
+  // every page load. Now a bad row costs only itself.
+  let failed = 0;
+  for (const session of sessions) {
+    try {
       await upsertDrillSession({
         player_id: playerId,
         drill_type: config.drillType,
@@ -133,11 +147,18 @@ async function migrateOne(config: DrillMigrationConfig, playerId: string): Promi
         played_at: config.getPlayedAt(session),
         payload: session,
       });
+    } catch (err) {
+      failed += 1;
+      console.error(`[drillHistoryMigration] session failed for ${config.drillType}`, err);
     }
+  }
+
+  // Only claim the drill is migrated once every session landed; otherwise
+  // leave the marker unset so the stragglers retry on the next sign-in. The
+  // unique constraint on (player_id, drill_type, client_id) makes re-uploading
+  // the ones that already succeeded a no-op.
+  if (failed === 0) {
     window.localStorage.setItem(marker, new Date().toISOString());
-  } catch (err) {
-    console.error(`[drillHistoryMigration] failed for ${config.drillType}`, err);
-    // Leave the marker unset so this retries on the next sign-in.
   }
 }
 

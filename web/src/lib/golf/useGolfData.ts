@@ -104,9 +104,24 @@ export function useGolfData(): UseGolfDataResult {
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
+  // Persisted to the player's profile as well as held locally, so the choice
+  // follows them to another device instead of resetting to the male default.
+  // Fire-and-forget: the dashboard should never block on this write, and a
+  // failure only costs the player re-picking next time.
   const setBenchmarkGenderManual = useCallback((gender: Gender) => {
     setGenderTouched(true);
     setBenchmarkGender(gender);
+
+    void (async () => {
+      const supabase = createBrowserClient();
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) return;
+      const { error } = await supabase
+        .from('profiles')
+        .update({ gender })
+        .eq('id', userData.user.id);
+      if (error) console.error('Failed to save benchmark gender to profile:', error);
+    })();
   }, []);
 
   useEffect(() => {
@@ -140,11 +155,18 @@ export function useGolfData(): UseGolfDataResult {
       const supabase = createBrowserClient();
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) return;
-      const { data: profile } = await supabase
+      const { data: profile, error } = await supabase
         .from('profiles')
         .select('gender')
         .eq('id', userData.user.id)
         .single();
+      // Checked rather than ignored: a missing column or a failed request used
+      // to be indistinguishable from "no gender set", so every player silently
+      // fell back to the male benchmark with nothing logged.
+      if (error) {
+        console.error('Failed to read benchmark gender from profile:', error);
+        return;
+      }
       if (!cancelled && !genderTouched && (profile?.gender === 'male' || profile?.gender === 'female')) {
         setBenchmarkGender(profile.gender);
       }

@@ -688,7 +688,11 @@ export function RoundSessionProvider({
       track(
         await persistOrQueue({
           type: 'upsertRound',
-          payload: draftRoundRef.current,
+          // Submitting from review is the only thing that finishes a round, so
+          // it is the only place is_complete becomes true. Without it every
+          // round stays flagged unfinished and an abandoned round is
+          // indistinguishable from a full 18 on the dashboard.
+          payload: { ...draftRoundRef.current, is_complete: true },
         }),
       );
       for (const h of state.holes) {

@@ -312,7 +312,18 @@ export default function NewRoundPage() {
     const name = state.courseName.trim();
     const id = createId();
     const now = new Date().toISOString();
-    const optimistic: CourseRow = { id, player_id: playerId, name, ...defaultPars, created_at: now, updated_at: now };
+    // A course the player added for themselves: no owning school, and
+    // created_by is only set for school courses added by a coach.
+    const optimistic: CourseRow = {
+      id,
+      school_id: null,
+      player_id: playerId,
+      created_by: null,
+      name,
+      ...defaultPars,
+      created_at: now,
+      updated_at: now,
+    };
     // Optimistically add the course so the user can proceed immediately.
     setCourses((prev) => [...prev, optimistic]);
     selectCourse(optimistic);
