@@ -1,13 +1,9 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { LS_LAG_PUTT_SESSIONS } from '@/lib/constants';
-import { storage } from '@/lib/playerpath/storage';
-import { derivedClientId, newClientId } from '@/lib/playerpath/clientId';
-import { playedAtMs, syncDrillHistory } from '@/lib/playerpath/history';
-import { drillSessionInput, recordDrillSession } from '@/lib/playerpath/record';
+import { useDrillHistory } from '@/lib/golf/useDrillHistory';
 import './LagPuttTest.css';
-import { fmtDateShort } from '@/lib/playerpath/format';
 
 type Direction = 'short' | 'long';
 
@@ -21,17 +17,15 @@ interface PuttResult {
 
 interface SavedSession {
   id: number;
-  /** Idempotency key for the account-level row. Absent on sessions saved
-   *  before practice results synced; the upload derives one in that case. */
-  clientId?: string;
   date: string;
   total: number;
   putts: PuttResult[];
 }
 
 // ── Distance set ─────────────────────────────────────────────────
-// 8 m → 26.25 ft, 22 m → 72.18 ft. Rounded to nearest 3 ft → 27..72.
-const DISTANCE_OPTIONS = [27, 30, 33, 36, 39, 42, 45, 48, 51, 54, 57, 60, 63, 66, 69, 72];
+// Capped at 60 ft — most practice greens don't have room for longer lag putts.
+// 27..60 ft in 3-ft steps.
+const DISTANCE_OPTIONS = [27, 30, 33, 36, 39, 42, 45, 48, 51, 54, 57, 60];
 const NUM_PUTTS = 18;
 
 // ── Score table — buckets in whole feet, mapped to Swedish scoring ──
@@ -110,43 +104,32 @@ function generateDistances(): number[] {
   return [...pool, ...extras];
 }
 
+const getSessionId = (s: SavedSession) => String(s.id);
+const getSessionPlayedAt = (s: SavedSession) => s.date;
 
+interface LagPuttTestProps {
+  onScreenChange?: (screen: 'home' | 'play' | 'results') => void;
+}
 
 // ── Component ────────────────────────────────────────────────────
-export default function LagPuttTest() {
+export default function LagPuttTest({ onScreenChange }: LagPuttTestProps = {}) {
   const [screen, setScreen] = useState<'home' | 'play' | 'results'>('home');
   const [distances, setDistances] = useState<number[]>([]);
   const [results, setResults] = useState<PuttResult[]>([]);
   const [puttIdx, setPuttIdx] = useState(0);
   const [selectedBucket, setSelectedBucket] = useState<number | 'holed' | null>(null);
   const [selectedDir, setSelectedDir] = useState<Direction | null>(null);
-  const [history, setHistory] = useState<SavedSession[]>([]);
+
+  const { sessions: history, record } = useDrillHistory<SavedSession>({
+    drillType: 'lag-putt-test',
+    lsKey: LS_LAG_PUTT_SESSIONS,
+    getId: getSessionId,
+    getPlayedAt: getSessionPlayedAt,
+  });
 
   useEffect(() => {
-    const local = storage.get<SavedSession[]>(LS_LAG_PUTT_SESSIONS) ?? [];
-    setHistory(local);
-    // Fold in sessions played on the player's other devices.
-    void syncDrillHistory<SavedSession>({
-      drillType: 'lag-putt-test',
-      local,
-      hydrate: (r) => ({
-        id: Number(r.payload.id ?? playedAtMs(r)),
-        clientId: r.client_id,
-        date: typeof r.payload.date === 'string' ? r.payload.date : r.played_at,
-        total: Number(r.payload.total ?? 0),
-        putts: (r.payload.putts as PuttResult[]) ?? [],
-      }),
-      // Sessions saved before results synced carry no clientId. The upload
-      // gave them the derived one, so derive the same value here or the two
-      // copies of one session would not collapse.
-      keyOf: (x) => x.clientId ?? derivedClientId('lag-putt-test', x.id),
-      sortKey: (x) => Date.parse(x.date) || x.id,
-    }).then((merged) => {
-      if (!merged) return;
-      setHistory(merged);
-      storage.set(LS_LAG_PUTT_SESSIONS, merged.slice(0, 50));
-    });
-  }, []);
+    onScreenChange?.(screen);
+  }, [screen, onScreenChange]);
 
   function startSession() {
     setDistances(generateDistances());
@@ -180,22 +163,11 @@ export default function LagPuttTest() {
       const total = next.reduce((s, r) => s + r.score, 0);
       const session: SavedSession = {
         id: Date.now(),
-        clientId: newClientId(),
         date: new Date().toISOString(),
         total,
         putts: next,
       };
-      const updatedHistory = [session, ...history].slice(0, 50);
-      // Local write first so the result is never lost, then push to the
-      // player's account; the clientId makes a queued retry update, not add.
-      setHistory(updatedHistory);
-      storage.set(LS_LAG_PUTT_SESSIONS, updatedHistory);
-      void recordDrillSession(
-        drillSessionInput('lag-putt-test', session.clientId!, session.date, {
-          total: session.total,
-          putts: session.putts,
-        }),
-      );
+      record(session);
       setScreen('results');
     } else {
       setPuttIdx(puttIdx + 1);
@@ -213,13 +185,13 @@ export default function LagPuttTest() {
           <h2 className="lpt-card-title">Lag Putt Test</h2>
           <p className="lpt-card-copy">
             Adapted from the Swedish Golf Team protocol. Hit 18 putts from random
-            distances between 27 and 72 feet. After each putt, log how far the ball
+            distances between 27 and 60 feet. After each putt, log how far the ball
             finished from the hole — short or long.
           </p>
           <div className="lpt-rules">
             <div className="lpt-rule">
               <span className="lpt-rule-key">01</span>
-              <span className="lpt-rule-text">App generates 18 distances between 27 and 72 ft</span>
+              <span className="lpt-rule-text">App generates 18 distances between 27 and 60 ft</span>
             </div>
             <div className="lpt-rule">
               <span className="lpt-rule-key">02</span>
@@ -231,21 +203,19 @@ export default function LagPuttTest() {
             </div>
           </div>
 
-          <div className="lpt-table-scroll">
-            <table className="lpt-table">
-              <thead>
-                <tr><th>Result</th><th>Score</th></tr>
-              </thead>
-              <tbody>
-                <tr><td>Holed</td><td>−2 (Eagle)</td></tr>
-                <tr><td>1 ft</td><td>−1 (Birdie)</td></tr>
-                <tr><td>2–3 ft</td><td>0 (Par)</td></tr>
-                <tr><td>4–6 ft</td><td>+1 (Bogey)</td></tr>
-                <tr><td>7–9 ft</td><td>+2 (Double)</td></tr>
-                <tr><td>10+ ft</td><td>+3 (Triple)</td></tr>
-              </tbody>
-            </table>
-          </div>
+          <table className="lpt-table">
+            <thead>
+              <tr><th>Result</th><th>Score</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Holed</td><td>−2 (Eagle)</td></tr>
+              <tr><td>1 ft</td><td>−1 (Birdie)</td></tr>
+              <tr><td>2–3 ft</td><td>0 (Par)</td></tr>
+              <tr><td>4–6 ft</td><td>+1 (Bogey)</td></tr>
+              <tr><td>7–9 ft</td><td>+2 (Double)</td></tr>
+              <tr><td>10+ ft</td><td>+3 (Triple)</td></tr>
+            </tbody>
+          </table>
 
           <button className="lpt-primary-btn" onClick={startSession}>
             Start Session
@@ -259,7 +229,7 @@ export default function LagPuttTest() {
               {history.slice(0, 5).map((s) => (
                 <li key={s.id} className="lpt-history-row">
                   <span className="lpt-history-date">
-                    {fmtDateShort(s.date)}
+                    {new Date(s.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   </span>
                   <span className="lpt-history-total">
                     {s.total > 0 ? `+${s.total}` : s.total}
@@ -299,6 +269,7 @@ export default function LagPuttTest() {
             <span className="lpt-distance-number">{currentDist}</span>
             <span className="lpt-distance-unit">ft</span>
           </div>
+          <p className="lpt-distance-paces">≈ {Math.round(currentDist / 3)} paces</p>
         </div>
 
         <div className="lpt-card">
@@ -324,11 +295,8 @@ export default function LagPuttTest() {
               );
             })}
           </div>
-        </div>
 
-        {selectedBucket !== null && selectedBucket !== 'holed' && (
-          <div className="lpt-card">
-            <p className="lpt-card-eyebrow">Direction</p>
+          {selectedBucket !== null && selectedBucket !== 'holed' && (
             <div className="lpt-dir-row">
               <button
                 className={`lpt-dir-btn${selectedDir === 'short' ? ' is-selected' : ''}`}
@@ -343,8 +311,8 @@ export default function LagPuttTest() {
                 Long
               </button>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
         <button
           className="lpt-primary-btn"

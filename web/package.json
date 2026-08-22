@@ -7,7 +7,6 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "audit:drill-reads": "node scripts/audit-drill-read-paths.mjs",
     "verify:practice-sync": "node scripts/verify-practice-sync.mjs"
   },
   "dependencies": {
@@ -19,7 +18,9 @@
     "next": "15.2.6",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-markdown": "^10.1.0",
     "recharts": "^3.8.0",
+    "remark-gfm": "^4.0.1",
     "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {

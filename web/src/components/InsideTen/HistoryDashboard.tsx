@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Trash2 } from 'lucide-react';
 import {
@@ -8,9 +8,20 @@ import {
   ResponsiveContainer, ReferenceLine,
   PieChart, Pie, Cell, Legend,
 } from 'recharts';
-import { loadSessions, persistSessions, syncSessions, type InsideTenSession, type TierName } from '.';
+import { LS_INSIDE_TEN_SESSIONS } from '@/lib/constants';
+import { useDrillHistory } from '@/lib/golf/useDrillHistory';
 import './InsideTen.css';
-import { fmtDateShort } from '@/lib/playerpath/format';
+
+type TierName = 'elite' | 'tour' | 'competitive' | 'developing';
+
+interface InsideTenSession {
+  id: string;
+  date: string;
+  timestamp: number;
+  score: number;
+  sg: number;
+  tier: TierName;
+}
 
 const SG_TABLE: Record<number, number> = {
   18: 6.28, 17: 5.25, 16: 4.22, 15: 3.19, 14: 2.16, 13: 1.13,
@@ -36,6 +47,9 @@ function formatSG(sg: number): string {
   const abs = Math.abs(sg).toFixed(1);
   return sg >= 0 ? `+${abs}` : `-${abs}`;
 }
+
+const getSessionId = (s: InsideTenSession) => s.id;
+const getSessionPlayedAt = (s: InsideTenSession) => s.date;
 
 // Recharts custom tooltip
 function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number }>; label?: string }) {
@@ -66,28 +80,20 @@ function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: 
 }
 
 export default function HistoryDashboard() {
-  const [sessions, setSessions] = useState<InsideTenSession[]>([]);
+  const { sessions, remove } = useDrillHistory<InsideTenSession>({
+    drillType: 'inside-ten',
+    lsKey: LS_INSIDE_TEN_SESSIONS,
+    getId: getSessionId,
+    getPlayedAt: getSessionPlayedAt,
+  });
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
-
-  useEffect(() => {
-    // This device's history first, then the account copy folded in.
-    const local = loadSessions();
-    setSessions(local);
-    void syncSessions(local).then((merged) => {
-      if (!merged) return;
-      setSessions(merged);
-      persistSessions(merged);
-    });
-  }, []);
 
   function handleDelete(id: string) {
     if (pendingDelete !== id) {
       setPendingDelete(id);
       return;
     }
-    const updated = sessions.filter(s => s.id !== id);
-    persistSessions(updated);
-    setSessions(updated);
+    remove(id);
     setPendingDelete(null);
   }
 
@@ -267,7 +273,7 @@ export default function HistoryDashboard() {
             return (
               <div className="it-log-row" key={s.id}>
                 <span className="it-log-date">
-                  {fmtDateShort(s.date)}
+                  {new Date(s.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })}
                 </span>
                 <span className="it-log-score">{s.score}/18</span>
                 <span className="it-log-sg" style={{ color: cfg.color }}>{formatSG(s.sg)}</span>

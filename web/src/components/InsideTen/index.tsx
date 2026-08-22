@@ -3,17 +3,14 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { LS_INSIDE_TEN_SESSIONS } from '@/lib/constants';
-import { isAvailable } from '@/lib/playerpath/storage';
-import { playedAtMs, playedOnISO, syncDrillHistory } from '@/lib/playerpath/history';
-import { drillSessionInput, recordDrillSession } from '@/lib/playerpath/record';
+import { useDrillHistory } from '@/lib/golf/useDrillHistory';
 import './InsideTen.css';
-import { fmtDateShort } from '@/lib/playerpath/format';
 
 // ── Types ─────────────────────────────────────────────────────────
-export type TierName = 'elite' | 'tour' | 'competitive' | 'developing';
+type TierName = 'elite' | 'tour' | 'competitive' | 'developing';
 type Screen = 'home' | 'play' | 'result';
 
-export interface InsideTenSession {
+interface InsideTenSession {
   id: string;
   date: string;
   timestamp: number;
@@ -80,49 +77,6 @@ function todayISO(): string {
 }
 
 // ── Storage ────────────────────────────────────────────────────────
-export function loadSessions(): InsideTenSession[] {
-  try {
-    const raw = localStorage.getItem(LS_INSIDE_TEN_SESSIONS);
-    if (!raw) return [];
-    const store = JSON.parse(raw) as { version: number; sessions: InsideTenSession[] };
-    if (store.version !== 1 || !Array.isArray(store.sessions)) {
-      console.warn('[Inside Ten] schema mismatch, resetting store');
-      return [];
-    }
-    return store.sessions;
-  } catch {
-    return [];
-  }
-}
-
-export function persistSessions(sessions: InsideTenSession[]): void {
-  try {
-    localStorage.setItem(LS_INSIDE_TEN_SESSIONS, JSON.stringify({ version: 1, sessions }));
-  } catch { /* noop */ }
-}
-
-/**
- * Fold the account's sessions into this device's list, so a session played on
- * another device shows up here. Returns null when the account copy is
- * unreachable (signed out or offline), in which case `local` still stands.
- */
-export function syncSessions(local: InsideTenSession[]) {
-  return syncDrillHistory<InsideTenSession>({
-    drillType: 'inside-ten',
-    local,
-    hydrate: (r) => ({
-      id: r.client_id,
-      date: playedOnISO(r),
-      timestamp: playedAtMs(r),
-      score: Number(r.payload.score ?? 0),
-      sg: Number(r.payload.sg ?? 0),
-      tier: (r.payload.tier as TierName) ?? 'developing',
-    }),
-    keyOf: (x) => x.id,
-    sortKey: (x) => x.timestamp,
-  });
-}
-
 function buildSession(score: number, date: string): InsideTenSession {
   return {
     id: crypto.randomUUID(),
@@ -135,28 +89,38 @@ function buildSession(score: number, date: string): InsideTenSession {
 }
 
 // ── Main component ─────────────────────────────────────────────────
-export default function InsideTen() {
+const getSessionId = (s: InsideTenSession) => s.id;
+const getSessionPlayedAt = (s: InsideTenSession) => s.date;
+
+interface InsideTenProps {
+  onScreenChange?: (screen: Screen) => void;
+}
+
+export default function InsideTen({ onScreenChange }: InsideTenProps = {}) {
   const [screen, setScreen]                 = useState<Screen>('home');
-  const [sessions, setSessions]             = useState<InsideTenSession[]>([]);
   const [storageAvailable, setStorageAvail] = useState(true);
   const [score, setScore]                   = useState(12);
   const [sessionDate, setSessionDate]       = useState<string>(todayISO);
   const [result, setResult]                 = useState<ResultState | null>(null);
 
   useEffect(() => {
-    if (!isAvailable()) {
+    onScreenChange?.(screen);
+  }, [screen, onScreenChange]);
+
+  const { sessions, record } = useDrillHistory<InsideTenSession>({
+    drillType: 'inside-ten',
+    lsKey: LS_INSIDE_TEN_SESSIONS,
+    getId: getSessionId,
+    getPlayedAt: getSessionPlayedAt,
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('_it_probe', '1');
+      localStorage.removeItem('_it_probe');
+    } catch {
       setStorageAvail(false);
-      return;
     }
-    // Show this device's history immediately, then fold in the account copy
-    // so sessions played on another device appear here too.
-    const local = loadSessions();
-    setSessions(local);
-    void syncSessions(local).then((merged) => {
-      if (!merged) return;
-      setSessions(merged);
-      persistSessions(merged);
-    });
   }, []);
 
   function handleStartSession() {
@@ -173,20 +137,7 @@ export default function InsideTen() {
     const prevLast = sessions.length > 0 ? sessions[0].score : null;
 
     const newSession = buildSession(score, sessionDate);
-    const updated = [newSession, ...sessions];
-    // Local write first so the result is never lost, then push to the player's
-    // account. The session's own id is the idempotency key, so a queued retry
-    // updates the same row.
-    persistSessions(updated);
-    setSessions(updated);
-    void recordDrillSession(
-      drillSessionInput('inside-ten', newSession.id, new Date(newSession.timestamp), {
-        date: newSession.date,
-        score: newSession.score,
-        sg: newSession.sg,
-        tier: newSession.tier,
-      }),
-    );
+    record(newSession);
     setResult({ session: newSession, prevBest, prevAvg5, prevLast });
     setScreen('result');
   }
@@ -229,28 +180,26 @@ function HomeScreen({ sessions, storageAvailable, onStart }: {
           The drill is played on a real green — choose your own line from each
           distance. No warm-up putts: the first putt is the first putt.
         </p>
-        <div className="it-ladder-scroll">
-          <table className="it-ladder-table">
-            <thead>
-              <tr>
-                <th>Group</th>
-                <th>Putt 1</th>
-                <th>Putt 2</th>
-                <th>Putt 3</th>
+        <table className="it-ladder-table">
+          <thead>
+            <tr>
+              <th>Group</th>
+              <th>Putt 1</th>
+              <th>Putt 2</th>
+              <th>Putt 3</th>
+            </tr>
+          </thead>
+          <tbody>
+            {GROUPS.map(({ group, putts }) => (
+              <tr key={group}>
+                <td>{group}</td>
+                <td><span>{putts[0]} ft</span></td>
+                <td><span>{putts[1]} ft</span></td>
+                <td><span>{putts[2]} ft</span></td>
               </tr>
-            </thead>
-            <tbody>
-              {GROUPS.map(({ group, putts }) => (
-                <tr key={group}>
-                  <td>{group}</td>
-                  <td><span>{putts[0]} ft</span></td>
-                  <td><span>{putts[1]} ft</span></td>
-                  <td><span>{putts[2]} ft</span></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
         <div className="it-rules">
           {[
             'Each putt is hit once — misses are not retried.',
@@ -314,7 +263,7 @@ function HomeScreen({ sessions, storageAvailable, onStart }: {
               return (
                 <div className="it-recent-row" key={s.id}>
                   <span className="it-recent-date">
-                    {fmtDateShort(s.date)}
+                    {new Date(s.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   </span>
                   <span className="it-recent-score">
                     {s.score}<span>/18</span>

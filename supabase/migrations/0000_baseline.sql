@@ -9,8 +9,14 @@
 --
 -- Everything here is idempotent (`if not exists` / `or replace` /
 -- drop-then-create for policies and triggers), so applying it to the live
--- project is a no-op. It runs first by filename; 0001-0004 then apply the
+-- project is a no-op. It runs first by filename; 0001-0008 then apply the
 -- history that WAS tracked, and are also idempotent.
+--
+-- SNAPSHOT DATE: this captures production as of 2026-08-12. It has not been
+-- recaptured since, so it is deliberately NOT the current shape of the
+-- database -- the migrations that follow carry it the rest of the way. Most
+-- visibly, drill_sessions.client_id is uuid here and 0006 widens it to text.
+-- Treat this file as the historical floor, not as a description of today.
 --
 -- Regenerate by re-reading pg_catalog: pg_get_constraintdef, pg_indexes,
 -- pg_get_functiondef, pg_get_triggerdef, pg_policy, pg_get_viewdef.

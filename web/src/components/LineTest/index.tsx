@@ -4,9 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, X } from 'lucide-react';
 import { CLUB_OPTIONS, DEFAULT_CLUBS } from '@/components/WeatherYardageCard/StepMyBag';
 import { LS_CLUBS, LS_LINE_TEST_SESSIONS } from '@/lib/constants';
-import { derivedClientId } from '@/lib/playerpath/clientId';
-import { syncDrillHistory } from '@/lib/playerpath/history';
-import { drillSessionInput, recordDrillSession } from '@/lib/playerpath/record';
+import { useDrillHistory } from '@/lib/golf/useDrillHistory';
 
 // ── Domain ───────────────────────────────────────────────────────────
 
@@ -370,24 +368,8 @@ function buildSession(
   };
 }
 
-// ── Session storage (lineTest:sessions) ──────────────────────────────
-
-const loadSessions = (): SessionResult[] => {
-  if (typeof window === 'undefined') return [];
-  try {
-    const raw = localStorage.getItem(LS_LINE_TEST_SESSIONS);
-    return raw ? (JSON.parse(raw) as SessionResult[]) : [];
-  } catch {
-    return [];
-  }
-};
-
-const saveSessions = (s: SessionResult[]) => {
-  if (typeof window === 'undefined') return;
-  try {
-    localStorage.setItem(LS_LINE_TEST_SESSIONS, JSON.stringify(s));
-  } catch {}
-};
+const getSessionId = (s: SessionResult) => s.session_id;
+const getSessionPlayedAt = (s: SessionResult) => s.timestamp;
 
 // ── Insights ─────────────────────────────────────────────────────────
 
@@ -1640,30 +1622,24 @@ interface ActiveSession {
   shots: RawShot[];
 }
 
-export default function LineTest() {
-  const [hydrated, setHydrated] = useState(false);
+interface LineTestProps {
+  onScreenChange?: (screen: Screen) => void;
+}
+
+export default function LineTest({ onScreenChange }: LineTestProps = {}) {
   const [screen, setScreen] = useState<Screen>('home');
-  const [sessions, setSessions] = useState<SessionResult[]>([]);
+  const { sessions, record } = useDrillHistory<SessionResult>({
+    drillType: 'line-test',
+    lsKey: LS_LINE_TEST_SESSIONS,
+    getId: getSessionId,
+    getPlayedAt: getSessionPlayedAt,
+  });
   const [active, setActive] = useState<ActiveSession | null>(null);
   const [lastResult, setLastResult] = useState<SessionResult | null>(null);
 
   useEffect(() => {
-    const local = loadSessions();
-    setSessions(local);
-    setHydrated(true);
-    // The full SessionResult is stored as the payload, so it round-trips.
-    void syncDrillHistory<SessionResult>({
-      drillType: 'line-test',
-      local,
-      hydrate: (r) => r.payload as unknown as SessionResult,
-      keyOf: (x) => x.session_id,
-      sortKey: (x) => Date.parse(x.timestamp) || 0,
-    }).then((merged) => {
-      if (!merged) return;
-      setSessions(merged);
-      saveSessions(merged);
-    });
-  }, []);
+    onScreenChange?.(screen);
+  }, [screen, onScreenChange]);
 
   const beginFlow = () => {
     setScreen(hasProfile() ? 'setup' : 'profile');
@@ -1697,21 +1673,7 @@ export default function LineTest() {
         active.clubs,
         shots,
       );
-      const next = [...sessions, result];
-      // Local write first so the result is never lost, then push to the
-      // player's account. session_id falls back to a non-UUID string when
-      // crypto.randomUUID is unavailable, so derive the key from it — the
-      // upload derives the same value, keeping both paths idempotent.
-      setSessions(next);
-      saveSessions(next);
-      void recordDrillSession(
-        drillSessionInput(
-          'line-test',
-          derivedClientId('line-test', result.session_id),
-          result.timestamp,
-          { ...result },
-        ),
-      );
+      record(result);
       setLastResult(result);
       setActive(null);
       setScreen('result');
@@ -1730,10 +1692,6 @@ export default function LineTest() {
       setScreen('home');
     }
   };
-
-  if (!hydrated) {
-    return <div className="px-6 py-12 max-w-xl mx-auto" />;
-  }
 
   return (
     <section className="px-6 pb-16">

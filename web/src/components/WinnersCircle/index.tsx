@@ -3,10 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { LS_WINNERS_CIRCLE_RUNS } from '@/lib/constants';
-import { isAvailable } from '@/lib/playerpath/storage';
-import { playedAtMs, playedOnISO, syncDrillHistory } from '@/lib/playerpath/history';
-import { fmtDateShort } from '@/lib/playerpath/format';
-import { drillSessionInput, recordDrillSession } from '@/lib/playerpath/record';
+import { useDrillHistory } from '@/lib/golf/useDrillHistory';
 import './WinnersCircle.css';
 
 // ── Types ─────────────────────────────────────────────────────────
@@ -108,53 +105,12 @@ function todayISO(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-const formatDate = fmtDateShort;
-
-// ── Storage ────────────────────────────────────────────────────────
-export function loadRuns(): WinnersCircleRun[] {
-  try {
-    const raw = localStorage.getItem(LS_WINNERS_CIRCLE_RUNS);
-    if (!raw) return [];
-    const store = JSON.parse(raw) as { version: number; runs: WinnersCircleRun[] };
-    if (store.version !== 1 || !Array.isArray(store.runs)) {
-      console.warn('[Winners Circle] schema mismatch, resetting store');
-      return [];
-    }
-    return store.runs;
-  } catch {
-    return [];
-  }
+function formatDate(date: string): string {
+  return new Date(date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
-export function persistRuns(runs: WinnersCircleRun[]): void {
-  try {
-    localStorage.setItem(LS_WINNERS_CIRCLE_RUNS, JSON.stringify({ version: 1, runs }));
-  } catch { /* noop */ }
-}
-
-/**
- * Fold the account's runs into this device's list, so a run played on another
- * device shows up here. Returns null when the account copy is unreachable
- * (signed out or offline), in which case `local` still stands.
- */
-export function syncRuns(local: WinnersCircleRun[]) {
-  return syncDrillHistory<WinnersCircleRun>({
-    drillType: 'winners-circle',
-    local,
-    hydrate: (r) => ({
-      id: r.client_id,
-      date: playedOnISO(r),
-      timestamp: playedAtMs(r),
-      totalMakes: Number(r.payload.totalMakes ?? 0),
-      maxDistanceReached: Number(r.payload.maxDistanceReached ?? 0),
-      rounds: (r.payload.rounds as WinnersCircleRun['rounds']) ?? [],
-      standardCleared: Boolean(r.payload.standardCleared),
-      endedEarly: Boolean(r.payload.endedEarly),
-    }),
-    keyOf: (x) => x.id,
-    sortKey: (x) => x.timestamp,
-  });
-}
+const getRunId = (r: WinnersCircleRun) => r.id;
+const getRunPlayedAt = (r: WinnersCircleRun) => r.date;
 
 // ── Tee glyph ──────────────────────────────────────────────────────
 type TeeStatus = 'lost' | 'missed' | 'made' | 'pending' | 'current';
@@ -200,25 +156,34 @@ function TeeRow({ state }: { state: DrillState }) {
 }
 
 // ── Main component ─────────────────────────────────────────────────
-export default function WinnersCircle() {
+interface WinnersCircleProps {
+  onScreenChange?: (screen: Screen) => void;
+}
+
+export default function WinnersCircle({ onScreenChange }: WinnersCircleProps = {}) {
   const [screen, setScreen]                 = useState<Screen>('home');
-  const [runs, setRuns]                     = useState<WinnersCircleRun[]>([]);
   const [storageAvailable, setStorageAvail] = useState(true);
   const [putts, setPutts]                   = useState<boolean[]>([]);
   const [result, setResult]                 = useState<ResultState | null>(null);
 
   useEffect(() => {
-    if (!isAvailable()) {
+    onScreenChange?.(screen);
+  }, [screen, onScreenChange]);
+
+  const { sessions: runs, record } = useDrillHistory<WinnersCircleRun>({
+    drillType: 'winners-circle',
+    lsKey: LS_WINNERS_CIRCLE_RUNS,
+    getId: getRunId,
+    getPlayedAt: getRunPlayedAt,
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('_wc_probe', '1');
+      localStorage.removeItem('_wc_probe');
+    } catch {
       setStorageAvail(false);
-      return;
     }
-    const local = loadRuns();
-    setRuns(local);
-    void syncRuns(local).then((merged) => {
-      if (!merged) return;
-      setRuns(merged);
-      persistRuns(merged);
-    });
   }, []);
 
   function handleStart() {
@@ -239,22 +204,7 @@ export default function WinnersCircle() {
 
   function handleSave() {
     if (!result || result.saved) return;
-    const updated = [result.run, ...runs];
-    // Local write first so the run is never lost, then push to the player's
-    // account. The run's own id is the idempotency key, so a queued retry
-    // updates the same row.
-    persistRuns(updated);
-    setRuns(updated);
-    void recordDrillSession(
-      drillSessionInput('winners-circle', result.run.id, new Date(result.run.timestamp), {
-        date: result.run.date,
-        totalMakes: result.run.totalMakes,
-        maxDistanceReached: result.run.maxDistanceReached,
-        rounds: result.run.rounds,
-        standardCleared: result.run.standardCleared,
-        endedEarly: result.run.endedEarly,
-      }),
-    );
+    record(result.run);
     setResult({ ...result, saved: true });
   }
 

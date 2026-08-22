@@ -4,8 +4,10 @@ import { useState } from 'react';
 import type { ScoringMetrics, HoleOutcome, MentalMetrics, BirdieAndBogeyMetrics } from '@/lib/golf/types';
 import { getStrokeGainedColor, formatStrokesGained } from '@/lib/golf/tokens';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
+import { useMediaQuery, MOBILE_QUERY } from '@/lib/useMediaQuery';
 
 export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: { metrics: ScoringMetrics; birdieAndBogeyMetrics: BirdieAndBogeyMetrics; mentalMetrics: MentalMetrics }) {
+  const isNarrow = useMediaQuery(MOBILE_QUERY);
   const { holeOutcomes, totalHoles, par3, par4, par5 } = metrics;
   const { bogeyRates, birdieOpportunities, bogeyRootCause, doubleBogeyPlusRootCause, totalBogeys, totalDoubleBogeyPlus } = birdieAndBogeyMetrics;
 
@@ -83,7 +85,7 @@ export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: {
       <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>Scoring by Par</h4>
 
       {/* Hero Cards - Par 3, Par 4, Par 5 */}
-      <div className="grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '24px' }}>
+      <div className="grid-cards-3" style={{ gap: '16px', marginBottom: '24px' }}>
         {parCards.map((card) => (
           <div
             key={card.label}
@@ -130,7 +132,7 @@ export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: {
         <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>Mental Resilience</h4>
 
         {/* Five Cards */}
-        <div className="grid" style={{ gridTemplateColumns: 'repeat(5, 1fr)', gap: '12px' }}>
+        <div className="grid-tiles-5" style={{ gap: '12px' }}>
           {/* Card 1: Bounce Back % */}
           <div className="card-stat" style={{ borderLeft: '3px solid var(--under)' }}>
             <div className="label" style={{ color: 'var(--ash)', marginBottom: '8px' }}>Bounce Back %</div>
@@ -194,81 +196,81 @@ export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: {
         </div>
       </div>
 
-      {/* Section Heading for Distribution */}
-      <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>Hole Outcome Distribution</h4>
-
       {/* Donut Chart and Bogey Rate on Same Row */}
       {holeOutcomes.length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '24px' }}>
+        <div className="grid-pair" style={{ gap: '24px', marginBottom: '24px' }}>
           {/* Donut Chart - Hole Outcome Distribution */}
-          <div style={{ background: 'var(--charcoal)', padding: '16px', borderRadius: '4px' }}>
-            <p style={{ fontSize: '11px', color: 'var(--ash)', marginBottom: '16px' }}>
-              Distribution of scores vs par across {totalHoles} holes
-            </p>
-            <ResponsiveContainer width="100%" height={280}>
-              <PieChart>
-                <Pie
-                  data={donutData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={100}
-                  paddingAngle={2}
-                  dataKey="value"
-                  nameKey="name"
-                  label={({ percent }: { percent?: number }) => `${((percent ?? 0) * 100).toFixed(0)}%`}
-                  labelLine={false}
-                >
-                  {donutData.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={OUTCOME_COLORS[entry.name as HoleOutcome] || '#6B7280'}
-                      stroke="var(--charcoal)"
-                      strokeWidth={2}
-                    />
-                  ))}
-                </Pie>
-                {/* Center text showing total holes */}
-                <text
-                  x="50%"
-                  y="46%"
-                  textAnchor="middle"
-                  dominantBaseline="middle"
-                  fill="var(--chalk)"
-                  style={{ fontSize: '24px', fontWeight: 'bold' }}
-                >
-                  {totalHoles}
-                </text>
-                <text
-                  x="50%"
-                  y="58%"
-                  textAnchor="middle"
-                  dominantBaseline="middle"
-                  fill="var(--ash)"
-                  style={{ fontSize: '11px' }}
-                >
-                  holes
-                </text>
-                <Tooltip content={<DonutTooltip />} />
-                <Legend
-                  layout="vertical"
-                  align="right"
-                  verticalAlign="middle"
-                  formatter={(value) => <span style={{ color: 'var(--ash)', fontSize: '11px' }}>{value}</span>}
-                />
-              </PieChart>
-            </ResponsiveContainer>
+          <div>
+            <h5 style={{ marginBottom: '12px', color: 'var(--ash)', fontSize: '14px' }}>Outcome Distribution</h5>
+            <div style={{ background: 'var(--charcoal)', padding: '16px', borderRadius: '4px' }}>
+              <p style={{ fontSize: '11px', color: 'var(--ash)', marginBottom: '16px' }}>
+                Distribution of scores vs par across {totalHoles} holes
+              </p>
+              <ResponsiveContainer width="100%" height={isNarrow ? 220 : 280}>
+                <PieChart>
+                  <Pie
+                    data={donutData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius="42%"
+                    outerRadius="70%"
+                    paddingAngle={2}
+                    dataKey="value"
+                    nameKey="name"
+                    label={({ percent }: { percent?: number }) => `${((percent ?? 0) * 100).toFixed(0)}%`}
+                    labelLine={false}
+                  >
+                    {donutData.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={OUTCOME_COLORS[entry.name as HoleOutcome] || '#6B7280'}
+                        stroke="var(--charcoal)"
+                        strokeWidth={2}
+                      />
+                    ))}
+                  </Pie>
+                  {/* Center text showing total holes */}
+                  <text
+                    x="50%"
+                    y="46%"
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    fill="var(--chalk)"
+                    style={{ fontSize: '24px', fontWeight: 'bold' }}
+                  >
+                    {totalHoles}
+                  </text>
+                  <text
+                    x="50%"
+                    y="58%"
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    fill="var(--ash)"
+                    style={{ fontSize: '11px' }}
+                  >
+                    holes
+                  </text>
+                  <Tooltip content={<DonutTooltip />} />
+                  <Legend
+                    layout="vertical"
+                    align="right"
+                    verticalAlign="middle"
+                    formatter={(value) => <span style={{ color: 'var(--ash)', fontSize: '11px' }}>{value}</span>}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
           </div>
 
           {/* Bogey Rate Stacked Bar Chart */}
           <div>
             <h5 style={{ marginBottom: '12px', color: 'var(--ash)', fontSize: '14px' }}>Bogey & Double Bogey+ Rate by Par</h5>
             <div style={{ background: 'var(--charcoal)', padding: '16px', borderRadius: '4px' }}>
-              <ResponsiveContainer width="100%" height={280}>
+              <ResponsiveContainer width="100%" height={isNarrow ? 220 : 280}>
                 <BarChart data={bogeyRates} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--dark)" />
-                  <XAxis dataKey="label" stroke="var(--ash)" fontSize={11} />
-                  <YAxis stroke="var(--ash)" fontSize={11} unit="%" />
+                  <XAxis dataKey="label" stroke="var(--ash)" fontSize={12} />
+                  <YAxis stroke="var(--ash)" fontSize={12} unit="%" />
                   <Tooltip
                     contentStyle={{ background: 'var(--court)', border: '1px solid var(--scarlet)', borderRadius: '4px' }}
                     labelStyle={{ color: 'var(--chalk)' }}
@@ -309,8 +311,8 @@ export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: {
                 margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--dark)" />
-                <XAxis type="number" stroke="var(--ash)" fontSize={11} />
-                <YAxis dataKey="name" type="category" stroke="var(--ash)" fontSize={10} width={80} />
+                <XAxis type="number" stroke="var(--ash)" fontSize={12} />
+                <YAxis dataKey="name" type="category" stroke="var(--ash)" fontSize={isNarrow ? 10 : 12} width={isNarrow ? 56 : 80} />
                 <Tooltip
                   contentStyle={{ background: 'var(--court)', border: '1px solid var(--scarlet)', borderRadius: '4px' }}
                   labelStyle={{ color: 'var(--chalk)' }}
@@ -340,8 +342,8 @@ export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: {
                 margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--dark)" />
-                <XAxis type="number" stroke="var(--ash)" fontSize={11} />
-                <YAxis dataKey="name" type="category" stroke="var(--ash)" fontSize={10} width={80} />
+                <XAxis type="number" stroke="var(--ash)" fontSize={12} />
+                <YAxis dataKey="name" type="category" stroke="var(--ash)" fontSize={isNarrow ? 10 : 12} width={isNarrow ? 56 : 80} />
                 <Tooltip
                   contentStyle={{ background: 'var(--court)', border: '1px solid var(--scarlet)', borderRadius: '4px' }}
                   labelStyle={{ color: 'var(--chalk)' }}
@@ -358,7 +360,7 @@ export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: {
         <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>Birdie Opportunities</h4>
 
         {/* Three Hero Cards for Birdie Opportunities */}
-        <div className="grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+        <div className="grid-cards-3" style={{ gap: '16px' }}>
           {/* Card 1: Opportunities */}
           <div
             className="card-hero"

@@ -70,17 +70,11 @@ function NumericKeypadImpl({
     );
   }
 
+  // The entered value is rendered by the caller, on the field's label line
+  // (see DistanceEntry) rather than in a box of its own here — same reading,
+  // one fewer row. The 3-column key grid below is deliberately untouched.
   return (
-    <div className="flex flex-col gap-2">
-      {/* Display */}
-      <div className="border border-border rounded-md bg-shadow px-4 py-2 text-center">
-        <span className="font-mono text-3xl text-chalk tracking-tight">
-          {value || '—'}
-        </span>
-      </div>
-
-      {/* Keypad */}
-      <div className="grid grid-cols-3 gap-2">
+    <div className="grid grid-cols-3 gap-2">
         {DIGITS.map((d) => (
           <button
             key={d}
@@ -121,7 +115,6 @@ function NumericKeypadImpl({
         >
           ⌫
         </button>
-      </div>
     </div>
   );
 }

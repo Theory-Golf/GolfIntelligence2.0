@@ -15,9 +15,11 @@ interface FilterBarProps {
   onClear: () => void;
   isCollapsed?: boolean;
   onToggleCollapse?: () => void;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
-export function FilterBar({ filters, options, validOptions, onFilterChange, onClear, isCollapsed = false, onToggleCollapse }: FilterBarProps) {
+export function FilterBar({ filters, options, validOptions, onFilterChange, onClear, isCollapsed = false, onToggleCollapse, isOpen = false, onClose }: FilterBarProps) {
   const handleToggle = () => {
     if (onToggleCollapse) {
       onToggleCollapse();
@@ -41,19 +43,32 @@ export function FilterBar({ filters, options, validOptions, onFilterChange, onCl
 
   return (
     <>
-      <aside className={`filter-sidebar ${isCollapsed ? 'is-collapsed' : ''}`}>
+      {/* Tap-outside dismiss. Mobile only — .filter-backdrop is
+          display:none at >=768px. */}
+      {isOpen && (
+        <div className="filter-backdrop" onClick={onClose} aria-hidden="true" />
+      )}
+      <aside
+        className={`filter-sidebar ${isCollapsed ? 'is-collapsed' : ''} ${isOpen ? 'is-open' : ''}`}
+        aria-label="Filters"
+      >
         <div className="filter-sidebar-header">
           <h3>Filters</h3>
-          <button
-            className="filter-toggle"
-            onClick={handleToggle}
-            title={isCollapsed ? 'Expand filters' : 'Collapse filters'}
-          >
-            {isCollapsed ? '▶' : '◀'}
-          </button>
+          <div className="flex items-center gap-sm">
+            <button
+              className="filter-toggle"
+              onClick={handleToggle}
+              title={isCollapsed ? 'Expand filters' : 'Collapse filters'}
+            >
+              {isCollapsed ? '▶' : '◀'}
+            </button>
+            <button className="filter-close" onClick={onClose} aria-label="Close filters">
+              ×
+            </button>
+          </div>
         </div>
 
-        {!isCollapsed && (
+        {(!isCollapsed || isOpen) && (
           <div className="filter-sidebar-content">
             {/* Hide the Player section when only one player is visible (non-coach) */}
             {options.players.length > 1 && (

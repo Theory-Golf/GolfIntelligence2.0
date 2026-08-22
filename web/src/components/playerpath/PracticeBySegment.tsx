@@ -11,8 +11,8 @@ import {
   isBuilt,
 } from '@/data/practiceActivities';
 import type { Activity, ActivityCategory } from '@/data/practiceActivities';
-import { getRecentDrillActivity } from '@/lib/playerpath/db';
-import type { DrillActivitySummary } from '@/lib/playerpath/db';
+import { getRecentDrillActivity } from '@/lib/golf/db';
+import type { DrillActivitySummary } from '@/lib/golf/db';
 import { fmtRelativeDay } from '@/lib/playerpath/format';
 
 type Recency = Record<string, DrillActivitySummary>;

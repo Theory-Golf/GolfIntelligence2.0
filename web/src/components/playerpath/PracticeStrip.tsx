@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { activityById } from '@/data/practiceActivities';
-import { getRecentDrillActivity } from '@/lib/playerpath/db';
-import type { DrillActivitySummary } from '@/lib/playerpath/db';
+import { getRecentDrillActivity } from '@/lib/golf/db';
+import type { DrillActivitySummary } from '@/lib/golf/db';
 import { fmtRelativeDay } from '@/lib/playerpath/format';
 
 /**
@@ -35,8 +35,8 @@ export default function PracticeStrip() {
 
   if (!rows || rows.length === 0) return null;
 
-  const sessions = rows.find((r) => r.drillType === 'practice-session');
-  const games = rows.filter((r) => r.drillType !== 'practice-session');
+  const sessions = rows.find((r) => r.drillType === 'practice-planner');
+  const games = rows.filter((r) => r.drillType !== 'practice-planner');
   const totalRuns = games.reduce((sum, r) => sum + r.count, 0);
   const lastPlayed = rows[0]?.lastPlayed;
 

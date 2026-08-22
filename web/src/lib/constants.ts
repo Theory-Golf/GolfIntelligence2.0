@@ -33,7 +33,7 @@ export const LS_WINNERS_CIRCLE_RUNS = 'theory.golf:player-path:winners-circle:v1
 // ── Standards tools ────────────────────────────────────────────────────
 // These keys were hard-coded inside their components. The VALUES must not
 // change — players have history stored under them, and the one-time upload
-// in lib/playerpath/migrateLocal.ts reads them. New keys should follow the
+// in lib/golf/drillHistoryMigration.ts reads them. New keys should follow the
 // `theory.golf:player-path:<tool>:v1` convention above.
 export const LS_DRIVER_STANDARD = 'driver-standard:v1';
 export const LS_WEDGE_STANDARD_WEDGES = 'wm-wedges';

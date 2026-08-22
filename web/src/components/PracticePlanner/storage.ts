@@ -19,6 +19,10 @@ if (KEY_PREFIX + 'currentSession' !== LS_PRACTICE_CURRENT_SESSION) {
 
 export const EXPORT_VERSION = 2;
 
+// Exported so drillHistoryMigration.ts can read the same key when
+// uploading pre-existing local session history to Supabase.
+export const SESSIONS_STORAGE_KEY = KEY_PREFIX + 'sessions';
+
 type StorageMap = {
   weekConfig: WeekConfig;
   currentSession: Session;

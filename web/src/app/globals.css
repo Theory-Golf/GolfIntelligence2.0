@@ -43,6 +43,12 @@
   --color-c4: #D4F000;
   --color-c5: #F03DAA;
 
+  /* Ethos paper segment colors (Driving / Approach / Short Game / Putting) */
+  --color-seg-drive: #E040A0;
+  --color-seg-approach: #D4A800;
+  --color-seg-shortgame: #00B870;
+  --color-seg-putting: #3D8EF0;
+
   /* Radius */
   --radius-sm: 2px;
   --radius-md: 4px;
@@ -348,6 +354,18 @@
     text-transform: uppercase;
     padding: 3px 10px;
   }
+}
+
+/* ================================================================
+   TOUCH
+   Suppress double-tap-to-zoom (and the click delay that comes with
+   it) on every control. Without this a mis-registering tap invites a
+   second tap, which zooms the page — and a zoomed page offsets every
+   subsequent tap on iOS until it is reloaded.
+   ================================================================ */
+button,
+[role='button'] {
+  touch-action: manipulation;
 }
 
 /* ================================================================

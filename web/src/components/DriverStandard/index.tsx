@@ -15,9 +15,7 @@ import {
   bandClasses,
 } from '@/components/playerpath/ui';
 import { LS_DRIVER_STANDARD } from '@/lib/constants';
-import { derivedClientId } from '@/lib/playerpath/clientId';
-import { syncDrillHistory } from '@/lib/playerpath/history';
-import { drillSessionInput, recordDrillSession } from '@/lib/playerpath/record';
+import { syncDrillSession } from '@/lib/golf/useDrillHistory';
 
 // ── Domain ───────────────────────────────────────────────────────────
 
@@ -89,12 +87,10 @@ const emptyTrack = (tier = 1): TrackState => ({
   dismissedPatterns: [],
 });
 
-const LS_KEY = LS_DRIVER_STANDARD;
-
 const loadState = (): PersistedState => {
   if (typeof window === 'undefined') return defaultState();
   try {
-    const raw = localStorage.getItem(LS_KEY);
+    const raw = localStorage.getItem(LS_DRIVER_STANDARD);
     if (!raw) return defaultState();
     return JSON.parse(raw) as PersistedState;
   } catch {
@@ -104,8 +100,11 @@ const loadState = (): PersistedState => {
 
 const saveState = (s: PersistedState) => {
   if (typeof window === 'undefined') return;
-  try { localStorage.setItem(LS_KEY, JSON.stringify(s)); } catch {}
+  try { localStorage.setItem(LS_DRIVER_STANDARD, JSON.stringify(s)); } catch {}
 };
+
+const getSessionId = (s: SessionRecord) => String(s.timestamp);
+const getSessionPlayedAt = (s: SessionRecord) => new Date(s.timestamp).toISOString();
 
 const defaultState = (): PersistedState => ({
   initialized: false,
@@ -864,10 +863,18 @@ type Screen =
   | 'promotion'
   | 'history';
 
-export default function DriverStandard() {
+interface DriverStandardProps {
+  onScreenChange?: (screen: Screen) => void;
+}
+
+export default function DriverStandard({ onScreenChange }: DriverStandardProps = {}) {
   const [hydrated, setHydrated] = useState(false);
   const [state, setStateRaw] = useState<PersistedState>(defaultState);
   const [screen, setScreen] = useState<Screen>('welcome');
+
+  useEffect(() => {
+    onScreenChange?.(screen);
+  }, [screen, onScreenChange]);
 
   // Active session
   const [sessionLength, setSessionLength] = useState<'mini' | 'standard'>('standard');
@@ -888,17 +895,6 @@ export default function DriverStandard() {
     setStateRaw(loaded);
     setScreen(loaded.initialized ? 'setup' : 'welcome');
     setHydrated(true);
-    // Fold in sessions logged on the player's other devices.
-    void syncDrillHistory<SessionRecord>({
-      drillType: 'driver-standard',
-      local: loaded.history ?? [],
-      hydrate: (r) => r.payload as unknown as SessionRecord,
-      keyOf: (x) => String(x.timestamp),
-      sortKey: (x) => x.timestamp,
-    }).then((merged) => {
-      if (!merged) return;
-      setStateRaw((prev) => ({ ...prev, history: merged }));
-    });
   }, []);
 
   const setState = (s: PersistedState) => {
@@ -1076,6 +1072,13 @@ export default function DriverStandard() {
       timestamp: Date.now(),
     };
 
+    void syncDrillSession({
+      drillType: 'driver-standard',
+      session: sessionRecord,
+      getId: getSessionId,
+      getPlayedAt: getSessionPlayedAt,
+    });
+
     setState({
       ...state,
       history: [...state.history, sessionRecord],
@@ -1084,20 +1087,6 @@ export default function DriverStandard() {
         [track]: newTrackState,
       },
     });
-
-    // Local write first (the state effect persists it), then push to the
-    // player's account. Records are keyed on a timestamp, so derive a stable
-    // uuid from it — the upload derives the same one.
-    void recordDrillSession(
-      drillSessionInput(
-        'driver-standard',
-        // Keyed on timestamp alone: the stored history records carry no
-        // track, so the one-time upload must derive the same value.
-        derivedClientId('driver-standard', sessionRecord.timestamp),
-        new Date(sessionRecord.timestamp),
-        { track, ...sessionRecord },
-      ),
-    );
 
     setLastResult({
       hits: finalHits,

@@ -132,8 +132,12 @@ const defaultPars = {
 const monoLabel = 'font-mono text-[10px] tracking-[0.25em] uppercase text-ash';
 const containerLabel = 'block font-mono text-[9px] tracking-[0.3em] uppercase text-ash mb-3';
 const container = 'border border-border rounded-md p-6';
+// text-base (16px) is deliberate and load-bearing: iOS Safari auto-zooms the
+// page when an input under 16px is focused, and because App Router navigations
+// are same-document that zoom follows the player into the hole screens with no
+// reload to reset it, offsetting every tap from there on.
 const input =
-  'w-full bg-shadow border border-border rounded-md px-3 py-2.5 text-chalk font-body text-sm outline-none box-border';
+  'w-full bg-shadow border border-border rounded-md px-3 py-2.5 text-chalk font-body text-base outline-none box-border';
 
 function roundTypeBtnClass(selected: boolean): string {
   return (
@@ -384,7 +388,7 @@ export default function NewRoundPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-svh bg-background text-foreground">
       {/* Page header */}
       <header className="flex items-center justify-between px-4 py-3.5 border-b border-border">
         <span className={monoLabel}>New Round</span>
@@ -648,12 +652,10 @@ export default function NewRoundPage() {
             })}
           </div>
 
-          <div
-            className={
-              'overflow-hidden transition-[max-height] duration-200 ' +
-              (needsRoundNumber ? 'max-h-[140px]' : 'max-h-0')
-            }
-          >
+          {/* Rendered outright rather than animated open: this sits directly
+              above "Start Round", and animating its height moves that button
+              for 200ms after the round type is tapped. */}
+          {needsRoundNumber && (
             <div className="border-t border-border mt-4 pt-4">
               <span className={`${containerLabel} mb-2.5`}>Round</span>
               <div className="flex gap-2">
@@ -673,7 +675,7 @@ export default function NewRoundPage() {
                 })}
               </div>
             </div>
-          </div>
+          )}
         </div>
 
         {submitWarning && (

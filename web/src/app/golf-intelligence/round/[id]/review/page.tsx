@@ -60,7 +60,7 @@ export default function RoundReviewPage() {
 
   if (session.loading) {
     return (
-      <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
+      <div className="min-h-svh bg-background text-foreground flex items-center justify-center">
         <span className="font-mono text-xs text-ash tracking-[0.25em] uppercase">
           Loading…
         </span>
@@ -70,7 +70,7 @@ export default function RoundReviewPage() {
 
   if (session.error) {
     return (
-      <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
+      <div className="min-h-svh bg-background text-foreground flex items-center justify-center">
         <span className="font-mono text-xs text-scarlet tracking-[0.25em] uppercase">
           {session.error}
         </span>
@@ -138,7 +138,7 @@ export default function RoundReviewPage() {
   });
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-svh bg-background text-foreground">
       <div className="max-w-md mx-auto p-4 flex flex-col gap-5">
         {/* Header */}
         <header className="flex items-center justify-between border-b border-border pb-3">

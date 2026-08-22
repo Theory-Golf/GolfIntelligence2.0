@@ -1,15 +1,16 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { Trash2 } from 'lucide-react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ReferenceLine,
 } from 'recharts';
-import { loadRuns, persistRuns, syncRuns, type WinnersCircleRun } from '.';
+import { LS_WINNERS_CIRCLE_RUNS } from '@/lib/constants';
+import { useDrillHistory } from '@/lib/golf/useDrillHistory';
+import type { WinnersCircleRun } from '.';
 import './WinnersCircle.css';
-import { fmtDateShort } from '@/lib/playerpath/format';
 
 const STANDARD_MAKES = 20;
 
@@ -39,29 +40,24 @@ function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: 
   );
 }
 
-export default function HistoryDashboard() {
-  const [runs, setRuns] = useState<WinnersCircleRun[]>([]);
-  const [pendingDelete, setPendingDelete] = useState<string | null>(null);
+const getRunId = (r: WinnersCircleRun) => r.id;
+const getRunPlayedAt = (r: WinnersCircleRun) => r.date;
 
-  useEffect(() => {
-    // This device's history first, then the account copy folded in.
-    const local = loadRuns();
-    setRuns(local);
-    void syncRuns(local).then((merged) => {
-      if (!merged) return;
-      setRuns(merged);
-      persistRuns(merged);
-    });
-  }, []);
+export default function HistoryDashboard() {
+  const { sessions: runs, remove } = useDrillHistory<WinnersCircleRun>({
+    drillType: 'winners-circle',
+    lsKey: LS_WINNERS_CIRCLE_RUNS,
+    getId: getRunId,
+    getPlayedAt: getRunPlayedAt,
+  });
+  const [pendingDelete, setPendingDelete] = useState<string | null>(null);
 
   function handleDelete(id: string) {
     if (pendingDelete !== id) {
       setPendingDelete(id);
       return;
     }
-    const updated = runs.filter(r => r.id !== id);
-    persistRuns(updated);
-    setRuns(updated);
+    remove(id);
     setPendingDelete(null);
   }
 
@@ -187,7 +183,7 @@ export default function HistoryDashboard() {
             return (
               <div className="wc-log-row" key={r.id}>
                 <span className="wc-log-date">
-                  {fmtDateShort(r.date)}
+                  {new Date(r.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })}
                 </span>
                 <span className="wc-log-score">{r.totalMakes}</span>
                 <span className="wc-log-dist">{r.maxDistanceReached} ft</span>

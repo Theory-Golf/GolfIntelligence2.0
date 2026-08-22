@@ -8,7 +8,7 @@
 .ws-wrapper {
   max-width: 576px;
   margin: 0 auto;
-  padding: 0 24px 64px;
+  padding: 0 24px 24px;
 }
 
 /* ── TOP NAV ───────────────────────────────────────────────────── */
@@ -16,7 +16,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 
 .ws-back-btn {
@@ -85,7 +85,7 @@
 .ws-progress-track {
   height: 2px;
   background: var(--border-color);
-  margin-bottom: 28px;
+  margin-bottom: 16px;
   overflow: hidden;
 }
 
@@ -99,8 +99,8 @@
 .ws-card {
   background: var(--card);
   border: 1px solid var(--border-color);
-  padding: 24px;
-  margin-bottom: 16px;
+  padding: 18px;
+  margin-bottom: 12px;
 }
 
 .ws-card-title {
@@ -222,7 +222,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 16px 24px;
+  padding: 13px 24px;
   font-family: var(--font-display);
   font-size: 14px;
   font-weight: 700;
@@ -508,8 +508,8 @@
 .ws-target-card {
   background: var(--card);
   border: 1px solid var(--border-color);
-  padding: 36px 24px;
-  margin-bottom: 20px;
+  padding: 20px 24px;
+  margin-bottom: 12px;
   text-align: center;
 }
 
@@ -519,12 +519,12 @@
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--ash);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .ws-target-value {
   font-family: var(--font-display);
-  font-size: 88px;
+  font-size: 64px;
   font-weight: 800;
   line-height: 1;
   letter-spacing: -0.02em;
@@ -557,9 +557,9 @@
 
 .ws-number-input {
   width: 100%;
-  padding: 16px;
+  padding: 12px;
   font-family: var(--font-display);
-  font-size: 36px;
+  font-size: 30px;
   font-weight: 800;
   text-align: center;
   color: var(--foreground);
@@ -590,7 +590,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
-  margin-top: 16px;
+  margin-top: 10px;
 }
 
 .ws-dir-btn {
@@ -598,7 +598,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 14px;
+  padding: 10px;
   font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.12em;

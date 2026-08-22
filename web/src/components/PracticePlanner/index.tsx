@@ -3,9 +3,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import SectionHeader from '@/components/playerpath/SectionHeader';
-import { derivedClientId } from '@/lib/playerpath/clientId';
-import { drillSessionInput, recordDrillSession } from '@/lib/playerpath/record';
-import { syncDrillHistory } from '@/lib/playerpath/history';
 import { seedWeekConfig, todayISO, uid } from './defaults';
 import {
   buildSessionBlocks,
@@ -18,6 +15,7 @@ import {
   summarizeSession,
 } from './logic';
 import { EXPORT_VERSION, isPlannerExport, storage } from './storage';
+import { syncDrillSession } from '@/lib/golf/useDrillHistory';
 import type {
   Block,
   Direction,
@@ -56,8 +54,7 @@ export default function PracticePlanner() {
   const savedTimer = useRef<number | null>(null);
   const historyRef = useRef<HTMLDivElement>(null);
 
-  // Hydrate from localStorage once on the client, then fold in the account's
-  // completed sessions so ones finished on another device show up here too.
+  // Hydrate from localStorage once on the client
   useEffect(() => {
     const { weekConfig: wc, currentSession: cs, history: h, sessions: s } = storage.loadAll();
     setWeekConfig(wc);
@@ -66,24 +63,6 @@ export default function PracticePlanner() {
     setSessions(s);
     setStage(cs ? 'running' : wc ? 'build' : 'setup');
     setHydrated(true);
-
-    void syncDrillHistory<SessionRecord>({
-      drillType: 'practice-session',
-      local: s,
-      // The whole record is the payload, so it round-trips as-is. A row
-      // without an id can't be de-duplicated; throw so the helper skips it.
-      hydrate: (r) => {
-        const rec = r.payload as unknown as SessionRecord;
-        if (!rec?.id) throw new Error('practice-session row has no record id');
-        return rec;
-      },
-      keyOf: (x) => x.id,
-      sortKey: (x) => Date.parse(x.completedAt),
-    }).then((merged) => {
-      // The helper returns newest-first; this list is kept oldest-first and
-      // reversed at render, so put it back the way the planner expects.
-      if (merged) setSessions(merged.reverse());
-    });
   }, []);
 
   // Persistence side-effects
@@ -229,20 +208,18 @@ export default function PracticePlanner() {
       setHistory((h) => [...h, ...flushEntries]);
     }
     setSessions((s) => [...s, record]);
+    // Sync only sessions completed in this browser -- imported backups
+    // (handleImport) and clears (handleClearAll) stay local-only, same
+    // tradeoff as Driver Standard / Approach Standard.
+    void syncDrillSession({
+      drillType: 'practice-planner',
+      session: record,
+      getId: (r) => r.id,
+      getPlayedAt: (r) => r.completedAt,
+    });
     setLastCompleted(record);
     setSession(null);
     setStage('complete');
-    // Local write first (the effects above persist it), then push to the
-    // player's account so the session follows them off this device. The
-    // record's own id is the idempotency key.
-    void recordDrillSession(
-      drillSessionInput(
-        'practice-session',
-        derivedClientId('practice-session', record.id),
-        record.completedAt,
-        { ...record },
-      ),
-    );
   }, [session, weekConfig]);
 
   const handleDiscardSession = useCallback(() => {
@@ -409,7 +386,7 @@ export default function PracticePlanner() {
               Build the <span className="text-primary">session</span>
             </>
           }
-          lead="A guided practice cycle: set your weekly technical focus, scale a session to your shot budget, run structured blocks with checkpoints and practice-intent gates, then track acquisition over time. From week three the plan starts prescribing scored assessments — everything you complete saves to your player profile."
+          lead="A guided practice cycle: set your weekly technical focus, scale a session to your shot budget, run structured blocks with checkpoints and practice-intent gates, then track acquisition over time. Completed sessions sync to your player profile when you're signed in; your weekly plan and in-progress session stay on this device."
         />
 
         {!hydrated ? (

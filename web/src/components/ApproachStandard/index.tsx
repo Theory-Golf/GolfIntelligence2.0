@@ -10,18 +10,16 @@ import {
   PrimaryButton,
   SecondaryButton,
 } from '@/components/playerpath/ui';
-import {
-  LS_APPROACH_STANDARD_PLAYER,
-  LS_APPROACH_STANDARD_SESSIONS,
-} from '@/lib/constants';
-import { storage } from '@/lib/playerpath/storage';
-import { derivedClientId } from '@/lib/playerpath/clientId';
-import { syncDrillHistory } from '@/lib/playerpath/history';
-import { drillSessionInput, recordDrillSession } from '@/lib/playerpath/record';
+import { LS_APPROACH_STANDARD_SESSIONS } from '@/lib/constants';
+import { syncDrillSession } from '@/lib/golf/useDrillHistory';
 
 // ── Storage helpers ──────────────────────────────────────────────
+const storage = {
+  get: (k) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch { return null; } },
+  set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (_) {} },
+};
 
-const LS_PLAYER   = LS_APPROACH_STANDARD_PLAYER;
+const LS_PLAYER   = 'as_player';
 const LS_SESSIONS = LS_APPROACH_STANDARD_SESSIONS;
 
 // ── Domain constants ─────────────────────────────────────────────
@@ -1028,13 +1026,23 @@ function SessionHistory({ player, sessions, patterns, onBack, onApplyPrescriptio
 
 // ── Main component ───────────────────────────────────────────────
 
-export default function ApproachStandard() {
+type Screen = 'TIER_SELECT' | 'SETUP' | 'SHOT' | 'RESULT' | 'HISTORY';
+
+interface ApproachStandardProps {
+  onScreenChange?: (screen: Screen) => void;
+}
+
+export default function ApproachStandard({ onScreenChange }: ApproachStandardProps = {}) {
   const [player, setPlayer] = useState(null);
   const [sessions, setSessions] = useState([]);
-  const [screen, setScreen] = useState('TIER_SELECT');
+  const [screen, setScreen] = useState<Screen>('TIER_SELECT');
   const [currentSession, setCurrentSession] = useState(null);
   const [lastMovement, setLastMovement] = useState(null);
   const [showShapePrompt, setShowShapePrompt] = useState(false);
+
+  useEffect(() => {
+    onScreenChange?.(screen);
+  }, [screen, onScreenChange]);
 
   // Restore from localStorage on mount
   useEffect(() => {
@@ -1045,17 +1053,6 @@ export default function ApproachStandard() {
       setSessions(savedSessions || []);
       setScreen('SETUP');
     }
-    // Fold in sessions logged on the player's other devices.
-    void syncDrillHistory({
-      drillType: 'approach-standard',
-      local: savedSessions || [],
-      hydrate: (r) => r.payload,
-      keyOf: (x) => String(x.id),
-      sortKey: (x) => Date.parse(x.completedAt || x.startedAt) || 0,
-    }).then((merged) => {
-      if (!merged) return;
-      setSessions(merged);
-    });
   }, []);
 
   // Persist on change
@@ -1099,18 +1096,16 @@ export default function ApproachStandard() {
     const movement = evaluatePeriodization(player, sessions, completed);
     const sessionWithMovement = { ...completed, movement };
     const newSessions = [...sessions, sessionWithMovement];
-    // The sessions effect persists this locally; push to the player's account
-    // too. Sessions are keyed on `s-<timestamp>`, so derive a stable uuid
-    // from that — the upload derives the same one.
     setSessions(newSessions);
-    void recordDrillSession(
-      drillSessionInput(
-        'approach-standard',
-        derivedClientId('approach-standard', completed.id),
-        completed.completedAt,
-        { ...sessionWithMovement },
-      ),
-    );
+    // Sync only at creation -- later local-only mutations (e.g.
+    // promptShownAfter below) aren't re-synced, same tradeoff as
+    // Driver Standard.
+    void syncDrillSession({
+      drillType: 'approach-standard',
+      session: sessionWithMovement,
+      getId: (s) => s.id,
+      getPlayedAt: (s) => s.startedAt,
+    });
 
     let newPlayer = { ...player };
     if (movement.movement === 'PROMOTE' || movement.movement === 'EXPRESS_PROMOTE') {

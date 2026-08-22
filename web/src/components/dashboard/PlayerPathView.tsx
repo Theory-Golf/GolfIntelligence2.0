@@ -203,28 +203,30 @@ export function PlayerPathView({ drivers: _drivers, playerPathMetrics, performan
 
     return (
       <div>
-        <table style={{ width: '100%', fontSize: '10px', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ borderBottom: '1px solid var(--ash)' }}>
-              <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>Band</th>
-              <th style={{ textAlign: 'right', padding: '4px', color: 'var(--ash)' }}>Shots</th>
-              <th style={{ textAlign: 'right', padding: '4px', color: 'var(--ash)' }}>GIR%</th>
-              <th style={{ textAlign: 'right', padding: '4px', color: 'var(--ash)' }}>SG</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.bands.filter((b: any) => b.totalShots > 0).map((band: any, idx: number) => (
-              <tr key={idx} style={{ borderBottom: '1px solid var(--dark)' }}>
-                <td style={{ padding: '4px', color: 'var(--chalk)' }}>{band.label}</td>
-                <td style={{ padding: '4px', textAlign: 'right', color: 'var(--cement)' }}>{band.totalShots}</td>
-                <td style={{ padding: '4px', textAlign: 'right', color: 'var(--chalk)' }}>{band.girRate?.toFixed(0)}%</td>
-                <td style={{ padding: '4px', textAlign: 'right', color: band.sgTotal < 0 ? 'var(--scarlet)' : 'var(--under)' }}>
-                  {band.sgTotal?.toFixed(2)}
-                </td>
+        <div className="gi-table-scroll">
+          <table style={{ minWidth: '340px', width: '100%', fontSize: '13px', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid var(--ash)' }}>
+                <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>Band</th>
+                <th style={{ textAlign: 'right', padding: '4px', color: 'var(--ash)' }}>Shots</th>
+                <th style={{ textAlign: 'right', padding: '4px', color: 'var(--ash)' }}>GIR%</th>
+                <th style={{ textAlign: 'right', padding: '4px', color: 'var(--ash)' }}>SG</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {data.bands.filter((b: any) => b.totalShots > 0).map((band: any, idx: number) => (
+                <tr key={idx} style={{ borderBottom: '1px solid var(--dark)' }}>
+                  <td style={{ padding: '4px', color: 'var(--chalk)' }}>{band.label}</td>
+                  <td style={{ padding: '4px', textAlign: 'right', color: 'var(--cement)' }}>{band.totalShots}</td>
+                  <td style={{ padding: '4px', textAlign: 'right', color: 'var(--chalk)' }}>{band.girRate?.toFixed(0)}%</td>
+                  <td style={{ padding: '4px', textAlign: 'right', color: band.sgTotal < 0 ? 'var(--scarlet)' : 'var(--under)' }}>
+                    {band.sgTotal?.toFixed(2)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     );
   };
@@ -255,28 +257,30 @@ export function PlayerPathView({ drivers: _drivers, playerPathMetrics, performan
 
     return (
       <div>
-        <table style={{ width: '100%', fontSize: '10px', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ borderBottom: '1px solid var(--ash)' }}>
-              <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>Bucket</th>
-              <th style={{ textAlign: 'right', padding: '4px', color: 'var(--ash)' }}>Putts</th>
-              <th style={{ textAlign: 'right', padding: '4px', color: 'var(--ash)' }}>Make%</th>
-              <th style={{ textAlign: 'right', padding: '4px', color: 'var(--ash)' }}>SG/Put</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.buckets.filter((b: any) => b.totalPutts > 0).map((bucket: any, idx: number) => (
-              <tr key={idx} style={{ borderBottom: '1px solid var(--dark)' }}>
-                <td style={{ padding: '4px', color: 'var(--chalk)' }}>{bucket.label}</td>
-                <td style={{ padding: '4px', textAlign: 'right', color: 'var(--cement)' }}>{bucket.totalPutts}</td>
-                <td style={{ padding: '4px', textAlign: 'right', color: 'var(--chalk)' }}>{bucket.makePct?.toFixed(0)}%</td>
-                <td style={{ padding: '4px', textAlign: 'right', color: bucket.avgSG < 0 ? 'var(--scarlet)' : 'var(--under)' }}>
-                  {bucket.avgSG?.toFixed(3)}
-                </td>
+        <div className="gi-table-scroll">
+          <table style={{ minWidth: '340px', width: '100%', fontSize: '13px', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid var(--ash)' }}>
+                <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>Bucket</th>
+                <th style={{ textAlign: 'right', padding: '4px', color: 'var(--ash)' }}>Putts</th>
+                <th style={{ textAlign: 'right', padding: '4px', color: 'var(--ash)' }}>Make%</th>
+                <th style={{ textAlign: 'right', padding: '4px', color: 'var(--ash)' }}>SG/Put</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {data.buckets.filter((b: any) => b.totalPutts > 0).map((bucket: any, idx: number) => (
+                <tr key={idx} style={{ borderBottom: '1px solid var(--dark)' }}>
+                  <td style={{ padding: '4px', color: 'var(--chalk)' }}>{bucket.label}</td>
+                  <td style={{ padding: '4px', textAlign: 'right', color: 'var(--cement)' }}>{bucket.totalPutts}</td>
+                  <td style={{ padding: '4px', textAlign: 'right', color: 'var(--chalk)' }}>{bucket.makePct?.toFixed(0)}%</td>
+                  <td style={{ padding: '4px', textAlign: 'right', color: bucket.avgSG < 0 ? 'var(--scarlet)' : 'var(--under)' }}>
+                    {bucket.avgSG?.toFixed(3)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     );
   };
@@ -297,28 +301,30 @@ export function PlayerPathView({ drivers: _drivers, playerPathMetrics, performan
     if (data.lieMetrics) {
       return (
         <div>
-          <table style={{ width: '100%', fontSize: '10px', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--ash)' }}>
-                <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>Lie</th>
-                <th style={{ textAlign: 'right', padding: '4px', color: 'var(--ash)' }}>Shots</th>
-                <th style={{ textAlign: 'right', padding: '4px', color: 'var(--ash)' }}>≤8ft</th>
-                <th style={{ textAlign: 'right', padding: '4px', color: 'var(--ash)' }}>Rate</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.lieMetrics.filter((m: any) => m.totalShots > 0).map((metric: any, idx: number) => (
-                <tr key={idx} style={{ borderBottom: '1px solid var(--dark)' }}>
-                  <td style={{ padding: '4px', color: 'var(--chalk)' }}>{metric.lie}</td>
-                  <td style={{ padding: '4px', textAlign: 'right', color: 'var(--cement)' }}>{metric.totalShots}</td>
-                  <td style={{ padding: '4px', textAlign: 'right', color: 'var(--chalk)' }}>{metric.inside8Feet}</td>
-                  <td style={{ padding: '4px', textAlign: 'right', color: metric.proximityRate < 50 ? 'var(--scarlet)' : 'var(--under)' }}>
-                    {metric.proximityRate?.toFixed(0)}%
-                  </td>
+          <div className="gi-table-scroll">
+            <table style={{ minWidth: '340px', width: '100%', fontSize: '13px', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid var(--ash)' }}>
+                  <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>Lie</th>
+                  <th style={{ textAlign: 'right', padding: '4px', color: 'var(--ash)' }}>Shots</th>
+                  <th style={{ textAlign: 'right', padding: '4px', color: 'var(--ash)' }}>≤8ft</th>
+                  <th style={{ textAlign: 'right', padding: '4px', color: 'var(--ash)' }}>Rate</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {data.lieMetrics.filter((m: any) => m.totalShots > 0).map((metric: any, idx: number) => (
+                  <tr key={idx} style={{ borderBottom: '1px solid var(--dark)' }}>
+                    <td style={{ padding: '4px', color: 'var(--chalk)' }}>{metric.lie}</td>
+                    <td style={{ padding: '4px', textAlign: 'right', color: 'var(--cement)' }}>{metric.totalShots}</td>
+                    <td style={{ padding: '4px', textAlign: 'right', color: 'var(--chalk)' }}>{metric.inside8Feet}</td>
+                    <td style={{ padding: '4px', textAlign: 'right', color: metric.proximityRate < 50 ? 'var(--scarlet)' : 'var(--under)' }}>
+                      {metric.proximityRate?.toFixed(0)}%
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       );
     }
@@ -326,28 +332,30 @@ export function PlayerPathView({ drivers: _drivers, playerPathMetrics, performan
     if (data.distanceMetrics) {
       return (
         <div>
-          <table style={{ width: '100%', fontSize: '10px', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--ash)' }}>
-                <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>Distance</th>
-                <th style={{ textAlign: 'right', padding: '4px', color: 'var(--ash)' }}>Shots</th>
-                <th style={{ textAlign: 'right', padding: '4px', color: 'var(--ash)' }}>≤8ft</th>
-                <th style={{ textAlign: 'right', padding: '4px', color: 'var(--ash)' }}>Rate</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.distanceMetrics.filter((m: any) => m.totalShots > 0).map((metric: any, idx: number) => (
-                <tr key={idx} style={{ borderBottom: '1px solid var(--dark)' }}>
-                  <td style={{ padding: '4px', color: 'var(--chalk)' }}>{metric.label}</td>
-                  <td style={{ padding: '4px', textAlign: 'right', color: 'var(--cement)' }}>{metric.totalShots}</td>
-                  <td style={{ padding: '4px', textAlign: 'right', color: 'var(--chalk)' }}>{metric.inside8Feet}</td>
-                  <td style={{ padding: '4px', textAlign: 'right', color: metric.proximityRate < 50 ? 'var(--scarlet)' : 'var(--under)' }}>
-                    {metric.proximityRate?.toFixed(0)}%
-                  </td>
+          <div className="gi-table-scroll">
+            <table style={{ minWidth: '340px', width: '100%', fontSize: '13px', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid var(--ash)' }}>
+                  <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>Distance</th>
+                  <th style={{ textAlign: 'right', padding: '4px', color: 'var(--ash)' }}>Shots</th>
+                  <th style={{ textAlign: 'right', padding: '4px', color: 'var(--ash)' }}>≤8ft</th>
+                  <th style={{ textAlign: 'right', padding: '4px', color: 'var(--ash)' }}>Rate</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {data.distanceMetrics.filter((m: any) => m.totalShots > 0).map((metric: any, idx: number) => (
+                  <tr key={idx} style={{ borderBottom: '1px solid var(--dark)' }}>
+                    <td style={{ padding: '4px', color: 'var(--chalk)' }}>{metric.label}</td>
+                    <td style={{ padding: '4px', textAlign: 'right', color: 'var(--cement)' }}>{metric.totalShots}</td>
+                    <td style={{ padding: '4px', textAlign: 'right', color: 'var(--chalk)' }}>{metric.inside8Feet}</td>
+                    <td style={{ padding: '4px', textAlign: 'right', color: metric.proximityRate < 50 ? 'var(--scarlet)' : 'var(--under)' }}>
+                      {metric.proximityRate?.toFixed(0)}%
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       );
     }
@@ -385,7 +393,7 @@ export function PlayerPathView({ drivers: _drivers, playerPathMetrics, performan
       </p>
 
       {/* Top 5 Performance Drivers Hero Cards */}
-      <div className="grid" style={{ gridTemplateColumns: 'repeat(5, 1fr)', gap: '16px', marginBottom: '32px' }}>
+      <div className="grid-cards-5" style={{ gap: '16px', marginBottom: '32px' }}>
         {top5Drivers.length > 0 ? top5Drivers.map((driver) => (
           <div
             key={driver.driverId}

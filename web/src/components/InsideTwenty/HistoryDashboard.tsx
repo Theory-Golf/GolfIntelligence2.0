@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { Trash2 } from 'lucide-react';
 import {
@@ -8,10 +8,20 @@ import {
   ResponsiveContainer, ReferenceLine,
   PieChart, Pie, Cell, Legend,
 } from 'recharts';
-import { loadSessions, persistSessions, syncSessions, type InsideTwentySession, type TierName } from '.';
+import { LS_INSIDE_TWENTY_SESSIONS } from '@/lib/constants';
+import { useDrillHistory } from '@/lib/golf/useDrillHistory';
 import '../InsideTen/InsideTen.css';
 import './InsideTwenty.css';
-import { fmtDateShort } from '@/lib/playerpath/format';
+
+type TierName = 'elite' | 'tour' | 'competitive' | 'developing';
+
+interface InsideTwentySession {
+  id: string;
+  date: string;
+  timestamp: number;
+  score: number;
+  tier: TierName;
+}
 
 const TIER_CONFIG: Record<TierName, { label: string; color: string; hexColor: string }> = {
   elite:       { label: 'Elite',       color: 'var(--sg-strong)', hexColor: '#00C07A' },
@@ -26,6 +36,9 @@ function tierForScore(score: number): TierName {
   if (score >= 7)  return 'competitive';
   return 'developing';
 }
+
+const getSessionId = (s: InsideTwentySession) => s.id;
+const getSessionPlayedAt = (s: InsideTwentySession) => s.date;
 
 function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number }>; label?: string }) {
   if (!active || !payload?.length) return null;
@@ -54,28 +67,20 @@ function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: 
 }
 
 export default function HistoryDashboard() {
-  const [sessions, setSessions] = useState<InsideTwentySession[]>([]);
+  const { sessions, remove } = useDrillHistory<InsideTwentySession>({
+    drillType: 'inside-twenty',
+    lsKey: LS_INSIDE_TWENTY_SESSIONS,
+    getId: getSessionId,
+    getPlayedAt: getSessionPlayedAt,
+  });
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
-
-  useEffect(() => {
-    // This device's history first, then the account copy folded in.
-    const local = loadSessions();
-    setSessions(local);
-    void syncSessions(local).then((merged) => {
-      if (!merged) return;
-      setSessions(merged);
-      persistSessions(merged);
-    });
-  }, []);
 
   function handleDelete(id: string) {
     if (pendingDelete !== id) {
       setPendingDelete(id);
       return;
     }
-    const updated = sessions.filter(s => s.id !== id);
-    persistSessions(updated);
-    setSessions(updated);
+    remove(id);
     setPendingDelete(null);
   }
 
@@ -242,7 +247,7 @@ export default function HistoryDashboard() {
             return (
               <div className="it-log-row" key={s.id}>
                 <span className="it-log-date">
-                  {fmtDateShort(s.date)}
+                  {new Date(s.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })}
                 </span>
                 <span className="it-log-score">{s.score}/18</span>
                 <span className="it-log-tier-badge" style={{ color: cfg.color, gridColumn: '3 / 5' }}>{cfg.label}</span>
