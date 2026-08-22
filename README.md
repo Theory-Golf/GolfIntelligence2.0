@@ -95,7 +95,7 @@ Read these before touching `supabase/migrations/` or building coach/team feature
 
 **The migrations rebuild the database.** `supabase/migrations/` was catching up to a
 schema largely created by hand in the dashboard; `0000_baseline.sql` is the snapshot
-that closed that gap. `0000` through `0009` are applied and recorded, and the recorded
+that closed that gap. `0000` through `0010` are applied and recorded, and the recorded
 version of each matches its filename prefix. Every file is idempotent, so re-running
 against the live project is a no-op.
 
@@ -105,9 +105,10 @@ Two conventions worth keeping:
   `0005_ethos_papers.sql` both claimed `0005`. The CLI keys on the version prefix, so
   only one of them could ever be recorded — the ethos table ended up applied by hand
   and untracked. It is now `0006_ethos_papers.sql`.
-- **Unapplied SQL does not live in `migrations/`.** Anything proposed but not yet run
-  belongs in `supabase/proposals/`, where `db push` cannot pick it up. See
-  `supabase/proposals/rls-consolidation.sql`.
+- **Unapplied SQL does not live in `migrations/`.** Anything proposed but not yet
+  run belongs in `supabase/proposals/`, where `db push` cannot pick it up. That
+  directory is currently empty -- the RLS consolidation that lived there shipped as
+  `0010`.
 
 To verify after a schema change, rebuild locally and diff the catalogs against production:
 
@@ -169,26 +170,98 @@ force every call site to pass it.
 a mutable `search_path`; several `SECURITY DEFINER` functions are executable by `anon`
 via RPC; leaked-password protection is off in Auth settings. All pre-existing — see
 `get_advisors` for the current list.
+### Coach access: one model, one rule
 
-### There are two coach–player models, and only one is wired up
+`0010_coach_model_consolidation.sql` collapsed two competing coach-player models
+into one. Before it, the database answered "which coach sees which player" twice:
+`team_members` + `profiles.role` governed every SELECT, while
+`coaches`/`coach_teams`/`coach_players` governed every UPDATE. Nothing connected
+them, so a coach registered in one could read but not edit, or edit but not read.
+Both were empty, so nothing broke -- coach access had simply never worked
+end to end, and had never been tested.
 
-| Model | Used by | Rows |
-|-------|---------|------|
-| `team_members` + `profiles.role = 'coach'` | `can_access_player()`, and therefore every `_select` policy | 0 |
-| `coaches` + `coach_players` / `coach_teams` | the granular `_update` / `_insert` policies | 0 |
+**The rule now lives in one function.** `can_access_player(target)` returns true if:
 
-No application code reads `profiles`, `team_members`, `coaches`, `coach_players`,
-`coach_teams`, or `.role` — nine of seventeen tables are untouched by the app. Coach
-and team roles are planned for the Golf Intelligence dashboard; **pick one model before
-building**, and see `supabase/proposals/rls-consolidation.sql` for what consolidating
-costs. Note in particular that `holes` and `shots` have no explicit DELETE policy.
+1. `target` is you, or
+2. you are an admin (`profiles.role = 'admin'`), or
+3. you coach the team the player is on (`coach_teams` -> `players.team_id`), or
+4. you hold a direct, unrevoked assignment (`coach_players`, `revoked_at is null`).
 
-**Coach access to practice data is intentional.** `drill_sessions` reads use the same
-`can_access_player()` rule as `rounds`/`shots`, so populating `team_members` gives
-coaches visibility of their players' practice results as well as their rounds. This is
-the accountability model PlayerPath is built on — see the comment in
-`0005_drill_sessions.sql` before changing it.
+`can_edit_player(target)` currently delegates to it -- a coach may correct their
+player's round. It exists as a seam: to make some coaches view-only, change that
+one function and every write policy follows.
+
+**Coach authority comes from the assignment tables, not from `profiles.role`.**
+Being listed in `coach_teams` / `coach_players` is what grants access. `role` is a
+UI hint plus the admin flag. This is deliberate -- see the privileges note below.
+
+Assignments are made by an admin (dashboard or service role). There is no in-app
+management UI, so `coach_teams` / `coach_players` are select-only under RLS.
+
+| Want to&hellip; | Do this |
+|---|---|
+| Make someone a coach | `update profiles set role='coach' where id=…` then insert into `coach_teams` |
+| Give a coach a whole team | insert into `coach_teams (coach_id, team_id)` |
+| Give a coach one player | insert into `coach_players (coach_id, player_id)` |
+| End a direct assignment | set `coach_players.revoked_at` -- do not delete the row |
+| Make someone an admin | `update profiles set role='admin' where id=…` |
+
+### Roles are assigned, never self-selected
+
+`authenticated` no longer holds blanket UPDATE on `profiles` and `players`. Before
+`0010`, it did -- and because the update policies allow writing your own row, **any
+player could set `profiles.role = 'coach'` and `players.team_id` to any team**, then
+read every teammate's rounds, shots and practice data. It was inert only because
+`can_access_player()` read the empty `team_members` table; a real roster would have
+made it live.
+
+RLS cannot express "this row but not that column", so this is enforced with
+column-level privileges:
+
+```sql
+grant update (display_name, gender)            on public.profiles to authenticated;
+grant update (display_name, graduation_year)   on public.players  to authenticated;
+```
+
+`role`, `team_id` and `is_active` are settable only by an admin through the
+dashboard or service role. **Sign a person up as a normal player, then set their
+role.** If you add a column that must not be self-assigned, it is excluded by
+default -- but if you add one a user *should* edit, you must grant it explicitly or
+the app will get a permission error.
+
+### A player's data follows the player
+
+Rounds, shots, courses and practice sessions hang off the player, never off a team
+or a coach, and the foreign keys enforce it rather than leaving it to convention:
+
+- `rounds.player_id` and `courses.player_id` are **RESTRICT** -- a player with data
+  cannot be deleted.
+- `players.team_id` is **SET NULL** -- deleting a team never deletes players.
+
+So moving a player between teams, or revoking a coach assignment, changes who can
+*see* the data and nothing else.
+
+Two consequences worth deciding on before onboarding a real program:
+
+- **A former coach loses visibility of history.** Move a player from team A to
+  team B and coach A immediately sees nothing -- including rounds played while the
+  player was on their team. `rounds.team_id_at_round` exists for exactly this and
+  is never written by the app. Populate it if a coach should keep the season a
+  player played for them.
+- **Deleting a login still destroys practice history.** `drill_sessions.player_id`
+  cascades from `auth.users`, while rounds are protected by RESTRICT. The two
+  should probably match.
+
+**Coach access to practice data is intentional.** `drill_sessions` reads use the
+same `can_access_player()` rule as `rounds`/`shots`, so assigning a coach gives
+them their players' practice results as well as their rounds. This is the
+accountability model PlayerPath is built on -- see the comment in
+`0005_drill_sessions.sql` before changing it. Practice *writes* stay owner-only: a
+result is recorded by the player who played the drill, never on their behalf.
 
 **Player identity.** `drill_sessions.player_id` references `auth.users`, while
-`rounds.player_id` references `players`. Every `players.id` is its auth user's id, so
-the same UUID identifies a player on both sides — use `auth.uid()` when writing either.
+`rounds.player_id` references `players`. Every `players.id` is its auth user's id,
+so the same UUID identifies a player on both sides -- use `auth.uid()` when writing
+either. `profiles` and `players` are both created by the `handle_new_user` trigger
+on signup; `profiles` carries identity and role, `players` carries player
+attributes.

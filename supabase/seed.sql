@@ -37,21 +37,32 @@ values
    '{"provider":"email","providers":["email"]}', '{"display_name":"Coach"}', now(), now())
 on conflict (id) do nothing;
 
--- The on_auth_user_created trigger creates profiles; mark the coach.
+-- The on_auth_user_created trigger creates both profiles and players rows.
+-- Mark the coach: role is a UI hint and the admin flag -- what actually grants
+-- a coach access is the coach_teams / coach_players assignment below.
 update public.profiles set role = 'coach' where id = '33333333-3333-3333-3333-333333333333';
 
 -- ============================================================
--- Team
+-- Team, and the coach assignment that grants access
+--
+-- Player One is reachable via the TEAM; Player Two is assigned to the coach
+-- DIRECTLY and is deliberately left off the team, so a local run exercises both
+-- halves of can_access_player().
 -- ============================================================
 insert into public.teams (id, name)
 values ('44444444-4444-4444-4444-444444444444', 'Seed University Golf')
 on conflict (id) do nothing;
 
-insert into public.team_members (team_id, player_id)
-values
-  ('44444444-4444-4444-4444-444444444444', '11111111-1111-1111-1111-111111111111'),
-  ('44444444-4444-4444-4444-444444444444', '22222222-2222-2222-2222-222222222222'),
-  ('44444444-4444-4444-4444-444444444444', '33333333-3333-3333-3333-333333333333')
+update public.players
+set team_id = '44444444-4444-4444-4444-444444444444'
+where id = '11111111-1111-1111-1111-111111111111';
+
+insert into public.coach_teams (coach_id, team_id)
+values ('33333333-3333-3333-3333-333333333333', '44444444-4444-4444-4444-444444444444')
+on conflict do nothing;
+
+insert into public.coach_players (coach_id, player_id)
+values ('33333333-3333-3333-3333-333333333333', '22222222-2222-2222-2222-222222222222')
 on conflict do nothing;
 
 -- ============================================================
