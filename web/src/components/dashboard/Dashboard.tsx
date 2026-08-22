@@ -114,7 +114,7 @@ export default function Dashboard() {
       {/* Header */}
       <header className="header">
         <div className="header-content">
-          <h1><span style={{ fontFamily: 'var(--font-body)' }}>Golf</span> <em>Intelligence</em></h1>
+          <h1>Golf <span className="header-accent">Intelligence</span></h1>
           <p className="subtitle">By: Theory Golf</p>
         </div>
         {/* Benchmark Selectors */}
