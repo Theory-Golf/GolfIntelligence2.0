@@ -3,12 +3,11 @@
  */
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import type { ProcessedShot, Tiger5Metrics, RoundSummary, FilterState, FilterOptions, FilterOption, DrivingMetrics, DrivingAnalysis, ProblemDriveMetrics, ApproachMetrics, ApproachDistanceBucket, ApproachHeatMapData, PuttingMetrics, PuttingDistanceBucket, LagPuttingMetrics, ScoringMetrics, MentalMetrics, BirdieAndBogeyMetrics, ShortGameMetrics, ShortGameHeatMapData, PerformanceDriversResult, PlayerPathMetrics, PerformanceDriversResultV2, CoachTableMetrics } from './types';
+import type { ProcessedShot, Tiger5Metrics, RoundSummary, FilterState, FilterOptions, FilterOption, DrivingMetrics, DrivingAnalysis, ProblemDriveMetrics, ApproachMetrics, ApproachDistanceBucket, ApproachHeatMapData, PuttingMetrics, PuttingDistanceBucket, LagPuttingMetrics, ScoringMetrics, MentalMetrics, BirdieAndBogeyMetrics, ShortGameMetrics, ShortGameHeatMapData, CoachTableMetrics } from './types';
 import type { Gender, BenchmarkTier } from './benchmarks';
 import { createBrowserClient } from './db/client';
 import { processShots, calculateTiger5Metrics, getRoundSummaries, calculateDrivingMetrics, calculateDrivingAnalysis, calculateProblemDriveMetrics, calculateApproachMetrics, calculateApproachByDistance, calculateApproachFromRough, calculateApproachHeatMapData, calculatePuttingMetrics, calculatePuttingByDistance, calculateLagPuttingMetrics, calculateScoringMetrics, calculateMentalMetrics, calculateBirdieAndBogeyMetrics, calculateShortGameMetrics, calculateShortGameHeatMapData } from './calculations';
-import { calculatePerformanceDrivers } from './performanceDrivers';
-import { calculatePlayerPathMetrics, calculatePerformanceDriversV2 } from './playerPathCalculations';
+import { runDriverEngine, type DriverEngineResult } from './driverEngine';
 import { calculateCoachTableMetrics } from './calculations';
 import { fetchDashboardShots, type DashboardShotRow } from './db/dashboard';
 
@@ -34,9 +33,7 @@ interface UseGolfDataResult {
   mentalMetrics: MentalMetrics;
   shortGameMetrics: ShortGameMetrics;
   shortGameHeatMapData: ShortGameHeatMapData;
-  performanceDrivers: PerformanceDriversResult;
-  playerPathMetrics: PlayerPathMetrics;
-  performanceDriversV2: PerformanceDriversResultV2;
+  driverEngine: DriverEngineResult;
   coachTableMetrics: CoachTableMetrics;
   roundSummaries: RoundSummary[];
   filterOptions: FilterOptions;
@@ -332,32 +329,12 @@ export function useGolfData(): UseGolfDataResult {
     return calculateShortGameHeatMapData(filteredShots, uniqueRounds);
   }, [filteredShots, uniqueRounds]);
 
-  // Calculate performance drivers
-  const performanceDrivers = useMemo(() => {
-    return calculatePerformanceDrivers(
-      filteredShots,
-      tiger5Metrics,
-      mentalMetrics,
-      birdieAndBogeyMetrics,
-      drivingMetrics,
-      problemDriveMetrics,
-      approachMetrics,
-      approachByDistance,
-      shortGameMetrics,
-      puttingMetrics,
-      puttingByDistance
-    );
-  }, [filteredShots, tiger5Metrics, mentalMetrics, birdieAndBogeyMetrics, drivingMetrics, problemDriveMetrics, approachMetrics, approachByDistance, shortGameMetrics, puttingMetrics, puttingByDistance]);
-
-  // Calculate PlayerPath metrics
-  const playerPathMetrics = useMemo(() => {
-    return calculatePlayerPathMetrics(filteredShots);
-  }, [filteredShots]);
-
-  // Calculate Performance Drivers V2 (new algorithm with scoring)
-  const performanceDriversV2 = useMemo(() => {
-    return calculatePerformanceDriversV2(filteredShots);
-  }, [filteredShots]);
+  // PlayerPath drivers: one engine over the 17 published specs. Depends on the
+  // benchmark because both strokes gained and the derived putting thresholds
+  // are relative to the selected tier.
+  const driverEngine = useMemo(() => {
+    return runDriverEngine(filteredShots, benchmark);
+  }, [filteredShots, benchmark]);
 
   // Calculate Coach Table metrics (per player pivot table)
   const coachTableMetrics = useMemo(() => {
@@ -393,9 +370,7 @@ export function useGolfData(): UseGolfDataResult {
     mentalMetrics,
     shortGameMetrics,
     shortGameHeatMapData,
-    performanceDrivers,
-    playerPathMetrics,
-    performanceDriversV2,
+    driverEngine,
     coachTableMetrics,
     roundSummaries,
     filterOptions,
