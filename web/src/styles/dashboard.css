@@ -1047,7 +1047,6 @@
   white-space: nowrap;
 }
 .pp-tier-elite { color: var(--under); background: rgba(0, 192, 122, 0.14); }
-.pp-tier-solid { color: var(--cement); background: var(--obsidian); }
 .pp-tier-flag { color: var(--bogey); background: rgba(245, 149, 32, 0.14); }
 .pp-tier-severe { color: var(--scarlet); background: rgba(232, 32, 42, 0.14); }
 .pp-tier-unrated { color: var(--ash); background: var(--obsidian); }
@@ -1065,7 +1064,6 @@
 }
 .pp-meter-bar > i { display: block; height: 100%; }
 .pp-seg-elite { background: var(--under); }
-.pp-seg-solid { background: var(--pitch); }
 .pp-seg-flag { background: var(--bogey); }
 .pp-seg-severe { background: var(--scarlet); }
 

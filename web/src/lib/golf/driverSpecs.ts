@@ -6,10 +6,13 @@
  * transcribed from a `thresholds` block in a published paper and carries its
  * source, so a reader can trace any number on a card back to the framework.
  *
+ * Bands are contiguous by construction: a tier is its two edges, so everything
+ * between elite and severe is Flag and no value can fall outside a band.
+ *
  * The exception is Putting. P1–P4 have published definitions but no threshold
  * blocks yet — the putting paper is still being written. P1, P2 and P4 derive
- * their thresholds from the selected benchmark's expected-putts curve; P3 is
- * marked unrated and abstains from a tier rather than inventing one.
+ * their bounds from the selected benchmark's expected-putts curve and stay
+ * marked provisional; P3 is measured against its 50/50 dispersion target.
  */
 
 import type { HoleScore, ProcessedShot } from './types';
@@ -31,18 +34,23 @@ export type Pillar = 'Driving' | 'Approach' | 'ShortGame' | 'Putting';
 export type Tier5Code = 'T1' | 'T2' | 'T3' | 'T4' | 'T5';
 
 /**
- * Rating bands.
- *
- * `solid` names the gap the papers leave between elite and flag — D1 is elite
- * at <=3% and flagged above 5%, so 3–5% has no published label. The Short Game
- * paper's bands are contiguous and never produce it. `unrated` is used where no
- * threshold has been published at all.
+ * Rating bands. `unrated` covers a pillar with no drivers in the current filter.
  */
-export type Tier = 'elite' | 'solid' | 'flag' | 'severe' | 'unrated';
+export type Tier = 'elite' | 'flag' | 'severe' | 'unrated';
 
+/**
+ * Two boundaries, three contiguous bands.
+ *
+ * Three numbers would describe four bands and leave a gap with no label — which
+ * is exactly what the driving and approach papers do (D1 is elite at <=3% and
+ * flagged above 5%, saying nothing about 3-5%). Expressing a tier as its two
+ * edges makes that gap impossible to write down: everything between elite and
+ * severe is Flag.
+ */
 export interface TierBounds {
+  /** At or beyond this, the driver is Elite. */
   elite: number;
-  flag: number;
+  /** Past this, the driver is Severe. Flag is everything in between. */
   severe: number;
 }
 
@@ -99,6 +107,15 @@ export interface DriverSpec {
    * the wrong question entirely.
    */
   lowSampleBasis: 'events' | 'population';
+  /**
+   * Whether the severe bound is itself severe.
+   *
+   * Most papers phrase severe as strictly beyond a value ("> 10%"), which is the
+   * default. SG1 is the exception at ">= 7 per round", and 7.0 is exactly
+   * reachable (21 shots over 3 rounds), so it opts in rather than relying on a
+   * rounding fudge that would display the wrong number.
+   */
+  severeInclusive?: boolean;
   /** True while thresholds await a published paper. */
   provisional?: boolean;
   /** Excluded from ranking; computed for the segment view only. */
@@ -131,8 +148,15 @@ export function endYards(s: ProcessedShot): number {
   return s.endingLie === 'Green' ? s.endingDistance / 3 : s.endingDistance;
 }
 
+/**
+ * A percentage, rounded to kill binary-floating-point noise.
+ *
+ * `(55 / 100) * 100` evaluates to 55.00000000000001, which is enough to push a
+ * value sitting exactly on a tier boundary into the wrong band. Rounding to six
+ * decimals removes the artefact without touching any real precision.
+ */
 const rate = (numerator: number, denominator: number): number =>
-  denominator === 0 ? 0 : (numerator / denominator) * 100;
+  denominator === 0 ? 0 : Math.round((numerator / denominator) * 1e8) / 1e6;
 
 function qualifyRate(
   metricPopulation: ProcessedShot[],
@@ -195,11 +219,7 @@ function expectedPutts(ctx: EngineContext, feet: number): number {
  */
 function deriveMakeRateTiers(ctx: EngineContext, midpointFt: number): TierBounds {
   const benchmarkMakeRate = Math.max(0, (2 - expectedPutts(ctx, midpointFt)) * 100);
-  return {
-    elite: benchmarkMakeRate,
-    flag: benchmarkMakeRate * 0.8,
-    severe: benchmarkMakeRate * 0.6,
-  };
+  return { elite: benchmarkMakeRate, severe: benchmarkMakeRate * 0.6 };
 }
 
 // ============================================
@@ -213,7 +233,7 @@ const DRIVING: DriverSpec[] = [
     name: 'Tee Shot Penalty Rate',
     summary: 'All tee shots, par 4 and 5. Rate resulting in a penalty stroke.',
     polarity: 'lower',
-    tiers: { elite: 3, flag: 5, severe: 10 },
+    tiers: { elite: 3, severe: 10 },
     tiger5: ['T1', 'T2'],
     lowSampleAt: 3,
     lowSampleBasis: 'events',
@@ -226,7 +246,7 @@ const DRIVING: DriverSpec[] = [
     name: 'Distance Deficiency',
     summary: 'Fairway tee shots. Share that still lost value against the benchmark.',
     polarity: 'lower',
-    tiers: { elite: 10, flag: 25, severe: 35 },
+    tiers: { elite: 10, severe: 35 },
     tiger5: ['T1', 'T2'],
     lowSampleAt: 20,
     lowSampleBasis: 'population',
@@ -252,7 +272,7 @@ const DRIVING: DriverSpec[] = [
     name: 'Recovery Rate',
     summary: 'Tee shots, penalties excluded. Rate finishing in a recovery lie.',
     polarity: 'lower',
-    tiers: { elite: 3, flag: 8, severe: 15 },
+    tiers: { elite: 3, severe: 15 },
     tiger5: ['T1', 'T2'],
     lowSampleAt: 20,
     lowSampleBasis: 'population',
@@ -280,7 +300,7 @@ const DRIVING: DriverSpec[] = [
     polarity: 'lower',
     // Two-condition trigger with severity by dominant band, not a rate against
     // bounds — see tierOverride. The paper publishes no elite level.
-    tiers: { elite: 0, flag: 50, severe: 50 },
+    tiers: { elite: 0, severe: 50 },
     tiger5: ['T1', 'T2'],
     lowSampleAt: 20,
     lowSampleBasis: 'population',
@@ -325,7 +345,7 @@ const DRIVING: DriverSpec[] = [
     name: 'Sand Rate, Scoring Zone',
     summary: 'Tee shots leaving a second shot in sand between 60 and 120 yards.',
     polarity: 'lower',
-    tiers: { elite: 2, flag: 5, severe: 8 },
+    tiers: { elite: 2, severe: 8 },
     tiger5: ['T1', 'T2'],
     lowSampleAt: 3,
     lowSampleBasis: 'events',
@@ -361,7 +381,7 @@ const APPROACH: DriverSpec[] = [
     name: 'Long Approach GIR',
     summary: '150–200 yards from tee or fairway. Strict putting surface, fringe excluded.',
     polarity: 'higher',
-    tiers: { elite: 55, flag: 40, severe: 25 },
+    tiers: { elite: 55, severe: 25 },
     tiger5: ['T1', 'T2'],
     lowSampleAt: 20,
     lowSampleBasis: 'population',
@@ -387,7 +407,7 @@ const APPROACH: DriverSpec[] = [
     name: 'Short Approach Scoring Position',
     summary: '50–150 yards. On the green inside 20ft, or off it within 6 yards of the pin.',
     polarity: 'higher',
-    tiers: { elite: 55, flag: 40, severe: 25 },
+    tiers: { elite: 55, severe: 25 },
     tiger5: ['T3', 'T1', 'T2', 'T4'],
     lowSampleAt: 20,
     lowSampleBasis: 'population',
@@ -417,7 +437,7 @@ const APPROACH: DriverSpec[] = [
     name: 'Approach Precision Rate',
     summary: '50–200 yards. End distance in feet within 20% of start distance in yards.',
     polarity: 'higher',
-    tiers: { elite: 55, flag: 40, severe: 25 },
+    tiers: { elite: 55, severe: 25 },
     tiger5: ['T1', 'T2', 'T4'],
     lowSampleAt: 20,
     lowSampleBasis: 'population',
@@ -440,7 +460,7 @@ const APPROACH: DriverSpec[] = [
     name: 'Approach Penalty Rate',
     summary: '50–230 yards, all playable lies. Rate resulting in a penalty stroke.',
     polarity: 'lower',
-    tiers: { elite: 2, flag: 4, severe: 8 },
+    tiers: { elite: 2, severe: 8 },
     tiger5: ['T2', 'T1', 'T4'],
     lowSampleAt: 3,
     lowSampleBasis: 'events',
@@ -469,7 +489,7 @@ const APPROACH: DriverSpec[] = [
     name: 'Approach Obstruction Rate',
     summary: 'Non-penalty misses severe enough to functionally destroy the hole.',
     polarity: 'lower',
-    tiers: { elite: 4, flag: 6, severe: 10 },
+    tiers: { elite: 4, severe: 10 },
     tiger5: ['T1', 'T2', 'T4'],
     lowSampleAt: 3,
     lowSampleBasis: 'events',
@@ -504,7 +524,9 @@ const SHORT_GAME: DriverSpec[] = [
     name: 'Frequency & Routing Signal',
     summary: 'Short game volume per round, and how much of it follows a missed green.',
     polarity: 'lower',
-    tiers: { elite: 2, flag: 3, severe: 7 },
+    tiers: { elite: 2, severe: 7 },
+    // The paper's severe level is ">= 7 per round", not "> 7".
+    severeInclusive: true,
     tiger5: [],
     lowSampleAt: 0,
     lowSampleBasis: 'population',
@@ -540,7 +562,7 @@ const SHORT_GAME: DriverSpec[] = [
     name: 'Second Attempt Conversion',
     summary: 'Once a second short game shot was needed, how often trouble stopped there.',
     polarity: 'higher',
-    tiers: { elite: 90, flag: 70, severe: 70 },
+    tiers: { elite: 90, severe: 70 },
     tiger5: ['T5'],
     lowSampleAt: 10,
     lowSampleBasis: 'population',
@@ -588,7 +610,7 @@ const SHORT_GAME: DriverSpec[] = [
     name: 'Fairway Precision Rate',
     summary: 'The no-excuse shot: a clean fairway lie inside 25 yards, finishing within 5ft.',
     polarity: 'higher',
-    tiers: { elite: 75, flag: 50, severe: 50 },
+    tiers: { elite: 75, severe: 50 },
     tiger5: ['T5'],
     lowSampleAt: 10,
     lowSampleBasis: 'population',
@@ -649,18 +671,18 @@ const PUTTING: DriverSpec[] = [
     code: 'P3',
     pillar: 'Putting',
     name: 'Speed Window: Lag',
-    summary: '15–40 feet. Balance of short and long misses around the hole.',
+    summary:
+      '15–40 feet. Misses should split evenly long and short — balanced dispersion is what good speed control looks like, and it maximises make probability.',
     polarity: 'lower',
-    // The published material describes a 50/50 short-long target but gives no
-    // numeric bands, and the benchmark curve cannot supply them the way it does
-    // for make and three-putt rates. Rather than invent bounds, P3 reports its
-    // metric and its strokes-gained cost and abstains from a tier.
-    tiers: 'unrated',
+    // Distance from a 50/50 split, in percentage points. The bounds are
+    // anchored rather than picked: under a true 50/50 the sampling spread at
+    // roughly 25 lag putts is about 10 points, so a small deviation is not
+    // distinguishable from perfect control, while 20 points is a clear bias.
+    tiers: { elite: 5, severe: 20 },
     tiger5: ['T3'],
     lowSampleAt: 20,
     lowSampleBasis: 'population',
-    provisional: true,
-    source: 'Definition published; thresholds awaiting the putting paper',
+    source: 'Definition published; bounds set against a 50/50 dispersion target',
     qualify: ctx => {
       const pop = puttsBetween(ctx, 15, 40).filter(s => !isMade(s));
       if (pop.length === 0) return null;
@@ -673,8 +695,14 @@ const PUTTING: DriverSpec[] = [
         metricPopulation: pop,
         impactPopulation: pop.filter(s => s.calculatedStrokesGained < 0),
         // Deviation from a balanced 50/50 dispersion, in percentage points.
+        // Symmetric: a long bias and a short bias of the same size rate the
+        // same, but the card names the direction because the fix differs.
         metricValue: Math.abs(shortShare - 50),
-        detail: { shortShare: Number(shortShare.toFixed(1)), classified },
+        detail: {
+          shortShare: Number(shortShare.toFixed(1)),
+          classified,
+          bias: shortShare > 50 ? 'short' : 'long',
+        },
       };
     },
   },
@@ -694,7 +722,7 @@ const PUTTING: DriverSpec[] = [
       // Beyond 40ft makes are close to zero, so expected putts decompose as
       // `2 + threePuttRate`, giving the benchmark rate directly.
       const benchmark = Math.max(0, (expectedPutts(ctx, 40) - 2) * 100);
-      return { elite: benchmark, flag: benchmark * 1.5, severe: benchmark * 2 };
+      return { elite: benchmark, severe: benchmark * 2 };
     },
     qualify: ctx => {
       const longPutts = puttsBetween(ctx, 40, Number.MAX_SAFE_INTEGER);

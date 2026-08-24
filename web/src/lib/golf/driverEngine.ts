@@ -43,7 +43,7 @@ export interface DriverResult {
   summary: string;
   /** The driver's rate or count, in its own units. */
   metricValue: number;
-  /** The boundary the tier was judged against — the flag level. */
+  /** The elite edge the metric is measured against. */
   thresholdValue: number | null;
   tierBounds: TierBounds | null;
   tier: Tier;
@@ -82,9 +82,8 @@ const DOWNSTREAM_PILLARS: Pillar[] = ['ShortGame', 'Putting'];
 const TIER_RANK: Record<Tier, number> = {
   unrated: 0,
   elite: 1,
-  solid: 2,
-  flag: 3,
-  severe: 4,
+  flag: 2,
+  severe: 3,
 };
 
 function buildContext(
@@ -110,21 +109,27 @@ function buildContext(
 }
 
 /**
- * Place a metric against its bounds.
- *
- * `solid` is the band the papers leave unlabelled between elite and flag.
+ * Place a metric against its two bounds. Flag is everything between them, so
+ * every value lands in exactly one band.
  */
-function classify(metricValue: number, bounds: TierBounds, polarity: 'lower' | 'higher'): Tier {
+function classify(
+  metricValue: number,
+  bounds: TierBounds,
+  polarity: 'lower' | 'higher',
+  severeInclusive = false,
+): Tier {
   if (polarity === 'lower') {
-    if (metricValue > bounds.severe) return 'severe';
-    if (metricValue > bounds.flag) return 'flag';
-    if (metricValue <= bounds.elite) return 'elite';
-    return 'solid';
+    const isSevere = severeInclusive
+      ? metricValue >= bounds.severe
+      : metricValue > bounds.severe;
+    if (isSevere) return 'severe';
+    return metricValue <= bounds.elite ? 'elite' : 'flag';
   }
-  if (metricValue < bounds.severe) return 'severe';
-  if (metricValue < bounds.flag) return 'flag';
-  if (metricValue >= bounds.elite) return 'elite';
-  return 'solid';
+  const isSevere = severeInclusive
+    ? metricValue <= bounds.severe
+    : metricValue < bounds.severe;
+  if (isSevere) return 'severe';
+  return metricValue >= bounds.elite ? 'elite' : 'flag';
 }
 
 function resolveBounds(spec: DriverSpec, ctx: EngineContext): TierBounds | null {
@@ -170,7 +175,7 @@ function evaluate(spec: DriverSpec, ctx: EngineContext): DriverResult | null {
   const tier = spec.tierOverride
     ? spec.tierOverride(q, ctx)
     : bounds
-      ? classify(q.metricValue, bounds, spec.polarity)
+      ? classify(q.metricValue, bounds, spec.polarity, spec.severeInclusive)
       : 'unrated';
 
   const impactSG =
@@ -183,7 +188,7 @@ function evaluate(spec: DriverSpec, ctx: EngineContext): DriverResult | null {
     name: spec.name,
     summary: spec.summary,
     metricValue: q.metricValue,
-    thresholdValue: bounds ? bounds.flag : null,
+    thresholdValue: bounds ? bounds.elite : null,
     tierBounds: bounds,
     tier,
     polarity: spec.polarity,

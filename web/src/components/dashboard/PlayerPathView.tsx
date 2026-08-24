@@ -29,7 +29,6 @@ const PILLAR_ORDER: Pillar[] = ['Driving', 'Approach', 'ShortGame', 'Putting'];
 
 const TIER_LABEL: Record<Tier, string> = {
   elite: 'Elite',
-  solid: 'On standard',
   flag: 'Flag',
   severe: 'Severe',
   unrated: 'Unrated',
@@ -38,7 +37,10 @@ const TIER_LABEL: Record<Tier, string> = {
 /** Percentages read as rates; SG1 is a count per round. */
 function formatMetric(driver: DriverResult): string {
   if (driver.code === 'SG1') return `${driver.metricValue.toFixed(1)} per round`;
-  if (driver.code === 'P3') return `${driver.metricValue.toFixed(0)}pts off balance`;
+  if (driver.code === 'P3') {
+    const bias = driver.detail?.bias;
+    return `${driver.metricValue.toFixed(0)}pts off balance${bias ? ` · bias ${bias}` : ''}`;
+  }
   return `${driver.metricValue.toFixed(1)}%`;
 }
 
@@ -72,12 +74,11 @@ function meterSegments(driver: DriverResult): {
     return {
       segments: [
         { tier: 'elite', width: pct(bounds.elite) },
-        { tier: 'solid', width: pct(bounds.flag) - pct(bounds.elite) },
-        { tier: 'flag', width: pct(bounds.severe) - pct(bounds.flag) },
+        { tier: 'flag', width: pct(bounds.severe) - pct(bounds.elite) },
         { tier: 'severe', width: 100 - pct(bounds.severe) },
       ],
       markerPct: pct(driver.metricValue),
-      scale: ['0', bounds.elite.toFixed(0), bounds.flag.toFixed(0), bounds.severe.toFixed(0)],
+      scale: ['0', bounds.elite.toFixed(0), bounds.severe.toFixed(0)],
     };
   }
 
@@ -86,12 +87,11 @@ function meterSegments(driver: DriverResult): {
   return {
     segments: [
       { tier: 'severe', width: pct(bounds.severe) },
-      { tier: 'flag', width: pct(bounds.flag) - pct(bounds.severe) },
-      { tier: 'solid', width: pct(bounds.elite) - pct(bounds.flag) },
+      { tier: 'flag', width: pct(bounds.elite) - pct(bounds.severe) },
       { tier: 'elite', width: 100 - pct(bounds.elite) },
     ],
     markerPct: pct(driver.metricValue),
-    scale: ['0', bounds.severe.toFixed(0), bounds.flag.toFixed(0), bounds.elite.toFixed(0)],
+    scale: ['0', bounds.severe.toFixed(0), bounds.elite.toFixed(0), '100'],
   };
 }
 

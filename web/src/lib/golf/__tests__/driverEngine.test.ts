@@ -42,19 +42,27 @@ function teeShots(n: number, penalties: number) {
 }
 
 describe('threshold boundaries', () => {
-  it('places D1 in each published band', () => {
-    // D1: elite <=3%, flag >5%, severe >10%.
+  it('places D1 in each contiguous band', () => {
+    // D1: elite <=3%, severe >10%, flag everything between.
     expect(find(teeShots(100, 3), 'D1')?.tier).toBe('elite');
-    // 4% sits in the gap the paper leaves between elite and flag.
-    expect(find(teeShots(100, 4), 'D1')?.tier).toBe('solid');
-    expect(find(teeShots(100, 6), 'D1')?.tier).toBe('flag');
+    // 4% used to fall in an unlabelled gap; it is now flagged.
+    expect(find(teeShots(100, 4), 'D1')?.tier).toBe('flag');
+    expect(find(teeShots(100, 10), 'D1')?.tier).toBe('flag');
     expect(find(teeShots(100, 11), 'D1')?.tier).toBe('severe');
   });
 
-  it('is inclusive at the elite bound and exclusive at the flag bound', () => {
-    // Exactly 3% is elite; exactly 5% is not yet flagged.
+  it('treats the elite bound as elite and the severe bound as not yet severe', () => {
     expect(find(teeShots(100, 3), 'D1')?.tier).toBe('elite');
-    expect(find(teeShots(100, 5), 'D1')?.tier).toBe('solid');
+    expect(find(teeShots(1000, 31), 'D1')?.tier).toBe('flag');
+    expect(find(teeShots(100, 10), 'D1')?.tier).toBe('flag');
+  });
+
+  it('leaves no value unbanded', () => {
+    // Every whole-percent penalty rate lands in exactly one of three bands.
+    for (let penalties = 0; penalties <= 100; penalties += 1) {
+      const tier = find(teeShots(100, penalties), 'D1')?.tier;
+      expect(['elite', 'flag', 'severe']).toContain(tier);
+    }
   });
 
   it('reverses the comparison for higher-is-better drivers', () => {
@@ -74,7 +82,8 @@ describe('threshold boundaries', () => {
       );
 
     expect(find(approaches(60), 'A1')?.tier).toBe('elite');
-    expect(find(approaches(45), 'A1')?.tier).toBe('solid');
+    // 45% used to fall in the gap between flag and elite; now flagged.
+    expect(find(approaches(45), 'A1')?.tier).toBe('flag');
     expect(find(approaches(30), 'A1')?.tier).toBe('flag');
     expect(find(approaches(20), 'A1')?.tier).toBe('severe');
   });
@@ -373,7 +382,138 @@ describe('putting thresholds derive from the selected benchmark', () => {
     expect(find(shortPutts(20), 'P1')?.provisional).toBe(true);
   });
 
-  it('leaves P3 unrated rather than inventing a threshold', () => {
-    expect(SPECS_BY_CODE.P3.tiers).toBe('unrated');
+});
+
+describe('contiguous bands the papers already published', () => {
+  /**
+   * SG2 and SG3 publish contiguous bands. Encoding a tier as three numbers
+   * described four bands, so a mid-band value fell through every branch and
+   * came back as the invented in-between tier instead of Flag.
+   */
+  it('rates SG3 at 60% as Flag, not something in between', () => {
+    // SG3: elite >=75%, flag 50-74%, severe <50%.
+    const shots = Array.from({ length: 100 }, (_, i) =>
+      shot({
+        roundId: `round-${(i % 5) + 1}`,
+        holeNumber: (i % 18) + 1,
+        shotNumber: 3,
+        shotType: 'Short Game',
+        startingLie: 'Fairway',
+        startingDistance: 18,
+        endingLie: 'Green',
+        endingDistance: i < 60 ? 4 : 12,
+        calculatedStrokesGained: i < 60 ? 0.1 : -0.3,
+      }),
+    );
+
+    const sg3 = find(shots, 'SG3');
+    expect(sg3?.metricValue).toBeCloseTo(60, 5);
+    expect(sg3?.tier).toBe('flag');
+  });
+
+  it('rates SG2 at 80% conversion as Flag', () => {
+    // SG2: elite >=90%, flag 70-89%, severe <70%.
+    // Each hole plays drive, approach, then two short game shots, so the second
+    // short game shot is shot 4. Strokes remaining after it is the hole score
+    // minus 4: one putt to come converts, two does not.
+    const hole = (h: number, converts: boolean) => {
+      const roundId = `round-${(h % 5) + 1}`;
+      const base = { roundId, holeNumber: h + 1 };
+      return [
+        shot({ ...base, shotNumber: 1, shotType: 'Drive', startingLie: 'Tee', startingDistance: 400, endingLie: 'Rough', endingDistance: 160 }),
+        shot({ ...base, shotNumber: 2, shotType: 'Approach', startingLie: 'Rough', startingDistance: 160, endingLie: 'Rough', endingDistance: 22 }),
+        shot({ ...base, shotNumber: 3, shotType: 'Short Game', startingLie: 'Rough', startingDistance: 22, endingLie: 'Rough', endingDistance: 8, calculatedStrokesGained: -0.4 }),
+        shot({ ...base, shotNumber: 4, shotType: 'Short Game', startingLie: 'Rough', startingDistance: 8, endingLie: 'Green', endingDistance: converts ? 3 : 24, calculatedStrokesGained: converts ? 0.1 : -0.5 }),
+        ...(converts
+          ? [shot({ ...base, shotNumber: 5, shotType: 'Putt', startingLie: 'Green', startingDistance: 3, endingLie: 'Green', endingDistance: 0 })]
+          : [
+              shot({ ...base, shotNumber: 5, shotType: 'Putt', startingLie: 'Green', startingDistance: 24, endingLie: 'Green', endingDistance: 3, calculatedStrokesGained: -0.2 }),
+              shot({ ...base, shotNumber: 6, shotType: 'Putt', startingLie: 'Green', startingDistance: 3, endingLie: 'Green', endingDistance: 0 }),
+            ]),
+      ];
+    };
+
+    const shots = Array.from({ length: 20 }, (_, h) => hole(h, h < 16)).flat();
+
+    const sg2 = find(shots, 'SG2');
+    expect(sg2?.metricValue).toBeCloseTo(80, 5);
+    expect(sg2?.tier).toBe('flag');
+  });
+
+  it('treats SG1 at exactly 7 per round as severe', () => {
+    // SG1's severe level is published as ">= 7", unlike every other driver's
+    // strict ">". 21 shots over 3 rounds lands exactly on it.
+    const shots = Array.from({ length: 21 }, (_, i) =>
+      shot({
+        roundId: `round-${(i % 3) + 1}`,
+        holeNumber: (i % 18) + 1,
+        shotNumber: 3,
+        shotType: 'Short Game',
+        startingLie: 'Rough',
+        startingDistance: 20,
+        endingLie: 'Green',
+        endingDistance: 9,
+        calculatedStrokesGained: -0.2,
+      }),
+    );
+
+    const sg1 = find(shots, 'SG1');
+    expect(sg1?.metricValue).toBeCloseTo(7, 5);
+    expect(sg1?.tier).toBe('severe');
+  });
+});
+
+describe('P3 speed window', () => {
+  /** `short` of `total` lag misses finished short of the hole. */
+  const lagMisses = (short: number, total: number) =>
+    Array.from({ length: total }, (_, i) =>
+      shot({
+        roundId: `round-${(i % 4) + 1}`,
+        holeNumber: (i % 18) + 1,
+        shotNumber: 2,
+        shotType: 'Putt',
+        startingLie: 'Green',
+        startingDistance: 25,
+        endingLie: 'Green',
+        endingDistance: 3,
+        puttLongShort: i < short ? 'Short' : 'Long',
+        calculatedStrokesGained: -0.1,
+      }),
+    );
+
+  it('rates a balanced split elite', () => {
+    // 55/45 is 5 points off balance — at the elite bound.
+    const p3 = find(lagMisses(55, 100), 'P3');
+    expect(p3?.metricValue).toBeCloseTo(5, 5);
+    expect(p3?.tier).toBe('elite');
+  });
+
+  it('flags a moderate bias', () => {
+    const p3 = find(lagMisses(62, 100), 'P3');
+    expect(p3?.metricValue).toBeCloseTo(12, 5);
+    expect(p3?.tier).toBe('flag');
+  });
+
+  it('calls a heavy bias severe', () => {
+    const p3 = find(lagMisses(72, 100), 'P3');
+    expect(p3?.metricValue).toBeCloseTo(22, 5);
+    expect(p3?.tier).toBe('severe');
+  });
+
+  it('rates a long bias the same as an equal short bias, but names the direction', () => {
+    const shortBias = find(lagMisses(70, 100), 'P3');
+    const longBias = find(lagMisses(30, 100), 'P3');
+
+    expect(shortBias?.metricValue).toBeCloseTo(20, 5);
+    expect(longBias?.metricValue).toBeCloseTo(20, 5);
+    expect(shortBias?.tier).toBe(longBias?.tier);
+
+    expect(shortBias?.detail?.bias).toBe('short');
+    expect(longBias?.detail?.bias).toBe('long');
+  });
+
+  it('is rated rather than provisional', () => {
+    expect(SPECS_BY_CODE.P3.tiers).toEqual({ elite: 5, severe: 20 });
+    expect(find(lagMisses(55, 100), 'P3')?.provisional).toBe(false);
   });
 });
