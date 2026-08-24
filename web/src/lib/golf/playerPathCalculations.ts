@@ -1231,8 +1231,10 @@ export function calculatePerformanceDriversV2(shots: ProcessedShot[]): Performan
     
     if (bandShots.length >= 10) {
       const insideTarget = bandShots.filter(s => {
-        const distInFeet = s.endingDistance * 3; // Convert yards to feet
-        return distInFeet <= band.target;
+        // bandShots is already filtered to endingLie === 'Green', and green
+        // distances are stored in feet (types.ts). Converting again inflated
+        // every proximity reading threefold.
+        return s.endingDistance <= band.target;
       }).length;
       const proximityRate = (insideTarget / bandShots.length) * 100;
       
@@ -1433,8 +1435,9 @@ export function calculatePerformanceDriversV2(shots: ProcessedShot[]): Performan
     // S3 - Failure Rate (>15 feet)
     const failures = shortGame.filter(s => {
       if (s.endingLie !== 'Green') return true;
-      const distInFeet = s.endingDistance * 3;
-      return distInFeet > 15;
+      // Green distances are already in feet (types.ts); the previous `* 3`
+      // counted a 6ft result as 18ft and flagged it as a failure.
+      return s.endingDistance > 15;
     });
     
     if (shortGame.length >= 10) {
@@ -1462,8 +1465,10 @@ export function calculatePerformanceDriversV2(shots: ProcessedShot[]): Performan
   // ===== SCORING ALGORITHM =====
   
   // Calculate final scores for each candidate
+  // No sample-size gate: a three-round tournament review must surface the same
+  // drivers as a full season. Sample size is reported on the card so the reader
+  // can judge how far to generalise, but it never suppresses a driver.
   const scoredCandidates = candidates
-    .filter(c => c.sampleSize >= 10) // Minimum sample gate
     .map(c => {
       const impactScore = calculateImpactScore(
         c.driverId,
