@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "verify:practice-sync": "node scripts/verify-practice-sync.mjs"
   },
   "dependencies": {
@@ -31,6 +33,7 @@
     "eslint": "^8.57.1",
     "eslint-config-next": "^15.2.6",
     "tailwindcss": "^4.2.2",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.11"
   }
 }

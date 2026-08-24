@@ -1,564 +1,409 @@
 'use client';
 
+/**
+ * PlayerPath — prioritised performance drivers.
+ *
+ * Answers one question: what is driving my scores, and what do I work on first?
+ * The engine (lib/golf/driverEngine.ts) does the arithmetic; this file decides
+ * what a coach sees first.
+ *
+ * Every card carries two independent readings that are deliberately not blended:
+ * the tier says how far off standard the player is, the strokes-gained figure
+ * says what it costs. They can disagree — a Severe driver on a thin population
+ * may cost very little — and that disagreement is exactly the judgement a coach
+ * needs to make rather than have hidden inside a composite score.
+ */
+
 import { useState } from 'react';
-import type { PerformanceDriversResult, PlayerPathMetrics, PerformanceDriversResultV2 } from '@/lib/golf/types';
+import type { DriverEngineResult, DriverResult } from '@/lib/golf/driverEngine';
+import { MATERIALITY_SG_PER_ROUND } from '@/lib/golf/driverEngine';
+import { PILLAR_COLORS, PILLAR_LABELS, type Pillar, type Tier } from '@/lib/golf/driverSpecs';
+import { BENCHMARK_TIER_LABELS, type BenchmarkSelection } from '@/lib/golf/benchmarks';
 
-export function PlayerPathView({ drivers: _drivers, playerPathMetrics, performanceDriversV2 }: { drivers: PerformanceDriversResult; playerPathMetrics: PlayerPathMetrics; performanceDriversV2: PerformanceDriversResultV2 }) {
-  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
-    'Driving': true,
-    'Approach': true,
-    'Putting': true,
-    'Short Game': true,
-  });
+interface PlayerPathViewProps {
+  driverEngine: DriverEngineResult;
+  benchmark: BenchmarkSelection;
+}
 
-  // Toggle section expansion
-  const toggleSection = (segment: string) => {
-    setExpandedSections(prev => ({
-      ...prev,
-      [segment]: !prev[segment]
-    }));
-  };
+const PILLAR_ORDER: Pillar[] = ['Driving', 'Approach', 'ShortGame', 'Putting'];
 
-  // Get severity color
-  const getSeverityColor = (severity: string): string => {
-    switch (severity) {
-      case 'Critical': return 'var(--scarlet)';
-      case 'Significant': return '#EA580C';
-      case 'Moderate': return '#CA8A04';
-      case 'Strong': return 'var(--under)';
-      default: return 'var(--ash)';
-    }
-  };
+const TIER_LABEL: Record<Tier, string> = {
+  elite: 'Elite',
+  flag: 'Flag',
+  severe: 'Severe',
+  unrated: 'Unrated',
+};
 
-  // Get SG value from a driver for sorting purposes
-  const getDriverSG = (driver: { code: string; data: any }): number => {
-    if (!driver.data) return 0;
-    const { code, data } = driver;
+/** Percentages read as rates; SG1 is a count per round. */
+function formatMetric(driver: DriverResult): string {
+  if (driver.code === 'SG1') return `${driver.metricValue.toFixed(1)} per round`;
+  if (driver.code === 'P3') {
+    const bias = driver.detail?.bias;
+    return `${driver.metricValue.toFixed(0)}pts off balance${bias ? ` · bias ${bias}` : ''}`;
+  }
+  return `${driver.metricValue.toFixed(1)}%`;
+}
 
-    // Driving drivers: D1-D5 - use sgImpact
-    if (code.startsWith('D')) {
-      return data.sgImpact ?? 0;
-    }
+function formatThreshold(driver: DriverResult): string | null {
+  if (!driver.tierBounds) return null;
+  const { elite } = driver.tierBounds;
+  const unit = driver.code === 'SG1' ? '' : '%';
+  return `${driver.polarity === 'lower' ? '≤' : '≥'} ${elite.toFixed(elite % 1 === 0 ? 0 : 1)}${unit} elite`;
+}
 
-    // Approach drivers: A1-A4 - sum of all band sgTotal values
-    if (code.startsWith('A') && data.bands) {
-      return data.bands.reduce((sum: number, band: any) => sum + (band.sgTotal ?? 0), 0);
-    }
+const formatSG = (sg: number): string => `${sg > 0 ? '+' : ''}${sg.toFixed(2)}`;
 
-    // Putting - Lag: L1-L3 - use sgImpact
-    if (code === 'L1-L3') {
-      return data.sgImpact ?? 0;
-    }
+/**
+ * Band widths for the threshold meter.
+ *
+ * The scale runs in the direction the metric improves, so a lower-is-better
+ * driver reads elite-first from the left and a higher-is-better driver reads
+ * severe-first — the player's marker always moves right as they get worse.
+ */
+function meterSegments(driver: DriverResult): {
+  segments: Array<{ tier: Tier; width: number }>;
+  markerPct: number;
+  scale: string[];
+} | null {
+  const bounds = driver.tierBounds;
+  if (!bounds) return null;
 
-    // Putting - Makeable: M1 - average of bucket avgSG (weighted by totalPutts)
-    if (code === 'M1' && data.buckets) {
-      const totalPutts = data.buckets.reduce((sum: number, b: any) => sum + (b.totalPutts ?? 0), 0);
-      if (totalPutts === 0) return 0;
-      const totalSG = data.buckets.reduce((sum: number, b: any) => sum + ((b.avgSG ?? 0) * (b.totalPutts ?? 0)), 0);
-      return totalSG / totalPutts;
-    }
-
-    // Putting - Primary Loss: M2 - use primaryLossSG
-    if (code === 'M2') {
-      return data.primaryLossSG ?? 0;
-    }
-
-    // Short Game drivers: S1-S3
-    if (code.startsWith('S')) {
-      // S3 has direct sgImpact
-      if (code === 'S3') {
-        return data.sgImpact ?? 0;
-      }
-      // S1 and S2 - calculate from lieMetrics or distanceMetrics
-      if (data.lieMetrics) {
-        // Calculate weighted SG from lie metrics
-        const totalShots = data.lieMetrics.reduce((sum: number, m: any) => sum + (m.totalShots ?? 0), 0);
-        if (totalShots === 0) return 0;
-        // Estimate SG based on proximity rate (lower rate = negative SG)
-        const avgProximityRate = data.lieMetrics.reduce((sum: number, m: any) => sum + ((m.proximityRate ?? 0) * (m.totalShots ?? 0)), 0) / totalShots;
-        // Assume baseline 50% proximity rate = 0 SG, below is negative
-        return (avgProximityRate - 50) * 0.1;
-      }
-      if (data.distanceMetrics) {
-        const totalShots = data.distanceMetrics.reduce((sum: number, m: any) => sum + (m.totalShots ?? 0), 0);
-        if (totalShots === 0) return 0;
-        const avgProximityRate = data.distanceMetrics.reduce((sum: number, m: any) => sum + ((m.proximityRate ?? 0) * (m.totalShots ?? 0)), 0) / totalShots;
-        return (avgProximityRate - 50) * 0.1;
-      }
-    }
-
-    return 0;
-  };
-
-
-  // Get drivers for all segments
-  const getAllSegmentDrivers = () => {
-    const { driving, approach, putting, shortGame } = playerPathMetrics;
-
+  if (driver.polarity === 'lower') {
+    const max = Math.max(bounds.severe * 1.6, driver.metricValue * 1.15, bounds.severe + 1);
+    const pct = (v: number) => Math.min(100, Math.max(0, (v / max) * 100));
     return {
-      'Driving': [
-        { code: 'D1', data: driving.d1 },
-        { code: 'D2', data: driving.d2 },
-        { code: 'D3', data: driving.d3 },
-        { code: 'D4', data: driving.d4 },
-        { code: 'D5', data: driving.d5 },
+      segments: [
+        { tier: 'elite', width: pct(bounds.elite) },
+        { tier: 'flag', width: pct(bounds.severe) - pct(bounds.elite) },
+        { tier: 'severe', width: 100 - pct(bounds.severe) },
       ],
-      'Approach': [
-        { code: 'A1', data: approach.a1 },
-        { code: 'A2', data: approach.a2 },
-        { code: 'A3', data: approach.a3 },
-        { code: 'A4', data: approach.a4 },
-      ],
-      'Putting': [
-        { code: 'L1-L3', data: putting.lag },
-        { code: 'M1', data: putting.m1 },
-        { code: 'M2', data: putting.m2 },
-      ],
-      'Short Game': [
-        { code: 'S1', data: shortGame.s1 },
-        { code: 'S2', data: shortGame.s2 },
-        { code: 'S3', data: shortGame.s3 },
-      ],
+      markerPct: pct(driver.metricValue),
+      scale: ['0', bounds.elite.toFixed(0), bounds.severe.toFixed(0)],
     };
+  }
+
+  // Higher-is-better: 0–100% of the rate, worst on the left.
+  const pct = (v: number) => Math.min(100, Math.max(0, v));
+  return {
+    segments: [
+      { tier: 'severe', width: pct(bounds.severe) },
+      { tier: 'flag', width: pct(bounds.elite) - pct(bounds.severe) },
+      { tier: 'elite', width: 100 - pct(bounds.elite) },
+    ],
+    markerPct: pct(driver.metricValue),
+    scale: ['0', bounds.severe.toFixed(0), bounds.elite.toFixed(0), '100'],
   };
+}
 
-  const allSegmentDrivers = getAllSegmentDrivers();
+function TierBadge({ tier }: { tier: Tier }) {
+  return <span className={`pp-tier pp-tier-${tier}`}>{TIER_LABEL[tier]}</span>;
+}
 
-  // Render driver card based on driver type
-  const renderDriverCard = (driver: { code: string; data: any }) => {
-    if (!driver.data) return null;
-
-    const { code, data } = driver;
-
-    // Common card styling
-    const cardStyle = {
-      borderLeft: `4px solid ${getSeverityColor(data.severity)}`,
-      background: 'var(--charcoal)',
-      padding: '16px',
-      borderRadius: '4px',
-      marginBottom: '12px',
-    };
-
-    return (
-      <div key={code} style={cardStyle}>
-        {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ color: 'var(--chalk)', fontWeight: 600, fontSize: '14px' }}>{data.name}</span>
-          </div>
-          <span style={{
-            fontSize: '10px',
-            fontWeight: 600,
-            color: getSeverityColor(data.severity),
-            background: `${getSeverityColor(data.severity)}20`,
-            padding: '4px 8px',
-            borderRadius: '4px',
-            textTransform: 'uppercase',
-          }}>
-            {data.severity}
-          </span>
-        </div>
-
-        {/* Description */}
-        <p style={{ color: 'var(--cement)', fontSize: '11px', marginBottom: '12px' }}>
-          {data.description}
-        </p>
-
-        {/* Driver-specific content */}
-        {code.startsWith('D') && renderDrivingDriver(data)}
-        {code.startsWith('A') && renderApproachDriver(data)}
-        {code === 'L1-L3' && renderLagPuttingDriver(data)}
-        {code === 'M1' && renderMakeableDriver(data)}
-        {code === 'M2' && renderPrimaryLossDriver(data)}
-        {code.startsWith('S') && renderShortGameDriver(data)}
-      </div>
-    );
-  };
-
-  // Driving driver rendering
-  const renderDrivingDriver = (data: any) => {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px' }}>
-        <div>
-          <span style={{ color: 'var(--ash)' }}>Value: </span>
-          <span style={{ color: 'var(--chalk)', fontWeight: 600 }}>
-            {typeof data.value === 'number' ? data.value.toFixed(0) : data.fwHitRate?.toFixed(0)}%
-          </span>
-        </div>
-        {data.sgImpact !== undefined && (
-          <div>
-            <span style={{ color: 'var(--ash)' }}>SG Impact: </span>
-            <span style={{ color: data.sgImpact < 0 ? 'var(--scarlet)' : 'var(--under)', fontWeight: 600 }}>
-              {data.sgImpact.toFixed(2)}
-            </span>
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  // Approach driver rendering
-  const renderApproachDriver = (data: any) => {
-    if (!data.bands || data.bands.length === 0) return null;
-
-    return (
-      <div>
-        <div className="gi-table-scroll">
-          <table style={{ minWidth: '340px', width: '100%', fontSize: '13px', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--ash)' }}>
-                <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>Band</th>
-                <th style={{ textAlign: 'right', padding: '4px', color: 'var(--ash)' }}>Shots</th>
-                <th style={{ textAlign: 'right', padding: '4px', color: 'var(--ash)' }}>GIR%</th>
-                <th style={{ textAlign: 'right', padding: '4px', color: 'var(--ash)' }}>SG</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.bands.filter((b: any) => b.totalShots > 0).map((band: any, idx: number) => (
-                <tr key={idx} style={{ borderBottom: '1px solid var(--dark)' }}>
-                  <td style={{ padding: '4px', color: 'var(--chalk)' }}>{band.label}</td>
-                  <td style={{ padding: '4px', textAlign: 'right', color: 'var(--cement)' }}>{band.totalShots}</td>
-                  <td style={{ padding: '4px', textAlign: 'right', color: 'var(--chalk)' }}>{band.girRate?.toFixed(0)}%</td>
-                  <td style={{ padding: '4px', textAlign: 'right', color: band.sgTotal < 0 ? 'var(--scarlet)' : 'var(--under)' }}>
-                    {band.sgTotal?.toFixed(2)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    );
-  };
-
-  // Lag putting driver rendering
-  const renderLagPuttingDriver = (data: any) => {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', flexWrap: 'wrap', gap: '8px' }}>
-        <div>
-          <span style={{ color: 'var(--ash)' }}>Poor Lag Rate: </span>
-          <span style={{ color: 'var(--chalk)', fontWeight: 600 }}>{data.poorLagRate?.toFixed(0)}%</span>
-        </div>
-        <div>
-          <span style={{ color: 'var(--ash)' }}>Dispersion: </span>
-          <span style={{ color: 'var(--chalk)', fontWeight: 600 }}>{data.speedDispersionBand?.toFixed(0)}ft</span>
-        </div>
-        <div>
-          <span style={{ color: 'var(--ash)' }}>Centering: </span>
-          <span style={{ color: 'var(--chalk)', fontWeight: 600 }}>{data.centeringRate}</span>
-        </div>
-      </div>
-    );
-  };
-
-  // Makeable putt driver rendering
-  const renderMakeableDriver = (data: any) => {
-    if (!data.buckets || data.buckets.length === 0) return null;
-
-    return (
-      <div>
-        <div className="gi-table-scroll">
-          <table style={{ minWidth: '340px', width: '100%', fontSize: '13px', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--ash)' }}>
-                <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>Bucket</th>
-                <th style={{ textAlign: 'right', padding: '4px', color: 'var(--ash)' }}>Putts</th>
-                <th style={{ textAlign: 'right', padding: '4px', color: 'var(--ash)' }}>Make%</th>
-                <th style={{ textAlign: 'right', padding: '4px', color: 'var(--ash)' }}>SG/Put</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.buckets.filter((b: any) => b.totalPutts > 0).map((bucket: any, idx: number) => (
-                <tr key={idx} style={{ borderBottom: '1px solid var(--dark)' }}>
-                  <td style={{ padding: '4px', color: 'var(--chalk)' }}>{bucket.label}</td>
-                  <td style={{ padding: '4px', textAlign: 'right', color: 'var(--cement)' }}>{bucket.totalPutts}</td>
-                  <td style={{ padding: '4px', textAlign: 'right', color: 'var(--chalk)' }}>{bucket.makePct?.toFixed(0)}%</td>
-                  <td style={{ padding: '4px', textAlign: 'right', color: bucket.avgSG < 0 ? 'var(--scarlet)' : 'var(--under)' }}>
-                    {bucket.avgSG?.toFixed(3)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    );
-  };
-
-  // Primary loss driver rendering
-  const renderPrimaryLossDriver = (data: any) => {
-    return (
-      <div style={{ fontSize: '11px' }}>
-        <span style={{ color: 'var(--ash)' }}>Primary Loss: </span>
-        <span style={{ color: 'var(--scarlet)', fontWeight: 600 }}>{data.primaryLossBucket}</span>
-        <span style={{ color: 'var(--ash)' }}> ({data.primaryLossSG?.toFixed(2)} SG)</span>
-      </div>
-    );
-  };
-
-  // Short game driver rendering
-  const renderShortGameDriver = (data: any) => {
-    if (data.lieMetrics) {
-      return (
-        <div>
-          <div className="gi-table-scroll">
-            <table style={{ minWidth: '340px', width: '100%', fontSize: '13px', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid var(--ash)' }}>
-                  <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>Lie</th>
-                  <th style={{ textAlign: 'right', padding: '4px', color: 'var(--ash)' }}>Shots</th>
-                  <th style={{ textAlign: 'right', padding: '4px', color: 'var(--ash)' }}>≤8ft</th>
-                  <th style={{ textAlign: 'right', padding: '4px', color: 'var(--ash)' }}>Rate</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.lieMetrics.filter((m: any) => m.totalShots > 0).map((metric: any, idx: number) => (
-                  <tr key={idx} style={{ borderBottom: '1px solid var(--dark)' }}>
-                    <td style={{ padding: '4px', color: 'var(--chalk)' }}>{metric.lie}</td>
-                    <td style={{ padding: '4px', textAlign: 'right', color: 'var(--cement)' }}>{metric.totalShots}</td>
-                    <td style={{ padding: '4px', textAlign: 'right', color: 'var(--chalk)' }}>{metric.inside8Feet}</td>
-                    <td style={{ padding: '4px', textAlign: 'right', color: metric.proximityRate < 50 ? 'var(--scarlet)' : 'var(--under)' }}>
-                      {metric.proximityRate?.toFixed(0)}%
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      );
-    }
-
-    if (data.distanceMetrics) {
-      return (
-        <div>
-          <div className="gi-table-scroll">
-            <table style={{ minWidth: '340px', width: '100%', fontSize: '13px', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid var(--ash)' }}>
-                  <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>Distance</th>
-                  <th style={{ textAlign: 'right', padding: '4px', color: 'var(--ash)' }}>Shots</th>
-                  <th style={{ textAlign: 'right', padding: '4px', color: 'var(--ash)' }}>≤8ft</th>
-                  <th style={{ textAlign: 'right', padding: '4px', color: 'var(--ash)' }}>Rate</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.distanceMetrics.filter((m: any) => m.totalShots > 0).map((metric: any, idx: number) => (
-                  <tr key={idx} style={{ borderBottom: '1px solid var(--dark)' }}>
-                    <td style={{ padding: '4px', color: 'var(--chalk)' }}>{metric.label}</td>
-                    <td style={{ padding: '4px', textAlign: 'right', color: 'var(--cement)' }}>{metric.totalShots}</td>
-                    <td style={{ padding: '4px', textAlign: 'right', color: 'var(--chalk)' }}>{metric.inside8Feet}</td>
-                    <td style={{ padding: '4px', textAlign: 'right', color: metric.proximityRate < 50 ? 'var(--scarlet)' : 'var(--under)' }}>
-                      {metric.proximityRate?.toFixed(0)}%
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      );
-    }
-
-    return (
-      <div style={{ fontSize: '11px' }}>
-        <span style={{ color: 'var(--ash)' }}>Failure Rate: </span>
-        <span style={{ color: data.value > 20 ? 'var(--scarlet)' : 'var(--chalk)', fontWeight: 600 }}>
-          {data.value?.toFixed(0)}%
-        </span>
-        <span style={{ color: 'var(--ash)' }}> ({data.failures}/{data.totalShortGameShots} shots)</span>
-      </div>
-    );
-  };
-
-  // Get severity color
-  const getSeverityColorV2 = (severity: string): string => {
-    switch (severity) {
-      case 'Critical': return 'var(--scarlet)';
-      case 'Moderate': return '#CA8A04';
-      case 'Monitor': return 'var(--ash)';
-      default: return 'var(--ash)';
-    }
-  };
-
-
-  const top5Drivers = performanceDriversV2.drivers;
+function ThresholdMeter({ driver }: { driver: DriverResult }) {
+  const meter = meterSegments(driver);
+  if (!meter) return null;
 
   return (
-    <div className="content">
-      {/* Section Heading */}
-      <h4 style={{ marginBottom: '8px', color: 'var(--ash)' }}>Player Path</h4>
-      <p style={{ fontSize: '12px', color: 'var(--ash)', marginBottom: '16px' }}>
-        Top 5 Performance Drivers — Ranked by scoring impact with specificity bonuses applied
-      </p>
+    <div className="pp-meter">
+      <div className="pp-meter-bar">
+        {meter.segments.map(seg => (
+          <i
+            key={seg.tier}
+            className={`pp-seg-${seg.tier}`}
+            style={{ width: `${Math.max(0, seg.width)}%` }}
+          />
+        ))}
+        <span className="pp-marker" style={{ left: `${meter.markerPct}%` }} />
+      </div>
+      <div className="pp-meter-scale">
+        {meter.scale.map((label, i) => (
+          <span key={i}>{label}</span>
+        ))}
+      </div>
+    </div>
+  );
+}
 
-      {/* Top 5 Performance Drivers Hero Cards */}
-      <div className="grid-cards-5" style={{ gap: '16px', marginBottom: '32px' }}>
-        {top5Drivers.length > 0 ? top5Drivers.map((driver) => (
-          <div
-            key={driver.driverId}
-            className="card-hero"
-            style={{
-              borderLeft: `4px solid ${getSeverityColorV2(driver.severity)}`,
-              padding: '16px',
-            }}
-          >
-            {/* Rank Badge */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-              <span style={{
-                fontSize: '11px',
-                fontWeight: 700,
-                color: 'var(--chalk)',
-                background: 'var(--obsidian)',
-                padding: '2px 6px',
-                borderRadius: '4px',
-              }}>
-                #{driver.rank}
-              </span>
-              <span style={{
-                fontSize: '10px',
-                fontWeight: 600,
-                color: getSeverityColorV2(driver.severity),
-                background: `${getSeverityColorV2(driver.severity)}20`,
-                padding: '2px 8px',
-                borderRadius: '4px',
-                textTransform: 'uppercase',
-              }}>
-                {driver.severity}
-              </span>
-            </div>
+function DriverFooter({ driver }: { driver: DriverResult }) {
+  return (
+    <div className="pp-foot">
+      <span>
+        {driver.sampleSize} shots · {driver.rounds} {driver.rounds === 1 ? 'round' : 'rounds'}
+      </span>
+      {driver.lowSample && <span style={{ color: 'var(--bogey)' }}>Low sample</span>}
+      {driver.provisional && <span style={{ color: 'var(--ash)' }}>Provisional threshold</span>}
+      {driver.scoreToParDelta !== null && (
+        <span title="Average score to par on holes where this fired, against holes where it did not. Observational context only.">
+          {formatSG(driver.scoreToParDelta)} to par on affected holes
+        </span>
+      )}
+    </div>
+  );
+}
 
-            {/* Category */}
-            <div style={{ fontSize: '11px', color: 'var(--ash)', marginBottom: '4px' }}>
-              {driver.category}
-            </div>
+function PrimaryCard({ driver, rank }: { driver: DriverResult; rank: number }) {
+  const threshold = formatThreshold(driver);
 
-            {/* Label */}
-            <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--chalk)', marginBottom: '12px', lineHeight: 1.3 }}>
-              {driver.label}
-            </div>
-
-            {/* Impact Score */}
-            <div style={{ paddingTop: '8px', borderTop: '1px solid var(--obsidian)' }}>
-              <div style={{ fontSize: '10px', color: 'var(--ash)' }}>Impact</div>
-              <div style={{ fontSize: '16px', fontWeight: 700, color: 'var(--scarlet)' }}>
-                {driver.impactScore.toFixed(2)} strokes/round
-              </div>
-            </div>
-
-            {/* Cascade Note */}
-            {driver.cascadeNote && (
-              <div style={{ marginTop: '8px', padding: '6px', background: 'var(--obsidian)', borderRadius: '4px', fontSize: '10px', color: 'var(--cement)', fontStyle: 'italic' }}>
-                {driver.cascadeNote}
-              </div>
-            )}
-
-            {/* Sample Size */}
-            <div style={{ marginTop: '8px', fontSize: '9px', color: 'var(--ash)' }}>
-              Sample: {driver.sampleSize} shots
-            </div>
-          </div>
-        )) : (
-          <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '32px', color: 'var(--ash)' }}>
-            <p>No significant performance drivers identified.</p>
-            <p style={{ fontSize: '11px', marginTop: '8px' }}>Keep tracking your shots to identify patterns.</p>
-          </div>
-        )}
+  return (
+    <div
+      className="pp-card"
+      style={{ ['--pp-pillar' as string]: PILLAR_COLORS[driver.pillar] }}
+    >
+      <div className="pp-card-top">
+        <span>
+          {String(rank).padStart(2, '0')} · {PILLAR_LABELS[driver.pillar]} · {driver.code}
+        </span>
+        <TierBadge tier={driver.tier} />
       </div>
 
-      {/* Summary Stats */}
-      <div style={{ display: 'flex', gap: '16px', marginBottom: '24px' }}>
-        <div style={{
-          background: 'var(--charcoal)',
-          padding: '12px 16px',
-          borderRadius: '4px',
-          borderLeft: '3px solid var(--scarlet)',
-          flex: 1,
-        }}>
-          <div style={{ fontSize: '20px', fontWeight: 700, color: 'var(--scarlet)' }}>{playerPathMetrics.criticalDrivers.length}</div>
-          <div style={{ fontSize: '10px', color: 'var(--ash)' }}>Critical Drivers</div>
-        </div>
-        <div style={{
-          background: 'var(--charcoal)',
-          padding: '12px 16px',
-          borderRadius: '4px',
-          borderLeft: '3px solid #EA580C',
-          flex: 1,
-        }}>
-          <div style={{ fontSize: '20px', fontWeight: 700, color: '#EA580C' }}>{playerPathMetrics.significantDrivers.length}</div>
-          <div style={{ fontSize: '10px', color: 'var(--ash)' }}>Significant Drivers</div>
-        </div>
-        <div style={{
-          background: 'var(--charcoal)',
-          padding: '12px 16px',
-          borderRadius: '4px',
-          borderLeft: '3px solid #CA8A04',
-          flex: 1,
-        }}>
-          <div style={{ fontSize: '20px', fontWeight: 700, color: '#CA8A04' }}>{playerPathMetrics.moderateDrivers.length}</div>
-          <div style={{ fontSize: '10px', color: 'var(--ash)' }}>Moderate Drivers</div>
-        </div>
-        <div style={{
-          background: 'var(--charcoal)',
-          padding: '12px 16px',
-          borderRadius: '4px',
-          borderLeft: '3px solid var(--under)',
-          flex: 1,
-        }}>
-          <div style={{ fontSize: '20px', fontWeight: 700, color: 'var(--under)' }}>{playerPathMetrics.totalRounds}</div>
-          <div style={{ fontSize: '10px', color: 'var(--ash)' }}>Rounds Analyzed</div>
-        </div>
+      <div className="pp-name">{driver.name}</div>
+      <div className="pp-summary">{driver.summary}</div>
+
+      <div className="pp-metric">
+        {formatMetric(driver)}
+        {threshold && <span style={{ color: 'var(--ash)' }}> vs {threshold}</span>}
       </div>
 
+      <ThresholdMeter driver={driver} />
 
+      <div>
+        <div className="pp-impact">{formatSG(driver.impactSG)}</div>
+        <div className="pp-impact-label">Strokes gained / round</div>
+      </div>
 
+      {driver.reorderNote && <div className="pp-note">{driver.reorderNote}</div>}
 
-      {/* Segment Sections - Collapsible */}
-      {(['Driving', 'Approach', 'Putting', 'Short Game'] as const).map(segment => (
-        <div key={segment} style={{ marginBottom: '24px' }}>
-          {/* Section Header - Clickable to expand/collapse */}
-          <button
-            onClick={() => toggleSection(segment)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              width: '100%',
-              padding: '12px 16px',
-              background: 'var(--charcoal)',
-              border: '1px solid var(--ash)',
-              borderRadius: '4px',
-              color: 'var(--chalk)',
-              cursor: 'pointer',
-              fontSize: '14px',
-              fontWeight: 600,
-            }}
-          >
-            <span>{segment}</span>
-            <span style={{ fontSize: '12px', color: 'var(--ash)' }}>
-              {expandedSections[segment] ? '▲' : '▼'}
-            </span>
-          </button>
+      <DriverFooter driver={driver} />
+    </div>
+  );
+}
 
-          {/* Driver Cards - Only shown when section is expanded */}
-          {expandedSections[segment] && (
-            <div style={{ marginTop: '16px' }}>
-              {/* Sort drivers by SG lowest to highest */}
-              {allSegmentDrivers[segment]
-                .slice()
-                .sort((a, b) => getDriverSG(a) - getDriverSG(b))
-                .map(driver => renderDriverCard(driver))
-              }
+function MonitorRow({ driver }: { driver: DriverResult }) {
+  return (
+    <div
+      className="pp-monitor"
+      style={{ ['--pp-pillar' as string]: PILLAR_COLORS[driver.pillar] }}
+    >
+      <strong style={{ color: 'var(--chalk)' }}>{driver.code}</strong>
+      <span>{driver.name}</span>
+      <span>{formatMetric(driver)}</span>
+      <TierBadge tier={driver.tier} />
+      <span style={{ color: 'var(--scarlet)' }}>{formatSG(driver.impactSG)} SG/rd</span>
+      {driver.lowSample && <span style={{ color: 'var(--bogey)' }}>Low sample</span>}
+    </div>
+  );
+}
 
-              {allSegmentDrivers[segment].filter(d => d.data).length === 0 && (
-                <div style={{ textAlign: 'center', padding: '16px', color: 'var(--ash)' }}>
-                  <p>No driver data available for this segment.</p>
-                </div>
-              )}
-            </div>
-          )}
+function CausalChain({ pillarState }: { pillarState: Record<Pillar, Tier> }) {
+  return (
+    <div className="pp-chain">
+      {PILLAR_ORDER.map((pillar, i) => (
+        <div key={pillar} className="pp-chain-step">
+          {i > 0 && <span className="pp-chain-arrow">→</span>}
+          <span className="pp-chain-dot" style={{ background: PILLAR_COLORS[pillar] }} />
+          <span style={{ color: 'var(--chalk)' }}>{PILLAR_LABELS[pillar]}</span>
+          <TierBadge tier={pillarState[pillar]} />
         </div>
       ))}
     </div>
   );
 }
+
+function SegmentSection({
+  pillar,
+  drivers,
+}: {
+  pillar: Pillar;
+  drivers: DriverResult[];
+}) {
+  const [open, setOpen] = useState(true);
+  if (drivers.length === 0) return null;
+
+  return (
+    <div style={{ marginBottom: '12px' }}>
+      <button
+        onClick={() => setOpen(v => !v)}
+        aria-expanded={open}
+        style={{
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '10px',
+          background: 'var(--shadow)',
+          border: 0,
+          borderLeft: `3px solid ${PILLAR_COLORS[pillar]}`,
+          padding: '12px 16px',
+          cursor: 'pointer',
+          color: 'var(--chalk)',
+          font: 'inherit',
+          textAlign: 'left',
+        }}
+      >
+        <span
+          style={{
+            fontFamily: 'var(--font-heading)',
+            fontWeight: 700,
+            fontSize: '15px',
+            letterSpacing: '0.1em',
+            textTransform: 'uppercase',
+          }}
+        >
+          {PILLAR_LABELS[pillar]}
+          <span style={{ color: 'var(--ash)', marginLeft: '10px', fontWeight: 400 }}>
+            {drivers.length}
+          </span>
+        </span>
+        <span style={{ color: 'var(--ash)', fontSize: '11px' }}>{open ? '▲' : '▼'}</span>
+      </button>
+
+      {open && (
+        <div style={{ padding: '4px 16px 8px', background: 'var(--obsidian)' }}>
+          {drivers.map(driver => (
+            <div key={driver.code} className="pp-row">
+              <span className="pp-row-code">{driver.code}</span>
+              <span>
+                <span style={{ color: 'var(--chalk)', fontSize: '13px' }}>{driver.name}</span>
+                {driver.lowSample && (
+                  <span
+                    style={{
+                      color: 'var(--bogey)',
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: '9.5px',
+                      marginLeft: '8px',
+                      letterSpacing: '0.1em',
+                    }}
+                  >
+                    LOW SAMPLE
+                  </span>
+                )}
+              </span>
+              <span className="pp-row-figures">
+                <span style={{ color: 'var(--cement)' }}>{formatMetric(driver)}</span>
+                <TierBadge tier={driver.tier} />
+                <span style={{ minWidth: '68px', textAlign: 'right' }}>
+                  {driver.contextual ? '—' : `${formatSG(driver.impactSG)} SG/rd`}
+                </span>
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function PlayerPathView({ driverEngine, benchmark }: PlayerPathViewProps) {
+  const { all, primary, monitoring, pillarState, totalRounds } = driverEngine;
+
+  if (totalRounds === 0) {
+    return (
+      <div className="content">
+        <h4 style={{ marginBottom: '8px', color: 'var(--ash)' }}>Player Path</h4>
+        <p style={{ color: 'var(--ash)', fontSize: '13px' }}>
+          No rounds in the current filter. Adjust the filters or add a round to see performance
+          drivers.
+        </p>
+      </div>
+    );
+  }
+
+  const byPillar = (pillar: Pillar) =>
+    all
+      .filter(d => d.pillar === pillar)
+      .sort((a, b) => a.impactSG - b.impactSG);
+
+  return (
+    <div className="content">
+      <h4 style={{ marginBottom: '4px', color: 'var(--ash)' }}>Player Path</h4>
+      <p style={{ fontSize: '12px', color: 'var(--ash)', marginBottom: '18px' }}>
+        Ranked by strokes gained against {BENCHMARK_TIER_LABELS[benchmark.tier]} over{' '}
+        {totalRounds} {totalRounds === 1 ? 'round' : 'rounds'}. Drivers costing less than{' '}
+        {MATERIALITY_SG_PER_ROUND.toFixed(1)} strokes per round are tracked below rather than
+        surfaced here.
+      </p>
+
+      {primary.length > 0 ? (
+        <>
+          <div className="grid-cards-3" style={{ gap: '16px', marginBottom: '20px' }}>
+            {primary.map((driver, i) => (
+              <PrimaryCard key={driver.code} driver={driver} rank={i + 1} />
+            ))}
+          </div>
+
+          {monitoring.length > 0 && (
+            <div style={{ marginBottom: '24px' }}>
+              <div
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '9.5px',
+                  letterSpacing: '0.2em',
+                  textTransform: 'uppercase',
+                  color: 'var(--ash)',
+                  marginBottom: '8px',
+                }}
+              >
+                Monitoring
+              </div>
+              <div style={{ display: 'grid', gap: '8px' }}>
+                {monitoring.map(driver => (
+                  <MonitorRow key={driver.code} driver={driver} />
+                ))}
+              </div>
+            </div>
+          )}
+        </>
+      ) : (
+        <div
+          style={{
+            background: 'var(--shadow)',
+            padding: '24px',
+            marginBottom: '24px',
+            color: 'var(--ash)',
+          }}
+        >
+          <p style={{ color: 'var(--chalk)', marginBottom: '6px' }}>
+            No driver is costing more than {MATERIALITY_SG_PER_ROUND.toFixed(1)} strokes per round.
+          </p>
+          <p style={{ fontSize: '12px' }}>
+            Every driver is still measured — see the segment detail below.
+          </p>
+        </div>
+      )}
+
+      <div style={{ marginBottom: '24px' }}>
+        <div
+          style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: '9.5px',
+            letterSpacing: '0.2em',
+            textTransform: 'uppercase',
+            color: 'var(--ash)',
+            marginBottom: '8px',
+          }}
+        >
+          Causal chain
+        </div>
+        <CausalChain pillarState={pillarState} />
+      </div>
+
+      <div
+        style={{
+          fontFamily: 'var(--font-mono)',
+          fontSize: '9.5px',
+          letterSpacing: '0.2em',
+          textTransform: 'uppercase',
+          color: 'var(--ash)',
+          marginBottom: '8px',
+        }}
+      >
+        All drivers
+      </div>
+      {PILLAR_ORDER.map(pillar => (
+        <SegmentSection key={pillar} pillar={pillar} drivers={byPillar(pillar)} />
+      ))}
+    </div>
+  );
+}
+
+export default PlayerPathView;
