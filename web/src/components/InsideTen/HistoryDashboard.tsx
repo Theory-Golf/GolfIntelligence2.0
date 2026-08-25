@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Trash2 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ReferenceLine,
@@ -10,43 +10,19 @@ import {
 } from 'recharts';
 import { LS_INSIDE_TEN_SESSIONS } from '@/lib/constants';
 import { useDrillHistory } from '@/lib/golf/useDrillHistory';
+import { DistanceProfile } from '@/components/putting/LadderBreakdown';
+import {
+  TIER_CONFIG,
+  TOUR_BASELINE_SCORE,
+  allPutts,
+  formatSG,
+  sgForScore,
+  tierForScore,
+  type InsideTenSession,
+  type TierName,
+} from './model';
+import '@/components/putting/LadderPlay.css';
 import './InsideTen.css';
-
-type TierName = 'elite' | 'tour' | 'competitive' | 'developing';
-
-interface InsideTenSession {
-  id: string;
-  date: string;
-  timestamp: number;
-  score: number;
-  sg: number;
-  tier: TierName;
-}
-
-const SG_TABLE: Record<number, number> = {
-  18: 6.28, 17: 5.25, 16: 4.22, 15: 3.19, 14: 2.16, 13: 1.13,
-  12: 0.10, 11: -0.93, 10: -1.96, 9: -2.99, 8: -4.02, 7: -5.05,
-  6: -6.08, 5: -7.11, 4: -8.14, 3: -9.17, 2: -10.20, 1: -11.23, 0: -12.26,
-};
-
-const TIER_CONFIG: Record<TierName, { label: string; color: string; hexColor: string }> = {
-  elite:       { label: 'Elite',       color: 'var(--sg-strong)', hexColor: '#00C07A' },
-  tour:        { label: 'Tour',        color: 'var(--sg-gain)',   hexColor: '#52D9A0' },
-  competitive: { label: 'Competitive', color: 'var(--bogey)',     hexColor: '#F59520' },
-  developing:  { label: 'Developing',  color: 'var(--double)',    hexColor: '#E8202A' },
-};
-
-function tierForScore(score: number): TierName {
-  if (score >= 13) return 'elite';
-  if (score >= 11) return 'tour';
-  if (score >= 9)  return 'competitive';
-  return 'developing';
-}
-
-function formatSG(sg: number): string {
-  const abs = Math.abs(sg).toFixed(1);
-  return sg >= 0 ? `+${abs}` : `-${abs}`;
-}
 
 const getSessionId = (s: InsideTenSession) => s.id;
 const getSessionPlayedAt = (s: InsideTenSession) => s.date;
@@ -55,9 +31,7 @@ const getSessionPlayedAt = (s: InsideTenSession) => s.date;
 function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number }>; label?: string }) {
   if (!active || !payload?.length) return null;
   const score = payload[0].value;
-  const sg = SG_TABLE[score] ?? 0;
-  const tier = tierForScore(score);
-  const cfg = TIER_CONFIG[tier];
+  const cfg = TIER_CONFIG[tierForScore(score)];
   return (
     <div style={{
       background: 'var(--shadow)',
@@ -73,7 +47,7 @@ function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: 
         {score}/18
       </div>
       <div style={{ color: cfg.color, fontSize: 11, marginTop: 4 }}>
-        {formatSG(sg)} SG · {cfg.label}
+        {formatSG(sgForScore(score))} SG · {cfg.label}
       </div>
     </div>
   );
@@ -121,6 +95,10 @@ export default function HistoryDashboard() {
     .map(([key, value]) => ({ name: TIER_CONFIG[key].label, value, color: TIER_CONFIG[key].hexColor }));
 
   const hasEnoughData = sessions.length >= 3;
+
+  // Distance rollup across every session that was logged putt by putt.
+  const loggedSessions = sessions.filter(s => s.putts?.length);
+  const puttLog = allPutts(sessions);
 
   return (
     <div className="it-wrapper">
@@ -187,7 +165,7 @@ export default function HistoryDashboard() {
                   tickLine={false}
                 />
                 <ReferenceLine
-                  y={12}
+                  y={TOUR_BASELINE_SCORE}
                   stroke="var(--ash)"
                   strokeDasharray="4 4"
                   label={{ value: 'SG 0', position: 'insideTopRight', fontFamily: 'var(--font-mono)', fontSize: 9, fill: 'var(--ash)' }}
@@ -204,7 +182,7 @@ export default function HistoryDashboard() {
               </LineChart>
             </ResponsiveContainer>
             <div className="it-chart-card-header">
-              <p className="it-chart-note">Dashed line = SG 0 baseline (score 12)</p>
+              <p className="it-chart-note">Dashed line = SG 0 baseline (score {TOUR_BASELINE_SCORE})</p>
             </div>
           </div>
 
@@ -256,6 +234,23 @@ export default function HistoryDashboard() {
         </div>
       )}
 
+      {/* ── Make rate by distance, across every putt-by-putt session ── */}
+      {puttLog.length > 0 ? (
+        <DistanceProfile
+          putts={puttLog}
+          title="Make Rate by Distance"
+          note={`${puttLog.length} putts across ${loggedSessions.length} session${loggedSessions.length === 1 ? '' : 's'} logged putt by putt. Total-only sessions are not included.`}
+        />
+      ) : sessions.length > 0 && (
+        <div className="it-empty-state">
+          <p className="it-empty-icon">Make Rate by Distance</p>
+          <p className="it-empty-text">
+            Log a session putt by putt to see which distances your makes and
+            misses are coming from.
+          </p>
+        </div>
+      )}
+
       {/* ── Session log ── */}
       {sessions.length > 0 ? (
         <div className="it-card">
@@ -274,6 +269,9 @@ export default function HistoryDashboard() {
               <div className="it-log-row" key={s.id}>
                 <span className="it-log-date">
                   {new Date(s.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })}
+                  {s.putts?.length ? (
+                    <span className="lp-log-mark" title="Logged putt by putt">▪</span>
+                  ) : null}
                 </span>
                 <span className="it-log-score">{s.score}/18</span>
                 <span className="it-log-sg" style={{ color: cfg.color }}>{formatSG(s.sg)}</span>
@@ -285,11 +283,14 @@ export default function HistoryDashboard() {
                   title={isPending ? 'Click again to confirm' : 'Delete session'}
                   style={isPending ? { color: 'var(--double)', borderColor: 'var(--double)' } : undefined}
                 >
-                  {isPending ? <Trash2 size={13} /> : <Trash2 size={13} />}
+                  <Trash2 size={13} />
                 </button>
               </div>
             );
           })}
+          <p className="lp-note">
+            <span className="lp-log-mark">▪</span> logged putt by putt — carries distance detail
+          </p>
         </div>
       ) : (
         <div className="it-empty-state">

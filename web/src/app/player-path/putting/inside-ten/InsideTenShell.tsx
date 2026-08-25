@@ -6,15 +6,16 @@ import { ArrowLeft } from 'lucide-react';
 import ResumeSessionBar from '@/components/playerpath/ResumeSessionBar';
 import InsideTen from '@/components/InsideTen';
 
-type Screen = 'home' | 'play' | 'result';
+type Screen = 'home' | 'play' | 'quick' | 'result';
 
 export default function InsideTenShell() {
   const [screen, setScreen] = useState<Screen>('home');
+  const immersive = screen === 'play' || screen === 'quick';
 
   return (
     <>
-      {screen !== 'play' && <ResumeSessionBar />}
-      {screen !== 'play' && (
+      {!immersive && <ResumeSessionBar />}
+      {!immersive && (
         <section className="px-6 pt-16 pb-8">
           <div className="max-w-3xl mx-auto">
             <Link

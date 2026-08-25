@@ -2,7 +2,7 @@ import HistoryDashboard from '@/components/InsideTwenty/HistoryDashboard';
 
 export const metadata = {
   title: 'Inside Twenty — History',
-  description: 'Your Inside Twenty session history. Score trend, tier breakdown, and session log.',
+  description: 'Your Inside Twenty session history. Score trend, tier breakdown, make rate by distance, and session log.',
 };
 
 export default function InsideTwentyHistoryPage() {

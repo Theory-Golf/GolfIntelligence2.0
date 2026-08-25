@@ -10,32 +10,18 @@ import {
 } from 'recharts';
 import { LS_INSIDE_TWENTY_SESSIONS } from '@/lib/constants';
 import { useDrillHistory } from '@/lib/golf/useDrillHistory';
+import { DistanceProfile } from '@/components/putting/LadderBreakdown';
+import {
+  TIER_CONFIG,
+  TOUR_BASELINE_SCORE,
+  allPutts,
+  tierForScore,
+  type InsideTwentySession,
+  type TierName,
+} from './model';
+import '@/components/putting/LadderPlay.css';
 import '../InsideTen/InsideTen.css';
 import './InsideTwenty.css';
-
-type TierName = 'elite' | 'tour' | 'competitive' | 'developing';
-
-interface InsideTwentySession {
-  id: string;
-  date: string;
-  timestamp: number;
-  score: number;
-  tier: TierName;
-}
-
-const TIER_CONFIG: Record<TierName, { label: string; color: string; hexColor: string }> = {
-  elite:       { label: 'Elite',       color: 'var(--sg-strong)', hexColor: '#00C07A' },
-  tour:        { label: 'Tour',        color: 'var(--sg-gain)',   hexColor: '#52D9A0' },
-  competitive: { label: 'Competitive', color: 'var(--bogey)',     hexColor: '#F59520' },
-  developing:  { label: 'Developing',  color: 'var(--double)',    hexColor: '#E8202A' },
-};
-
-function tierForScore(score: number): TierName {
-  if (score >= 11) return 'elite';
-  if (score >= 9)  return 'tour';
-  if (score >= 7)  return 'competitive';
-  return 'developing';
-}
 
 const getSessionId = (s: InsideTwentySession) => s.id;
 const getSessionPlayedAt = (s: InsideTwentySession) => s.date;
@@ -104,6 +90,10 @@ export default function HistoryDashboard() {
 
   const hasEnoughData = sessions.length >= 3;
 
+  // Distance rollup across every session that was logged putt by putt.
+  const loggedSessions = sessions.filter(s => s.putts?.length);
+  const puttLog = allPutts(sessions);
+
   return (
     <div className="it-wrapper">
       <div className="it-top-nav" style={{ marginBottom: 24 }}>
@@ -167,7 +157,7 @@ export default function HistoryDashboard() {
                   tickLine={false}
                 />
                 <ReferenceLine
-                  y={9}
+                  y={TOUR_BASELINE_SCORE}
                   stroke="var(--ash)"
                   strokeDasharray="4 4"
                   label={{ value: 'Tour', position: 'insideTopRight', fontFamily: 'var(--font-mono)', fontSize: 9, fill: 'var(--ash)' }}
@@ -184,7 +174,7 @@ export default function HistoryDashboard() {
               </LineChart>
             </ResponsiveContainer>
             <div className="it-chart-card-header">
-              <p className="it-chart-note">Dashed line = Tour baseline (9 makes)</p>
+              <p className="it-chart-note">Dashed line = Tour baseline ({TOUR_BASELINE_SCORE} makes)</p>
             </div>
           </div>
 
@@ -230,6 +220,23 @@ export default function HistoryDashboard() {
         </div>
       )}
 
+      {/* ── Make rate by distance, across every putt-by-putt session ── */}
+      {puttLog.length > 0 ? (
+        <DistanceProfile
+          putts={puttLog}
+          title="Make Rate by Distance"
+          note={`${puttLog.length} putts across ${loggedSessions.length} session${loggedSessions.length === 1 ? '' : 's'} logged putt by putt. Total-only sessions are not included.`}
+        />
+      ) : sessions.length > 0 && (
+        <div className="it-empty-state">
+          <p className="it-empty-icon">Make Rate by Distance</p>
+          <p className="it-empty-text">
+            Log a session putt by putt to see which distances your makes and
+            misses are coming from.
+          </p>
+        </div>
+      )}
+
       {/* ── Session log ── */}
       {sessions.length > 0 ? (
         <div className="it-card">
@@ -248,6 +255,9 @@ export default function HistoryDashboard() {
               <div className="it-log-row" key={s.id}>
                 <span className="it-log-date">
                   {new Date(s.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })}
+                  {s.putts?.length ? (
+                    <span className="lp-log-mark" title="Logged putt by putt">▪</span>
+                  ) : null}
                 </span>
                 <span className="it-log-score">{s.score}/18</span>
                 <span className="it-log-tier-badge" style={{ color: cfg.color, gridColumn: '3 / 5' }}>{cfg.label}</span>
@@ -263,6 +273,9 @@ export default function HistoryDashboard() {
               </div>
             );
           })}
+          <p className="lp-note">
+            <span className="lp-log-mark">▪</span> logged putt by putt — carries distance detail
+          </p>
         </div>
       ) : (
         <div className="it-empty-state">

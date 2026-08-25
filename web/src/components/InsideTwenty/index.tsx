@@ -4,72 +4,31 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { LS_INSIDE_TWENTY_SESSIONS } from '@/lib/constants';
 import { useDrillHistory } from '@/lib/golf/useDrillHistory';
+import LadderPlay from '@/components/putting/LadderPlay';
+import { LadderGroupBreakdown, DistanceProfile } from '@/components/putting/LadderBreakdown';
+import {
+  GROUPS,
+  TIER_CONFIG,
+  TOTAL_PUTTS,
+  TOUR_BASELINE_SCORE,
+  buildSession,
+  formatDelta,
+  todayISO,
+  type InsideTwentySession,
+  type TierName,
+} from './model';
+import '@/components/putting/LadderPlay.css';
 import '../InsideTen/InsideTen.css';
 import './InsideTwenty.css';
 
 // ── Types ─────────────────────────────────────────────────────────
-type TierName = 'elite' | 'tour' | 'competitive' | 'developing';
-type Screen = 'home' | 'play' | 'result';
-
-interface InsideTwentySession {
-  id: string;
-  date: string;
-  timestamp: number;
-  score: number;
-  tier: TierName;
-}
+type Screen = 'home' | 'play' | 'quick' | 'result';
 
 interface ResultState {
   session: InsideTwentySession;
   prevBest: number | null;
   prevAvg5: number | null;
   prevLast: number | null;
-}
-
-// ── Drill constants ────────────────────────────────────────────────
-const GROUPS = [
-  { group: 1, putts: [5,  7,  9]  },
-  { group: 2, putts: [7,  9,  11] },
-  { group: 3, putts: [9,  11, 13] },
-  { group: 4, putts: [11, 13, 15] },
-  { group: 5, putts: [13, 15, 17] },
-  { group: 6, putts: [15, 17, 19] },
-];
-
-const TIER_CONFIG: Record<TierName, { label: string; copy: string; color: string }> = {
-  elite:       { label: 'Elite',       copy: 'Beating Tour baseline. Championship-grade mid-range putting.',         color: 'var(--sg-strong)' },
-  tour:        { label: 'Tour',        copy: 'PGA Tour benchmark. Converting at the level of the best players.',     color: 'var(--sg-gain)'   },
-  competitive: { label: 'Competitive', copy: 'Solid collegiate / scratch amateur. The conversion habit is forming.', color: 'var(--bogey)'     },
-  developing:  { label: 'Developing',  copy: 'Repeat the drill — focus on speed first, line second.',               color: 'var(--double)'    },
-};
-
-// ── Scoring ────────────────────────────────────────────────────────
-function tierForScore(score: number): TierName {
-  if (score >= 11) return 'elite';
-  if (score >= 9)  return 'tour';
-  if (score >= 7)  return 'competitive';
-  return 'developing';
-}
-
-function formatDelta(d: number): string {
-  if (d > 0) return `+${d}`;
-  if (d < 0) return `${d}`;
-  return '—';
-}
-
-function todayISO(): string {
-  return new Date().toISOString().slice(0, 10);
-}
-
-// ── Storage ────────────────────────────────────────────────────────
-function buildSession(score: number, date: string): InsideTwentySession {
-  return {
-    id: crypto.randomUUID(),
-    date,
-    timestamp: Date.now(),
-    score,
-    tier: tierForScore(score),
-  };
 }
 
 const getSessionId = (s: InsideTwentySession) => s.id;
@@ -83,6 +42,7 @@ interface InsideTwentyProps {
 export default function InsideTwenty({ onScreenChange }: InsideTwentyProps = {}) {
   const [screen, setScreen]                 = useState<Screen>('home');
   const [storageAvailable, setStorageAvail] = useState(true);
+  const [results, setResults]               = useState<boolean[]>([]);
   const [score, setScore]                   = useState(9);
   const [sessionDate, setSessionDate]       = useState<string>(todayISO);
   const [result, setResult]                 = useState<ResultState | null>(null);
@@ -108,35 +68,85 @@ export default function InsideTwenty({ onScreenChange }: InsideTwentyProps = {})
   }, []);
 
   function handleStartSession() {
-    setScore(9);
+    setResults([]);
     setSessionDate(todayISO());
     setScreen('play');
   }
 
-  function handleSave() {
+  function handleQuickEntry() {
+    setScore(9);
+    setSessionDate(todayISO());
+    setScreen('quick');
+  }
+
+  function saveSession(newSession: InsideTwentySession) {
     const prevBest = sessions.length > 0 ? Math.max(...sessions.map(s => s.score)) : null;
     const prevAvg5 = sessions.length > 0
       ? sessions.slice(0, 5).reduce((s, r) => s + r.score, 0) / Math.min(sessions.length, 5)
       : null;
     const prevLast = sessions.length > 0 ? sessions[0].score : null;
 
-    const newSession = buildSession(score, sessionDate);
     record(newSession);
     setResult({ session: newSession, prevBest, prevAvg5, prevLast });
     setScreen('result');
   }
 
-  if (screen === 'home')   return <HomeScreen   sessions={sessions} storageAvailable={storageAvailable} onStart={handleStartSession} />;
-  if (screen === 'play')   return <PlayScreen   score={score} date={sessionDate} onScoreChange={setScore} onDateChange={setSessionDate} onSave={handleSave} onBack={() => setScreen('home')} />;
-  if (screen === 'result' && result) return <ResultScreen result={result} onDone={() => setScreen('home')} onNew={handleStartSession} />;
+  function handlePutt(made: boolean) {
+    const next = [...results, made];
+    setResults(next);
+    if (next.length === TOTAL_PUTTS) {
+      saveSession(buildSession(next.filter(Boolean).length, sessionDate, next));
+    }
+  }
+
+  if (screen === 'home') {
+    return (
+      <HomeScreen
+        sessions={sessions}
+        storageAvailable={storageAvailable}
+        onStart={handleStartSession}
+        onQuickEntry={handleQuickEntry}
+      />
+    );
+  }
+  if (screen === 'play') {
+    return (
+      <LadderPlay
+        navLabel="Inside Twenty"
+        groups={GROUPS}
+        results={results}
+        benchmarkScore={TOUR_BASELINE_SCORE}
+        benchmarkLabel="the Tour benchmark"
+        onPutt={handlePutt}
+        onUndo={() => setResults(r => r.slice(0, -1))}
+        onQuit={() => setScreen('home')}
+      />
+    );
+  }
+  if (screen === 'quick') {
+    return (
+      <QuickEntryScreen
+        score={score}
+        date={sessionDate}
+        onScoreChange={setScore}
+        onDateChange={setSessionDate}
+        onSave={() => saveSession(buildSession(score, sessionDate))}
+        onBack={() => setScreen('home')}
+      />
+    );
+  }
+  if (screen === 'result' && result) {
+    return <ResultScreen result={result} onDone={() => setScreen('home')} onNew={handleStartSession} />;
+  }
   return null;
 }
 
 // ── Home Screen ────────────────────────────────────────────────────
-function HomeScreen({ sessions, storageAvailable, onStart }: {
+function HomeScreen({ sessions, storageAvailable, onStart, onQuickEntry }: {
   sessions: InsideTwentySession[];
   storageAvailable: boolean;
   onStart: () => void;
+  onQuickEntry: () => void;
 }) {
   const recent = sessions.slice(0, 3);
 
@@ -150,9 +160,12 @@ function HomeScreen({ sessions, storageAvailable, onStart }: {
 
       {/* ── Hero ── */}
       <div className="it-hero">
-        <p className="it-hero-subtitle">Eighteen putts · The conversion zone · One number that tells the truth</p>
+        <p className="it-hero-subtitle">Eighteen putts · The conversion zone · Every putt logged where it was hit</p>
         <button className="it-primary-btn" onClick={onStart}>
           Start Session
+        </button>
+        <button className="lp-text-btn" onClick={onQuickEntry}>
+          Already finished? Log a total score →
         </button>
       </div>
 
@@ -162,8 +175,8 @@ function HomeScreen({ sessions, storageAvailable, onStart }: {
         <p className="it-body-text" style={{ marginBottom: 20 }}>
           Inside Twenty trains the make-or-break mid-range zone — the distances where rounds are won or lost.
           Six groups, three putts each. Walk off each distance — no markers needed. Putt the prescribed
-          three putts per group with one ball, no retries. Track makes in your head across all 18 putts.
-          When the drill is done, enter the total. One number. That is the test.
+          three putts per group with one ball, no retries. Tap made or missed after each one and the app
+          keeps the count, so the only thing you carry between distances is the next putt.
         </p>
         <table className="it-ladder-table">
           <thead>
@@ -199,29 +212,43 @@ function HomeScreen({ sessions, storageAvailable, onStart }: {
         </div>
       </div>
 
-      {/* ── How It's Scored ── */}
+      {/* ── How It's Logged ── */}
+      <div className="it-card">
+        <p className="it-section-label">How It&apos;s Logged</p>
+        <p className="it-body-text" style={{ marginBottom: 20 }}>
+          Tap made or missed after every putt. Each finished group gets a recap
+          before you walk to the next one, and every make and miss is recorded
+          against the distance it came from — which is what turns eighteen putts
+          into a read on where the mid-range is actually leaking. If you already
+          played the drill away from your phone, log the total score instead.
+        </p>
+        <div className="lp-mode-row">
+          <button className="lp-mode-btn" onClick={onStart}>
+            <span className="lp-mode-btn-title">Log Every Putt</span>
+            <span className="lp-mode-btn-sub">Distance-level detail · recommended</span>
+          </button>
+          <button className="lp-mode-btn" onClick={onQuickEntry}>
+            <span className="lp-mode-btn-title">Total Only</span>
+            <span className="lp-mode-btn-sub">One number · score and tier only</span>
+          </button>
+        </div>
+      </div>
+
+      {/* ── Performance Tiers ── */}
       <div className="it-card">
         <p className="it-section-label">Performance Tiers</p>
         <p className="it-body-text" style={{ marginBottom: 20 }}>
-          Enter one number at the end — total putts made out of 18. Tour benchmark
-          is 9–10 makes, anchored to PGA Tour conversion rates in the 5–19 ft range.
+          Your score is total putts made out of 18. Tour benchmark is 9–10 makes,
+          anchored to PGA Tour conversion rates in the 5–19 ft range.
         </p>
         <div className="it-tier-grid">
-          {(Object.entries(TIER_CONFIG) as [TierName, typeof TIER_CONFIG[TierName]][]).map(([key, cfg]) => {
-            const ranges: Record<TierName, string> = {
-              elite:       '11–18  ·  Championship grade',
-              tour:        '9–10   ·  PGA Tour benchmark',
-              competitive: '7–8    ·  Collegiate / scratch',
-              developing:  '0–6    ·  Below baseline',
-            };
-            return (
-              <div className="it-tier-item" key={key} style={{ borderLeftColor: cfg.color }}>
-                <div className="it-tier-label" style={{ color: cfg.color }}>{cfg.label}</div>
-                <div className="it-tier-range">{ranges[key]}</div>
-                <div className="it-tier-copy">{cfg.copy}</div>
-              </div>
-            );
-          })}
+          {(Object.entries(TIER_CONFIG) as [TierName, typeof TIER_CONFIG[TierName]][]).map(([key, cfg]) => (
+            <div className="it-tier-item" key={key} style={{ borderLeftColor: cfg.color }}>
+              <div className="it-tier-label" style={{ color: cfg.color }}>{cfg.label}</div>
+              <div className="it-tier-range">{cfg.range}</div>
+              <div className="it-tier-copy">{cfg.copy}</div>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -252,7 +279,7 @@ function HomeScreen({ sessions, storageAvailable, onStart }: {
                     {s.score}<span>/18</span>
                   </span>
                   <span className="it-recent-sg" style={{ color: cfg.color }}>
-                    {cfg.label}
+                    {s.putts ? `${s.putts.filter(p => p.made).length}/${s.putts.length} logged` : 'Total only'}
                   </span>
                   <span className="it-recent-tier-badge" style={{ color: cfg.color }}>
                     {cfg.label}
@@ -275,8 +302,8 @@ function HomeScreen({ sessions, storageAvailable, onStart }: {
   );
 }
 
-// ── Play Screen ────────────────────────────────────────────────────
-function PlayScreen({ score, date, onScoreChange, onDateChange, onSave, onBack }: {
+// ── Quick Entry Screen ─────────────────────────────────────────────
+function QuickEntryScreen({ score, date, onScoreChange, onDateChange, onSave, onBack }: {
   score: number;
   date: string;
   onScoreChange: (n: number) => void;
@@ -290,7 +317,7 @@ function PlayScreen({ score, date, onScoreChange, onDateChange, onSave, onBack }
     <div className="it-wrapper">
       <div className="it-top-nav">
         <button className="it-back-btn" onClick={onBack}>← Exit</button>
-        <span className="it-nav-label">Active Session</span>
+        <span className="it-nav-label">Total Score Entry</span>
         <span style={{ minWidth: 60 }} />
       </div>
 
@@ -336,6 +363,10 @@ function PlayScreen({ score, date, onScoreChange, onDateChange, onSave, onBack }
             +
           </button>
         </div>
+        <p className="lp-note" style={{ textAlign: 'center' }}>
+          A total-only session has no distance detail. Log putt by putt to see
+          which distances the misses came from.
+        </p>
       </div>
 
       {/* ── Date ── */}
@@ -448,6 +479,14 @@ function ResultScreen({ result, onDone, onNew }: {
           )}
         </div>
       </div>
+
+      {/* ── Putt-level breakdowns (putt-by-putt sessions only) ── */}
+      <LadderGroupBreakdown putts={session.putts} />
+      <DistanceProfile
+        putts={session.putts}
+        title="This Session By Distance"
+        note="9 through 15 ft carry three putts each — the ends of the ladder are sampled once or twice."
+      />
 
       {/* ── CTAs ── */}
       <div className="it-cta-row">

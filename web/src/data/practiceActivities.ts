@@ -228,7 +228,7 @@ export const ACTIVITIES: Activity[] = [
     category: 'putting',
     type: 'skill_assessment',
     description:
-      '18 putts across six ladders from 3 to 10 feet — the par-save and birdie-conversion range. Single-input scoring with Strokes Gained tracked across the makeable band.',
+      '18 putts across six ladders from 3 to 10 feet — the par-save and birdie-conversion range. Logged putt by putt with a recap after every ladder, and Strokes Gained tracked across the makeable band.',
     connected_drivers: [
       {
         driver_id: 'M1',
@@ -249,7 +249,7 @@ export const ACTIVITIES: Activity[] = [
     category: 'putting',
     type: 'skill_assessment',
     description:
-      'Eighteen putts across six ladders from 5 to 19 feet — the mid-range conversion zone. Tier-based performance tracking across the distances where rounds are won or lost.',
+      'Eighteen putts across six ladders from 5 to 19 feet — the mid-range conversion zone. Logged putt by putt so every make and miss carries the distance it came from, with tier-based tracking across the range where rounds are won or lost.',
     connected_drivers: [
       {
         driver_id: 'M1',
