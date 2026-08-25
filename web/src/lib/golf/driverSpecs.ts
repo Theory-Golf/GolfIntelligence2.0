@@ -133,17 +133,13 @@ export interface DriverSpec {
 // ============================================
 
 /**
- * End distance in feet.
+ * End distance in yards.
  *
  * Distances are yards EXCEPT when the corresponding lie is Green, where the
- * value is already feet (types.ts). Converting a green distance again is the
- * defect that inflated every proximity reading threefold.
+ * stored value is feet (types.ts). Every proportional comparison in this file
+ * runs through here so both sides of the ratio are the same unit — mixing feet
+ * against yards is what made the precision drivers three times too strict.
  */
-export function endFeet(s: ProcessedShot): number {
-  return s.endingLie === 'Green' ? s.endingDistance : s.endingDistance * 3;
-}
-
-/** End distance in yards, for the off-green comparisons A2 uses. */
 export function endYards(s: ProcessedShot): number {
   return s.endingLie === 'Green' ? s.endingDistance / 3 : s.endingDistance;
 }
@@ -435,7 +431,7 @@ const APPROACH: DriverSpec[] = [
     code: 'A3',
     pillar: 'Approach',
     name: 'Approach Precision Rate',
-    summary: '50–200 yards. End distance in feet within 20% of start distance in yards.',
+    summary: '50–200 yards. Finishes within 20% of the distance it started from.',
     polarity: 'higher',
     tiers: { elite: 55, severe: 25 },
     tiger5: ['T1', 'T2', 'T4'],
@@ -450,8 +446,11 @@ const APPROACH: DriverSpec[] = [
           s.startingDistance >= 50 &&
           s.startingDistance <= 200,
       );
-      // The 20% rule is surface-agnostic: only distance from the pin matters.
-      return qualifyRate(pop, s => endFeet(s) > 0.2 * s.startingDistance, 'success');
+      // A dimensionless ratio: end distance over start distance, both in yards.
+      // A shot finishing on the green is stored in feet, so endYards converts it
+      // first — comparing a feet value against a yards value would make the bar
+      // three times tighter than intended.
+      return qualifyRate(pop, s => endYards(s) > 0.2 * s.startingDistance, 'success');
     },
   },
   {
@@ -503,10 +502,10 @@ const APPROACH: DriverSpec[] = [
           s.startingDistance <= 230 &&
           !s.hasPenalty,
       );
-      // The 25% comparison follows A3's feet-against-yards convention.
+      // Same yards-over-yards ratio as A3, at 25%.
       return qualifyRate(
         pop,
-        s => s.endingLie === 'Recovery' || endFeet(s) > 0.25 * s.startingDistance,
+        s => s.endingLie === 'Recovery' || endYards(s) > 0.25 * s.startingDistance,
         'failure',
       );
     },
