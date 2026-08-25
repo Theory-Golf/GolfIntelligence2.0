@@ -2,7 +2,7 @@ import HistoryDashboard from '@/components/InsideTen/HistoryDashboard';
 
 export const metadata = {
   title: 'Inside Ten — History',
-  description: 'Your Inside Ten session history. Score trend, tier breakdown, and session log.',
+  description: 'Your Inside Ten session history. Score trend, tier breakdown, make rate by distance, and session log.',
 };
 
 export default function InsideTenHistoryPage() {
