@@ -382,3 +382,14 @@ button,
   --color-accent: var(--primary);
   --color-secondary: var(--cement);
 }
+
+/* ================================================================
+   PLAYERPATH STICKY CHROME
+   The navbar (61px) plus PlayerPath's own section rail (44px). Every
+   anchor target on /player-path offsets by this so a jump lands the
+   heading below the rail rather than behind it. One number, one place —
+   change the rail's height and the anchors follow.
+   ================================================================ */
+:root {
+  --pp-chrome-h: 106px; /* 61px navbar + 44px rail + its 1px bottom border */
+}

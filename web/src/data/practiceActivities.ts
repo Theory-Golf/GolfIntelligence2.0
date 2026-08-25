@@ -74,6 +74,16 @@ export function activityById(id: string): Activity | undefined {
   return ACTIVITIES.find((a) => a.id === id);
 }
 
+/**
+ * Where a tool's back-link should return to on the PlayerPath hub: the segment
+ * the player was working, not the top of the catalog. Falls back to the whole
+ * Practice section for anything not in the catalog.
+ */
+export function segmentAnchor(activityId: string): string {
+  const category = activityById(activityId)?.category;
+  return category ? `/player-path#segment-${category}` : '/player-path#practice';
+}
+
 export const ACTIVITIES: Activity[] = [
   // ── PUTTING ──────────────────────────────────────────────────────────
 

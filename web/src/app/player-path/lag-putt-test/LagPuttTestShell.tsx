@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import ResumeSessionBar from '@/components/playerpath/ResumeSessionBar';
+import { segmentAnchor } from '@/data/practiceActivities';
 import LagPuttTest from '@/components/LagPuttTest';
 
 export default function LagPuttTestShell() {
@@ -16,7 +17,7 @@ export default function LagPuttTestShell() {
         <section className="px-6 pt-16 pb-8">
           <div className="max-w-3xl mx-auto">
             <Link
-              href="/player-path#practice"
+              href={segmentAnchor('lag-putt-test')}
               className="inline-flex items-center gap-2 font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground no-underline mb-6 hover:text-primary transition-colors"
             >
               <ArrowLeft className="size-3" /> Practice

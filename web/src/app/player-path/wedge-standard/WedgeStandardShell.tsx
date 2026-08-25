@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import ResumeSessionBar from '@/components/playerpath/ResumeSessionBar';
+import { segmentAnchor } from '@/data/practiceActivities';
 import WedgeStandard from '@/components/WedgeStandard';
 
 type Screen = 'home' | 'setup' | 'practice' | 'creative' | 'history' | 'results';
@@ -19,7 +20,7 @@ export default function WedgeStandardShell() {
       {!PLAY_SCREENS.includes(screen) && (
         <section className="px-6 pt-16 pb-8">
           <div className="max-w-3xl mx-auto">
-            <Link href="/player-path#practice" className="inline-flex items-center gap-2 font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground no-underline mb-6 hover:text-primary transition-colors">
+            <Link href={segmentAnchor('wedge-standard')} className="inline-flex items-center gap-2 font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground no-underline mb-6 hover:text-primary transition-colors">
               <ArrowLeft className="size-3" /> Practice
             </Link>
             <p className="eyebrow mb-5">Assessment &middot; Wedge</p>
