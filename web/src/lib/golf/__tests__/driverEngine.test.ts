@@ -13,7 +13,7 @@ import {
   MAX_PRIMARY,
   MAX_MONITORING,
 } from '../driverEngine';
-import { SPECS_BY_CODE, endFeet } from '../driverSpecs';
+import { SPECS_BY_CODE, endYards } from '../driverSpecs';
 import type { BenchmarkSelection } from '../benchmarks';
 import { shot } from './fixtures';
 
@@ -90,9 +90,9 @@ describe('threshold boundaries', () => {
 });
 
 describe('units', () => {
-  it('reads a green end distance as feet and an off-green one as yards', () => {
-    expect(endFeet(shot({ endingLie: 'Green', endingDistance: 6 }))).toBe(6);
-    expect(endFeet(shot({ endingLie: 'Rough', endingDistance: 6 }))).toBe(18);
+  it('converts a green end distance from feet to yards and leaves others alone', () => {
+    expect(endYards(shot({ endingLie: 'Green', endingDistance: 6 }))).toBe(2);
+    expect(endYards(shot({ endingLie: 'Rough', endingDistance: 6 }))).toBe(6);
   });
 
   it('counts a 12ft approach as in scoring position, not 36ft out', () => {
@@ -116,20 +116,48 @@ describe('units', () => {
     expect(a2?.tier).toBe('elite');
   });
 
-  it('applies the 20% rule as feet against yards', () => {
-    // From 100y the threshold is 20ft. A shot finishing 18ft away passes.
-    const pass = Array.from({ length: 30 }, (_, i) =>
+  /** `n` approach shots from `startYards`, each finishing at `endDist` in `lie`. */
+  const approachesFinishing = (
+    startYards: number,
+    endDist: number,
+    lie: 'Green' | 'Rough',
+    n = 30,
+  ) =>
+    Array.from({ length: n }, (_, i) =>
       shot({
         roundId: `round-${(i % 3) + 1}`,
         holeNumber: (i % 18) + 1,
         shotType: 'Approach',
         startingLie: 'Fairway',
-        startingDistance: 100,
-        endingLie: 'Green',
-        endingDistance: 18,
+        startingDistance: startYards,
+        endingLie: lie,
+        endingDistance: endDist,
+        calculatedStrokesGained: -0.2,
       }),
     );
-    expect(find(pass, 'A3')?.metricValue).toBe(100);
+
+  it('measures A3 as a yards ratio, not feet against yards', () => {
+    // From 100y the bar is 20 yards. A shot finishing 40ft — 13.3 yards — is
+    // inside it. Under the old mixed-unit reading 40ft failed a 20ft bar, so
+    // this case distinguishes the two readings.
+    expect(find(approachesFinishing(100, 40, 'Green'), 'A3')?.metricValue).toBe(100);
+  });
+
+  it('still rejects an approach outside the A3 bar', () => {
+    // 25 yards from 100y is beyond the 20-yard threshold.
+    expect(find(approachesFinishing(100, 25, 'Rough'), 'A3')?.metricValue).toBe(0);
+  });
+
+  it('measures A5 obstruction as the same yards ratio at 25%', () => {
+    // From 200y the bar is 50 yards. 40 yards is clean; 60 is an obstruction.
+    expect(find(approachesFinishing(200, 40, 'Rough'), 'A5')?.metricValue).toBe(0);
+    expect(find(approachesFinishing(200, 60, 'Rough'), 'A5')?.metricValue).toBe(100);
+  });
+
+  it('converts a green finish before applying the A3 ratio', () => {
+    // 30ft on the green is 10 yards — comfortably inside the 20-yard bar from
+    // 100y, and the conversion is the only thing that makes that true.
+    expect(find(approachesFinishing(100, 30, 'Green'), 'A3')?.metricValue).toBe(100);
   });
 });
 
@@ -257,6 +285,9 @@ describe('causal chain', () => {
   it('ranks putting below a flagged approach pillar and says why', () => {
     // Putting costs more in raw strokes, but approach is flagged upstream, so
     // approach must lead and the putting card must explain its demotion.
+    // Approach is severe on A1: 6 greens in 40 from 150-200y is 15% GIR,
+    // under A1's severe bound of 25%. Anchoring on GIR keeps this test about
+    // the causal-chain rule rather than about any one proximity threshold.
     const approachMisses = Array.from({ length: 40 }, (_, i) =>
       shot({
         roundId: `round-${(i % 4) + 1}`,
@@ -264,9 +295,9 @@ describe('causal chain', () => {
         shotType: 'Approach',
         startingLie: 'Fairway',
         startingDistance: 170,
-        endingLie: i < 30 ? 'Rough' : 'Green',
-        endingDistance: i < 30 ? 15 : 25,
-        calculatedStrokesGained: i < 30 ? -0.3 : 0.1,
+        endingLie: i < 34 ? 'Rough' : 'Green',
+        endingDistance: i < 34 ? 15 : 25,
+        calculatedStrokesGained: i < 34 ? -0.3 : 0.1,
       }),
     );
 
