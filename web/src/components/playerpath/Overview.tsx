@@ -37,7 +37,7 @@ const LOOP = [
 
 export default function PlayerPathOverview() {
   return (
-    <section id="playerpath" className="scroll-mt-[61px] px-6 pt-20 pb-16">
+    <section id="playerpath" className="scroll-mt-[var(--pp-chrome-h)] px-6 pt-20 pb-16">
       <div className="mx-auto max-w-5xl">
         <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-primary">
           01 — PlayerPath
@@ -50,6 +50,14 @@ export default function PlayerPathOverview() {
           about it — structured practice built around that finding, and measured the same way a
           round is.
         </p>
+
+        {/*
+          A returning player's own numbers, before the pitch. PracticeStrip
+          renders nothing until there is history to show, so a player on their
+          first visit still meets the explainer first — no flag, no first-visit
+          state: the empty case is already the signal.
+        */}
+        <PracticeStrip />
 
         <div className="mt-12 grid grid-cols-1 gap-px border border-border bg-border md:grid-cols-3">
           {LOOP.map((item) => (
@@ -87,8 +95,6 @@ export default function PlayerPathOverview() {
             </span>
           </p>
         </div>
-
-        <PracticeStrip />
       </div>
     </section>
   );

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import SectionHeader from '@/components/playerpath/SectionHeader';
 import {
@@ -71,13 +71,38 @@ export default function PracticeBySegment() {
   const groups = useMemo(buildGroups, []);
   const [open, setOpen] = useState<Record<string, boolean>>({});
   const [recency, setRecency] = useState<Recency>({});
+  const pendingJump = useRef<string | null>(null);
 
   // Collapsed on phones so the section is a short list rather than 18 cards;
   // expanded on wider screens where the whole catalog fits comfortably.
+  //
+  // A `#segment-*` landing overrides that for its own group: arriving from a
+  // tool's back-link onto a collapsed header would be a dead end.
   useEffect(() => {
     const wide = typeof window !== 'undefined' && window.matchMedia('(min-width: 640px)').matches;
-    setOpen(Object.fromEntries(groups.map((g) => [g.id, wide])));
+    const landing = window.location.hash.match(/^#segment-(.+)$/)?.[1];
+    setOpen(Object.fromEntries(groups.map((g) => [g.id, wide || g.id === landing])));
   }, [groups]);
+
+  /**
+   * Chip click: open the group, then scroll to it. The scroll has to wait for
+   * the open state to commit, or it measures the collapsed height and lands
+   * short — so it runs from the effect below rather than here.
+   */
+  const jumpToSegment = useCallback((id: string) => {
+    pendingJump.current = id;
+    setOpen((o) => ({ ...o, [id]: true }));
+  }, []);
+
+  useEffect(() => {
+    const id = pendingJump.current;
+    if (!id) return;
+    pendingJump.current = null;
+    document.getElementById(`segment-${id}`)?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
+  }, [open]);
 
   // Per-activity recency from the player's account. Absent when signed out —
   // the cards simply omit the line rather than erroring.
@@ -97,6 +122,16 @@ export default function PracticeBySegment() {
   }, []);
 
   const builtCount = ACTIVITIES.filter((a) => isBuilt(a.id)).length;
+  const readyByGroup = useMemo(
+    () =>
+      Object.fromEntries(
+        groups.map((g) => [
+          g.id,
+          ACTIVITIES.filter((a) => a.category === g.id && isBuilt(a.id)).length,
+        ]),
+      ),
+    [groups],
+  );
 
   return (
     <section className="px-6 pb-20">
@@ -119,14 +154,35 @@ export default function PracticeBySegment() {
           in development
         </p>
 
+        {/*
+          The fast path into a segment. The accordion below starts collapsed on
+          phones, which is exactly where scrolling a four-segment catalog costs
+          most — so a chip opens its group as well as scrolling to it.
+        */}
+        <div className="mb-6 flex flex-wrap gap-2" role="group" aria-label="Jump to a segment">
+          {groups.map((group) => (
+            <button
+              key={group.id}
+              type="button"
+              onClick={() => jumpToSegment(group.id)}
+              className="flex min-h-[44px] items-center gap-2 border border-border bg-card px-4 font-mono text-[10px] uppercase tracking-[0.15em] text-foreground transition-colors duration-150 hover:border-primary hover:text-primary"
+            >
+              {group.label}
+              <span className="text-muted-foreground">{readyByGroup[group.id]}</span>
+            </button>
+          ))}
+        </div>
+
         <div className="border border-border">
           {groups.map((group, i) => {
             const isOpen = open[group.id] ?? false;
-            const ready = ACTIVITIES.filter(
-              (a) => a.category === group.id && isBuilt(a.id),
-            ).length;
+            const ready = readyByGroup[group.id];
             return (
-              <div key={group.id} className={i > 0 ? 'border-t border-border' : ''}>
+              <div
+                key={group.id}
+                id={`segment-${group.id}`}
+                className={`scroll-mt-[var(--pp-chrome-h)] ${i > 0 ? 'border-t border-border' : ''}`}
+              >
                 <button
                   type="button"
                   aria-expanded={isOpen}
