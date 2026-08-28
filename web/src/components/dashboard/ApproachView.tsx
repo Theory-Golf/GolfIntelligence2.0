@@ -183,7 +183,7 @@ function ApproachBucketCard({ bucket }: { bucket: ApproachDistanceBucket }) {
         {hasShots ? formatStrokesGained(bucket.strokesGained) : '—'}
       </div>
       <div className="label" style={{ color: 'var(--ash)', fontSize: '11px', marginBottom: '16px' }}>
-        SG ({bucket.totalShots} shots)
+        SG ({bucket.totalShots} {bucket.totalShots === 1 ? 'shot' : 'shots'})
       </div>
 
       <div className="flex justify-between">
@@ -310,8 +310,8 @@ function ApproachTableSection({ shots }: { shots: ProcessedShot[] }) {
         <span style={{ fontWeight: 600 }}>All Approach Shots</span>
         <span style={{ fontSize: '12px', color: 'var(--ash)' }}>
           {isFiltered
-            ? `${filteredApproaches.length} of ${approaches.length} approach shots`
-            : `${approaches.length} approach shots`}
+            ? `${filteredApproaches.length} of ${approaches.length} approach ${approaches.length === 1 ? 'shot' : 'shots'}`
+            : `${approaches.length} approach ${approaches.length === 1 ? 'shot' : 'shots'}`}
           {' • '}{isExpanded ? '▲' : '▼'}
         </span>
       </button>

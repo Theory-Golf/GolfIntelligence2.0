@@ -1856,10 +1856,10 @@ export function calculateApproachMetrics(shots: ProcessedShot[]): ApproachMetric
  * - Calculate SG, Green %, and Proximity for each bucket
  * 
  * Distance buckets (see APPROACH_DISTANCE_BUCKETS):
- * - 50-100 yards: Distance Wedges
+ * - 51-100 yards: Distance Wedges
  * - 101-150 yards: Short Approach
  * - 151-200 yards: Medium Approach
- * - 201+ yards: Long Approach
+ * - 201-225 yards: Long Approach
  *
  * All four buckets are always returned, including empty ones.
  */
@@ -1933,7 +1933,7 @@ export function calculateApproachByDistance(shots: ProcessedShot[]): ApproachDis
 /**
  * Calculate Approach from Rough metrics
  * - Filter to approach shots from Rough only
- * - Four buckets: 50-100, 101-150, 151-200, 201+ yards
+ * - Four buckets: 51-100, 101-150, 151-200, 201-225 yards
  * - Calculate SG, Green %, and Proximity for each bucket
  * - All four buckets are always returned, including empty ones
  */
@@ -2003,16 +2003,18 @@ export function calculateApproachFromRough(shots: ProcessedShot[]): ApproachDist
 
 /**
  * Calculate Approach Heat Map data
- * - X-axis: Distance buckets (50-100, 101-150, 151-200, 201+ yards)
- * - Y-axis: Starting Lie (Tee, Fairway, Rough, Sand, Recovery)
+ * - X-axis: Distance buckets (51-100, 101-150, 151-200, 201-225 yards)
+ * - Y-axis: Starting Lie (Tee, Fairway, Rough, Sand)
  * - Cell values: Total shots and SG metrics
  * 
  * @param shots - Processed shots
  * @param totalRounds - Total number of rounds in the filter (for SG per Round calculation)
  */
 export function calculateApproachHeatMapData(shots: ProcessedShot[], totalRounds: number): ApproachHeatMapData {
-  // Define the 5 starting lies for Y-axis
-  const lies = ['Tee', 'Fairway', 'Rough', 'Sand', 'Recovery'];
+  // Define the 4 starting lies for Y-axis. Recovery is excluded: classifyShotType
+  // labels a shot from a Recovery lie as its own shot type, never an Approach,
+  // so the row could only ever be empty.
+  const lies = ['Tee', 'Fairway', 'Rough', 'Sand'];
   
   // Define distance buckets for X-axis
   const distanceBuckets = APPROACH_DISTANCE_BUCKETS;
