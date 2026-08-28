@@ -14,14 +14,6 @@ export type MissDirection = 'Left' | 'Right';
 
 export type PuttDirection = 'Long' | 'Short';
 
-export type ShotSegment =
-  | 'Drive'
-  | 'Approach'
-  | 'ShortGame'
-  | 'Recovery'
-  | 'Putt'
-  | 'Other';
-
 export interface CourseRow {
   id: string;
   /** Null for a course a player added for themselves. */

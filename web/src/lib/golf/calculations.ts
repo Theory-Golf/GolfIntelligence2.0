@@ -7,6 +7,7 @@ import type { ProcessedShot, ShotType, ShotCategory, Tiger5Metrics, RoundSummary
 import type { BenchmarkSelection } from './benchmarks';
 import { calculateStrokesGained } from './benchmarks';
 import type { DashboardShotRow } from './db/dashboard';
+import { APPROACH_DISTANCE_BUCKETS } from './approachBuckets';
 
 /**
  * Group shots by hole and calculate hole scores
@@ -1854,11 +1855,13 @@ export function calculateApproachMetrics(shots: ProcessedShot[]): ApproachMetric
  * - Group by distance buckets
  * - Calculate SG, Green %, and Proximity for each bucket
  * 
- * Distance buckets:
+ * Distance buckets (see APPROACH_DISTANCE_BUCKETS):
  * - 51-100 yards: Distance Wedges
  * - 101-150 yards: Short Approach
  * - 151-200 yards: Medium Approach
  * - 201-225 yards: Long Approach
+ *
+ * All four buckets are always returned, including empty ones.
  */
 export function calculateApproachByDistance(shots: ProcessedShot[]): ApproachDistanceBucket[] {
   // Filter to approach shots from Tee and Fairway only
@@ -1868,12 +1871,7 @@ export function calculateApproachByDistance(shots: ProcessedShot[]): ApproachDis
   );
   
   // Define distance buckets
-  const buckets = [
-    { label: 'Distance Wedges', description: '51-100 yards', minDistance: 51, maxDistance: 100 },
-    { label: 'Short Approach', description: '101-150 yards', minDistance: 101, maxDistance: 150 },
-    { label: 'Medium Approach', description: '151-200 yards', minDistance: 151, maxDistance: 200 },
-    { label: 'Long Approach', description: '201-225 yards', minDistance: 201, maxDistance: 225 },
-  ];
+  const buckets = APPROACH_DISTANCE_BUCKETS;
   
   // Calculate metrics for each bucket
   const results: ApproachDistanceBucket[] = buckets.map(bucket => {
@@ -1927,8 +1925,9 @@ export function calculateApproachByDistance(shots: ProcessedShot[]): ApproachDis
     };
   });
   
-  // Filter out buckets with no shots
-  return results.filter(b => b.totalShots > 0);
+  // Every bucket is returned, including empty ones, so the UI can show all
+  // four distance bands even when a band has no shots.
+  return results;
 }
 
 /**
@@ -1936,6 +1935,7 @@ export function calculateApproachByDistance(shots: ProcessedShot[]): ApproachDis
  * - Filter to approach shots from Rough only
  * - Four buckets: 51-100, 101-150, 151-200, 201-225 yards
  * - Calculate SG, Green %, and Proximity for each bucket
+ * - All four buckets are always returned, including empty ones
  */
 export function calculateApproachFromRough(shots: ProcessedShot[]): ApproachDistanceBucket[] {
   // Filter to approach shots from Rough only
@@ -1945,12 +1945,7 @@ export function calculateApproachFromRough(shots: ProcessedShot[]): ApproachDist
   );
   
   // Define four buckets (same as approach by distance)
-  const buckets = [
-    { label: 'Distance Wedges', description: '51-100 yards', minDistance: 51, maxDistance: 100 },
-    { label: 'Short Approach', description: '101-150 yards', minDistance: 101, maxDistance: 150 },
-    { label: 'Medium Approach', description: '151-200 yards', minDistance: 151, maxDistance: 200 },
-    { label: 'Long Approach', description: '201-225 yards', minDistance: 201, maxDistance: 225 },
-  ];
+  const buckets = APPROACH_DISTANCE_BUCKETS;
   
   // Calculate metrics for each bucket
   const results: ApproachDistanceBucket[] = buckets.map(bucket => {
@@ -2001,30 +1996,28 @@ export function calculateApproachFromRough(shots: ProcessedShot[]): ApproachDist
     };
   });
   
-  // Filter out buckets with no shots
-  return results.filter(b => b.totalShots > 0);
+  // Every bucket is returned, including empty ones, so the UI can show all
+  // four distance bands even when a band has no shots.
+  return results;
 }
 
 /**
  * Calculate Approach Heat Map data
  * - X-axis: Distance buckets (51-100, 101-150, 151-200, 201-225 yards)
- * - Y-axis: Starting Lie (Tee, Fairway, Rough, Sand, Recovery)
+ * - Y-axis: Starting Lie (Tee, Fairway, Rough, Sand)
  * - Cell values: Total shots and SG metrics
  * 
  * @param shots - Processed shots
  * @param totalRounds - Total number of rounds in the filter (for SG per Round calculation)
  */
 export function calculateApproachHeatMapData(shots: ProcessedShot[], totalRounds: number): ApproachHeatMapData {
-  // Define the 5 starting lies for Y-axis
-  const lies = ['Tee', 'Fairway', 'Rough', 'Sand', 'Recovery'];
+  // Define the 4 starting lies for Y-axis. Recovery is excluded: classifyShotType
+  // labels a shot from a Recovery lie as its own shot type, never an Approach,
+  // so the row could only ever be empty.
+  const lies = ['Tee', 'Fairway', 'Rough', 'Sand'];
   
   // Define distance buckets for X-axis
-  const distanceBuckets = [
-    { label: 'Distance Wedges', minDistance: 51, maxDistance: 100 },
-    { label: 'Short Approach', minDistance: 101, maxDistance: 150 },
-    { label: 'Medium Approach', minDistance: 151, maxDistance: 200 },
-    { label: 'Long Approach', minDistance: 201, maxDistance: 225 },
-  ];
+  const distanceBuckets = APPROACH_DISTANCE_BUCKETS;
   
   // Filter to approach shots only
   const approachShots = shots.filter(s => s.shotType === 'Approach');

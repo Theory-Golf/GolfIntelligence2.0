@@ -1,10 +1,25 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, type CSSProperties } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { getStrokeGainedColor, formatStrokesGained, getShotSGColor, chartColors } from '@/lib/golf/tokens';
 import { useMediaQuery, MOBILE_QUERY } from '@/lib/useMediaQuery';
 import type { ApproachMetrics, ApproachDistanceBucket, ApproachHeatMapData, ProcessedShot } from '@/lib/golf/types';
+import { APPROACH_DISTANCE_BUCKETS, getApproachType, getApproachBucketRange, type ApproachTypeLabel } from '@/lib/golf/approachBuckets';
+
+// Get color for green hit percentage
+function getGreenHitPctColor(pct: number): string {
+  if (pct >= 50) return 'var(--under)';      // Green
+  if (pct >= 35) return 'var(--bogey)';      // Yellow
+  return 'var(--double)';                     // Red
+}
+
+// Get color for proximity (lower is better)
+function getProximityColor(proximity: number): string {
+  if (proximity <= 30) return 'var(--under)';  // Green
+  if (proximity <= 45) return 'var(--bogey)';  // Yellow
+  return 'var(--double)';                       // Red
+}
 
 export function ApproachView({ metrics, approachByDistance, approachFromRough, approachHeatMapData, filteredShots }: { metrics: ApproachMetrics; approachByDistance: ApproachDistanceBucket[]; approachFromRough: ApproachDistanceBucket[]; approachHeatMapData: ApproachHeatMapData; filteredShots: ProcessedShot[] }) {
   const {
@@ -32,20 +47,6 @@ export function ApproachView({ metrics, approachByDistance, approachFromRough, a
     greenHitPctOver150: _greenHitPctOver150,
     greenHitPctUnder150: _greenHitPctUnder150,
   } = metrics;
-
-  // Get color for green hit percentage
-  const getGreenHitPctColor = (pct: number): string => {
-    if (pct >= 50) return 'var(--under)';      // Green
-    if (pct >= 35) return 'var(--bogey)';        // Yellow
-    return 'var(--double)';                       // Red
-  };
-
-  // Get color for proximity (lower is better)
-  const getProximityColor = (proximity: number): string => {
-    if (proximity <= 30) return 'var(--under)';  // Green
-    if (proximity <= 45) return 'var(--bogey)';  // Yellow
-    return 'var(--double)';                       // Red
-  };
 
   return (
     <div className="content">
@@ -128,89 +129,21 @@ export function ApproachView({ metrics, approachByDistance, approachFromRough, a
 
       </div>
 
-      {/* Approach by Distance Section */}
-      {approachByDistance.length > 0 && (
-        <>
-          <h4 style={{ marginTop: '32px', marginBottom: '16px', color: 'var(--ash)' }}>Approach (Fairway and Tee): Approach Skill</h4>
-          <div className="grid-cards-4" style={{ gap: '16px' }}>
-            {approachByDistance.map((bucket) => (
-              <div key={bucket.label} className="card">
-                <div className="flex justify-between items-center" style={{ marginBottom: '8px' }}>
-                  <div className="label" style={{ color: 'var(--scarlet)' }}>{bucket.label}</div>
-                </div>
-                <div className="label" style={{ color: 'var(--ash)', fontSize: '11px', marginBottom: '12px' }}>
-                  {bucket.description}
-                </div>
+      {/* Approach by Distance Section - all four buckets always shown */}
+      <h4 style={{ marginTop: '32px', marginBottom: '16px', color: 'var(--ash)' }}>Approach (Fairway and Tee): Approach Skill</h4>
+      <div className="grid-cards-4" style={{ gap: '16px' }}>
+        {approachByDistance.map((bucket) => (
+          <ApproachBucketCard key={bucket.label} bucket={bucket} />
+        ))}
+      </div>
 
-                {/* Main Value: SG */}
-                <div className="value-hero" style={{ color: getStrokeGainedColor(bucket.strokesGained), fontSize: '28px' }}>
-                  {formatStrokesGained(bucket.strokesGained)}
-                </div>
-                <div className="label" style={{ color: 'var(--ash)', fontSize: '11px', marginBottom: '16px' }}>
-                  SG ({bucket.totalShots} shots)
-                </div>
-
-                <div className="flex justify-between">
-                  <div>
-                    <div className="label" style={{ color: 'var(--ash)', fontSize: '10px' }}>Green %</div>
-                    <div className="value-stat" style={{ color: getGreenHitPctColor(bucket.greenHitPct), fontSize: '14px' }}>
-                      {bucket.greenHitPct.toFixed(0)}%
-                    </div>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div className="label" style={{ color: 'var(--ash)', fontSize: '10px' }}>Prox</div>
-                    <div className="value-stat" style={{ color: getProximityColor(bucket.proximity), fontSize: '14px' }}>
-                      {bucket.proximity.toFixed(0)} ft
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </>
-      )}
-
-      {/* Approach from Rough Section */}
-      {approachFromRough.length > 0 && (
-        <>
-          <h4 style={{ marginTop: '32px', marginBottom: '16px', color: 'var(--ash)' }}>Approach from Rough: Rough Skill</h4>
-          <div className="grid-cards-4" style={{ gap: '16px' }}>
-            {approachFromRough.map((bucket) => (
-              <div key={bucket.label} className="card">
-                <div className="flex justify-between items-center" style={{ marginBottom: '8px' }}>
-                  <div className="label" style={{ color: 'var(--scarlet)' }}>{bucket.label}</div>
-                </div>
-                <div className="label" style={{ color: 'var(--ash)', fontSize: '11px', marginBottom: '12px' }}>
-                  {bucket.description}
-                </div>
-
-                {/* Main Value: SG */}
-                <div className="value-hero" style={{ color: getStrokeGainedColor(bucket.strokesGained), fontSize: '28px' }}>
-                  {formatStrokesGained(bucket.strokesGained)}
-                </div>
-                <div className="label" style={{ color: 'var(--ash)', fontSize: '11px', marginBottom: '16px' }}>
-                  SG ({bucket.totalShots} shots)
-                </div>
-
-                <div className="flex justify-between">
-                  <div>
-                    <div className="label" style={{ color: 'var(--ash)', fontSize: '10px' }}>Green %</div>
-                    <div className="value-stat" style={{ color: getGreenHitPctColor(bucket.greenHitPct), fontSize: '14px' }}>
-                      {bucket.greenHitPct.toFixed(0)}%
-                    </div>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div className="label" style={{ color: 'var(--ash)', fontSize: '10px' }}>Prox</div>
-                    <div className="value-stat" style={{ color: getProximityColor(bucket.proximity), fontSize: '14px' }}>
-                      {bucket.proximity.toFixed(0)} ft
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </>
-      )}
+      {/* Approach from Rough Section - all four buckets always shown */}
+      <h4 style={{ marginTop: '32px', marginBottom: '16px', color: 'var(--ash)' }}>Approach from Rough: Rough Skill</h4>
+      <div className="grid-cards-4" style={{ gap: '16px' }}>
+        {approachFromRough.map((bucket) => (
+          <ApproachBucketCard key={bucket.label} bucket={bucket} />
+        ))}
+      </div>
 
       {/* Approach Heat Map Section */}
       <ApproachHeatMapSection data={approachHeatMapData} />
@@ -225,31 +158,132 @@ export function ApproachView({ metrics, approachByDistance, approachFromRough, a
 }
 
 /**
- * Approach Table Section - Collapsible table showing all approach shots
- * Columns: Date, Course, Hole, Starting Distance, Starting Lie, Ending Distance, Ending Lie, Penalty, SG
+ * Approach Bucket Card - one distance band in the Approach Skill / Rough Skill grids.
+ * Buckets with no shots still render so all four distance bands are always visible;
+ * their values show as em dashes rather than zeros, which would read as measured
+ * neutral performance.
  */
+function ApproachBucketCard({ bucket }: { bucket: ApproachDistanceBucket }) {
+  const hasShots = bucket.totalShots > 0;
+
+  return (
+    <div className="card">
+      <div className="flex justify-between items-center" style={{ marginBottom: '8px' }}>
+        <div className="label" style={{ color: 'var(--scarlet)' }}>{bucket.label}</div>
+      </div>
+      <div className="label" style={{ color: 'var(--ash)', fontSize: '11px', marginBottom: '12px' }}>
+        {bucket.description}
+      </div>
+
+      {/* Main Value: SG */}
+      <div
+        className="value-hero"
+        style={{ color: hasShots ? getStrokeGainedColor(bucket.strokesGained) : 'var(--ash)', fontSize: '28px' }}
+      >
+        {hasShots ? formatStrokesGained(bucket.strokesGained) : '—'}
+      </div>
+      <div className="label" style={{ color: 'var(--ash)', fontSize: '11px', marginBottom: '16px' }}>
+        SG ({bucket.totalShots} {bucket.totalShots === 1 ? 'shot' : 'shots'})
+      </div>
+
+      <div className="flex justify-between">
+        <div>
+          <div className="label" style={{ color: 'var(--ash)', fontSize: '10px' }}>Green %</div>
+          <div
+            className="value-stat"
+            style={{ color: hasShots ? getGreenHitPctColor(bucket.greenHitPct) : 'var(--ash)', fontSize: '14px' }}
+          >
+            {hasShots ? `${bucket.greenHitPct.toFixed(0)}%` : '—'}
+          </div>
+        </div>
+        <div style={{ textAlign: 'right' }}>
+          <div className="label" style={{ color: 'var(--ash)', fontSize: '10px' }}>Prox</div>
+          <div
+            className="value-stat"
+            style={{ color: hasShots ? getProximityColor(bucket.proximity) : 'var(--ash)', fontSize: '14px' }}
+          >
+            {hasShots ? `${bucket.proximity.toFixed(0)} ft` : '—'}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Approach Table Section - Collapsible, filterable table of all approach shots.
+ * Rows are grouped by round; columns are Hole, Start Dist, Type, Start Lie,
+ * End Dist, End Lie, Penalty, SG.
+ */
+type SGFilter = 'all' | 'negative' | 'positive';
+
+const FILTER_CONTROL_STYLE: CSSProperties = {
+  background: 'var(--charcoal)',
+  border: '1px solid var(--ash)',
+  borderRadius: '4px',
+  color: 'var(--chalk)',
+  fontSize: '12px',
+  padding: '6px 8px',
+};
+
 function ApproachTableSection({ shots }: { shots: ProcessedShot[] }) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [typeFilter, setTypeFilter] = useState<'all' | ApproachTypeLabel>('all');
+  const [sgFilter, setSgFilter] = useState<SGFilter>('all');
+  const [lieFilter, setLieFilter] = useState<string>('all');
+  const [penaltyOnly, setPenaltyOnly] = useState(false);
 
   // Filter for approach shots only
-  const approaches = shots.filter(shot => shot.shotType === 'Approach');
+  const approaches = useMemo(
+    () => shots.filter(shot => shot.shotType === 'Approach'),
+    [shots],
+  );
 
-  // Group approaches by round (date + course)
-  const approachesByRound = approaches.reduce((acc, approach) => {
-    const key = `${approach.playedOn}|${approach.courseName}`;
-    if (!acc[key]) {
-      acc[key] = [];
-    }
-    acc[key].push(approach);
-    return acc;
-  }, {} as Record<string, ProcessedShot[]>);
+  // Only offer lies that actually appear in the data, so there are no dead options
+  const availableLies = useMemo(() => {
+    const lies = new Set(approaches.map(shot => shot.startingLie));
+    return Array.from(lies).sort();
+  }, [approaches]);
 
-  // Sort rounds by date (most recent first)
-  const sortedRounds = Object.entries(approachesByRound).sort((a, b) => {
-    const dateA = a[0].split('|')[0];
-    const dateB = b[0].split('|')[0];
-    return dateB.localeCompare(dateA);
-  });
+  const isFiltered = typeFilter !== 'all' || sgFilter !== 'all' || lieFilter !== 'all' || penaltyOnly;
+
+  const clearFilters = () => {
+    setTypeFilter('all');
+    setSgFilter('all');
+    setLieFilter('all');
+    setPenaltyOnly(false);
+  };
+
+  const filteredApproaches = useMemo(() => {
+    return approaches.filter(shot => {
+      if (typeFilter !== 'all' && getApproachType(shot.startingDistance) !== typeFilter) return false;
+      if (sgFilter === 'negative' && shot.calculatedStrokesGained >= 0) return false;
+      if (sgFilter === 'positive' && shot.calculatedStrokesGained <= 0) return false;
+      if (lieFilter !== 'all' && shot.startingLie !== lieFilter) return false;
+      if (penaltyOnly && !shot.hasPenalty) return false;
+      return true;
+    });
+  }, [approaches, typeFilter, sgFilter, lieFilter, penaltyOnly]);
+
+  // Group the filtered approaches by round (date + course); rounds left with no
+  // matching shots drop out of the listing entirely
+  const sortedRounds = useMemo(() => {
+    const approachesByRound = filteredApproaches.reduce((acc, approach) => {
+      const key = `${approach.playedOn}|${approach.courseName}`;
+      if (!acc[key]) {
+        acc[key] = [];
+      }
+      acc[key].push(approach);
+      return acc;
+    }, {} as Record<string, ProcessedShot[]>);
+
+    // Sort rounds by date (most recent first)
+    return Object.entries(approachesByRound).sort((a, b) => {
+      const dateA = a[0].split('|')[0];
+      const dateB = b[0].split('|')[0];
+      return dateB.localeCompare(dateA);
+    });
+  }, [filteredApproaches]);
 
   if (approaches.length === 0) {
     return null;
@@ -275,63 +309,170 @@ function ApproachTableSection({ shots }: { shots: ProcessedShot[] }) {
       >
         <span style={{ fontWeight: 600 }}>All Approach Shots</span>
         <span style={{ fontSize: '12px', color: 'var(--ash)' }}>
-          {approaches.length} approach shots • {isExpanded ? '▲' : '▼'}
+          {isFiltered
+            ? `${filteredApproaches.length} of ${approaches.length} approach ${approaches.length === 1 ? 'shot' : 'shots'}`
+            : `${approaches.length} approach ${approaches.length === 1 ? 'shot' : 'shots'}`}
+          {' • '}{isExpanded ? '▲' : '▼'}
         </span>
       </button>
 
       {isExpanded && (
         <div style={{ marginTop: '16px' }}>
-          {sortedRounds.map(([roundKey, roundApproaches]) => {
-            const [dateStr, courseStr] = roundKey.split('|');
+          {/* Filters */}
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              alignItems: 'flex-end',
+              gap: '16px',
+              marginBottom: '16px',
+              padding: '12px',
+              background: 'var(--charcoal)',
+              borderRadius: '4px',
+            }}
+          >
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <label htmlFor="approach-type-filter" style={{ fontSize: '11px', color: 'var(--ash)' }}>
+                Approach Type
+              </label>
+              <select
+                id="approach-type-filter"
+                value={typeFilter}
+                onChange={(e) => setTypeFilter(e.target.value as 'all' | ApproachTypeLabel)}
+                style={FILTER_CONTROL_STYLE}
+              >
+                <option value="all">All types</option>
+                {APPROACH_DISTANCE_BUCKETS.map(bucket => (
+                  <option key={bucket.label} value={bucket.label}>
+                    {bucket.label} ({bucket.shortRange})
+                  </option>
+                ))}
+              </select>
+            </div>
 
-            return (
-              <div key={roundKey} style={{ marginBottom: '16px', padding: '12px', background: 'var(--charcoal)', borderRadius: '4px' }}>
-                <div style={{ display: 'flex', gap: '24px', marginBottom: '12px', fontSize: '12px', color: 'var(--chalk)' }}>
-                  <span><strong>Date:</strong> {dateStr}</span>
-                  <span><strong>Course:</strong> {courseStr}</span>
-                  <span><strong>Approach Shots:</strong> {roundApproaches.length}</span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <label htmlFor="approach-sg-filter" style={{ fontSize: '11px', color: 'var(--ash)' }}>
+                Strokes Gained
+              </label>
+              <select
+                id="approach-sg-filter"
+                value={sgFilter}
+                onChange={(e) => setSgFilter(e.target.value as SGFilter)}
+                style={FILTER_CONTROL_STYLE}
+              >
+                <option value="all">All shots</option>
+                <option value="negative">Negative SG only</option>
+                <option value="positive">Positive SG only</option>
+              </select>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <label htmlFor="approach-lie-filter" style={{ fontSize: '11px', color: 'var(--ash)' }}>
+                Starting Lie
+              </label>
+              <select
+                id="approach-lie-filter"
+                value={lieFilter}
+                onChange={(e) => setLieFilter(e.target.value)}
+                style={FILTER_CONTROL_STYLE}
+              >
+                <option value="all">All lies</option>
+                {availableLies.map(lie => (
+                  <option key={lie} value={lie}>{lie}</option>
+                ))}
+              </select>
+            </div>
+
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--ash)', cursor: 'pointer', paddingBottom: '7px' }}>
+              <input
+                type="checkbox"
+                checked={penaltyOnly}
+                onChange={(e) => setPenaltyOnly(e.target.checked)}
+                style={{ cursor: 'pointer' }}
+              />
+              Penalty shots only
+            </label>
+
+            {isFiltered && (
+              <button
+                onClick={clearFilters}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'var(--scarlet)',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  padding: '6px 0',
+                  textDecoration: 'underline',
+                }}
+              >
+                Clear Filters
+              </button>
+            )}
+          </div>
+
+          {sortedRounds.length === 0 ? (
+            <div style={{ padding: '16px', background: 'var(--charcoal)', borderRadius: '4px', fontSize: '13px', color: 'var(--ash)' }}>
+              No approach shots match these filters.
+            </div>
+          ) : (
+            sortedRounds.map(([roundKey, roundApproaches]) => {
+              const [dateStr, courseStr] = roundKey.split('|');
+
+              return (
+                <div key={roundKey} style={{ marginBottom: '16px', padding: '12px', background: 'var(--charcoal)', borderRadius: '4px' }}>
+                  <div style={{ display: 'flex', gap: '24px', marginBottom: '12px', fontSize: '12px', color: 'var(--chalk)' }}>
+                    <span><strong>Date:</strong> {dateStr}</span>
+                    <span><strong>Course:</strong> {courseStr}</span>
+                    <span><strong>Approach Shots:</strong> {roundApproaches.length}</span>
+                  </div>
+                  <div className="gi-table-scroll">
+                    <table style={{ minWidth: '680px', width: '100%', fontSize: '13px', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+                      <thead>
+                        <tr style={{ borderBottom: '1px solid var(--ash)' }}>
+                          <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '7%' }}>Hole</th>
+                          <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '11%' }}>Start Dist</th>
+                          <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '20%' }}>Type</th>
+                          <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '11%' }}>Start Lie</th>
+                          <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '11%' }}>End Dist</th>
+                          <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '11%' }}>End Lie</th>
+                          <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '9%' }}>Penalty</th>
+                          <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '20%' }}>SG</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {roundApproaches
+                          .slice()
+                          .sort((a, b) => a.holeNumber - b.holeNumber)
+                          .map((approach, idx) => (
+                            <tr key={idx} style={{ borderBottom: '1px solid var(--dark)' }}>
+                              <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{approach.holeNumber}</td>
+                              <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>
+                                {approach.startingDistance}
+                              </td>
+                              <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>
+                                {getApproachType(approach.startingDistance) ?? '—'}
+                              </td>
+                              <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{approach.startingLie}</td>
+                              <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>
+                                {approach.endingDistance}
+                              </td>
+                              <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{approach.endingLie}</td>
+                              <td style={{ padding: '6px', textAlign: 'center', color: approach.hasPenalty ? 'var(--scarlet)' : 'transparent' }}>
+                                {approach.hasPenalty ? 'Yes' : ''}
+                              </td>
+                              <td style={{ padding: '6px', textAlign: 'center', color: getShotSGColor(approach.calculatedStrokesGained), fontFamily: 'var(--font-mono)' }}>
+                                {formatStrokesGained(approach.calculatedStrokesGained)}
+                              </td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-                <div className="gi-table-scroll">
-                  <table style={{ minWidth: '580px', width: '100%', fontSize: '13px', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
-                    <thead>
-                      <tr style={{ borderBottom: '1px solid var(--ash)' }}>
-                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '8%' }}>Hole</th>
-                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '12%' }}>Start Dist</th>
-                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '12%' }}>Start Lie</th>
-                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '12%' }}>End Dist</th>
-                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '12%' }}>End Lie</th>
-                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '10%' }}>Penalty</th>
-                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '12%' }}>SG</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {roundApproaches
-                        .sort((a, b) => a.holeNumber - b.holeNumber)
-                        .map((approach, idx) => (
-                          <tr key={idx} style={{ borderBottom: '1px solid var(--dark)' }}>
-                            <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{approach.holeNumber}</td>
-                            <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>
-                              {approach.startingDistance}
-                            </td>
-                            <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{approach.startingLie}</td>
-                            <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>
-                              {approach.endingDistance}
-                            </td>
-                            <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{approach.endingLie}</td>
-                            <td style={{ padding: '6px', textAlign: 'center', color: approach.hasPenalty ? 'var(--scarlet)' : 'transparent' }}>
-                              {approach.hasPenalty ? 'Yes' : ''}
-                            </td>
-                            <td style={{ padding: '6px', textAlign: 'center', color: getShotSGColor(approach.calculatedStrokesGained), fontFamily: 'var(--font-mono)' }}>
-                              {formatStrokesGained(approach.calculatedStrokesGained)}
-                            </td>
-                          </tr>
-                        ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            );
-          })}
+              );
+            })
+          )}
         </div>
       )}
     </div>
@@ -612,12 +753,17 @@ function ApproachHeatMapSection({ data }: { data: ApproachHeatMapData }) {
 
       {/* Heat Map Table */}
       <div className="gi-table-scroll">
-        <table className="gi-sticky-col" style={{ minWidth: '640px', width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+        <table className="gi-sticky-col" style={{ minWidth: '700px', width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
           <thead>
             <tr>
               <th style={{ padding: '12px', textAlign: 'left', color: 'var(--ash)', fontWeight: '600', borderBottom: '1px solid var(--border)' }}>Starting Lie</th>
               {data.distanceBuckets.map(bucket => (
-                <th key={bucket} style={{ padding: '12px', textAlign: 'center', color: 'var(--ash)', fontWeight: '600', borderBottom: '1px solid var(--border)' }}>{bucket}</th>
+                <th key={bucket} style={{ padding: '12px', textAlign: 'center', color: 'var(--ash)', fontWeight: '600', borderBottom: '1px solid var(--border)' }}>
+                  <div>{bucket}</div>
+                  <div style={{ fontSize: '11px', fontWeight: '400', color: 'var(--ash)', marginTop: '2px' }}>
+                    {getApproachBucketRange(bucket)}
+                  </div>
+                </th>
               ))}
               <th style={{ padding: '12px', textAlign: 'center', color: 'var(--ash)', fontWeight: '600', borderBottom: '1px solid var(--border)', backgroundColor: 'var(--bg-secondary)' }}>Total</th>
             </tr>
