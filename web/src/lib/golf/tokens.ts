@@ -144,6 +144,26 @@ export function getShotSGColor(value: number): string {
 }
 
 /**
+ * Get color for a rate/percentage metric against good/ok thresholds.
+ *
+ * `good` and `ok` are stated in the metric's own direction, so a lower-is-better
+ * metric passes its smaller number as `good` (e.g. Drop Off: good 20, ok 30).
+ */
+export function getRateColor(
+  value: number,
+  good: number,
+  ok: number,
+  higherIsBetter: boolean
+): string {
+  const clears = (threshold: number) =>
+    higherIsBetter ? value >= threshold : value <= threshold;
+
+  if (clears(good)) return colors.under;
+  if (clears(ok)) return colors.bogey;
+  return colors.double;
+}
+
+/**
  * Get score color (relative to par)
  */
 export function getScoreColor(scoreToPar: number): string {

@@ -2799,10 +2799,15 @@ export function calculateBogeyRates(_shots: ProcessedShot[], holeScores: HoleSco
   return bogeyRates;
 }
 
+// Birdie Opportunity: first putt must start inside this distance, in FEET.
+// Putt distances are recorded in feet (distances are yards except when the lie
+// is Green — see DashboardShot in types.ts).
+const BIRDIE_OPPORTUNITY_FEET = 20;
+
 /**
  * Calculate Birdie Opportunities and Conversion Rate
- * Birdie Opportunity: GIR with resulting putt <= 20 feet
- * Conversion: Birdies made / Opportunities
+ * Birdie Opportunity: green in regulation with the first putt <= 20 feet
+ * Conversion: that first putt was holed (made putts / opportunities)
  */
 export function calculateBirdieOpportunities(shots: ProcessedShot[], _holeScores: HoleScore[]): BirdieOpportunityMetrics {
   const result: BirdieOpportunityMetrics = {
@@ -2810,7 +2815,7 @@ export function calculateBirdieOpportunities(shots: ProcessedShot[], _holeScores
     conversions: 0,
     conversionPct: 0,
   };
-  
+
   // Group shots by hole
   const holeMap = new Map<string, ProcessedShot[]>();
   shots.forEach(shot => {
@@ -2820,48 +2825,35 @@ export function calculateBirdieOpportunities(shots: ProcessedShot[], _holeScores
     }
     holeMap.get(key)!.push(shot);
   });
-  
-  holeMap.forEach((holeShots, _key) => {
-    // Find GIR: shot with starting lie "Green" that would give score = par - 1
-    const firstShot = holeShots[0];
-    const par = firstShot.holePar;
+
+  holeMap.forEach((unsortedShots) => {
+    const holeShots = [...unsortedShots].sort((a, b) => a.shotNumber - b.shotNumber);
+    const par = holeShots[0].holePar;
     const score = holeShots.length;
-    
-    // Check if this is a GIR (Green in Regulation)
-    // GIR means: on a par 3, you hit the green in 1; par 4 in 2; par 5 in 3
-    
-    // Find the shot that landed on green
-    const girShot = holeShots.find(s => s.startingLie === 'Green');
-    
-    if (girShot) {
-      // This is a GIR - now check if putt was <= 20 feet
-      const puttShots = holeShots.filter(s => s.shotType === 'Putt');
-      
-      // Find the first putt after GIR (the birdie putt)
-      const girShotIndex = holeShots.indexOf(girShot);
-      const birdiePutts = puttShots.filter(p => holeShots.indexOf(p) > girShotIndex);
-      
-      if (birdiePutts.length > 0) {
-        const firstBirdiePutt = birdiePutts[0];
-        const puttDistance = firstBirdiePutt.startingDistance;
-        
-        // Birdie Opportunity: putt <= 20 feet (240 inches)
-        if (puttDistance <= 240) {
-          result.opportunities++;
-          
-          // Check if birdie was made
-          if (score === par - 1) {
-            result.conversions++;
-          }
-        }
-      }
+
+    // The first shot played from the green IS the first putt.
+    const firstPutt = holeShots.find(s => s.startingLie === 'Green');
+    if (!firstPutt) return;
+
+    // Green in Regulation: the green was reached in par - 2 strokes or fewer,
+    // so the first putt is stroke par - 1 (par 3 in 1, par 4 in 2, par 5 in 3).
+    if (firstPutt.shotNumber > par - 1) return;
+
+    if (firstPutt.startingDistance > BIRDIE_OPPORTUNITY_FEET) return;
+
+    result.opportunities++;
+
+    // Converted when that putt was holed — i.e. the hole ended on it. This is
+    // the "made putt" rule directly, and credits a holed putt for eagle too.
+    if (score === firstPutt.shotNumber) {
+      result.conversions++;
     }
   });
-  
+
   if (result.opportunities > 0) {
     result.conversionPct = (result.conversions / result.opportunities) * 100;
   }
-  
+
   return result;
 }
 
