@@ -1,10 +1,58 @@
 'use client';
 
 import { useState } from 'react';
-import type { ScoringMetrics, HoleOutcome, MentalMetrics, BirdieAndBogeyMetrics } from '@/lib/golf/types';
-import { getStrokeGainedColor, formatStrokesGained } from '@/lib/golf/tokens';
+import type { ScoringMetrics, HoleOutcome, MentalMetrics, BirdieAndBogeyMetrics, ScoringRootCause } from '@/lib/golf/types';
+import { getStrokeGainedColor, getRateColor, formatStrokesGained } from '@/lib/golf/tokens';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { useMediaQuery, MOBILE_QUERY } from '@/lib/useMediaQuery';
+
+// Root cause categories, in a fixed display order shared by both charts.
+const ROOT_CAUSE_CATEGORIES: Array<{ name: string; key: keyof ScoringRootCause }> = [
+  { name: 'Penalties', key: 'penalties' },
+  { name: 'Driving', key: 'driving' },
+  { name: 'Approach', key: 'approach' },
+  { name: 'Lag Putts', key: 'lagPutts' },
+  { name: 'Makeable Putts', key: 'makeablePutts' },
+  { name: 'Short Game', key: 'shortGame' },
+  { name: 'Recovery', key: 'recovery' },
+];
+
+function RootCauseChart({ title, rootCause, fill, isNarrow }: {
+  title: string;
+  rootCause: ScoringRootCause;
+  fill: string;
+  isNarrow: boolean;
+}) {
+  const data = ROOT_CAUSE_CATEGORIES.map(({ name, key }) => ({ name, count: rootCause[key] }));
+
+  return (
+    <div>
+      <h5 style={{ marginBottom: '12px', color: 'var(--ash)', fontSize: '14px' }}>{title}</h5>
+      <div style={{ background: 'var(--charcoal)', padding: '16px', borderRadius: '4px' }}>
+        {/* 7 categories need ~40px each, or recharts drops ticks to fit */}
+        <ResponsiveContainer width="100%" height={isNarrow ? 280 : 320}>
+          <BarChart data={data} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--dark)" />
+            <XAxis type="number" stroke="var(--ash)" fontSize={12} allowDecimals={false} />
+            <YAxis
+              dataKey="name"
+              type="category"
+              stroke="var(--ash)"
+              fontSize={isNarrow ? 10 : 12}
+              width={isNarrow ? 70 : 100}
+              interval={0}
+            />
+            <Tooltip
+              contentStyle={{ background: 'var(--court)', border: '1px solid var(--scarlet)', borderRadius: '4px' }}
+              labelStyle={{ color: 'var(--chalk)' }}
+            />
+            <Bar dataKey="count" fill={fill} name="Count" radius={[0, 4, 4, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+}
 
 export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: { metrics: ScoringMetrics; birdieAndBogeyMetrics: BirdieAndBogeyMetrics; mentalMetrics: MentalMetrics }) {
   const isNarrow = useMediaQuery(MOBILE_QUERY);
@@ -72,6 +120,21 @@ export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: {
     );
   };
 
+  // Mental resilience rate cards. Thresholds are per metric — a single generic
+  // band would leave Gas Pedal (birdie+ after birdie+) permanently red.
+  // A card with no opportunities scores 0/0, which is not a result: show it ash.
+  const resilienceCards = [
+    { label: 'Bounce Back %', pct: bounceBackPct, count: bounceBackCount, total: bounceBackTotal, good: 65, ok: 50, higherIsBetter: true },
+    { label: 'Drop Off %', pct: dropOffPct, count: dropOffCount, total: dropOffTotal, good: 20, ok: 30, higherIsBetter: false },
+    { label: 'Gas Pedal %', pct: gasPedalPct, count: gasPedalCount, total: gasPedalTotal, good: 25, ok: 15, higherIsBetter: true },
+    { label: 'Bogey Train %', pct: bogeyTrainPct, count: bogeyTrainCount, total: bogeyTrainTotal, good: 25, ok: 35, higherIsBetter: false },
+  ].map(card => ({
+    ...card,
+    color: card.total > 0
+      ? getRateColor(card.pct, card.good, card.ok, card.higherIsBetter)
+      : 'var(--ash)',
+  }));
+
   // Par card data
   const parCards = [
     { label: 'Par 3', data: par3, color: '#3D8EF0' },
@@ -133,49 +196,22 @@ export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: {
 
         {/* Five Cards */}
         <div className="grid-tiles-5" style={{ gap: '12px' }}>
-          {/* Card 1: Bounce Back % */}
-          <div className="card-stat" style={{ borderLeft: '3px solid var(--under)' }}>
-            <div className="label" style={{ color: 'var(--ash)', marginBottom: '8px' }}>Bounce Back %</div>
-            <div className="value-stat" style={{ color: 'var(--under)' }}>{bounceBackPct.toFixed(0)}%</div>
-            <div style={{ marginTop: '8px' }}>
-              <div className="label" style={{ color: 'var(--ash)', fontSize: '9px' }}>Count</div>
-              <div className="value-stat" style={{ fontSize: '12px' }}>{bounceBackCount} / {bounceBackTotal}</div>
+          {/* Cards 1-4: rate metrics, colored against their own thresholds */}
+          {resilienceCards.map((card) => (
+            <div key={card.label} className="card-stat" style={{ borderLeft: `3px solid ${card.color}` }}>
+              <div className="label" style={{ color: 'var(--ash)', marginBottom: '8px' }}>{card.label}</div>
+              <div className="value-stat" style={{ color: card.color }}>
+                {card.total > 0 ? `${card.pct.toFixed(0)}%` : '-'}
+              </div>
+              <div style={{ marginTop: '8px' }}>
+                <div className="label" style={{ color: 'var(--ash)', fontSize: '9px' }}>Count</div>
+                <div className="value-stat" style={{ fontSize: '12px' }}>{card.count} / {card.total}</div>
+              </div>
+              <div className="label" style={{ fontSize: '10px', marginTop: '8px', color: 'var(--ash)' }}>
+                {card.higherIsBetter ? 'Higher is better' : 'Lower is better'}
+              </div>
             </div>
-            <div className="label" style={{ fontSize: '10px', marginTop: '8px', color: 'var(--ash)' }}>Higher is better</div>
-          </div>
-
-          {/* Card 2: Drop Off % */}
-          <div className="card-stat" style={{ borderLeft: '3px solid var(--scarlet)' }}>
-            <div className="label" style={{ color: 'var(--ash)', marginBottom: '8px' }}>Drop Off %</div>
-            <div className="value-stat" style={{ color: 'var(--scarlet)' }}>{dropOffPct.toFixed(0)}%</div>
-            <div style={{ marginTop: '8px' }}>
-              <div className="label" style={{ color: 'var(--ash)', fontSize: '9px' }}>Count</div>
-              <div className="value-stat" style={{ fontSize: '12px' }}>{dropOffCount} / {dropOffTotal}</div>
-            </div>
-            <div className="label" style={{ fontSize: '10px', marginTop: '8px', color: 'var(--ash)' }}>Lower is better</div>
-          </div>
-
-          {/* Card 3: Gas Pedal % */}
-          <div className="card-stat" style={{ borderLeft: '3px solid var(--under)' }}>
-            <div className="label" style={{ color: 'var(--ash)', marginBottom: '8px' }}>Gas Pedal %</div>
-            <div className="value-stat" style={{ color: 'var(--under)' }}>{gasPedalPct.toFixed(0)}%</div>
-            <div style={{ marginTop: '8px' }}>
-              <div className="label" style={{ color: 'var(--ash)', fontSize: '9px' }}>Count</div>
-              <div className="value-stat" style={{ fontSize: '12px' }}>{gasPedalCount} / {gasPedalTotal}</div>
-            </div>
-            <div className="label" style={{ fontSize: '10px', marginTop: '8px', color: 'var(--ash)' }}>Higher is better</div>
-          </div>
-
-          {/* Card 4: Bogey Train % */}
-          <div className="card-stat" style={{ borderLeft: '3px solid var(--scarlet)' }}>
-            <div className="label" style={{ color: 'var(--ash)', marginBottom: '8px' }}>Bogey Train %</div>
-            <div className="value-stat" style={{ color: 'var(--scarlet)' }}>{bogeyTrainPct.toFixed(0)}%</div>
-            <div style={{ marginTop: '8px' }}>
-              <div className="label" style={{ color: 'var(--ash)', fontSize: '9px' }}>Count</div>
-              <div className="value-stat" style={{ fontSize: '12px' }}>{bogeyTrainCount} / {bogeyTrainTotal}</div>
-            </div>
-            <div className="label" style={{ fontSize: '10px', marginTop: '8px', color: 'var(--ash)' }}>Lower is better</div>
-          </div>
+          ))}
 
           {/* Card 5: Drive after Tiger 5 Fail */}
           <div className="card-stat" style={{ borderLeft: '3px solid var(--pitch)' }}>
@@ -291,68 +327,19 @@ export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: {
         </div>
       )}
       {/* Bogey and Double Bogey+ Root Cause Charts - Side by Side */}
-      <div style={{ display: 'flex', gap: '16px', marginBottom: '24px' }}>
-        {/* Bogey Root Cause Chart */}
-        <div style={{ flex: 1 }}>
-          <h5 style={{ marginBottom: '12px', color: 'var(--ash)', fontSize: '14px' }}>Bogey Root Cause ({totalBogeys} holes)</h5>
-          <div style={{ background: 'var(--charcoal)', padding: '16px', borderRadius: '4px' }}>
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart
-                data={[
-                  { name: 'Penalties', count: bogeyRootCause.penalties },
-                  { name: 'Driving', count: bogeyRootCause.driving },
-                  { name: 'Approach', count: bogeyRootCause.approach },
-                  { name: 'Lag Putts', count: bogeyRootCause.lagPutts },
-                  { name: 'Makeable Putts', count: bogeyRootCause.makeablePutts },
-                  { name: 'Short Game', count: bogeyRootCause.shortGame },
-                  { name: 'Recovery', count: bogeyRootCause.recovery },
-                ]}
-                layout="vertical"
-                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--dark)" />
-                <XAxis type="number" stroke="var(--ash)" fontSize={12} />
-                <YAxis dataKey="name" type="category" stroke="var(--ash)" fontSize={isNarrow ? 10 : 12} width={isNarrow ? 56 : 80} />
-                <Tooltip
-                  contentStyle={{ background: 'var(--court)', border: '1px solid var(--scarlet)', borderRadius: '4px' }}
-                  labelStyle={{ color: 'var(--chalk)' }}
-                />
-                <Bar dataKey="count" fill="#F59520" name="Count" radius={[0, 4, 4, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Double Bogey+ Root Cause Chart */}
-        <div style={{ flex: 1 }}>
-          <h5 style={{ marginBottom: '12px', color: 'var(--ash)', fontSize: '14px' }}>Double Bogey+ Root Cause ({totalDoubleBogeyPlus} holes)</h5>
-          <div style={{ background: 'var(--charcoal)', padding: '16px', borderRadius: '4px' }}>
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart
-                data={[
-                  { name: 'Penalties', count: doubleBogeyPlusRootCause.penalties },
-                  { name: 'Driving', count: doubleBogeyPlusRootCause.driving },
-                  { name: 'Approach', count: doubleBogeyPlusRootCause.approach },
-                  { name: 'Lag Putts', count: doubleBogeyPlusRootCause.lagPutts },
-                  { name: 'Makeable Putts', count: doubleBogeyPlusRootCause.makeablePutts },
-                  { name: 'Short Game', count: doubleBogeyPlusRootCause.shortGame },
-                  { name: 'Recovery', count: doubleBogeyPlusRootCause.recovery },
-                ]}
-                layout="vertical"
-                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--dark)" />
-                <XAxis type="number" stroke="var(--ash)" fontSize={12} />
-                <YAxis dataKey="name" type="category" stroke="var(--ash)" fontSize={isNarrow ? 10 : 12} width={isNarrow ? 56 : 80} />
-                <Tooltip
-                  contentStyle={{ background: 'var(--court)', border: '1px solid var(--scarlet)', borderRadius: '4px' }}
-                  labelStyle={{ color: 'var(--chalk)' }}
-                />
-                <Bar dataKey="count" fill="#E8202A" name="Count" radius={[0, 4, 4, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+      <div className="grid-pair" style={{ gap: '24px', marginBottom: '24px' }}>
+        <RootCauseChart
+          title={`Bogey Root Cause (${totalBogeys} holes)`}
+          rootCause={bogeyRootCause}
+          fill="#F59520"
+          isNarrow={isNarrow}
+        />
+        <RootCauseChart
+          title={`Double Bogey+ Root Cause (${totalDoubleBogeyPlus} holes)`}
+          rootCause={doubleBogeyPlusRootCause}
+          fill="#E8202A"
+          isNarrow={isNarrow}
+        />
       </div>
 
       {/* Birdie Opportunities - Prominent Hero Cards */}
