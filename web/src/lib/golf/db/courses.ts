@@ -58,23 +58,43 @@ function editDistance(a: string, b: string): number {
   return dp[m][n];
 }
 
-export function fuzzyMatchCourse(
+/**
+ * The nearest of `candidates` to `name`: containment either way wins outright,
+ * otherwise the closest by edit distance, and only within two edits.
+ *
+ * Course names and tournament names are the same problem -- a player typing an
+ * existing thing slightly differently -- so they share one matcher.
+ */
+export function fuzzyMatchName(
   name: string,
-  existing: CourseRow[],
-): CourseRow | null {
+  candidates: readonly string[],
+): string | null {
   const needle = normalise(name);
-  let best: CourseRow | null = null;
+  let best: string | null = null;
   let bestDist = Infinity;
 
-  for (const course of existing) {
-    const hay = normalise(course.name);
-    if (hay.includes(needle) || needle.includes(hay)) return course;
+  for (const candidate of candidates) {
+    const hay = normalise(candidate);
+    if (hay.includes(needle) || needle.includes(hay)) return candidate;
     const dist = editDistance(needle, hay);
     if (dist < bestDist) {
       bestDist = dist;
-      best = course;
+      best = candidate;
     }
   }
 
   return bestDist <= 2 ? best : null;
+}
+
+export function fuzzyMatchCourse(
+  name: string,
+  existing: CourseRow[],
+): CourseRow | null {
+  const match = fuzzyMatchName(
+    name,
+    existing.map((c) => c.name),
+  );
+  return match === null
+    ? null
+    : (existing.find((c) => c.name === match) ?? null);
 }

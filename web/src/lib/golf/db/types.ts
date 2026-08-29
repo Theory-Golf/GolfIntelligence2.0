@@ -77,6 +77,8 @@ export interface RoundRow {
   /** Team the player belonged to when the round was played. */
   team_id_at_round: string | null;
   course_difficulty: string | null;
+  /** Event name, for a Tournament round. Null everywhere else. */
+  tournament_name: string | null;
   notes: string | null;
   /** Set when the round is submitted from review. Defaults false. */
   is_complete: boolean;
@@ -115,6 +117,7 @@ export interface ShotRow {
 // never forces every call site to start passing it explicitly.
 type CourseOptionalOnInsert = 'school_id' | 'created_by';
 type RoundOptionalOnInsert =
+  | 'tournament_name'
   | 'weather_precip_type'
   | 'current_team_id'
   | 'team_id_at_round'

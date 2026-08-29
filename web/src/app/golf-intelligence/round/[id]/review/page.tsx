@@ -170,6 +170,11 @@ export default function RoundReviewPage() {
             {state.courseName || '—'}
             {state.roundType ? ` · ${state.roundType.toUpperCase()}` : ''}
           </p>
+          {state.tournamentName && (
+            <p className="font-mono text-[10px] tracking-[0.25em] uppercase text-chalk">
+              {state.tournamentName}
+            </p>
+          )}
           <p className="font-mono text-[10px] tracking-[0.25em] uppercase text-ash">
             {formatDate(state.roundDate)}
             {' · '}
@@ -359,7 +364,12 @@ function HoleRow({
         `/golf-intelligence/round/${roundId}/hole/${holeNumber}/summary${qs}`,
       );
     } else {
-      router.push(`/golf-intelligence/round/${roundId}/hole/${holeNumber}`);
+      // Also for a hole that isn't finished: without from=review the hole
+      // screen has no way back here, and the exit would march the player
+      // forward through holes that are already recorded.
+      router.push(
+        `/golf-intelligence/round/${roundId}/hole/${holeNumber}?from=review`,
+      );
     }
   }
 
