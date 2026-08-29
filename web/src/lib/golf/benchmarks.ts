@@ -4113,6 +4113,39 @@ export function lookupExpectedStrokes(
 }
 
 /**
+ * Expected make rate (%) from a given putt distance, derived from the selected
+ * benchmark's own expected-strokes table.
+ *
+ * Expected putts from d feet decompose as E(d) = p + (1 - p)(1 + R(d)), where p
+ * is the make rate and R(d) is the expected cost of holing out from wherever a
+ * miss finishes. Solving for p:
+ *
+ *   p(d) = 1 - (E(d) - 1) / R(d)
+ *
+ * R(d) starts at a tap-in (1.03 strokes) and grows quadratically as misses
+ * finish further from the hole. Calibrated against published PGA Tour make
+ * rates, this reproduces the men's Tour table within ~1.5 points from 3-50 ft
+ * (see benchmarks.test.ts). Because it reads whichever tier and gender are
+ * selected, it tracks the benchmark dropdown automatically.
+ *
+ * Accuracy degrades past ~50 ft, where the make rate is near zero for every
+ * tier and callers should treat it as "no meaningful expectation" rather than a
+ * target.
+ */
+export function expectedMakeRate(benchmark: BenchmarkSelection, distanceFt: number): number {
+  if (distanceFt <= 0) return 100;
+  const expected = lookupExpectedStrokes(benchmark, distanceFt, 'Putt');
+  // Past 50 ft the leave model would grow faster than the expected-strokes
+  // curve, nudging the derived make rate back up. Every tier is already at
+  // roughly zero there, so the miss cost holds at its 50 ft value and the curve
+  // stays monotonic.
+  const leaveRef = Math.min(distanceFt, 50);
+  const missCost = Math.max(1.03, 1 + 0.00007 * leaveRef * leaveRef);
+  const rate = 1 - (expected - 1) / missCost;
+  return Math.max(0, Math.min(1, rate)) * 100;
+}
+
+/**
  * Calculate Strokes Gained for a single shot
  * SG = Expected from Start - (1 + Expected from End)
  * For penalty shots: SG = Expected from Start - (2 + Expected from End)

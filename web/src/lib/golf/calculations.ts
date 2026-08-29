@@ -5,7 +5,7 @@
 
 import type { ProcessedShot, ShotType, ShotCategory, Tiger5Metrics, RoundSummary, Tiger5Fail, HoleScore, RootCauseMetrics, Tiger5FailDetail, Tiger5FailDetails, RootCauseByFailTypeList, RootCauseByFailType, Tiger5TrendDataPoint, SGSeparator, SGShotCategory, SGRoundData, DrivingMetrics, DriveEndingLocationData, DriveDistanceRange, DrivingAnalysis, DriveEndingLocationType, ProblemDriveMetrics, ApproachMetrics, ApproachDistanceBucket, ApproachHeatMapCell, ApproachHeatMapData, PuttingMetrics, PuttingDistanceBucket, LagPuttingMetrics, LagDistanceDistribution, ScoringMetrics, ParScoringMetrics, HoleOutcomeData, HoleOutcome, MentalMetrics, BogeyRateByPar, BirdieOpportunityMetrics, ScoringRootCause, BirdieAndBogeyMetrics, ShortGameMetrics, ShortGameHeatMapCell, ShortGameHeatMapData, CoachTableMetrics, CoachTablePlayerMetrics } from './types';
 import type { BenchmarkSelection } from './benchmarks';
-import { calculateStrokesGained } from './benchmarks';
+import { calculateStrokesGained, expectedMakeRate } from './benchmarks';
 import type { DashboardShotRow } from './db/dashboard';
 import { APPROACH_DISTANCE_BUCKETS } from './approachBuckets';
 
@@ -2068,7 +2068,45 @@ export function calculateApproachHeatMapData(shots: ProcessedShot[], totalRounds
  * - Poor Lag: # of first putts >20 feet with ending distance >=5 feet
  * - Speed Rating: % of first putts >=20ft with Putt Result = Long
  */
-export function calculatePuttingMetrics(shots: ProcessedShot[]): PuttingMetrics {
+/**
+ * Shortest first putt treated as a lag putt. Matches the distance buckets the
+ * Good Lag % / Poor Lag % rows are reported over.
+ */
+export const LAG_PUTT_MIN_DISTANCE_FT = 13;
+
+export type LagOutcome = 'good' | 'fair' | 'poor' | null;
+
+/**
+ * Rate a single putt as a good or poor lag. Returns null for putts inside the
+ * lag range, which are judged on make % rather than leave distance.
+ *
+ * Good and poor share their cutoffs with the Good Lag % / Poor Lag % rows so the
+ * per-putt column and the percentages can't drift apart. A leave of exactly 4 ft
+ * falls between the two and is rated 'fair'.
+ */
+export function classifyLagOutcome(shot: ProcessedShot): LagOutcome {
+  if (shot.shotType !== 'Putt') return null;
+  if (shot.startingDistance < LAG_PUTT_MIN_DISTANCE_FT) return null;
+  if (shot.endingDistance <= 3) return 'good';   // includes made putts
+  if (shot.endingDistance >= 5) return 'poor';
+  return 'fair';
+}
+
+/**
+ * Mean expected make % across a set of putts, using each putt's own starting
+ * distance so a bucket is judged against the distances actually faced rather
+ * than the midpoint of its range.
+ */
+function averageBenchmarkMakePct(putts: ProcessedShot[], benchmark: BenchmarkSelection): number {
+  if (putts.length === 0) return 0;
+  const total = putts.reduce((sum, s) => sum + expectedMakeRate(benchmark, s.startingDistance), 0);
+  return total / putts.length;
+}
+
+export function calculatePuttingMetrics(
+  shots: ProcessedShot[],
+  benchmark: BenchmarkSelection
+): PuttingMetrics {
   // Filter to only putts
   const putts = shots.filter(s => s.shotType === 'Putt');
   
@@ -2078,6 +2116,7 @@ export function calculatePuttingMetrics(shots: ProcessedShot[]): PuttingMetrics 
       avgSGPutting: 0,
       totalPutts: 0,
       makePct0to4Ft: 0,
+      benchmarkMakePct0to4Ft: 0,
       made0to4Ft: 0,
       total0to4Ft: 0,
       totalSG5to12Ft: 0,
@@ -2085,8 +2124,9 @@ export function calculatePuttingMetrics(shots: ProcessedShot[]): PuttingMetrics 
       total5to12Ft: 0,
       poorLagCount: 0,
       totalLagPutts: 0,
-      speedRating: 0,
+      speedRating: null,
       longPutts: 0,
+      classifiedLongShort: 0,
       totalLongPutts: 0,
       puttingByDistance: [],
     };
@@ -2101,6 +2141,7 @@ export function calculatePuttingMetrics(shots: ProcessedShot[]): PuttingMetrics 
   const total0to4Ft = putts0to4Ft.length;
   const made0to4Ft = putts0to4Ft.filter(s => s.endingDistance === 0).length;
   const makePct0to4Ft = total0to4Ft > 0 ? (made0to4Ft / total0to4Ft) * 100 : 0;
+  const benchmarkMakePct0to4Ft = averageBenchmarkMakePct(putts0to4Ft, benchmark);
   
   // Total SG 5-12 ft
   const putts5to12Ft = putts.filter(s => s.startingDistance >= 5 && s.startingDistance <= 12);
@@ -2136,20 +2177,26 @@ export function calculatePuttingMetrics(shots: ProcessedShot[]): PuttingMetrics 
   const poorLagCount = lagPutts.length;
   const totalLagPutts = firstPutts.filter(s => s.startingDistance > 20).length;
   
-  // Speed Rating: % of first putts >=20ft with Putt Result = Long
-  const longPutts20ft = firstPutts.filter(s => s.startingDistance >= 20 && s.puttLongShort === 'Long');
-  const totalLongPutts = firstPutts.filter(s => s.startingDistance >= 20).length;
-  const longPutts = longPutts20ft.length;
-  const speedRating = totalLongPutts > 0 ? (longPutts / totalLongPutts) * 100 : 0;
+  // Speed Rating: of the first putts >=20ft that missed and were classified
+  // Long or Short, what share finished long. Made putts carry no Long/Short
+  // result, so keeping them in the denominator would make the 50% goal
+  // unreachable — the denominator is classified misses only.
+  const firstPutts20ft = firstPutts.filter(s => s.startingDistance >= 20);
+  const totalLongPutts = firstPutts20ft.length;
+  const longPutts = firstPutts20ft.filter(s => s.puttLongShort === 'Long').length;
+  const shortPutts20ft = firstPutts20ft.filter(s => s.puttLongShort === 'Short').length;
+  const classifiedLongShort = longPutts + shortPutts20ft;
+  const speedRating = classifiedLongShort > 0 ? (longPutts / classifiedLongShort) * 100 : null;
   
   // Calculate putting by distance
-  const puttingByDistance = calculatePuttingByDistance(shots);
+  const puttingByDistance = calculatePuttingByDistance(shots, benchmark);
 
   return {
     totalSGPutting,
     avgSGPutting,
     totalPutts: putts.length,
     makePct0to4Ft,
+    benchmarkMakePct0to4Ft,
     made0to4Ft,
     total0to4Ft,
     totalSG5to12Ft,
@@ -2159,6 +2206,7 @@ export function calculatePuttingMetrics(shots: ProcessedShot[]): PuttingMetrics 
     totalLagPutts,
     speedRating,
     longPutts,
+    classifiedLongShort,
     totalLongPutts,
     puttingByDistance,
   };
@@ -2171,7 +2219,10 @@ export function calculatePuttingMetrics(shots: ProcessedShot[]): PuttingMetrics 
  * Distance buckets (in feet):
  * - 0-4, 5-8, 9-12, 13-20, 20-40, 40-60
  */
-export function calculatePuttingByDistance(shots: ProcessedShot[]): PuttingDistanceBucket[] {
+export function calculatePuttingByDistance(
+  shots: ProcessedShot[],
+  benchmark: BenchmarkSelection
+): PuttingDistanceBucket[] {
   // Filter to only putts
   const putts = shots.filter(s => s.shotType === 'Putt');
   
@@ -2237,13 +2288,18 @@ export function calculatePuttingByDistance(shots: ProcessedShot[]): PuttingDista
     // Make % - made = ending distance is 0
     const madePutts = bucketPutts.filter(s => s.endingDistance === 0).length;
     const makePct = totalPutts > 0 ? (madePutts / totalPutts) * 100 : 0;
+    const benchmarkMakePct = averageBenchmarkMakePct(bucketPutts, benchmark);
     
     // 3 putts
     const threePutts = threePuttsByBucket.get(bucket.label) || 0;
     
-    // Speed Ratio - % of putts with Putt Result = "Long"
+    // Speed Ratio - share of classified misses that finished long. Made putts
+    // have no Long/Short result, so they stay out of the denominator; a bucket
+    // with no classified miss reports null rather than a misleading 0%.
     const longPutts = bucketPutts.filter(s => s.puttLongShort === 'Long').length;
-    const speedRatio = totalPutts > 0 ? (longPutts / totalPutts) * 100 : 0;
+    const shortPutts = bucketPutts.filter(s => s.puttLongShort === 'Short').length;
+    const classifiedMisses = longPutts + shortPutts;
+    const speedRatio = classifiedMisses > 0 ? (longPutts / classifiedMisses) * 100 : null;
     
     // For buckets 13-60 ft: Proximity, Good Lag %, Poor Lag %
     const isLagBucket = bucket.minDistance >= 13;
@@ -2258,13 +2314,11 @@ export function calculatePuttingByDistance(shots: ProcessedShot[]): PuttingDista
         proximityMissed = missedPutts.reduce((sum, s) => sum + s.endingDistance, 0) / missedPutts.length;
       }
       
-      // Good Lag % - % of putts <= 3 feet from hole
-      const goodLagPutts = bucketPutts.filter(s => s.endingDistance <= 3);
-      goodLagPct = (goodLagPutts.length / totalPutts) * 100;
-      
-      // Poor Lag % - % of putts >= 5 feet from hole
-      const poorLagPutts = bucketPutts.filter(s => s.endingDistance >= 5);
-      poorLagPct = (poorLagPutts.length / totalPutts) * 100;
+      // Good Lag % / Poor Lag % - share of putts finishing <= 3 ft / >= 5 ft,
+      // counted through the same classifier the per-putt Lag Outcome column uses
+      const outcomes = bucketPutts.map(classifyLagOutcome);
+      goodLagPct = (outcomes.filter(o => o === 'good').length / totalPutts) * 100;
+      poorLagPct = (outcomes.filter(o => o === 'poor').length / totalPutts) * 100;
     }
     
     return {
@@ -2275,8 +2329,10 @@ export function calculatePuttingByDistance(shots: ProcessedShot[]): PuttingDista
       totalStrokesGained,
       madePutts,
       makePct,
+      benchmarkMakePct,
       threePutts,
       longPutts,
+      shortPutts,
       speedRatio,
       proximityMissed,
       goodLagPct,
@@ -3281,7 +3337,7 @@ export function calculateCoachTableMetrics(
     const tiger5Metrics = calculateTiger5Metrics(playerShots);
     const drivingMetrics = calculateDrivingMetrics(playerShots);
     const approachMetrics = calculateApproachMetrics(playerShots);
-    const puttingMetrics = calculatePuttingMetrics(playerShots);
+    const puttingMetrics = calculatePuttingMetrics(playerShots, benchmark);
     const shortGameMetrics = calculateShortGameMetrics(playerShots);
     const mentalMetrics = calculateMentalMetrics(playerShots, benchmark);
 

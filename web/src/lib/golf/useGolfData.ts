@@ -301,13 +301,13 @@ export function useGolfData(): UseGolfDataResult {
 
   // Calculate putting metrics from filtered shots
   const puttingMetrics = useMemo(() => {
-    return calculatePuttingMetrics(filteredShots);
-  }, [filteredShots]);
+    return calculatePuttingMetrics(filteredShots, benchmark);
+  }, [filteredShots, benchmark]);
 
   // Calculate putting by distance
   const puttingByDistance = useMemo(() => {
-    return calculatePuttingByDistance(filteredShots);
-  }, [filteredShots]);
+    return calculatePuttingByDistance(filteredShots, benchmark);
+  }, [filteredShots, benchmark]);
 
   // Calculate lag putting metrics from filtered shots
   const lagPuttingMetrics = useMemo(() => {

@@ -510,11 +510,13 @@ export interface PuttingDistanceBucket {
   // Make %
   madePutts: number;
   makePct: number;
+  benchmarkMakePct: number;    // selected benchmark's expected make % over these putts
   // 3 putts (assigned to first putt's distance bucket)
   threePutts: number;
-  // Speed Ratio (% long)
+  // Speed Ratio (% of classified misses that finished long)
   longPutts: number;
-  speedRatio: number;
+  shortPutts: number;
+  speedRatio: number | null;   // null when no miss was classified Long/Short
   // Only for 13-60 ft buckets
   proximityMissed: number;     // avg ending distance for missed putts
   goodLagPct: number;          // % <= 3 feet
@@ -529,6 +531,7 @@ export interface PuttingMetrics {
   totalPutts: number;
   // Make % 0-4 feet
   makePct0to4Ft: number;
+  benchmarkMakePct0to4Ft: number;
   made0to4Ft: number;
   total0to4Ft: number;
   // Total SG 5-12 feet
@@ -538,9 +541,10 @@ export interface PuttingMetrics {
   // Poor Lag: # of first putts >20ft with end distance >=5ft
   poorLagCount: number;
   totalLagPutts: number;  // Total first putts >20ft for context
-  // Speed Rating: % of first putts >=20ft with Putt Result = Long
-  speedRating: number;
+  // Speed Rating: % of classified misses on first putts >=20ft that finished Long
+  speedRating: number | null;  // null when no miss was classified Long/Short
   longPutts: number;
+  classifiedLongShort: number;  // First putts >=20ft with a Long/Short result
   totalLongPutts: number;  // Total first putts >=20ft
   // Putting by distance
   puttingByDistance: PuttingDistanceBucket[];
