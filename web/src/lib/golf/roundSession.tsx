@@ -50,6 +50,8 @@ export interface RoundSessionState {
   courseName: string;
   roundDate: string | null;
   roundType: RoundType | null;
+  /** Event name, for a Tournament round. */
+  tournamentName: string | null;
   holePars: Record<number, number>;
   holes: HoleEntry[];
   activeHoleNumber: number;
@@ -165,6 +167,7 @@ export function RoundSessionProvider({
     courseName: '',
     roundDate: null,
     roundType: null,
+    tournamentName: null,
     holePars: {},
     holes: [],
     activeHoleNumber: 1,
@@ -246,6 +249,7 @@ export function RoundSessionProvider({
             courseName: draft.courseName,
             roundDate: draft.round.played_on,
             roundType: draft.round.round_type,
+            tournamentName: draft.round.tournament_name ?? null,
             holePars: draft.holePars,
             holes: entries,
             activeHoleNumber,
@@ -303,6 +307,7 @@ export function RoundSessionProvider({
           courseName,
           roundDate: round.played_on,
           roundType: round.round_type,
+          tournamentName: round.tournament_name,
           holePars,
           holes: entries,
           activeHoleNumber,

@@ -95,7 +95,7 @@ Read these before touching `supabase/migrations/` or building coach/team feature
 
 **The migrations rebuild the database.** `supabase/migrations/` was catching up to a
 schema largely created by hand in the dashboard; `0000_baseline.sql` is the snapshot
-that closed that gap. `0000` through `0010` are applied and recorded, and the recorded
+that closed that gap. `0000` through `0011` are applied and recorded, and the recorded
 version of each matches its filename prefix. Every file is idempotent, so re-running
 against the live project is a no-op.
 

@@ -138,7 +138,12 @@ function Shell({
               as scrollable rather than clipped. Invisible when it doesn't. */}
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-5 bg-gradient-to-t from-background to-transparent" />
         </div>
-        <div className="flex-none pt-2 pb-1.5 flex flex-col gap-2 border-t border-border">
+        {/* pb-6 keeps the primary button clear of the phone's bottom-edge
+            swipe strip, where a tap near Save was landing on the system
+            gesture instead. It has to be a fixed value: the root layout's
+            viewport does not set viewportFit: 'cover', so env(safe-area-*)
+            resolves to zero here. */}
+        <div className="flex-none pt-2 pb-6 flex flex-col gap-2 border-t border-border">
           {commit}
         </div>
       </div>
@@ -188,10 +193,13 @@ function HeaderImpl({
   holeNumber,
   roundId,
   score,
+  backToReview,
 }: {
   holeNumber: number;
   roundId: string;
   score: ReturnType<ReturnType<typeof useRoundSession>['getRunningScore']>;
+  /** True when this hole was opened from the round review screen. */
+  backToReview: boolean;
 }) {
   const online = useOnlineStatus();
   return (
@@ -203,12 +211,17 @@ function HeaderImpl({
         <span className="font-display font-extrabold text-3xl text-chalk uppercase tracking-tight whitespace-nowrap">
           Hole {holeNumber}
         </span>
-        <Link
-          href={`/golf-intelligence/round/${roundId}/review`}
-          className="font-mono text-[10px] tracking-[0.25em] uppercase text-ash hover:text-chalk whitespace-nowrap"
-        >
-          Review
-        </Link>
+        {/* Only a hole opened from the round review offers a way back to it.
+            During the hole-by-hole loop the title stands alone: a link sharing
+            this baseline row reads as the hole's state, not as navigation. */}
+        {backToReview && (
+          <Link
+            href={`/golf-intelligence/round/${roundId}/review`}
+            className="font-mono text-[10px] tracking-[0.25em] uppercase text-ash hover:text-chalk whitespace-nowrap border border-border rounded-sm px-2 py-0.5"
+          >
+            ← Round review
+          </Link>
+        )}
         {!online && (
           <span
             className="font-mono text-[9px] tracking-[0.2em] uppercase px-2 py-0.5 rounded-sm bg-shadow whitespace-nowrap shrink-0"
@@ -337,6 +350,22 @@ function ShotEntry({
   const [saving, setSaving] = useState(false);
   const [holedSaving, setHoledSaving] = useState(false);
   const [setupDone, setSetupDone] = useState(false);
+  // The hole's par and distance are entered on their own screen before shot 1.
+  // Reopening that screen is the only way to correct either one once the hole
+  // is under way — the distance is not a column, it is shot 1's
+  // starting_distance, so there is nothing else to edit.
+  const [editingSetup, setEditingSetup] = useState(false);
+
+  const shotOne = hole?.shots.find((s) => s.shot_number === 1) ?? null;
+
+  const openSetup = useCallback(() => {
+    setForm((f) => ({
+      ...f,
+      teeDistanceInput: shotOne ? String(shotOne.starting_distance) : f.teeDistanceInput,
+      warningDismissed: false,
+    }));
+    setEditingSetup(true);
+  }, [shotOne]);
 
   // When the course is in the database its par is known ahead of time;
   // pre-select it on the setup screen so the player only confirms.
@@ -356,15 +385,22 @@ function ShotEntry({
   useEffect(() => {
     if (
       mode === 'append' &&
+      !editingSetup &&
       hole &&
       hole.shots.length >= 1 &&
       form.teeDistanceInput !== ''
     ) {
       setForm((f) => ({ ...f, teeDistanceInput: '' }));
     }
-  }, [mode, hole, form.teeDistanceInput]);
+  }, [mode, editingSetup, hole, form.teeDistanceInput]);
 
-  const startingDistanceNum = isFreshShot1
+  // Editing shot 1 is editing the hole's starting distance: shot 1 has no
+  // preceding shot to inherit from, so the field is the only source there is.
+  const editingShot1Start =
+    mode === 'edit' && editingShot !== null && editingShot.shot_number === 1;
+  const startEditable = isFreshShot1 || editingSetup || editingShot1Start;
+
+  const startingDistanceNum = startEditable
     ? form.teeDistanceInput === ''
       ? null
       : Number(form.teeDistanceInput)
@@ -372,6 +408,9 @@ function ShotEntry({
 
   const startingUnit = unitFor(startingLie);
   const endingUnit = startingUnit;
+  // The setup screen always measures the hole from the tee, whatever lie the
+  // shot in progress happens to start from.
+  const setupUnit = unitFor(shotOne?.starting_lie ?? 'Tee');
 
   // Conditional triggers
   const showClubCategory =
@@ -392,7 +431,7 @@ function ShotEntry({
     startingDistanceNum >= 8;
 
   const warning =
-    isFreshShot1 &&
+    (isFreshShot1 || editingSetup) &&
     parSet &&
     startingDistanceNum !== null &&
     !form.warningDismissed
@@ -429,7 +468,7 @@ function ShotEntry({
     parSet &&
     form.endingDistance !== '' &&
     form.endingLie !== null &&
-    (!isFreshShot1 || form.teeDistanceInput !== '') &&
+    (!startEditable || form.teeDistanceInput !== '') &&
     (!showClubCategory || form.clubCategory !== null);
 
   // setPar updates local state (and flushes the draft) synchronously; there is
@@ -525,6 +564,22 @@ function ShotEntry({
       puttLongShort: null,
       penalty: false,
     }));
+  }
+
+  // Leaving the setup screen. On a hole that has already started, the corrected
+  // distance is written straight onto shot 1; nothing downstream needs
+  // recomputing, since cascadeFromShot only ever re-derives *later* shots from
+  // an earlier one's ending distance.
+  async function commitSetup() {
+    const n = form.teeDistanceInput === '' ? null : Number(form.teeDistanceInput);
+    if (n === null) return;
+    if (hole && shotOne && shotOne.starting_distance !== n) {
+      await session.updateShot(hole.holeId, {
+        id: shotOne.id,
+        starting_distance: n,
+      });
+    }
+    setEditingSetup(false);
   }
 
   async function handleSave() {
@@ -634,17 +689,29 @@ function ShotEntry({
   const displayShotNumber = strokeNumberForShot(hole?.shots ?? [], shotOrder);
 
   // ── Hole setup: par + hole distance get their own screen ──────────────────
-  if (isFreshShot1 && !setupDone) {
+  const openingHole = isFreshShot1 && !setupDone;
+  if (openingHole || editingSetup) {
     return (
-      <Shell header={<Header holeNumber={holeNumber} roundId={roundId} score={score} />}
+      <Shell
+        header={
+          <Header
+            holeNumber={holeNumber}
+            roundId={roundId}
+            score={score}
+            backToReview={fromReview}
+          />
+        }
         commit={
           <button
             type="button"
-            onClick={() => setSetupDone(true)}
+            onClick={() => {
+              if (openingHole) setSetupDone(true);
+              else void commitSetup();
+            }}
             disabled={!parSet || form.teeDistanceInput === ''}
             className={primaryBtn}
           >
-            Start hole →
+            {openingHole ? 'Start hole →' : 'Save hole distance'}
           </button>
         }
       >
@@ -688,7 +755,7 @@ function ShotEntry({
           {/* Hole distance */}
           <DistanceEntry
             label="Hole distance"
-            unit={startingUnit}
+            unit={setupUnit}
             value={form.teeDistanceInput}
             onChange={setTeeDistance}
           />
@@ -716,19 +783,29 @@ function ShotEntry({
 
   return (
     <Shell
-      header={<Header holeNumber={holeNumber} roundId={roundId} score={score} />}
+      header={
+        <Header
+          holeNumber={holeNumber}
+          roundId={roundId}
+          score={score}
+          backToReview={fromReview}
+        />
+      }
       commit={
         <>
           {/* Both committing actions live here, outside the scroll region, and
               fire on a completed tap. A drag that turns into a scroll is
               cancelled by the browser before click, so neither can be
               triggered by reaching in to scroll. */}
+          {/* Deliberately smaller than Save and pushed to the right edge:
+              same-width buttons stacked on one centre line made Holed easy to
+              hit when Save was meant. Still a 36px target. */}
           <button
             type="button"
             onClick={onHoled}
             disabled={!parSet || saving}
             className={
-              'w-full rounded-md border py-3 font-display font-bold text-sm tracking-[0.2em] uppercase select-none disabled:opacity-40 ' +
+              'self-end w-auto min-h-9 rounded-md border px-5 py-2 font-display font-bold text-xs tracking-[0.2em] uppercase select-none disabled:opacity-40 ' +
               (holedSaving
                 ? 'bg-chalk border-chalk text-pitch'
                 : 'bg-obsidian border-border text-chalk active:bg-pitch active:border-chalk')
@@ -756,32 +833,49 @@ function ShotEntry({
             {/* In edit mode on shot 1 there is no path yet, and an empty one
                 renders a lone "shot 1 ›" marker that costs a row for nothing. */}
             {!isFreshShot1 && hole && completedShots.length > 0 && (
-              <div className="mb-1">
-                <ShotPath shots={completedShots} activeShotNumber={shotOrder} />
+              <div className="mb-1 flex items-center justify-between gap-2">
+                <div className="min-w-0 flex-1">
+                  <ShotPath shots={completedShots} activeShotNumber={shotOrder} />
+                </div>
+                {/* Rides on the path row rather than taking one of its own:
+                    this screen is exactly one viewport tall and never scrolls. */}
+                {mode === 'append' && shotOne && (
+                  <button
+                    type="button"
+                    onClick={openSetup}
+                    aria-label="Edit hole distance"
+                    className="shrink-0 font-mono text-[10px] tracking-[0.15em] uppercase text-ash hover:text-chalk border border-border rounded-sm px-2 py-1"
+                  >
+                    ✎ {shotOne.starting_distance} {setupUnit}
+                  </button>
+                )}
               </div>
             )}
-            <div className="flex items-center justify-between">
-              <div className="flex items-baseline gap-2">
+            {/* Editing shot 1 is editing the hole's distance — there is no
+                earlier shot for it to be inherited from, so the field belongs
+                here rather than being shown read-only. */}
+            {editingShot1Start ? (
+              <DistanceEntry
+                label="Hole distance"
+                unit={startingUnit}
+                value={form.teeDistanceInput}
+                onChange={setTeeDistance}
+              />
+            ) : (
+              <div className="flex items-center justify-between">
+                {/* On shot 1 this row *is* the hole distance, so tapping it
+                    reopens the setup screen where it was entered. */}
+                <FromStrip
+                  distance={startingDistanceNum}
+                  unit={startingUnit}
+                  lie={startingLie}
+                  onEdit={isFreshShot1 ? openSetup : undefined}
+                />
                 <span className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash">
-                  From
-                </span>
-                <span className="font-display font-extrabold text-2xl text-chalk">
-                  {startingDistanceNum ?? '—'}
-                </span>
-                <span className="font-mono text-[10px] tracking-[0.25em] uppercase text-ash">
-                  {startingUnit}
-                </span>
-                <span
-                  className="font-display font-bold text-[10px] tracking-[0.2em] uppercase px-2 py-1 rounded-sm"
-                  style={{ background: LIE_COLORS[startingLie], color: '#0C0C0C' }}
-                >
-                  {startingLie}
+                  Shot {displayShotNumber}
                 </span>
               </div>
-              <span className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash">
-                Shot {displayShotNumber}
-              </span>
-            </div>
+            )}
           </div>
 
           {/* Ending distance + keypad */}
@@ -832,6 +926,52 @@ function ShotEntry({
           </ConditionalBlock>
 
     </Shell>
+  );
+}
+
+function FromStrip({
+  distance,
+  unit,
+  lie,
+  onEdit,
+}: {
+  distance: number | null;
+  unit: string;
+  lie: Lie;
+  onEdit?: () => void;
+}) {
+  const body = (
+    <>
+      <span className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash">
+        From
+      </span>
+      <span className="font-display font-extrabold text-2xl text-chalk">
+        {distance ?? '—'}
+      </span>
+      <span className="font-mono text-[10px] tracking-[0.25em] uppercase text-ash">
+        {unit}
+      </span>
+      <span
+        className="font-display font-bold text-[10px] tracking-[0.2em] uppercase px-2 py-1 rounded-sm"
+        style={{ background: LIE_COLORS[lie], color: '#0C0C0C' }}
+      >
+        {lie}
+      </span>
+      {onEdit && <span className="font-mono text-[11px] text-ash">✎</span>}
+    </>
+  );
+  if (!onEdit) {
+    return <div className="flex items-baseline gap-2">{body}</div>;
+  }
+  return (
+    <button
+      type="button"
+      onClick={onEdit}
+      aria-label="Edit hole distance"
+      className="flex items-baseline gap-2 text-left"
+    >
+      {body}
+    </button>
   );
 }
 

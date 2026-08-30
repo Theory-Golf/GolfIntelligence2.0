@@ -5,8 +5,10 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
   getCoursesByPlayer,
+  getTournamentSuggestions,
   upsertCourse,
   fuzzyMatchCourse,
+  fuzzyMatchName,
 } from '@/lib/golf/db/index';
 import { createBrowserClient } from '@/lib/golf/db/client';
 import { createId } from '@/lib/golf/utils/index';
@@ -47,6 +49,8 @@ interface RoundSetupState {
   locationInput: string;
   roundType: RoundType | null;
   roundNumber: number | null;
+  /** Event name. Only collected for a Tournament round. */
+  tournamentName: string;
   weather: WeatherFields;
   geocode: GeocodeResult | null;
   /** Alternates offered when a city name is ambiguous ("Springfield"). */
@@ -63,6 +67,7 @@ type Action =
   | { type: 'SET_LOCATION_INPUT'; value: string }
   | { type: 'SET_ROUND_TYPE'; roundType: RoundType }
   | { type: 'SET_ROUND_NUMBER'; roundNumber: number }
+  | { type: 'SET_TOURNAMENT_NAME'; tournamentName: string }
   | { type: 'SET_WEATHER_FIELD'; field: keyof WeatherFields; value: string }
   | { type: 'SET_CANDIDATES'; candidates: GeocodeResult[] }
   | { type: 'PICK_CANDIDATE'; geocode: GeocodeResult }
@@ -92,9 +97,15 @@ function reducer(state: RoundSetupState, action: Action): RoundSetupState {
         ...state,
         roundType: action.roundType,
         roundNumber: action.roundType === 'Practice' ? null : state.roundNumber,
+        // Only a tournament has an event name; switching away drops it rather
+        // than leaving it to be written by a later switch back.
+        tournamentName:
+          action.roundType === 'Tournament' ? state.tournamentName : '',
       };
     case 'SET_ROUND_NUMBER':
       return { ...state, roundNumber: action.roundNumber };
+    case 'SET_TOURNAMENT_NAME':
+      return { ...state, tournamentName: action.tournamentName };
     case 'SET_WEATHER_FIELD':
       return {
         ...state,
@@ -170,6 +181,7 @@ export default function NewRoundPage() {
     locationInput: '',
     roundType: null,
     roundNumber: null,
+    tournamentName: '',
     weather: EMPTY_WEATHER,
     geocode: null,
     candidates: [],
@@ -179,12 +191,15 @@ export default function NewRoundPage() {
   const [playerId, setPlayerId] = useState<string | null>(null);
   const [playerName, setPlayerName] = useState('');
   const [courses, setCourses] = useState<CourseRow[]>([]);
+  const [tournaments, setTournaments] = useState<string[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showTournamentDropdown, setShowTournamentDropdown] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [courseError, setCourseError] = useState<string | null>(null);
   const [submitWarning, setSubmitWarning] = useState<string | null>(null);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const tournamentDropdownRef = useRef<HTMLDivElement>(null);
   const pendingCourseRef = useRef<Promise<void> | null>(null);
 
   useEffect(() => {
@@ -196,6 +211,10 @@ export default function NewRoundPage() {
       const email = data.user.email ?? '';
       setPlayerName(email.split('@')[0] || uid.slice(0, 8));
       getCoursesByPlayer(uid).then(setCourses).catch(console.error);
+      // Shared across the player's team and coaches, so two teammates at the
+      // same event spell it the same way. Failure is non-fatal: the field
+      // still accepts anything typed.
+      getTournamentSuggestions().then(setTournaments).catch(console.error);
     });
   }, []);
 
@@ -203,6 +222,12 @@ export default function NewRoundPage() {
     function onPointerDown(e: PointerEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setShowDropdown(false);
+      }
+      if (
+        tournamentDropdownRef.current &&
+        !tournamentDropdownRef.current.contains(e.target as Node)
+      ) {
+        setShowTournamentDropdown(false);
       }
     }
     document.addEventListener('pointerdown', onPointerDown);
@@ -294,6 +319,24 @@ export default function NewRoundPage() {
     fuzzyMatch !== null &&
     !filteredCourses.some((c) => c.id === fuzzyMatch.id);
 
+  const isTournament = state.roundType === 'Tournament';
+  const typedTournament = state.tournamentName.trim();
+
+  const filteredTournaments = tournaments.filter((t) =>
+    t.toLowerCase().includes(typedTournament.toLowerCase()),
+  );
+
+  // An exact hit needs no nudge, and neither does a name already on the list.
+  const tournamentFuzzy =
+    typedTournament.length >= 2
+      ? fuzzyMatchName(typedTournament, tournaments)
+      : null;
+
+  const showTournamentFuzzyHint =
+    tournamentFuzzy !== null &&
+    tournamentFuzzy.toLowerCase() !== typedTournament.toLowerCase() &&
+    !filteredTournaments.includes(tournamentFuzzy);
+
   const showAddNew =
     state.courseId === null &&
     state.courseName.trim().length >= 2 &&
@@ -370,6 +413,7 @@ export default function NewRoundPage() {
         played_on: state.date,
         round_type: state.roundType,
         round_number: state.roundNumber,
+        tournament_name: isTournament ? state.tournamentName.trim() || null : null,
         // Prefer the resolved place; fall back to whatever was typed so the
         // round still records a location when geocoding was unavailable.
         location_city:
@@ -666,6 +710,73 @@ export default function NewRoundPage() {
           {/* Rendered outright rather than animated open: this sits directly
               above "Start Round", and animating its height moves that button
               for 200ms after the round type is tapped. */}
+          {isTournament && (
+            <div className="border-t border-border mt-4 pt-4">
+              <span className={`${containerLabel} mb-2.5`}>Tournament</span>
+              <div ref={tournamentDropdownRef} className="relative">
+                <input
+                  type="text"
+                  placeholder="Event name (optional)"
+                  value={state.tournamentName}
+                  onChange={(e) =>
+                    dispatch({
+                      type: 'SET_TOURNAMENT_NAME',
+                      tournamentName: e.target.value,
+                    })
+                  }
+                  onFocus={() => setShowTournamentDropdown(true)}
+                  autoComplete="off"
+                  autoCapitalize="words"
+                  className={input}
+                />
+
+                {showTournamentDropdown && filteredTournaments.length > 0 && (
+                  <div className="absolute left-0 right-0 top-[calc(100%+4px)] bg-shadow border border-border rounded-md overflow-hidden z-50">
+                    {filteredTournaments.slice(0, 6).map((t) => (
+                      <button
+                        key={t}
+                        type="button"
+                        onPointerDown={(e) => e.preventDefault()}
+                        onClick={() => {
+                          dispatch({
+                            type: 'SET_TOURNAMENT_NAME',
+                            tournamentName: t,
+                          });
+                          setShowTournamentDropdown(false);
+                        }}
+                        className="block w-full px-3.5 py-2.5 bg-transparent border-b border-border text-cement font-body text-[13px] text-left last:border-b-0"
+                      >
+                        {t}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* No "+ add as new": an unmatched name is simply kept as
+                    typed. The list is what the player's team has already
+                    used, so the nudge is all the consistency there is to
+                    offer. */}
+                {showTournamentFuzzyHint && tournamentFuzzy && (
+                  <div className="mt-1.5">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        dispatch({
+                          type: 'SET_TOURNAMENT_NAME',
+                          tournamentName: tournamentFuzzy,
+                        })
+                      }
+                      className="bg-transparent border-0 font-body text-xs text-ash p-0 text-left"
+                    >
+                      Did you mean{' '}
+                      <strong className="text-chalk">{tournamentFuzzy}</strong>?
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {needsRoundNumber && (
             <div className="border-t border-border mt-4 pt-4">
               <span className={`${containerLabel} mb-2.5`}>Round</span>
