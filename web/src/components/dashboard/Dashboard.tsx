@@ -75,6 +75,8 @@ export default function Dashboard() {
     shortGameMetrics,
     shortGameHeatMapData,
     driverEngine,
+    segmentDiagnosis,
+    practicePlan,
     coachTableMetrics,
     isLoading,
     error,
@@ -254,7 +256,12 @@ export default function Dashboard() {
             )}
 
             {activeTab === 'path' && (
-              <PlayerPathView driverEngine={driverEngine} benchmark={{ gender: benchmarkGender, tier: benchmarkTier }} />
+              <PlayerPathView
+            driverEngine={driverEngine}
+            benchmark={{ gender: benchmarkGender, tier: benchmarkTier }}
+            diagnosis={segmentDiagnosis}
+            practicePlan={practicePlan}
+          />
             )}
 
             {activeTab === 'shortgame' && (

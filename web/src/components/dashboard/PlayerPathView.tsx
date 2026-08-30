@@ -1,11 +1,13 @@
 'use client';
 
 /**
- * PlayerPath — prioritised performance drivers.
+ * PlayerPath — what is costing you strokes, and what to go practise.
  *
- * Answers one question: what is driving my scores, and what do I work on first?
- * The engine (lib/golf/driverEngine.ts) does the arithmetic; this file decides
- * what a coach sees first.
+ * Two layers. The verdict layer on top answers the player's question at the
+ * four-segment altitude and links out to the practice game that addresses it;
+ * segmentDiagnosis.ts and practicePrescription.ts do that arithmetic. Beneath
+ * it, collapsed, sits the seventeen-driver framework this file has always
+ * rendered — unchanged, and still the place a coach goes to confirm a finding.
  *
  * Every card carries two independent readings that are deliberately not blended:
  * the tier says how far off standard the player is, the strokes-gained figure
@@ -19,10 +21,24 @@ import type { DriverEngineResult, DriverResult } from '@/lib/golf/driverEngine';
 import { MATERIALITY_SG_PER_ROUND } from '@/lib/golf/driverEngine';
 import { PILLAR_COLORS, PILLAR_LABELS, type Pillar, type Tier } from '@/lib/golf/driverSpecs';
 import { BENCHMARK_TIER_LABELS, type BenchmarkSelection } from '@/lib/golf/benchmarks';
+import type { SegmentDiagnosisResult } from '@/lib/golf/segmentDiagnosis';
+import type { PracticePlan } from '@/lib/golf/practicePrescription';
+import {
+  AdvancedAnalysis,
+  Monitors,
+  PracticePlanSection,
+  SegmentStrip,
+  Verdict,
+  WhyCard,
+} from './playerpath/parts';
 
 interface PlayerPathViewProps {
   driverEngine: DriverEngineResult;
   benchmark: BenchmarkSelection;
+  diagnosis: SegmentDiagnosisResult;
+  practicePlan: PracticePlan;
+  /** Activity id → human-readable last-played date, from drill_sessions. */
+  lastPlayed?: Record<string, string>;
 }
 
 const PILLAR_ORDER: Pillar[] = ['Driving', 'Approach', 'ShortGame', 'Putting'];
@@ -293,7 +309,13 @@ function SegmentSection({
   );
 }
 
-export function PlayerPathView({ driverEngine, benchmark }: PlayerPathViewProps) {
+export function PlayerPathView({
+  driverEngine,
+  benchmark,
+  diagnosis,
+  practicePlan,
+  lastPlayed = {},
+}: PlayerPathViewProps) {
   const { all, primary, monitoring, pillarState, totalRounds } = driverEngine;
 
   if (totalRounds === 0) {
@@ -313,65 +335,98 @@ export function PlayerPathView({ driverEngine, benchmark }: PlayerPathViewProps)
       .filter(d => d.pillar === pillar)
       .sort((a, b) => a.impactSG - b.impactSG);
 
+  // Gate 4 can hand the plan to a segment that is not the SG leader; the "why"
+  // follows the plan, so the explanation matches the game being prescribed.
+  const explained = diagnosis.t5Promoted ?? diagnosis.headline;
+
   return (
     <div className="content">
-      <h4 style={{ marginBottom: '4px', color: 'var(--ash)' }}>Player Path</h4>
-      <p style={{ fontSize: '12px', color: 'var(--ash)', marginBottom: '18px' }}>
-        Ranked by strokes gained against {BENCHMARK_TIER_LABELS[benchmark.tier]} over{' '}
-        {totalRounds} {totalRounds === 1 ? 'round' : 'rounds'}. Drivers costing less than{' '}
-        {MATERIALITY_SG_PER_ROUND.toFixed(1)} strokes per round are tracked below rather than
-        surfaced here.
-      </p>
+      <h4 style={{ marginBottom: '18px', color: 'var(--ash)' }}>Player Path</h4>
 
-      {primary.length > 0 ? (
-        <>
-          <div className="grid-cards-3" style={{ gap: '16px', marginBottom: '20px' }}>
-            {primary.map((driver, i) => (
-              <PrimaryCard key={driver.code} driver={driver} rank={i + 1} />
-            ))}
-          </div>
+      <div className="ppv">
+        <SegmentStrip
+          readings={diagnosis.all}
+          lead={explained}
+          totalT5Holes={diagnosis.totalT5Holes}
+        />
+        <Verdict diagnosis={diagnosis} benchmarkLabel={BENCHMARK_TIER_LABELS[benchmark.tier]} />
+        {explained && <WhyCard diagnosis={diagnosis} reading={explained} />}
+        <PracticePlanSection plan={practicePlan} lastPlayed={lastPlayed} />
+        <Monitors readings={diagnosis.monitors} />
+      </div>
 
-          {monitoring.length > 0 && (
-            <div style={{ marginBottom: '24px' }}>
-              <div
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '9.5px',
-                  letterSpacing: '0.2em',
-                  textTransform: 'uppercase',
-                  color: 'var(--ash)',
-                  marginBottom: '8px',
-                }}
-              >
-                Monitoring
-              </div>
-              <div style={{ display: 'grid', gap: '8px' }}>
-                {monitoring.map(driver => (
-                  <MonitorRow key={driver.code} driver={driver} />
-                ))}
-              </div>
+      <AdvancedAnalysis>
+        <p style={{ fontSize: '12px', color: 'var(--ash)', margin: '14px 0 18px' }}>
+          Ranked by strokes gained against {BENCHMARK_TIER_LABELS[benchmark.tier]} over{' '}
+          {totalRounds} {totalRounds === 1 ? 'round' : 'rounds'}. Drivers costing less than{' '}
+          {MATERIALITY_SG_PER_ROUND.toFixed(1)} strokes per round are tracked below rather than
+          surfaced here.
+        </p>
+
+        {primary.length > 0 ? (
+          <>
+            <div className="grid-cards-3" style={{ gap: '16px', marginBottom: '20px' }}>
+              {primary.map((driver, i) => (
+                <PrimaryCard key={driver.code} driver={driver} rank={i + 1} />
+              ))}
             </div>
-          )}
-        </>
-      ) : (
-        <div
-          style={{
-            background: 'var(--shadow)',
-            padding: '24px',
-            marginBottom: '24px',
-            color: 'var(--ash)',
-          }}
-        >
-          <p style={{ color: 'var(--chalk)', marginBottom: '6px' }}>
-            No driver is costing more than {MATERIALITY_SG_PER_ROUND.toFixed(1)} strokes per round.
-          </p>
-          <p style={{ fontSize: '12px' }}>
-            Every driver is still measured — see the segment detail below.
-          </p>
-        </div>
-      )}
 
-      <div style={{ marginBottom: '24px' }}>
+            {monitoring.length > 0 && (
+              <div style={{ marginBottom: '24px' }}>
+                <div
+                  style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '9.5px',
+                    letterSpacing: '0.2em',
+                    textTransform: 'uppercase',
+                    color: 'var(--ash)',
+                    marginBottom: '8px',
+                  }}
+                >
+                  Monitoring
+                </div>
+                <div style={{ display: 'grid', gap: '8px' }}>
+                  {monitoring.map(driver => (
+                    <MonitorRow key={driver.code} driver={driver} />
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
+        ) : (
+          <div
+            style={{
+              background: 'var(--shadow)',
+              padding: '24px',
+              marginBottom: '24px',
+              color: 'var(--ash)',
+            }}
+          >
+            <p style={{ color: 'var(--chalk)', marginBottom: '6px' }}>
+              No driver is costing more than {MATERIALITY_SG_PER_ROUND.toFixed(1)} strokes per round.
+            </p>
+            <p style={{ fontSize: '12px' }}>
+              Every driver is still measured — see the segment detail below.
+            </p>
+          </div>
+        )}
+
+        <div style={{ marginBottom: '24px' }}>
+          <div
+            style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: '9.5px',
+              letterSpacing: '0.2em',
+              textTransform: 'uppercase',
+              color: 'var(--ash)',
+              marginBottom: '8px',
+            }}
+          >
+            Causal chain
+          </div>
+          <CausalChain pillarState={pillarState} />
+        </div>
+
         <div
           style={{
             fontFamily: 'var(--font-mono)',
@@ -382,26 +437,12 @@ export function PlayerPathView({ driverEngine, benchmark }: PlayerPathViewProps)
             marginBottom: '8px',
           }}
         >
-          Causal chain
+          All drivers
         </div>
-        <CausalChain pillarState={pillarState} />
-      </div>
-
-      <div
-        style={{
-          fontFamily: 'var(--font-mono)',
-          fontSize: '9.5px',
-          letterSpacing: '0.2em',
-          textTransform: 'uppercase',
-          color: 'var(--ash)',
-          marginBottom: '8px',
-        }}
-      >
-        All drivers
-      </div>
-      {PILLAR_ORDER.map(pillar => (
-        <SegmentSection key={pillar} pillar={pillar} drivers={byPillar(pillar)} />
-      ))}
+        {PILLAR_ORDER.map(pillar => (
+          <SegmentSection key={pillar} pillar={pillar} drivers={byPillar(pillar)} />
+        ))}
+      </AdvancedAnalysis>
     </div>
   );
 }

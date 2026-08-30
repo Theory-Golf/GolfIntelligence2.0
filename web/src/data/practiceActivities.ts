@@ -3,6 +3,22 @@
  * Single source of truth for all PlayerPath practice activities.
  */
 
+/**
+ * NOTE: `driver_id` here is a superseded taxonomy and nothing reads it.
+ *
+ * These ids (`M1`, `M2`, `L1`–`L3`, `A1`–`A4`) predate the seventeen published
+ * drivers in `lib/golf/driverSpecs.ts` (`D1`–`D5`, `A1`–`A5`, `SG1`–`SG3`,
+ * `P1`–`P4`). The overlap is a trap rather than a match: catalog `A1` is "GIR
+ * rate in the 50–100y band" while spec `A1` is "Long Approach GIR, 150–200y".
+ *
+ * The PlayerPath practice prescription therefore does not use this field or
+ * `getActivitiesForDrivers` below. It routes from measured signal — segment,
+ * then distance band or putting zone, then failure mode — in
+ * `lib/golf/practicePrescription.ts`, which needs reasoning a flat
+ * game-to-driver list cannot express. Re-keying these to the live codes is a
+ * content rewrite of every `connection` string, not a rename; do that
+ * deliberately or delete the field.
+ */
 export interface ConnectedDriver {
   driver_id: string;
   connection: string;
