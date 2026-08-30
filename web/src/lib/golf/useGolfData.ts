@@ -8,6 +8,8 @@ import type { Gender, BenchmarkTier } from './benchmarks';
 import { createBrowserClient } from './db/client';
 import { processShots, calculateTiger5Metrics, getRoundSummaries, calculateDrivingMetrics, calculateDrivingAnalysis, calculateProblemDriveMetrics, calculateApproachMetrics, calculateApproachByDistance, calculateApproachFromRough, calculateApproachHeatMapData, calculatePuttingMetrics, calculatePuttingByDistance, calculateLagPuttingMetrics, calculateScoringMetrics, calculateMentalMetrics, calculateBirdieAndBogeyMetrics, calculateShortGameMetrics, calculateShortGameHeatMapData } from './calculations';
 import { runDriverEngine, type DriverEngineResult } from './driverEngine';
+import { runSegmentDiagnosis, type SegmentDiagnosisResult } from './segmentDiagnosis';
+import { buildPracticePlan, type PracticePlan } from './practicePrescription';
 import { calculateCoachTableMetrics } from './calculations';
 import { fetchDashboardShots, type DashboardShotRow } from './db/dashboard';
 
@@ -34,6 +36,8 @@ interface UseGolfDataResult {
   shortGameMetrics: ShortGameMetrics;
   shortGameHeatMapData: ShortGameHeatMapData;
   driverEngine: DriverEngineResult;
+  segmentDiagnosis: SegmentDiagnosisResult;
+  practicePlan: PracticePlan;
   coachTableMetrics: CoachTableMetrics;
   roundSummaries: RoundSummary[];
   filterOptions: FilterOptions;
@@ -336,6 +340,16 @@ export function useGolfData(): UseGolfDataResult {
     return runDriverEngine(filteredShots, benchmark);
   }, [filteredShots, benchmark]);
 
+  // The verdict layer above those drivers: which of the four segments is
+  // costing strokes, and which built practice game addresses it.
+  const segmentDiagnosis = useMemo(() => {
+    return runSegmentDiagnosis(filteredShots, benchmark);
+  }, [filteredShots, benchmark]);
+
+  const practicePlan = useMemo(() => {
+    return buildPracticePlan(segmentDiagnosis);
+  }, [segmentDiagnosis]);
+
   // Calculate Coach Table metrics (per player pivot table)
   const coachTableMetrics = useMemo(() => {
     return calculateCoachTableMetrics(processedShots, benchmark);
@@ -371,6 +385,8 @@ export function useGolfData(): UseGolfDataResult {
     shortGameMetrics,
     shortGameHeatMapData,
     driverEngine,
+    segmentDiagnosis,
+    practicePlan,
     coachTableMetrics,
     roundSummaries,
     filterOptions,
