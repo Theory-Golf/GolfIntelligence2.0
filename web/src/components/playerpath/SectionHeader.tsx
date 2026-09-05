@@ -17,7 +17,7 @@ export default function SectionHeader({
 }) {
   return (
     <header className="mb-10 space-y-4">
-      <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-primary">
+      <p className="font-mono text-label uppercase tracking-[0.3em] text-primary">
         {index} — {eyebrow}
       </p>
       <h2 className="font-display text-[clamp(32px,5vw,56px)] font-extrabold uppercase leading-[0.95] tracking-tight text-foreground">

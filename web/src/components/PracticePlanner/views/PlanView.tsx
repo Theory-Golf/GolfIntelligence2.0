@@ -33,7 +33,7 @@ export default function PlanView({
     return (
       <div className="space-y-4">
         <header className="space-y-3">
-          <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+          <p className="font-mono text-label uppercase tracking-[0.3em] text-muted-foreground">
             Step 02 · Build
           </p>
           <h3 className="font-display text-3xl font-extrabold uppercase tracking-tight text-foreground sm:text-4xl">
@@ -57,7 +57,7 @@ export default function PlanView({
   return (
     <div className="space-y-6">
       <header className="space-y-3">
-        <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+        <p className="font-mono text-label uppercase tracking-[0.3em] text-muted-foreground">
           Step 02 · Build
         </p>
         <h3 className="font-display text-3xl font-extrabold uppercase tracking-tight text-foreground sm:text-4xl">
@@ -73,7 +73,7 @@ export default function PlanView({
       </header>
 
       <div className="border border-primary/30 bg-accent/40 p-4">
-        <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary">
+        <div className="font-mono text-label uppercase tracking-[0.2em] text-primary">
           Mesocycle · Week {week}
         </div>
         <p className="mt-1 text-sm text-foreground">
@@ -141,7 +141,7 @@ export default function PlanView({
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="block font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+      <label className="block font-mono text-label uppercase tracking-[0.2em] text-muted-foreground">
         {label}
       </label>
       <div className="mt-1">{children}</div>

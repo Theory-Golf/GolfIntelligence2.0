@@ -147,7 +147,7 @@ export default function PracticeBySegment() {
           lead="Assessment games and development work, grouped by the part of the game they belong to. Each one keeps its own score and history, so every rep you log is measured the same way twice."
         />
 
-        <p className="mb-6 font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+        <p className="mb-6 font-mono text-label uppercase tracking-[0.12em] text-muted-foreground">
           <strong className="font-normal text-foreground">{builtCount}</strong> ready to play
           <span className="mx-2 text-border">·</span>
           <strong className="font-normal text-foreground">{ACTIVITIES.length - builtCount}</strong>{' '}
@@ -165,7 +165,7 @@ export default function PracticeBySegment() {
               key={group.id}
               type="button"
               onClick={() => jumpToSegment(group.id)}
-              className="flex min-h-[44px] items-center gap-2 border border-border bg-card px-4 font-mono text-[10px] uppercase tracking-[0.15em] text-foreground transition-colors duration-150 hover:border-primary hover:text-primary"
+              className="flex min-h-[44px] items-center gap-2 border border-border bg-card px-4 font-mono text-label uppercase tracking-[0.15em] text-foreground transition-colors duration-150 hover:border-primary hover:text-primary"
             >
               {group.label}
               <span className="text-muted-foreground">{readyByGroup[group.id]}</span>
@@ -193,11 +193,11 @@ export default function PracticeBySegment() {
                     <span className="font-display text-lg font-bold uppercase tracking-wide text-foreground">
                       {group.label}
                     </span>
-                    <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+                    <span className="font-mono text-label uppercase tracking-[0.15em] text-muted-foreground">
                       {ready} of {group.total} ready
                     </span>
                   </span>
-                  <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-primary">
+                  <span className="font-mono text-label uppercase tracking-[0.18em] text-primary">
                     {isOpen ? '−' : '+'}
                   </span>
                 </button>
@@ -207,7 +207,7 @@ export default function PracticeBySegment() {
                     {group.subgroups.map((sub) => (
                       <div key={sub.key}>
                         {sub.label && (
-                          <div className="border-b border-border bg-surface px-5 py-2 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                          <div className="border-b border-border bg-surface px-5 py-2 font-mono text-label uppercase tracking-[0.2em] text-muted-foreground">
                             {sub.label}
                           </div>
                         )}
@@ -262,41 +262,41 @@ function ActivityCard({
         </span>
         <div className="flex shrink-0 flex-col items-end gap-1.5">
           <span
-            className={`whitespace-nowrap px-2 py-[3px] font-mono text-[9px] uppercase tracking-[0.18em] ${
+            className={`whitespace-nowrap px-2 py-[3px] font-mono text-label uppercase tracking-[0.18em] ${
               isAssessment ? 'bg-accent text-accent-foreground' : 'bg-secondary text-muted-foreground'
             }`}
           >
             {isAssessment ? 'Assessment' : 'Development'}
           </span>
           {inDevelopment && (
-            <span className="whitespace-nowrap border border-border px-2 py-[3px] font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground">
+            <span className="whitespace-nowrap border border-border px-2 py-[3px] font-mono text-label uppercase tracking-[0.18em] text-muted-foreground">
               In Development
             </span>
           )}
         </div>
       </div>
 
-      <p className="flex-1 text-[13px] leading-relaxed text-muted-foreground">
+      <p className="flex-1 text-caption leading-relaxed text-muted-foreground">
         {activity.description}
       </p>
 
       <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-border pt-2.5">
         {recency ? (
-          <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+          <span className="font-mono text-label uppercase tracking-[0.12em] text-muted-foreground">
             {recency.count} {recency.count === 1 ? 'run' : 'runs'}
             <span className="mx-1.5 text-border">·</span>
             {fmtRelativeDay(recency.lastPlayed)}
           </span>
         ) : (
           !inDevelopment && (
-            <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+            <span className="font-mono text-label uppercase tracking-[0.12em] text-muted-foreground">
               Not played yet
             </span>
           )
         )}
         {route && (
           // Always visible: a touch device has no hover to reveal it.
-          <span className="ml-auto font-mono text-[10px] uppercase tracking-[0.12em] text-primary transition duration-150 group-hover:translate-x-[3px]">
+          <span className="ml-auto font-mono text-label uppercase tracking-[0.12em] text-primary transition duration-150 group-hover:translate-x-[3px]">
             Play →
           </span>
         )}
@@ -321,7 +321,7 @@ function ActivityCard({
       {historyRoute && (
         <Link
           href={historyRoute}
-          className="min-h-[44px] border-t border-border px-5 py-3 font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground no-underline transition-colors duration-150 hover:text-primary"
+          className="min-h-[44px] border-t border-border px-5 py-3 font-mono text-label uppercase tracking-[0.12em] text-muted-foreground no-underline transition-colors duration-150 hover:text-primary"
         >
           History →
         </Link>

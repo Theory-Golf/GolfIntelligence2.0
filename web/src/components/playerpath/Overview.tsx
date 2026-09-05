@@ -39,7 +39,7 @@ export default function PlayerPathOverview() {
   return (
     <section id="playerpath" className="scroll-mt-[var(--pp-chrome-h)] px-6 pt-20 pb-16">
       <div className="mx-auto max-w-5xl">
-        <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-primary">
+        <p className="font-mono text-label uppercase tracking-[0.3em] text-primary">
           01 — PlayerPath
         </p>
         <h1 className="mt-5 font-display text-[clamp(40px,7vw,80px)] font-extrabold uppercase leading-[0.9] tracking-tight text-foreground">
@@ -66,18 +66,18 @@ export default function PlayerPathOverview() {
               href={item.href}
               className="group flex flex-col gap-3 bg-card p-6 no-underline transition-colors duration-150 hover:bg-surface"
             >
-              <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-primary">
+              <span className="font-mono text-label uppercase tracking-[0.25em] text-primary">
                 {item.num}
               </span>
               <span className="font-display text-xl font-bold uppercase tracking-wide text-foreground">
                 {item.name}
               </span>
-              <span className="text-[13px] leading-relaxed text-muted-foreground">{item.body}</span>
-              <span className="mt-auto border-t border-border pt-3 font-mono text-[9px] uppercase tracking-[0.15em] text-muted-foreground">
+              <span className="text-caption leading-relaxed text-muted-foreground">{item.body}</span>
+              <span className="mt-auto border-t border-border pt-3 font-mono text-label uppercase tracking-[0.15em] text-muted-foreground">
                 {item.note}
               </span>
               {/* Always visible — a phone has no hover to reveal it. */}
-              <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-primary transition duration-150 group-hover:translate-x-[3px]">
+              <span className="font-mono text-label uppercase tracking-[0.12em] text-primary transition duration-150 group-hover:translate-x-[3px]">
                 {item.cta} →
               </span>
             </Link>

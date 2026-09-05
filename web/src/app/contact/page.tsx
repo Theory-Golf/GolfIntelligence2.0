@@ -99,7 +99,7 @@ export default function ContactPage() {
 
         {submitted ? (
           <div className="mt-10">
-            <p className="text-primary font-mono text-xs tracking-[0.15em] uppercase mb-3">
+            <p className="text-primary font-mono text-label tracking-[0.15em] uppercase mb-3">
               Message sent
             </p>
             <p className="text-foreground leading-relaxed">
@@ -109,37 +109,37 @@ export default function ContactPage() {
         ) : (
           <form onSubmit={handleSubmit} noValidate className="mt-10 flex flex-col gap-5">
             <div className="flex flex-col gap-1.5">
-              <label className="font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground" htmlFor="name">
+              <label className="font-mono text-label tracking-[0.2em] uppercase text-muted-foreground" htmlFor="name">
                 Name
               </label>
               <input id="name" name="name" type="text" className={inputClasses} value={form.name} onChange={handleChange} placeholder="Your name" autoComplete="name" />
-              {errors.name && <p className="font-mono text-[11px] text-primary tracking-[0.05em] mt-1">{errors.name}</p>}
+              {errors.name && <p className="font-mono text-label text-primary tracking-[0.05em] mt-1">{errors.name}</p>}
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground" htmlFor="email">
+              <label className="font-mono text-label tracking-[0.2em] uppercase text-muted-foreground" htmlFor="email">
                 Email
               </label>
               <input id="email" name="email" type="email" className={inputClasses} value={form.email} onChange={handleChange} placeholder="you@example.com" autoComplete="email" />
-              {errors.email && <p className="font-mono text-[11px] text-primary tracking-[0.05em] mt-1">{errors.email}</p>}
+              {errors.email && <p className="font-mono text-label text-primary tracking-[0.05em] mt-1">{errors.email}</p>}
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground" htmlFor="phone">
-                Cell Phone <span className="text-ash text-[9px] tracking-[0.1em]">(optional)</span>
+              <label className="font-mono text-label tracking-[0.2em] uppercase text-muted-foreground" htmlFor="phone">
+                Cell Phone <span className="text-ash text-label-sm tracking-[0.1em]">(optional)</span>
               </label>
               <input id="phone" name="phone" type="tel" className={inputClasses} value={form.phone} onChange={handleChange} placeholder="(555) 000-0000" autoComplete="tel" />
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground" htmlFor="organization">
-                Organization / Program <span className="text-ash text-[9px] tracking-[0.1em]">(optional)</span>
+              <label className="font-mono text-label tracking-[0.2em] uppercase text-muted-foreground" htmlFor="organization">
+                Organization / Program <span className="text-ash text-label-sm tracking-[0.1em]">(optional)</span>
               </label>
               <input id="organization" name="organization" type="text" className={inputClasses} value={form.organization} onChange={handleChange} placeholder="University golf program, club, etc." autoComplete="organization" />
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground" htmlFor="message">
+              <label className="font-mono text-label tracking-[0.2em] uppercase text-muted-foreground" htmlFor="message">
                 Message
               </label>
               <textarea
@@ -151,11 +151,11 @@ export default function ContactPage() {
                 placeholder="Tell us about your program and what you're looking for..."
                 rows={5}
               />
-              {errors.message && <p className="font-mono text-[11px] text-primary tracking-[0.05em] mt-1">{errors.message}</p>}
+              {errors.message && <p className="font-mono text-label text-primary tracking-[0.05em] mt-1">{errors.message}</p>}
             </div>
 
             {submitError && (
-              <p className="font-mono text-[11px] text-primary tracking-[0.05em]">{submitError}</p>
+              <p className="font-mono text-label text-primary tracking-[0.05em]">{submitError}</p>
             )}
 
             <Button type="submit" disabled={loading} className="w-full">

@@ -31,14 +31,14 @@ function fmt(v: number | null): string {
 function ScoreHeaderImpl({ front, back, total }: ScoreHeaderProps) {
   return (
     <div className="font-mono text-right leading-tight">
-      <div className="flex items-center justify-end gap-2 text-[13px] font-medium">
+      <div className="flex items-center justify-end gap-2 text-caption font-medium">
         <span style={{ color: colorFor(front) }}>{fmt(front)}</span>
         <span className="text-ash">·</span>
         <span style={{ color: colorFor(back) }}>{fmt(back)}</span>
         <span className="text-ash">·</span>
         <span style={{ color: colorFor(total) }}>{fmt(total)}</span>
       </div>
-      <div className="flex items-center justify-end gap-2 text-[9px] tracking-[0.2em] text-ash mt-0.5">
+      <div className="flex items-center justify-end gap-2 text-label-sm tracking-[0.2em] text-ash mt-0.5">
         <span>F</span>
         <span>·</span>
         <span>B</span>

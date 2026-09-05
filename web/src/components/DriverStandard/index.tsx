@@ -272,7 +272,7 @@ function TierSelectScreen({
           <button
             type="button"
             onClick={onBack}
-            className="inline-flex items-center gap-2 font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground hover:text-primary transition-colors mb-4"
+            className="inline-flex items-center gap-2 font-mono text-label tracking-[0.2em] uppercase text-muted-foreground hover:text-primary transition-colors mb-4"
           >
             <ArrowLeft className="size-3" /> Back
           </button>
@@ -303,17 +303,17 @@ function TierSelectScreen({
             >
               <div className="flex justify-between items-start gap-4">
                 <div className="flex items-baseline gap-2">
-                  <span className={`font-mono text-[10px] tracking-[0.18em] uppercase ${active ? 'text-primary' : 'text-muted-foreground'}`}>Tier {t.num}</span>
+                  <span className={`font-mono text-label tracking-[0.18em] uppercase ${active ? 'text-primary' : 'text-muted-foreground'}`}>Tier {t.num}</span>
                   <span className={`font-display text-xl font-bold uppercase tracking-tight ${active ? 'text-primary' : 'text-foreground'}`}>{t.name}</span>
                 </div>
                 <div className="text-right">
                   <div className="font-display text-2xl font-extrabold text-foreground">
-                    {t.width}<span className="text-[11px] text-muted-foreground ml-0.5">YD</span>
+                    {t.width}<span className="text-label-sm text-muted-foreground ml-0.5">YD</span>
                   </div>
                   <Mono className="block mt-0.5">±{t.half} from center</Mono>
                 </div>
               </div>
-              <p className="font-body text-xs text-muted-foreground mt-1">{t.profile}</p>
+              <p className="font-body text-caption text-muted-foreground mt-1">{t.profile}</p>
               <p className="font-body text-sm text-muted-foreground mt-1.5">{t.desc}</p>
             </button>
           );
@@ -341,10 +341,10 @@ function PatternCard({ pattern, onDismiss }: { pattern: PatternResult | null; on
       </button>
       <Mono className="text-primary block mb-2">Pattern detected</Mono>
       <h3 className="font-display text-xl font-bold italic text-foreground uppercase mb-2">{pattern.title}</h3>
-      <p className="font-body text-xs text-muted-foreground mb-2.5">{pattern.summary}</p>
+      <p className="font-body text-caption text-muted-foreground mb-2.5">{pattern.summary}</p>
       <div className="h-px bg-border my-2.5" />
       <Mono className="block mb-1.5">Prescription</Mono>
-      <p className="font-body text-xs text-foreground">{pattern.prescription}</p>
+      <p className="font-body text-caption text-foreground">{pattern.prescription}</p>
     </div>
   );
 }
@@ -382,7 +382,7 @@ function SessionSetupScreen({
           </div>
           <div className="text-right">
             <div className="font-display text-3xl font-extrabold text-foreground">
-              {td.width}<span className="text-xs text-muted-foreground ml-0.5">YD</span>
+              {td.width}<span className="text-caption text-muted-foreground ml-0.5">YD</span>
             </div>
             <Mono className="block mt-0.5">±{td.half}</Mono>
           </div>
@@ -427,9 +427,9 @@ function SessionSetupScreen({
               >
                 <div className="flex justify-between items-baseline">
                   <span className={`font-display text-lg font-bold uppercase tracking-tight ${active ? 'text-primary' : 'text-foreground'}`}>{opt.label}</span>
-                  <span className={`font-mono text-[10px] tracking-[0.18em] uppercase ${active ? 'text-primary' : 'text-muted-foreground'}`}>{opt.shots} shots</span>
+                  <span className={`font-mono text-label tracking-[0.18em] uppercase ${active ? 'text-primary' : 'text-muted-foreground'}`}>{opt.shots} shots</span>
                 </div>
-                <p className="font-body text-[11px] text-muted-foreground mt-1">{opt.sub}</p>
+                <p className="font-body text-label-sm text-muted-foreground mt-1">{opt.sub}</p>
               </button>
             );
           })}
@@ -449,7 +449,7 @@ function SessionSetupScreen({
             <div className={`font-display text-base font-bold uppercase tracking-tight ${state.shapeMode ? 'text-primary' : 'text-foreground'}`}>
               {state.shapeMode ? 'On' : 'Off'}
             </div>
-            <p className="font-body text-[11px] text-muted-foreground mt-0.5">
+            <p className="font-body text-label-sm text-muted-foreground mt-0.5">
               {state.shapeMode ? 'Each shot will call Draw or Fade' : 'Width only — no shape called'}
             </p>
           </div>
@@ -550,14 +550,14 @@ function ShotScreen({
         </div>
         <div className="relative h-3 mt-1.5">
           <div
-            className="absolute font-mono text-[8px] tracking-[0.15em] uppercase text-muted-foreground whitespace-nowrap -translate-x-1/2"
+            className="absolute font-mono text-label tracking-[0.15em] uppercase text-muted-foreground whitespace-nowrap -translate-x-1/2"
             style={{ left: `${passPct}%` }}
           >
             Pass · {passThreshold}
           </div>
           {eliteThreshold && (
             <div
-              className="absolute font-mono text-[8px] tracking-[0.15em] uppercase text-sg-strong whitespace-nowrap -translate-x-1/2"
+              className="absolute font-mono text-label tracking-[0.15em] uppercase text-sg-strong whitespace-nowrap -translate-x-1/2"
               style={{ left: `${elitePct}%` }}
             >
               Elite · {eliteThreshold}
@@ -589,7 +589,7 @@ function ShotScreen({
         )}
       </div>
 
-      <p className="font-body text-xs text-muted-foreground text-center">
+      <p className="font-body text-caption text-muted-foreground text-center">
         {shapeMode
           ? 'Was the shot inside your window AND the correct shape?'
           : 'Was the shot inside your window?'}
@@ -672,7 +672,7 @@ function SummaryScreen({
           />
           <div className="absolute top-1 w-px h-4 bg-cement" style={{ left: `${(passThreshold / totalShots) * 100}%` }} />
           <div
-            className="absolute top-[22px] -translate-x-1/2 font-mono text-[8px] tracking-[0.15em] uppercase text-muted-foreground"
+            className="absolute top-[22px] -translate-x-1/2 font-mono text-label tracking-[0.15em] uppercase text-muted-foreground"
             style={{ left: `${(passThreshold / totalShots) * 100}%` }}
           >
             Pass
@@ -681,7 +681,7 @@ function SummaryScreen({
             <>
               <div className="absolute top-1 w-px h-4 bg-sg-strong" style={{ left: `${(eliteThreshold / totalShots) * 100}%` }} />
               <div
-                className="absolute top-[22px] -translate-x-1/2 font-mono text-[8px] tracking-[0.15em] uppercase text-sg-strong"
+                className="absolute top-[22px] -translate-x-1/2 font-mono text-label tracking-[0.15em] uppercase text-sg-strong"
                 style={{ left: `${(eliteThreshold / totalShots) * 100}%` }}
               >
                 Elite
@@ -785,14 +785,14 @@ function PromotionScreen({
         <div className="text-right">
           <Mono className="block">From</Mono>
           <div className="font-display text-xl font-bold text-muted-foreground mt-0.5">
-            {fromData.width}<span className="text-[11px] ml-0.5">YD</span>
+            {fromData.width}<span className="text-label-sm ml-0.5">YD</span>
           </div>
         </div>
         <div className="text-2xl text-sg-strong">→</div>
         <div className="text-left">
           <Mono className="block text-sg-strong">To</Mono>
           <div className="font-display text-xl font-bold text-sg-strong mt-0.5">
-            {toData.width}<span className="text-[11px] ml-0.5">YD</span>
+            {toData.width}<span className="text-label-sm ml-0.5">YD</span>
           </div>
         </div>
       </div>
@@ -814,7 +814,7 @@ function HistoryScreen({ history, onBack }: { history: SessionRecord[]; onBack: 
       <button
         type="button"
         onClick={onBack}
-        className="inline-flex items-center gap-2 font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground hover:text-primary transition-colors self-start"
+        className="inline-flex items-center gap-2 font-mono text-label tracking-[0.2em] uppercase text-muted-foreground hover:text-primary transition-colors self-start"
       >
         <ArrowLeft className="size-3" /> Back
       </button>
@@ -833,12 +833,12 @@ function HistoryScreen({ history, onBack }: { history: SessionRecord[]; onBack: 
                 <div className="flex justify-between items-baseline">
                   <div>
                     <Mono className={`block ${cfg.text}`}>{s.band} · T{s.tier} {td.name}</Mono>
-                    <p className="font-body text-xs text-muted-foreground mt-1">
+                    <p className="font-body text-caption text-muted-foreground mt-1">
                       {s.isStandard ? 'Standard 13' : 'Mini 6'} · Shape {s.shapeMode ? 'On' : 'Off'}
                     </p>
                   </div>
                   <div className={`font-display text-xl font-bold ${cfg.text}`}>
-                    {s.hits}<span className="text-xs text-muted-foreground ml-0.5">/{s.totalShots}</span>
+                    {s.hits}<span className="text-caption text-muted-foreground ml-0.5">/{s.totalShots}</span>
                   </div>
                 </div>
               </div>

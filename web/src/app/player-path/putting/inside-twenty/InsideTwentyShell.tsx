@@ -21,7 +21,7 @@ export default function InsideTwentyShell() {
           <div className="max-w-3xl mx-auto">
             <Link
               href={segmentAnchor('inside-twenty')}
-              className="inline-flex items-center gap-2 font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground no-underline mb-6 hover:text-primary transition-colors"
+              className="inline-flex items-center gap-2 font-mono text-label tracking-[0.2em] uppercase text-muted-foreground no-underline mb-6 hover:text-primary transition-colors"
             >
               <ArrowLeft className="size-3" /> Practice
             </Link>

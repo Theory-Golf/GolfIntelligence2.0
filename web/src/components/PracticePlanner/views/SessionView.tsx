@@ -66,7 +66,7 @@ export default function SessionView({
   return (
     <div className="space-y-6">
       <header className="space-y-3">
-        <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+        <p className="font-mono text-label uppercase tracking-[0.3em] text-muted-foreground">
           Step 03 · Run · {fmtDate(session.date)}
         </p>
         <h3 className="font-display text-3xl font-extrabold uppercase tracking-tight text-foreground sm:text-4xl">
@@ -89,7 +89,7 @@ export default function SessionView({
 
       {/* Finishing is the saving step — it writes the session to your history. */}
       <div className="border border-border bg-card p-5">
-        <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+        <div className="font-mono text-label uppercase tracking-[0.2em] text-muted-foreground">
           {completed === session.blocks.length
             ? 'All blocks complete'
             : `${completed} of ${session.blocks.length} blocks complete`}
@@ -131,7 +131,7 @@ function BlockCard({
           <div className="font-display text-xl font-bold uppercase tracking-wide text-foreground">
             {idx + 1}. {block.name}
           </div>
-          <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+          <div className="mt-1 font-mono text-label uppercase tracking-[0.2em] text-muted-foreground">
             {block.shots} shots
             {block.type === 'iron-technical' && block.checkpoints
               ? ` · ${block.checkpoints.length} checkpoint set${
@@ -147,7 +147,7 @@ function BlockCard({
 
       {block.cue && (
         <div className="mt-3 border-l-2 border-primary bg-accent/40 px-3 py-2">
-          <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary">
+          <div className="font-mono text-label uppercase tracking-[0.2em] text-primary">
             External Focus Cue
           </div>
           <div className="text-sm text-foreground">{block.cue}</div>
@@ -190,7 +190,7 @@ function BlockCard({
 function Meta({ label, value, small }: { label: string; value: string; small?: boolean }) {
   return (
     <div className="border border-border bg-card p-3">
-      <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+      <div className="font-mono text-label uppercase tracking-[0.2em] text-muted-foreground">
         {label}
       </div>
       <div

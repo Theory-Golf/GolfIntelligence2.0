@@ -84,7 +84,7 @@ export default function SectionNav() {
                 href={`#${section.id}`}
                 aria-current={isActive ? 'true' : undefined}
                 className={[
-                  'flex min-h-[44px] items-center border-b-2 px-3 font-mono text-[10px] uppercase',
+                  'flex min-h-[44px] items-center border-b-2 px-3 font-mono text-label uppercase',
                   'tracking-[0.18em] no-underline transition-colors duration-150',
                   isActive
                     ? 'border-primary text-primary'

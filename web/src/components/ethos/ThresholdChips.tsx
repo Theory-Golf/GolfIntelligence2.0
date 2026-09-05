@@ -14,7 +14,7 @@ export default function ThresholdChips({ spec }: { spec: ThresholdSpec }) {
         return (
           <span
             key={level.label}
-            className="inline-flex items-center gap-2 font-mono text-[11px] tracking-[0.05em] px-4 py-1.5 rounded-sm border"
+            className="inline-flex items-center gap-2 font-mono text-label tracking-[0.05em] px-4 py-1.5 rounded-sm border"
             style={{
               color,
               borderColor: `color-mix(in srgb, ${color} 35%, transparent)`,

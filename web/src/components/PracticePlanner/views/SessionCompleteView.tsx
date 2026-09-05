@@ -34,7 +34,7 @@ export default function SessionCompleteView({
           <span className="flex size-7 items-center justify-center bg-primary font-display text-sm font-bold text-primary-foreground">
             ✓
           </span>
-          <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-primary">
+          <p className="font-mono text-label uppercase tracking-[0.3em] text-primary">
             Session Complete · {fmtDate(record.date)}
           </p>
         </div>
@@ -51,7 +51,7 @@ export default function SessionCompleteView({
 
       {/* ── Stage ────────────────────────────────────────────── */}
       <div className="border border-border bg-card p-5">
-        <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+        <div className="font-mono text-label uppercase tracking-[0.2em] text-muted-foreground">
           Mesocycle Stage
         </div>
         <div className="mt-1 font-display text-2xl font-extrabold uppercase tracking-tight text-foreground">
@@ -62,7 +62,7 @@ export default function SessionCompleteView({
 
       {/* ── Session overview ─────────────────────────────────── */}
       <div>
-        <div className="mb-3 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+        <div className="mb-3 font-mono text-label uppercase tracking-[0.2em] text-muted-foreground">
           Session Overview
         </div>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -84,7 +84,7 @@ export default function SessionCompleteView({
       {/* ── What you worked on ───────────────────────────────── */}
       {elements.length > 0 && (
         <div className="border border-border bg-card p-5">
-          <div className="mb-4 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+          <div className="mb-4 font-mono text-label uppercase tracking-[0.2em] text-muted-foreground">
             What You Worked On
           </div>
           <div className="space-y-4">
@@ -100,7 +100,7 @@ export default function SessionCompleteView({
                   </div>
                   {el.sets.map((set, i) => (
                     <div key={i} className="flex items-center gap-3 text-sm">
-                      <span className="w-20 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                      <span className="w-20 font-mono text-label uppercase tracking-[0.18em] text-muted-foreground">
                         Set {i + 1}
                       </span>
                       <div className="h-1.5 flex-1 bg-muted">
@@ -124,10 +124,10 @@ export default function SessionCompleteView({
       {/* ── Assessments ──────────────────────────────────────── */}
       {record.assessments && record.assessments.length > 0 && (
         <div className="border border-border bg-card p-5">
-          <div className="mb-1 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+          <div className="mb-1 font-mono text-label uppercase tracking-[0.2em] text-muted-foreground">
             Assessments
           </div>
-          <p className="mb-3 text-xs text-muted-foreground">
+          <p className="mb-3 text-caption text-muted-foreground">
             Each of these scored itself and saved to your account — open the game to see the
             numbers and how they trend.
           </p>
@@ -138,7 +138,7 @@ export default function SessionCompleteView({
                   {a.name.replace(/^Test · /, '')}
                 </span>
                 <span
-                  className={`font-mono text-[10px] uppercase tracking-[0.18em] ${
+                  className={`font-mono text-label uppercase tracking-[0.18em] ${
                     a.completed ? 'text-primary' : 'text-muted-foreground'
                   }`}
                 >
@@ -152,7 +152,7 @@ export default function SessionCompleteView({
 
       {/* ── Blocks run ───────────────────────────────────────── */}
       <div className="border border-border bg-card p-5">
-        <div className="mb-3 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+        <div className="mb-3 font-mono text-label uppercase tracking-[0.2em] text-muted-foreground">
           Blocks Run
         </div>
         <ul className="space-y-2">
@@ -160,12 +160,12 @@ export default function SessionCompleteView({
             <li key={b.id} className="flex items-center justify-between gap-3 text-sm">
               <span className={b.completed ? 'text-foreground' : 'text-muted-foreground'}>
                 {b.name}
-                <span className="ml-2 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                <span className="ml-2 font-mono text-label uppercase tracking-[0.18em] text-muted-foreground">
                   {b.shots} shots
                 </span>
               </span>
               <span
-                className={`font-mono text-[10px] uppercase tracking-[0.18em] ${
+                className={`font-mono text-label uppercase tracking-[0.18em] ${
                   b.completed ? 'text-primary' : 'text-muted-foreground'
                 }`}
               >
@@ -212,12 +212,12 @@ function groupCheckpoints(record: SessionRecord) {
 function Stat({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
     <div className="border border-border bg-card p-3">
-      <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+      <div className="font-mono text-label uppercase tracking-[0.2em] text-muted-foreground">
         {label}
       </div>
       <div className="mt-1 font-display text-2xl font-extrabold text-foreground">{value}</div>
       {hint && (
-        <div className="mt-0.5 font-mono text-[9px] uppercase tracking-[0.12em] text-muted-foreground">
+        <div className="mt-0.5 font-mono text-label uppercase tracking-[0.12em] text-muted-foreground">
           {hint}
         </div>
       )}

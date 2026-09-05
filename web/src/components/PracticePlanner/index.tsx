@@ -414,7 +414,7 @@ export default function PracticePlanner() {
                     Next · Build the session →
                   </Button>
                   {!hasFocus && (
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-caption text-muted-foreground">
                       Add at least one iron element to continue.
                     </span>
                   )}
@@ -468,7 +468,7 @@ export default function PracticePlanner() {
                 aria-expanded={historyOpen}
                 className="flex w-full items-center justify-between gap-3 py-2 text-left"
               >
-                <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+                <span className="font-mono text-label uppercase tracking-[0.22em] text-muted-foreground">
                   Your history
                   {sessions.length > 0 && (
                     <span className="ml-3 text-foreground">
@@ -476,7 +476,7 @@ export default function PracticePlanner() {
                     </span>
                   )}
                 </span>
-                <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-primary">
+                <span className="font-mono text-label uppercase tracking-[0.22em] text-primary">
                   {historyOpen ? 'Hide −' : 'Show +'}
                 </span>
               </button>
@@ -511,12 +511,12 @@ function StepRail({ stage }: { stage: Stage }) {
         return (
           <li key={s.key} className="flex items-center gap-3">
             <span
-              className={`flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.22em] ${
+              className={`flex items-center gap-2 font-mono text-label uppercase tracking-[0.22em] ${
                 isActive ? 'text-primary' : isDone ? 'text-foreground' : 'text-muted-foreground'
               }`}
             >
               <span
-                className={`flex size-5 items-center justify-center border text-[10px] ${
+                className={`flex size-5 items-center justify-center border text-label-sm ${
                   isActive
                     ? 'border-primary bg-primary text-primary-foreground'
                     : isDone
@@ -535,7 +535,7 @@ function StepRail({ stage }: { stage: Stage }) {
         );
       })}
       {stage === 'complete' && (
-        <li className="font-mono text-[11px] uppercase tracking-[0.22em] text-primary">
+        <li className="font-mono text-label uppercase tracking-[0.22em] text-primary">
           · Complete
         </li>
       )}
@@ -551,7 +551,7 @@ function FocusStrip({ weekConfig, onEdit }: { weekConfig: WeekConfig; onEdit: ()
   return (
     <div className="mb-8 flex flex-wrap items-center justify-between gap-3 border border-border bg-card px-4 py-3">
       <div className="min-w-0">
-        <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+        <div className="font-mono text-label uppercase tracking-[0.2em] text-muted-foreground">
           Week {week} · {phase.phase}
         </div>
         <div className="mt-0.5 truncate text-sm text-foreground">
@@ -579,7 +579,7 @@ function NeedSetupNotice({ onGo }: { onGo: () => void }) {
       <button
         type="button"
         onClick={onGo}
-        className="mt-3 font-mono text-[11px] uppercase tracking-[0.22em] text-primary hover:underline"
+        className="mt-3 font-mono text-label uppercase tracking-[0.22em] text-primary hover:underline"
       >
         Open Setup →
       </button>

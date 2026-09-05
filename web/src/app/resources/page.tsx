@@ -69,7 +69,7 @@ export default function ResourcesPage() {
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
                       <Icon className="size-5 text-primary" />
-                      <span className="font-mono text-[10px] tracking-[0.25em] uppercase text-primary">
+                      <span className="font-mono text-label tracking-[0.25em] uppercase text-primary">
                         {r.category}
                       </span>
                     </div>

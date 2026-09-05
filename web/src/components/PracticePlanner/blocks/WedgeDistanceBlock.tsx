@@ -40,7 +40,7 @@ export default function WedgeDistanceBlock({
       {/* Progress */}
       <div className="border border-border bg-muted/40 p-4">
         <div className="mb-2 flex items-center justify-between">
-          <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+          <span className="font-mono text-label uppercase tracking-[0.2em] text-muted-foreground">
             Shots Recorded
           </span>
           <span className="font-display text-lg font-bold text-foreground">
@@ -63,13 +63,13 @@ export default function WedgeDistanceBlock({
             <div className="font-display text-lg font-bold uppercase tracking-wide text-foreground">
               Shot {recordedCount + 1}
             </div>
-            <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+            <div className="font-mono text-label uppercase tracking-[0.2em] text-muted-foreground">
               of {numShots}
             </div>
           </div>
 
           <div className="mb-4 border border-primary/30 bg-accent/40 p-4 text-center">
-            <div className="mb-1 font-mono text-[10px] uppercase tracking-[0.2em] text-primary">
+            <div className="mb-1 font-mono text-label uppercase tracking-[0.2em] text-primary">
               Target Distance
             </div>
             <div className="font-display text-5xl font-extrabold text-foreground">
@@ -80,7 +80,7 @@ export default function WedgeDistanceBlock({
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="block font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+              <label className="block font-mono text-label uppercase tracking-[0.2em] text-muted-foreground">
                 Ball Speed (mph)
               </label>
               <input
@@ -94,7 +94,7 @@ export default function WedgeDistanceBlock({
               />
             </div>
             <div>
-              <label className="block font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+              <label className="block font-mono text-label uppercase tracking-[0.2em] text-muted-foreground">
                 Direction
               </label>
               <div className="mt-1 grid grid-cols-3 gap-1">
@@ -103,7 +103,7 @@ export default function WedgeDistanceBlock({
                     key={d}
                     type="button"
                     onClick={() => onSetDirection(block.id, d)}
-                    className={`h-10 border font-mono text-[11px] uppercase tracking-[0.18em] transition-colors duration-150 ${
+                    className={`h-10 border font-mono text-label uppercase tracking-[0.18em] transition-colors duration-150 ${
                       cs.direction === d
                         ? 'border-primary bg-primary text-primary-foreground'
                         : 'border-border bg-card text-muted-foreground hover:border-primary hover:text-primary'
@@ -133,14 +133,14 @@ export default function WedgeDistanceBlock({
       {recordedCount > 0 && (
         <div className="border border-border bg-card p-4">
           <div className="mb-3 flex items-center justify-between">
-            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+            <span className="font-mono text-label uppercase tracking-[0.2em] text-muted-foreground">
               Recorded Shots
             </span>
             {sortedShots.length > 3 && (
               <button
                 type="button"
                 onClick={() => onToggleShowAll(block.id)}
-                className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary hover:underline"
+                className="font-mono text-label uppercase tracking-[0.18em] text-primary hover:underline"
               >
                 {showAll ? 'Show last 3' : `Show all ${sortedShots.length}`}
               </button>
@@ -162,14 +162,14 @@ export default function WedgeDistanceBlock({
                   key={`${shot.timestamp}-${realIdx}`}
                   className="flex items-center justify-between gap-3 py-2 text-sm"
                 >
-                  <span className="font-mono text-xs text-muted-foreground">#{realIdx + 1}</span>
-                  <span className="font-mono text-xs text-muted-foreground">
+                  <span className="font-mono text-label text-muted-foreground">#{realIdx + 1}</span>
+                  <span className="font-mono text-label text-muted-foreground">
                     TGT <span className="text-foreground">{shot.target}y</span>
                   </span>
-                  <span className="font-mono text-xs text-muted-foreground">
+                  <span className="font-mono text-label text-muted-foreground">
                     BALL <span className="text-foreground">{shot.ballSpeed || '—'}</span>
                   </span>
-                  <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-foreground">
+                  <span className="font-mono text-label uppercase tracking-[0.18em] text-foreground">
                     {dirLabel}
                   </span>
                 </li>
@@ -201,10 +201,10 @@ function BlockSummary({ shots }: { shots: { target: number; ballSpeed: string; d
   if (usable.length === 0) {
     return (
       <div className="border border-border bg-muted/40 p-4">
-        <div className="mb-1 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+        <div className="mb-1 font-mono text-label uppercase tracking-[0.2em] text-muted-foreground">
           Block Summary
         </div>
-        <p className="text-xs text-muted-foreground">No ball speed data recorded.</p>
+        <p className="text-caption text-muted-foreground">No ball speed data recorded.</p>
       </div>
     );
   }
@@ -220,7 +220,7 @@ function BlockSummary({ shots }: { shots: { target: number; ballSpeed: string; d
 
   return (
     <div className="border border-border bg-muted/40 p-4">
-      <div className="mb-3 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+      <div className="mb-3 font-mono text-label uppercase tracking-[0.2em] text-muted-foreground">
         Block Summary · By 10-Yard Band
       </div>
       <div className="space-y-3">
@@ -237,24 +237,24 @@ function BlockSummary({ shots }: { shots: { target: number; ballSpeed: string; d
             <div key={key} className="grid grid-cols-2 gap-2 border-t border-border pt-3 first:border-t-0 first:pt-0 sm:grid-cols-4">
               <div className="font-display text-sm font-bold uppercase tracking-wide text-foreground">
                 {key}
-                <span className="ml-1 font-mono text-[10px] font-normal text-muted-foreground">y</span>
-                <div className="font-mono text-[10px] font-normal text-muted-foreground">
+                <span className="ml-1 font-mono text-label font-normal text-muted-foreground">y</span>
+                <div className="font-mono text-label font-normal text-muted-foreground">
                   {b.shots.length} shot{b.shots.length !== 1 ? 's' : ''}
                 </div>
               </div>
-              <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+              <div className="font-mono text-label uppercase tracking-[0.18em] text-muted-foreground">
                 Sigma
                 <div className="font-display text-sm font-bold text-foreground">
                   {sigma !== null ? sigma.toFixed(1) : '—'}
                 </div>
               </div>
-              <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+              <div className="font-mono text-label uppercase tracking-[0.18em] text-muted-foreground">
                 Range
                 <div className="font-display text-sm font-bold text-foreground">
                   {range !== null ? range.toFixed(1) : '—'}
                 </div>
               </div>
-              <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+              <div className="font-mono text-label uppercase tracking-[0.18em] text-muted-foreground">
                 Direction
                 <div className="font-display text-sm font-bold text-foreground">
                   {dirCounts.L}L · {dirCounts.O}O · {dirCounts.R}R

@@ -77,8 +77,8 @@ export default function SignupForm() {
 
         <form onSubmit={handleSubmit} noValidate className="mt-10 flex flex-col gap-5">
           <div className="flex flex-col gap-1.5">
-            <label className="font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground" htmlFor="displayName">
-              Display Name <span className="text-ash text-[9px] tracking-[0.1em]">(optional)</span>
+            <label className="font-mono text-label tracking-[0.2em] uppercase text-muted-foreground" htmlFor="displayName">
+              Display Name <span className="text-ash text-label-sm tracking-[0.1em]">(optional)</span>
             </label>
             <input
               id="displayName"
@@ -93,7 +93,7 @@ export default function SignupForm() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground" htmlFor="email">
+            <label className="font-mono text-label tracking-[0.2em] uppercase text-muted-foreground" htmlFor="email">
               Email
             </label>
             <input
@@ -110,7 +110,7 @@ export default function SignupForm() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground" htmlFor="password">
+            <label className="font-mono text-label tracking-[0.2em] uppercase text-muted-foreground" htmlFor="password">
               Password
             </label>
             <input
@@ -128,7 +128,7 @@ export default function SignupForm() {
           </div>
 
           {error && (
-            <p className="font-mono text-[11px] text-primary tracking-[0.05em]">{error}</p>
+            <p className="font-mono text-label text-primary tracking-[0.05em]">{error}</p>
           )}
 
           <Button type="submit" disabled={loading} className="w-full">
@@ -136,7 +136,7 @@ export default function SignupForm() {
           </Button>
         </form>
 
-        <p className="font-mono text-[11px] tracking-[0.1em] uppercase text-muted-foreground mt-8 text-center">
+        <p className="font-mono text-label tracking-[0.1em] uppercase text-muted-foreground mt-8 text-center">
           Already have an account?{' '}
           <Link href="/login" className="text-primary hover:underline">
             Sign in

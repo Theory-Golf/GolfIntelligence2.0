@@ -43,11 +43,11 @@ export default function PracticeStrip() {
   return (
     <div className="mt-12 border border-border bg-card p-5 sm:p-6">
       <div className="mb-4 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-primary">
+        <span className="font-mono text-label uppercase tracking-[0.25em] text-primary">
           Your Practice
         </span>
         {lastPlayed && (
-          <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+          <span className="font-mono text-label uppercase tracking-[0.12em] text-muted-foreground">
             Last logged {fmtRelativeDay(lastPlayed)}
           </span>
         )}
@@ -69,7 +69,7 @@ export default function PracticeStrip() {
               <span className="text-sm text-foreground">
                 {activityById(g.drillType)?.name ?? g.drillType}
               </span>
-              <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+              <span className="font-mono text-label uppercase tracking-[0.12em] text-muted-foreground">
                 {g.count} {g.count === 1 ? 'run' : 'runs'}
                 <span className="mx-1.5 text-border">·</span>
                 {fmtRelativeDay(g.lastPlayed)}
@@ -89,7 +89,7 @@ function segmentOf(drillType: string): string {
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="border border-border bg-background p-3">
-      <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+      <div className="font-mono text-label uppercase tracking-[0.2em] text-muted-foreground">
         {label}
       </div>
       <div className="mt-1 font-display text-2xl font-extrabold text-foreground">{value}</div>

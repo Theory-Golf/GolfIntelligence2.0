@@ -140,8 +140,8 @@ const defaultPars = {
 
 // ─── Shared Tailwind class strings ───────────────────────────────────────────
 
-const monoLabel = 'font-mono text-[10px] tracking-[0.25em] uppercase text-ash';
-const containerLabel = 'block font-mono text-[9px] tracking-[0.3em] uppercase text-ash mb-3';
+const monoLabel = 'font-mono text-label tracking-[0.25em] uppercase text-ash';
+const containerLabel = 'block font-mono text-label tracking-[0.3em] uppercase text-ash mb-3';
 const container = 'border border-border rounded-md p-6';
 // text-base (16px) is deliberate and load-bearing: iOS Safari auto-zooms the
 // page when an input under 16px is focused, and because App Router navigations
@@ -152,7 +152,7 @@ const input =
 
 function roundTypeBtnClass(selected: boolean): string {
   return (
-    'w-full px-4 py-3 rounded-md border font-display text-[13px] font-semibold tracking-[0.12em] uppercase text-left transition-colors ' +
+    'w-full px-4 py-3 rounded-md border font-display text-caption font-semibold tracking-[0.12em] uppercase text-left transition-colors ' +
     (selected
       ? 'border-scarlet bg-scarlet-tint text-chalk'
       : 'border-border bg-shadow text-ash')
@@ -482,7 +482,7 @@ export default function NewRoundPage() {
           <div className="mb-3">
             {state.courseId ? (
               <div className="flex items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 bg-accent text-accent-foreground font-display text-[11px] font-bold tracking-[0.1em] uppercase px-2.5 py-1 rounded-sm">
+                <span className="inline-flex items-center gap-1.5 bg-accent text-accent-foreground font-display text-label font-bold tracking-[0.1em] uppercase px-2.5 py-1 rounded-sm">
                   {state.courseName}
                   <button
                     onClick={() => dispatch({ type: 'CLEAR_COURSE' })}
@@ -513,7 +513,7 @@ export default function NewRoundPage() {
                         key={c.id}
                         onPointerDown={(e) => e.preventDefault()}
                         onClick={() => selectCourse(c)}
-                        className="block w-full px-3.5 py-2.5 bg-transparent border-b border-border text-cement font-body text-[13px] text-left last:border-b-0"
+                        className="block w-full px-3.5 py-2.5 bg-transparent border-b border-border text-cement font-body text-caption text-left last:border-b-0"
                       >
                         {c.name}
                       </button>
@@ -522,7 +522,7 @@ export default function NewRoundPage() {
                       <button
                         onPointerDown={(e) => e.preventDefault()}
                         onClick={() => addNewCourse()}
-                        className="block w-full px-3.5 py-2.5 bg-transparent text-scarlet-glow font-body text-[13px] text-left"
+                        className="block w-full px-3.5 py-2.5 bg-transparent text-scarlet-glow font-body text-caption text-left"
                       >
                         + Add &ldquo;{state.courseName.trim()}&rdquo; as new course
                       </button>
@@ -531,7 +531,7 @@ export default function NewRoundPage() {
                 )}
 
                 {courseError && (
-                  <p className="mt-1.5 font-mono text-[10px] tracking-[0.2em] uppercase text-scarlet">
+                  <p className="mt-1.5 font-mono text-label tracking-[0.2em] uppercase text-scarlet">
                     {courseError}
                   </p>
                 )}
@@ -540,7 +540,7 @@ export default function NewRoundPage() {
                   <div className="mt-1.5">
                     <button
                       onClick={() => selectCourse(fuzzyMatch)}
-                      className="bg-transparent border-0 font-body text-xs text-ash p-0 text-left"
+                      className="bg-transparent border-0 font-body text-caption text-ash p-0 text-left"
                     >
                       Did you mean{' '}
                       <strong className="text-chalk">{fuzzyMatch.name}</strong>?
@@ -566,7 +566,7 @@ export default function NewRoundPage() {
               enterKeyHint="done"
               className={input}
             />
-            <p className="font-mono text-[10px] tracking-[0.25em] uppercase text-ash mt-1.5 min-h-[14px]">
+            <p className="font-mono text-label tracking-[0.25em] uppercase text-ash mt-1.5 min-h-[14px]">
               {state.weatherStatus === 'loading' && 'Finding location…'}
               {state.weatherStatus === 'ok' && state.geocode?.displayName}
               {state.weatherStatus === 'manual' &&
@@ -590,7 +590,7 @@ export default function NewRoundPage() {
                         dispatch({ type: 'PICK_CANDIDATE', geocode: c })
                       }
                       className={
-                        'rounded-sm px-2 py-1 border font-mono text-[10px] tracking-[0.15em] uppercase touch-manipulation ' +
+                        'rounded-sm px-2 py-1 border font-mono text-label tracking-[0.15em] uppercase touch-manipulation ' +
                         (active
                           ? 'border-scarlet bg-scarlet-tint text-chalk'
                           : 'border-border bg-shadow text-ash')
@@ -608,7 +608,7 @@ export default function NewRoundPage() {
             <span className={`${containerLabel} mb-2`}>Conditions</span>
             <div className="grid grid-cols-2 gap-3">
               <label className="flex flex-col gap-1">
-                <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-ash">
+                <span className="font-mono text-label tracking-[0.25em] uppercase text-ash">
                   Temp °F
                 </span>
                 <input
@@ -626,7 +626,7 @@ export default function NewRoundPage() {
                 />
               </label>
               <label className="flex flex-col gap-1">
-                <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-ash">
+                <span className="font-mono text-label tracking-[0.25em] uppercase text-ash">
                   Wind mph
                 </span>
                 <input
@@ -644,7 +644,7 @@ export default function NewRoundPage() {
                 />
               </label>
               <label className="flex flex-col gap-1">
-                <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-ash">
+                <span className="font-mono text-label tracking-[0.25em] uppercase text-ash">
                   Wind dir
                 </span>
                 <input
@@ -661,7 +661,7 @@ export default function NewRoundPage() {
                 />
               </label>
               <label className="flex flex-col gap-1">
-                <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-ash">
+                <span className="font-mono text-label tracking-[0.25em] uppercase text-ash">
                   Precip in
                 </span>
                 <input
@@ -681,7 +681,7 @@ export default function NewRoundPage() {
               </label>
             </div>
             {state.weatherStatus === 'ok' && (
-              <p className="font-mono text-[9px] tracking-[0.25em] uppercase text-ash mt-3">
+              <p className="font-mono text-label tracking-[0.25em] uppercase text-ash mt-3">
                 Weather auto-filled · edit if needed
               </p>
             )}
@@ -744,7 +744,7 @@ export default function NewRoundPage() {
                           });
                           setShowTournamentDropdown(false);
                         }}
-                        className="block w-full px-3.5 py-2.5 bg-transparent border-b border-border text-cement font-body text-[13px] text-left last:border-b-0"
+                        className="block w-full px-3.5 py-2.5 bg-transparent border-b border-border text-cement font-body text-caption text-left last:border-b-0"
                       >
                         {t}
                       </button>
@@ -766,7 +766,7 @@ export default function NewRoundPage() {
                           tournamentName: tournamentFuzzy,
                         })
                       }
-                      className="bg-transparent border-0 font-body text-xs text-ash p-0 text-left"
+                      className="bg-transparent border-0 font-body text-caption text-ash p-0 text-left"
                     >
                       Did you mean{' '}
                       <strong className="text-chalk">{tournamentFuzzy}</strong>?
@@ -801,7 +801,7 @@ export default function NewRoundPage() {
         </div>
 
         {submitWarning && (
-          <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-yellow-400 text-center px-2">
+          <p className="font-mono text-label tracking-[0.2em] uppercase text-yellow-400 text-center px-2">
             {submitWarning}
           </p>
         )}

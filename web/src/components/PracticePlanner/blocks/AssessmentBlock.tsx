@@ -24,7 +24,7 @@ export default function AssessmentBlock({
   return (
     <div className="space-y-4">
       <div className="border-l-2 border-primary bg-accent/30 px-3 py-2">
-        <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary">
+        <div className="font-mono text-label uppercase tracking-[0.2em] text-primary">
           Scored Test
         </div>
         <div className="text-sm text-foreground">
@@ -37,7 +37,7 @@ export default function AssessmentBlock({
         {route ? (
           <Link
             href={route}
-            className="inline-flex min-h-[44px] items-center justify-center bg-primary px-6 font-display text-xs font-bold uppercase tracking-[0.15em] text-primary-foreground no-underline transition-colors hover:bg-scarlet-dim"
+            className="inline-flex min-h-[44px] items-center justify-center bg-primary px-6 font-display text-label font-bold uppercase tracking-[0.15em] text-primary-foreground no-underline transition-colors hover:bg-scarlet-dim"
           >
             Open {block.name.replace(/^Test · /, '')} →
           </Link>
