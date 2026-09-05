@@ -7,11 +7,11 @@ import { getStrokeGainedColor, formatStrokesGained } from '@/lib/golf/tokens';
 
 // Same semantic scoring colors as ScoringView's donut chart
 const OUTCOME_COLORS: Record<HoleOutcome, string> = {
-  'Eagle': '#00C07A',
+  'Eagle': 'var(--under)',
   'Birdie': '#52D9A0',
-  'Par': '#8A8580',
-  'Bogey': '#F59520',
-  'Double Bogey+': '#E8202A',
+  'Par': 'var(--ash)',
+  'Bogey': 'var(--bogey)',
+  'Double Bogey+': 'var(--scarlet)',
 };
 
 function formatToPar(scoreToPar: number): string {

@@ -10,9 +10,9 @@ import {
 } from '@/lib/golf/roundSession';
 
 const COLOR_UNDER = '#00B870';
-const COLOR_PAR = '#F2F0EE';
+const COLOR_PAR = 'var(--chalk)';
 const COLOR_BOGEY = '#F09020';
-const COLOR_DOUBLE = '#E8202A';
+const COLOR_DOUBLE = 'var(--scarlet)';
 
 function scoreColor(rel: number): string {
   if (rel < 0) return COLOR_UNDER;

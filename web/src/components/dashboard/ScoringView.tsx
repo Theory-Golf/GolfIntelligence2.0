@@ -80,11 +80,11 @@ export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: {
 
   // Colors for hole outcomes - using semantic scoring colors
   const OUTCOME_COLORS: Record<HoleOutcome, string> = {
-    'Eagle': '#00C07A',       // Green/Under par
+    'Eagle': 'var(--under)',       // Green/Under par
     'Birdie': '#52D9A0',      // Mint/Gain
-    'Par': '#8A8580',         // Gray/Even
-    'Bogey': '#F59520',        // Amber/Bogey
-    'Double Bogey+': '#E8202A', // Red/Over par
+    'Par': 'var(--ash)',         // Gray/Even
+    'Bogey': 'var(--bogey)',        // Amber/Bogey
+    'Double Bogey+': 'var(--scarlet)', // Red/Over par
   };
 
   // Format data for donut chart
@@ -137,9 +137,9 @@ export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: {
 
   // Par card data
   const parCards = [
-    { label: 'Par 3', data: par3, color: '#3D8EF0' },
-    { label: 'Par 4', data: par4, color: '#A855F7' },
-    { label: 'Par 5', data: par5, color: '#06C8E0' },
+    { label: 'Par 3', data: par3, color: 'var(--c1)' },
+    { label: 'Par 4', data: par4, color: 'var(--c2)' },
+    { label: 'Par 5', data: par5, color: 'var(--c3)' },
   ];
 
   return (

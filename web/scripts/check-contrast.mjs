@@ -51,7 +51,9 @@ const CHROME = ['chalk', 'cement', 'ash'];
 // Data colours appear on page/card surfaces, and inside their own score pill.
 const DATA = ['under', 'even', 'bogey', 'double', 'scarlet-text',
               'sg-strong', 'sg-gain', 'sg-neutral', 'sg-loss', 'sg-weak',
-              'c1', 'c2', 'c3', 'c4', 'c5'];
+              'c1', 'c2', 'c3', 'c4', 'c5',
+              'lie-tee', 'lie-fairway', 'lie-rough', 'lie-sand',
+              'lie-recovery', 'lie-green'];
 // Score pills paint a translucent tint of the *original* accent over a card.
 const PILL_TINT = {
   under: ['#00C07A', 0.12], even: ['#8A8580', 0.10],

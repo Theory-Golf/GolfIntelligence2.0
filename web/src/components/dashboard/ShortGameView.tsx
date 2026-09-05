@@ -10,11 +10,11 @@ import { useMediaQuery, MOBILE_QUERY } from '@/lib/useMediaQuery';
 // Colors for starting lie - shared convention with other lie-based charts in the app
 const STARTING_LIE_COLORS: Record<Lie, string> = {
   'Fairway': '#10B981',    // Emerald
-  'Rough': '#A855F7',      // Court Purple
-  'Sand': '#D4F000',       // Volt
-  'Recovery': '#06C8E0',   // Aqua
-  'Tee': '#3D8EF0',        // Royal Blue
-  'Green': '#F03DAA',      // Magenta
+  'Rough': 'var(--c2)',      // Court Purple
+  'Sand': 'var(--c4)',       // Volt
+  'Recovery': 'var(--c3)',   // Aqua
+  'Tee': 'var(--c1)',        // Royal Blue
+  'Green': 'var(--c5)',      // Magenta
 };
 
 // Fixed display order for starting lies (only lies present in the data are shown)

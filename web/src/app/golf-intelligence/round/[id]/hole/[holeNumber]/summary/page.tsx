@@ -16,7 +16,7 @@ import type { ShotRow } from '@/lib/golf/db/types';
 const COLOR_UNDER = '#00B870';
 const COLOR_EVEN = '#B8B2AA';
 const COLOR_BOGEY = '#F09020';
-const COLOR_DOUBLE = '#E8202A';
+const COLOR_DOUBLE = 'var(--scarlet)';
 
 function scoreWord(rel: number): string {
   if (rel <= -2) return 'EAGLE';

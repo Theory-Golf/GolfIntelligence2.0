@@ -512,11 +512,11 @@ function ApproachEndingLieSection({ filteredShots }: { filteredShots: ProcessedS
 
   // Colors for different ending lies
   const LIE_COLORS: Record<string, string> = {
-    'Green': '#3D8EF0',      // Royal Blue
+    'Green': 'var(--c1)',      // Royal Blue
     'Fairway': '#10B981',    // Emerald
-    'Rough': '#A855F7',      // Court Purple
-    'Sand': '#D4F000',        // Volt
-    'Recovery': '#06C8E0',   // Aqua
+    'Rough': 'var(--c2)',      // Court Purple
+    'Sand': 'var(--c4)',        // Volt
+    'Recovery': 'var(--c3)',   // Aqua
     'Water': '#3B82F6',      // Blue
     'Out of Bounds': '#EF4444', // Red
     'Other': '#6B7280',       // Gray

@@ -32,8 +32,8 @@ const MOVING_AVERAGE_OPTIONS = [
 
 // Chart colors - matching the app theme
 const COLORS = {
-  bar: '#3D8EF0',      // Royal Blue
-  line: '#A855F7',     // Court Purple
+  bar: 'var(--c1)',      // Royal Blue
+  line: 'var(--c2)',     // Court Purple
   grid: 'var(--ash)',
   text: 'var(--ash)',
   tooltipBg: 'var(--court)',

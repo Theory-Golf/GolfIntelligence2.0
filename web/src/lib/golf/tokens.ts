@@ -1,64 +1,77 @@
 /**
- * Golf Intelligence v2.0 — Design Tokens
- * Athletic Edition: G/FORE × Jordan Brand inspired
+ * Golf Intelligence — design token bridge for JS-land.
+ *
+ * Every value here is a CSS custom property reference, not a hex literal.
+ * styles/system.css is the single source of truth; this file only lets
+ * TypeScript hand those tokens to Recharts and friends.
+ *
+ * Why var() and not hex: this module used to carry dark-mode hex, so in
+ * light mode chart axis labels rendered #8A8580 on #F5F3F0 -- 3.30:1, and
+ * effectively invisible. CSS variables resolve at paint time, including
+ * inside SVG presentation attributes such as fill and stroke, so a theme
+ * switch now repaints the charts with no JS and no re-render.
+ *
+ * The one place this does not work is canvas: a 2D context cannot resolve
+ * var(), so canvas code must read the computed value off the document
+ * element instead. ApproachAimOptimizer does that already.
  */
 
-// ── Foundation — Black Court ──────────────────────────────
+// ── Foundation ────────────────────────────────────────────
 export const colors = {
-  // Blacks with depth
-  court: '#0C0C0C',       // Deepest background - hero sections
-  obsidian: '#141414',    // Primary app surface
-  shadow: '#1E1E1E',      // Cards, panels, elevated surfaces
-  pitch: '#2A2A2A',       // Borders, dividers, separators
-  
-  // Neutrals
-  cement: '#C4BFB8',      // Jordan cement grey - secondary text
-  ash: '#8A8580',         // Muted labels, captions
-  chalk: '#F2F0EE',       // Near-white - headings, key values
-  
-  // Scarlet - The Only Accent
-  scarlet: '#E8202A',     // Primary accent - fire red / scarlet
-  scarletDim: '#9B1520',  // Hover states / pressed
-  scarletGlow: '#FF3D47', // Bright pop on dark surfaces
-  scarletTint: '#1F0507', // Subtle scarlet wash on black
-  
-  // Data Semantic - Score
-  under: '#00C07A',       // Under par - electric teal-green
-  even: '#8A8580',        // Even par - cement / disappears
-  bogey: '#F59520',       // Bogey - amber signal
-  double: '#E8202A',      // Double+ - scarlet / urgent
-  
-  // Strokes Gained Scale
-  sgStrong: '#00C07A',    // +1.0+ electric green
-  sgGain: '#52D9A0',      // +0.3–0.9 mint
-  sgNeutral: '#C4BFB8',   // ±0.3 cement
-  sgLoss: '#F59520',      // −0.3–0.9 amber
-  sgWeak: '#E8202A',      // −1.0+ scarlet
-  
-  // Chart Categorical (5 series)
-  c1: '#3D8EF0',          // Royal Blue
-  c2: '#A855F7',          // Court Purple
-  c3: '#06C8E0',          // Aqua
-  c4: '#D4F000',          // Volt
-  c5: '#F03DAA',          // Magenta
+  court: 'var(--court)',
+  obsidian: 'var(--obsidian)',
+  shadow: 'var(--shadow)',
+  pitch: 'var(--pitch)',
+
+  cement: 'var(--cement)',
+  ash: 'var(--ash)',
+  chalk: 'var(--chalk)',
+
+  // --scarlet is the fill colour; --scarlet-text is the readable-on-card
+  // variant, because #E8202A is only 3.71:1 against a card.
+  scarlet: 'var(--scarlet)',
+  scarletText: 'var(--scarlet-text)',
+  scarletDim: 'var(--scarlet-dim)',
+  scarletGlow: 'var(--scarlet-glow)',
+  scarletTint: 'var(--scarlet-tint)',
+
+  // Score
+  under: 'var(--under)',
+  even: 'var(--even)',
+  bogey: 'var(--bogey)',
+  double: 'var(--double)',
+
+  // Strokes gained
+  sgStrong: 'var(--sg-strong)',
+  sgGain: 'var(--sg-gain)',
+  sgNeutral: 'var(--sg-neutral)',
+  sgLoss: 'var(--sg-loss)',
+  sgWeak: 'var(--sg-weak)',
+
+  // Chart categorical
+  c1: 'var(--c1)',
+  c2: 'var(--c2)',
+  c3: 'var(--c3)',
+  c4: 'var(--c4)',
+  c5: 'var(--c5)',
 };
 
-// Ordered array for charts - drop straight into Recharts, Nivo, etc.
+// Ordered array for charts — drop straight into Recharts, Nivo, etc.
 export const chartColors = [
-  colors.c1,  // Royal Blue
-  colors.c2,  // Court Purple
-  colors.c3,  // Aqua
-  colors.c4,  // Volt
-  colors.c5,  // Magenta
+  colors.c1,
+  colors.c2,
+  colors.c3,
+  colors.c4,
+  colors.c5,
 ];
 
-// Fill variants (15% opacity for area/bar fills on dark bg)
+// Fill variants for area/bar fills; per-theme opacity lives in system.css.
 export const chartFillColors = [
-  'rgba(61, 142, 240, 0.15)',   // c1-fill
-  'rgba(168, 85, 247, 0.15)',   // c2-fill
-  'rgba(6, 200, 224, 0.15)',    // c3-fill
-  'rgba(212, 240, 0, 0.15)',   // c4-fill
-  'rgba(240, 61, 170, 0.15)',   // c5-fill
+  'var(--c1-fill)',
+  'var(--c2-fill)',
+  'var(--c3-fill)',
+  'var(--c4-fill)',
+  'var(--c5-fill)',
 ];
 
 // ── Typography ─────────────────────────────────────────────
@@ -69,7 +82,7 @@ export const typography = {
   
   // Body / UI / Navigation
   bodyFont: "'Barlow', sans-serif",
-  bodyWeight: 300,
+  bodyWeight: 400,
   
   // Data / Labels / Monospace
   monoFont: "'DM Mono', monospace",

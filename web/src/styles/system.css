@@ -259,6 +259,16 @@
   --c4-fill: rgba(212, 240, 0, .15);
   --c5-fill: rgba(240, 61, 170, .15);
 
+  /* Shot lie colours. Recovery was #8B1219 -- 1.75:1 on a card, so a
+     recovery shot was effectively invisible on the dark dashboard. Tee
+     was 4.30:1. Both lifted; the rest already passed. */
+  --lie-tee: #E24AA5;
+  --lie-fairway: #D4A800;
+  --lie-rough: #F07030;
+  --lie-sand: #B8B2AA;
+  --lie-recovery: #B97175;
+  --lie-green: #00B870;
+
   /* Scarlet, theme-local aliases */
   --scarlet: #E8202A;
   --scarlet-dim: #9B1520;
@@ -329,6 +339,13 @@
   --c4-fill: rgba(106, 116, 0, .10);
   --c5-fill: rgba(192, 21, 138, .10);
 
+  --lie-tee: #C1378A;
+  --lie-fairway: #886C00;
+  --lie-rough: #B25324;
+  --lie-sand: #726E69;
+  --lie-recovery: #8B1219;
+  --lie-green: #007F4D;
+
   --scarlet: #C8181F;
   --scarlet-dim: #9B1520;
   --scarlet-glow: #E8202A;
@@ -377,6 +394,13 @@
   --color-sg-neutral: var(--sg-neutral);
   --color-sg-loss: var(--sg-loss);
   --color-sg-weak: var(--sg-weak);
+  --color-lie-tee: var(--lie-tee);
+  --color-lie-fairway: var(--lie-fairway);
+  --color-lie-rough: var(--lie-rough);
+  --color-lie-sand: var(--lie-sand);
+  --color-lie-recovery: var(--lie-recovery);
+  --color-lie-green: var(--lie-green);
+
   --color-c1: var(--c1);
   --color-c2: var(--c2);
   --color-c3: var(--c3);

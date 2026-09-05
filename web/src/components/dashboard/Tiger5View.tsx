@@ -224,11 +224,11 @@ function getSortedTiger5Cards(fails: Tiger5Fail, totalRounds: number): Tiger5Car
 
   // Chart colors for variety - one unique color per card
   const chartColors = [
-    '#3D8EF0',  // Royal Blue
-    '#A855F7',  // Court Purple
-    '#06C8E0',  // Aqua
-    '#D4F000',  // Volt
-    '#F03DAA',  // Magenta
+    'var(--c1)',  // Royal Blue
+    'var(--c2)',  // Court Purple
+    'var(--c3)',  // Aqua
+    'var(--c4)',  // Volt
+    'var(--c5)',  // Magenta
   ];
 
   const cards: Tiger5CardData[] = [
@@ -573,11 +573,11 @@ function Tiger5TrendSection({ trendData }: { trendData: Tiger5TrendDataPoint[] }
 
   // Colors matching Tiger 5 stat cards
   const COLORS = {
-    threePutts: '#3D8EF0',    // Royal Blue
-    bogeyOnPar5: '#A855F7',   // Court Purple
-    doubleBogey: '#06C8E0',   // Aqua
-    bogeyApproach: '#D4F000', // Volt
-    missedGreen: '#F03DAA',  // Magenta
+    threePutts: 'var(--c1)',    // Royal Blue
+    bogeyOnPar5: 'var(--c2)',   // Court Purple
+    doubleBogey: 'var(--c3)',   // Aqua
+    bogeyApproach: 'var(--c4)', // Volt
+    missedGreen: 'var(--c5)',  // Magenta
   };
 
   // Format x-axis label as "Date - Course"
@@ -759,31 +759,31 @@ function RootCauseSection({ rootCause, totalFailHoles }: { rootCause: RootCauseM
       label: 'Penalties',
       value: rootCause.penalties,
       sgValue: rootCause.penaltiesSG,
-      color: '#F03DAA'  // Magenta
+      color: 'var(--c5)'  // Magenta
     },
     {
       label: 'Driving',
       value: rootCause.driving,
       sgValue: rootCause.drivingSG,
-      color: '#A855F7'  // Court Purple
+      color: 'var(--c2)'  // Court Purple
     },
     {
       label: 'Approach',
       value: rootCause.approach,
       sgValue: rootCause.approachSG,
-      color: '#D4F000'  // Volt
+      color: 'var(--c4)'  // Volt
     },
     {
       label: 'Lag Putts (13+)',
       value: rootCause.lagPutts,
       sgValue: rootCause.lagPuttsSG,
-      color: '#06C8E0'  // Aqua
+      color: 'var(--c3)'  // Aqua
     },
     {
       label: 'Makeable Putts (0-12)',
       value: rootCause.makeablePutts,
       sgValue: rootCause.makeablePuttsSG,
-      color: '#3D8EF0'  // Royal Blue
+      color: 'var(--c1)'  // Royal Blue
     },
     {
       label: 'Short Game',

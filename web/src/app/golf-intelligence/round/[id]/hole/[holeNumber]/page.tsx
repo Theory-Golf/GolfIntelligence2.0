@@ -771,7 +771,7 @@ function ShotEntry({
             </span>
             <span
               className="font-display font-bold text-label tracking-[0.2em] uppercase px-2 py-1 rounded-sm"
-              style={{ background: LIE_COLORS.Tee, color: '#0C0C0C' }}
+              style={{ background: LIE_COLORS.Tee, color: 'var(--court)' }}
             >
               Tee
             </span>
@@ -953,7 +953,7 @@ function FromStrip({
       </span>
       <span
         className="font-display font-bold text-label tracking-[0.2em] uppercase px-2 py-1 rounded-sm"
-        style={{ background: LIE_COLORS[lie], color: '#0C0C0C' }}
+        style={{ background: LIE_COLORS[lie], color: 'var(--court)' }}
       >
         {lie}
       </span>

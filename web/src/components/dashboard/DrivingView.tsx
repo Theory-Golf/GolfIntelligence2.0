@@ -381,15 +381,15 @@ function DrivingAnalysisSection({ analysis, totalDrives }: { analysis: DrivingAn
 
   // Map location types to chart colors - each location has a distinct color
   const LOCATION_COLORS: Record<string, string> = {
-    'Fairway': '#3D8EF0',      // Royal Blue
-    'Rough': '#A855F7',         // Court Purple
-    'Recovery': '#06C8E0',      // Aqua
-    'Sand': '#D4F000',          // Volt
-    'Green': '#F03DAA',         // Magenta
+    'Fairway': 'var(--c1)',      // Royal Blue
+    'Rough': 'var(--c2)',         // Court Purple
+    'Recovery': 'var(--c3)',      // Aqua
+    'Sand': 'var(--c4)',          // Volt
+    'Green': 'var(--c5)',         // Magenta
     'Tee': '#FF8C00',           // Orange
     'Out of Bounds': '#EF4444', // Red
-    'Water': '#3D8EF0',         // Royal Blue (same as Fairway for water)
-    'Penalty Area': '#A855F7',  // Court Purple (same as Rough)
+    'Water': 'var(--c1)',         // Royal Blue (same as Fairway for water)
+    'Penalty Area': 'var(--c2)',  // Court Purple (same as Rough)
     'Other': '#6B7280',         // Gray
   };
 
@@ -847,8 +847,8 @@ function ProblemDriveSection({ metrics }: { metrics: ProblemDriveMetrics }) {
   }
 
   // Chart colors for the breakdown items
-  const penaltyColors = ['#A855F7', '#3D8EF0']; // Purple, Blue
-  const obstructionColors = ['#D4F000', chartColors[4]]; // Volt, (Recovery accent)
+  const penaltyColors = ['var(--c2)', 'var(--c1)']; // Purple, Blue
+  const obstructionColors = ['var(--c4)', chartColors[4]]; // Volt, (Recovery accent)
 
   return (
     <div className="mt-8">
