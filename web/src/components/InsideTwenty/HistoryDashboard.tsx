@@ -35,7 +35,7 @@ function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: 
     <div style={{
       background: 'var(--shadow)',
       border: '1px solid var(--pitch)',
-      padding: '10px 14px',
+      padding: 'var(--spacing-2-5) var(--spacing-3-5)',
       fontFamily: 'var(--font-mono)',
       fontSize: 11,
     }}>
@@ -143,33 +143,33 @@ export default function HistoryDashboard() {
               <LineChart data={chartData} margin={{ top: 8, right: 16, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--pitch)" vertical={false} />
                 <XAxis
-                  dataKey="session"
-                  tick={{ fontFamily: 'var(--font-mono)', fontSize: 9, fill: 'var(--ash)', letterSpacing: '0.08em' }}
-                  axisLine={{ stroke: 'var(--pitch)' }}
-                  tickLine={false}
-                  label={{ value: 'Session', position: 'insideBottomRight', offset: -4, fontFamily: 'var(--font-mono)', fontSize: 9, fill: 'var(--ash)' }}
+ dataKey="session"
+ tick={{ fontFamily: 'var(--font-mono)', fontSize: 9, fill: 'var(--ash)', letterSpacing: '0.08em' }}
+ axisLine={{ stroke: 'var(--pitch)' }}
+ tickLine={false}
+ label={{ value: 'Session', position: 'insideBottomRight', offset: -4, fontFamily: 'var(--font-mono)', fontSize: 9, fill: 'var(--ash)' }}
                 />
                 <YAxis
-                  domain={[0, 18]}
-                  ticks={[0, 3, 6, 9, 12, 15, 18]}
-                  tick={{ fontFamily: 'var(--font-mono)', fontSize: 9, fill: 'var(--ash)' }}
-                  axisLine={false}
-                  tickLine={false}
+ domain={[0, 18]}
+ ticks={[0, 3, 6, 9, 12, 15, 18]}
+ tick={{ fontFamily: 'var(--font-mono)', fontSize: 9, fill: 'var(--ash)' }}
+ axisLine={false}
+ tickLine={false}
                 />
                 <ReferenceLine
-                  y={TOUR_BASELINE_SCORE}
-                  stroke="var(--ash)"
-                  strokeDasharray="4 4"
-                  label={{ value: 'Tour', position: 'insideTopRight', fontFamily: 'var(--font-mono)', fontSize: 9, fill: 'var(--ash)' }}
+ y={TOUR_BASELINE_SCORE}
+ stroke="var(--ash)"
+ strokeDasharray="4 4"
+ label={{ value: 'Tour', position: 'insideTopRight', fontFamily: 'var(--font-mono)', fontSize: 9, fill: 'var(--ash)' }}
                 />
                 <Tooltip content={<ChartTooltip />} cursor={{ stroke: 'var(--pitch)', strokeWidth: 1 }} />
                 <Line
-                  type="monotone"
-                  dataKey="score"
-                  stroke="var(--c1)"
-                  strokeWidth={2}
-                  dot={{ fill: 'var(--c1)', r: 3, strokeWidth: 0 }}
-                  activeDot={{ r: 5, fill: 'var(--c1)', stroke: 'var(--shadow)', strokeWidth: 2 }}
+ type="monotone"
+ dataKey="score"
+ stroke="var(--c1)"
+ strokeWidth={2}
+ dot={{ fill: 'var(--c1)', r: 3, strokeWidth: 0 }}
+ activeDot={{ r: 5, fill: 'var(--c1)', stroke: 'var(--shadow)', strokeWidth: 2 }}
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -191,15 +191,15 @@ export default function HistoryDashboard() {
                   ))}
                 </Pie>
                 <Tooltip
-                  formatter={(value) => [`${value} sessions`, '']}
-                  contentStyle={{ background: 'var(--shadow)', border: '1px solid var(--pitch)', fontFamily: 'var(--font-mono)', fontSize: 11 }}
-                  itemStyle={{ color: 'var(--chalk)' }}
-                  labelStyle={{ display: 'none' }}
+ formatter={(value) => [`${value} sessions`, '']}
+ contentStyle={{ background: 'var(--shadow)', border: '1px solid var(--pitch)', fontFamily: 'var(--font-mono)', fontSize: 11 }}
+ itemStyle={{ color: 'var(--chalk)' }}
+ labelStyle={{ display: 'none' }}
                 />
                 <Legend
-                  iconType="circle"
-                  iconSize={8}
-                  formatter={(value: string) => (
+ iconType="circle"
+ iconSize={8}
+ formatter={(value: string) => (
                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--ash)' }}>
                       {value}
                     </span>
@@ -223,9 +223,9 @@ export default function HistoryDashboard() {
       {/* ── Make rate by distance, across every putt-by-putt session ── */}
       {puttLog.length > 0 ? (
         <DistanceProfile
-          putts={puttLog}
-          title="Make Rate by Distance"
-          note={`${puttLog.length} putts across ${loggedSessions.length} session${loggedSessions.length === 1 ? '' : 's'} logged putt by putt. Total-only sessions are not included.`}
+ putts={puttLog}
+ title="Make Rate by Distance"
+ note={`${puttLog.length} putts across ${loggedSessions.length} session${loggedSessions.length === 1 ? '' : 's'} logged putt by putt. Total-only sessions are not included.`}
         />
       ) : sessions.length > 0 && (
         <div className="it-empty-state">
@@ -244,7 +244,7 @@ export default function HistoryDashboard() {
           <div className="it-log-head">
             <span>Date</span>
             <span>Score</span>
-            <span style={{ textAlign: 'right' }}>Tier</span>
+            <span className="text-right">Tier</span>
             <span />
             <span />
           </div>
@@ -262,11 +262,11 @@ export default function HistoryDashboard() {
                 <span className="it-log-score">{s.score}/18</span>
                 <span className="it-log-tier-badge" style={{ color: cfg.color, gridColumn: '3 / 5' }}>{cfg.label}</span>
                 <button
-                  className="it-log-delete"
-                  onClick={() => handleDelete(s.id)}
-                  aria-label={isPending ? 'Confirm delete' : 'Delete session'}
-                  title={isPending ? 'Click again to confirm' : 'Delete session'}
-                  style={isPending ? { color: 'var(--double)', borderColor: 'var(--double)' } : undefined}
+ className="it-log-delete"
+ onClick={() => handleDelete(s.id)}
+ aria-label={isPending ? 'Confirm delete' : 'Delete session'}
+ title={isPending ? 'Click again to confirm' : 'Delete session'}
+ style={isPending ? { color: 'var(--double)', borderColor: 'var(--double)' } : undefined}
                 >
                   <Trash2 size={13} />
                 </button>
@@ -285,9 +285,9 @@ export default function HistoryDashboard() {
       )}
 
       <Link
-        href="/player-path/putting/inside-twenty"
-        className="it-primary-btn"
-        style={{ textAlign: 'center', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 8 }}
+ href="/player-path/putting/inside-twenty"
+ className="it-primary-btn"
+ style={{ textAlign: 'center', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 8 }}
       >
         Start New Session
       </Link>

@@ -225,20 +225,20 @@ function SGTrendChart({ sessions, height = 100 }: { sessions: SavedSession[]; he
 
   return (
     <svg
-      viewBox={`0 0 ${W} ${H}`}
-      style={{ width: '100%', height, display: 'block' }}
-      aria-hidden="true"
+ viewBox={`0 0 ${W} ${H}`}
+ style={{ width: '100%', height, display: 'block' }}
+ aria-hidden="true"
     >
       {/* Y-axis labels */}
       {yTicks.map((v) => (
         <text
-          key={v}
-          x={PAD.left - 4}
-          y={yScale(v) + 4}
-          textAnchor="end"
-          fontSize="8"
-          fill="var(--ash)"
-          fontFamily="var(--font-mono)"
+ key={v}
+ x={PAD.left - 4}
+ y={yScale(v) + 4}
+ textAnchor="end"
+ fontSize="8"
+ fill="var(--ash)"
+ fontFamily="var(--font-mono)"
         >
           {v > 0 ? `+${v.toFixed(1)}` : v.toFixed(1)}
         </text>
@@ -248,41 +248,41 @@ function SGTrendChart({ sessions, height = 100 }: { sessions: SavedSession[]; he
       <line
         x1={PAD.left} y1={zeroY}
         x2={W - PAD.right} y2={zeroY}
-        stroke="var(--border-color)"
-        strokeWidth="1"
-        strokeDasharray="4 3"
+ stroke="var(--border-color)"
+ strokeWidth="1"
+ strokeDasharray="4 3"
       />
 
       {/* Connecting line */}
       <polyline
-        points={points}
-        fill="none"
-        stroke="var(--ash)"
-        strokeWidth="1.5"
-        strokeLinejoin="round"
+ points={points}
+ fill="none"
+ stroke="var(--ash)"
+ strokeWidth="1.5"
+ strokeLinejoin="round"
       />
 
       {/* Data dots */}
       {sgValues.map((v, i) => (
         <circle
-          key={i}
-          cx={xScale(i)}
-          cy={yScale(v)}
-          r="3.5"
-          fill={v >= 0 ? 'var(--under)' : 'var(--bogey)'}
+ key={i}
+ cx={xScale(i)}
+ cy={yScale(v)}
+ r="3.5"
+ fill={v >= 0 ? 'var(--under)' : 'var(--bogey)'}
         />
       ))}
 
       {/* X-axis session labels */}
       {data.map((s, i) => (
         <text
-          key={i}
-          x={xScale(i)}
-          y={H - 2}
-          textAnchor="middle"
-          fontSize="8"
-          fill="var(--ash)"
-          fontFamily="var(--font-mono)"
+ key={i}
+ x={xScale(i)}
+ y={H - 2}
+ textAnchor="middle"
+ fontSize="8"
+ fill="var(--ash)"
+ fontFamily="var(--font-mono)"
         >
           {i + 1}
         </text>
@@ -547,8 +547,8 @@ export default function RoundSimulation({ onScreenChange }: RoundSimulationProps
         <div className="rs-balance-track">
           <div className="rs-balance-ideal" />
           <div
-            className="rs-balance-marker"
-            style={{ left: `${value}%`, background: markerColor }}
+ className="rs-balance-marker"
+ style={{ left: `${value}%`, background: markerColor }}
           />
         </div>
         <div className="rs-balance-labels">
@@ -607,7 +607,7 @@ export default function RoundSimulation({ onScreenChange }: RoundSimulationProps
           )}
 
           {/* Distribution info */}
-          <div className="rs-card" style={{ textAlign: 'left' }}>
+          <div className="rs-card text-left" >
             <div className="rs-card-title">Round Distribution</div>
             <div className="rs-dist-table">
               {DIST_DISPLAY.map(({ label, count }) => (
@@ -643,19 +643,19 @@ export default function RoundSimulation({ onScreenChange }: RoundSimulationProps
         <div className="rs-card">
           <div className="rs-card-title">Putter</div>
           <input
-            type="text"
-            className="rs-text-input"
-            placeholder="Enter putter name…"
-            value={sessionSetup.putter}
-            onChange={(e) => setSessionSetup((p) => ({ ...p, putter: e.target.value }))}
+ type="text"
+ className="rs-text-input"
+ placeholder="Enter putter name…"
+ value={sessionSetup.putter}
+ onChange={(e) => setSessionSetup((p) => ({ ...p, putter: e.target.value }))}
           />
           {savedPutters.length > 0 && (
             <div className="rs-putter-chips">
               {savedPutters.map((p) => (
                 <button
-                  key={p}
-                  className={`rs-putter-chip${sessionSetup.putter === p ? ' is-selected' : ''}`}
-                  onClick={() => setSessionSetup((prev) => ({ ...prev, putter: p }))}
+ key={p}
+ className={`rs-putter-chip${sessionSetup.putter === p ? ' is-selected' : ''}`}
+ onClick={() => setSessionSetup((prev) => ({ ...prev, putter: p }))}
                 >
                   {p}
                 </button>
@@ -670,9 +670,9 @@ export default function RoundSimulation({ onScreenChange }: RoundSimulationProps
           <div className="rs-marking-grid">
             {BALL_MARKING_OPTIONS.map((opt) => (
               <button
-                key={opt.id}
-                className={`rs-marking-btn${sessionSetup.ballMarking === opt.id ? ' is-selected' : ''}`}
-                onClick={() => setSessionSetup((p) => ({ ...p, ballMarking: opt.id }))}
+ key={opt.id}
+ className={`rs-marking-btn${sessionSetup.ballMarking === opt.id ? ' is-selected' : ''}`}
+ onClick={() => setSessionSetup((p) => ({ ...p, ballMarking: opt.id }))}
               >
                 <BallMarkingIcon type={opt.id} size={32} />
                 <span className="rs-marking-label">{opt.label}</span>
@@ -682,9 +682,9 @@ export default function RoundSimulation({ onScreenChange }: RoundSimulationProps
         </div>
 
         <button
-          className="rs-primary-btn"
-          onClick={startSession}
-          disabled={!sessionSetup.putter.trim()}
+ className="rs-primary-btn"
+ onClick={startSession}
+ disabled={!sessionSetup.putter.trim()}
         >
           Start Putting
         </button>
@@ -803,14 +803,14 @@ export default function RoundSimulation({ onScreenChange }: RoundSimulationProps
                 <span className="rs-toggle-label">{label}</span>
                 <div className="rs-toggle-group">
                   <button
-                    className={`rs-toggle-btn${currentResult[key] === true ? ' is-correct' : ''}`}
-                    onClick={() => setCurrentResult((p: CurrentResult) => ({ ...p, [key]: true }))}
+ className={`rs-toggle-btn${currentResult[key] === true ? ' is-correct' : ''}`}
+ onClick={() => setCurrentResult((p: CurrentResult) => ({ ...p, [key]: true }))}
                   >
                     Correct
                   </button>
                   <button
-                    className={`rs-toggle-btn${currentResult[key] === false ? ' is-incorrect' : ''}`}
-                    onClick={() => setCurrentResult((p: CurrentResult) => ({ ...p, [key]: false }))}
+ className={`rs-toggle-btn${currentResult[key] === false ? ' is-incorrect' : ''}`}
+ onClick={() => setCurrentResult((p: CurrentResult) => ({ ...p, [key]: false }))}
                   >
                     Incorrect
                   </button>
@@ -828,9 +828,9 @@ export default function RoundSimulation({ onScreenChange }: RoundSimulationProps
               <div key={ri} className="rs-result-row">
                 {row.map((result) => (
                   <button
-                    key={result}
-                    className={`rs-result-btn${result === 'Made' ? ' is-made' : ''}`}
-                    onClick={() => handleFirstPutt(result)}
+ key={result}
+ className={`rs-result-btn${result === 'Made' ? ' is-made' : ''}`}
+ onClick={() => handleFirstPutt(result)}
                   >
                     {result}
                   </button>
@@ -861,9 +861,9 @@ export default function RoundSimulation({ onScreenChange }: RoundSimulationProps
           <div className="rs-distance-grid">
             {SECOND_PUTT_DISTANCES.map((dist) => (
               <button
-                key={dist}
-                className={`rs-dist-btn${currentResult.secondPuttDistance === dist ? ' is-selected' : ''}`}
-                onClick={() => setCurrentResult((p) => ({ ...p, secondPuttDistance: dist }))}
+ key={dist}
+ className={`rs-dist-btn${currentResult.secondPuttDistance === dist ? ' is-selected' : ''}`}
+ onClick={() => setCurrentResult((p) => ({ ...p, secondPuttDistance: dist }))}
               >
                 {dist}
               </button>
@@ -875,16 +875,16 @@ export default function RoundSimulation({ onScreenChange }: RoundSimulationProps
           <div className="rs-card-title">Second Putt Result</div>
           <div className="rs-make-row">
             <button
-              className="rs-make-btn is-made"
-              onClick={() => handleSecondPutt(true)}
-              disabled={!currentResult.secondPuttDistance}
+ className="rs-make-btn is-made"
+ onClick={() => handleSecondPutt(true)}
+ disabled={!currentResult.secondPuttDistance}
             >
               Made
             </button>
             <button
-              className="rs-make-btn is-missed"
-              onClick={() => handleSecondPutt(false)}
-              disabled={!currentResult.secondPuttDistance}
+ className="rs-make-btn is-missed"
+ onClick={() => handleSecondPutt(false)}
+ disabled={!currentResult.secondPuttDistance}
             >
               Missed
             </button>
@@ -918,9 +918,9 @@ export default function RoundSimulation({ onScreenChange }: RoundSimulationProps
         <div className="rs-tab-nav">
           {['overview', 'tendencies'].map((tab) => (
             <button
-              key={tab}
-              className={`rs-tab-btn${summaryTab === tab ? ' is-active' : ''}`}
-              onClick={() => setSummaryTab(tab)}
+ key={tab}
+ className={`rs-tab-btn${summaryTab === tab ? ' is-active' : ''}`}
+ onClick={() => setSummaryTab(tab)}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
             </button>
@@ -1093,8 +1093,8 @@ export default function RoundSimulation({ onScreenChange }: RoundSimulationProps
                 )}
               </>
             ) : (
-              <div className="rs-card" style={{ textAlign: 'center' }}>
-                <p style={{ color: 'var(--ash)', fontFamily: 'var(--font-body)', fontSize: '14px' }}>
+              <div className="rs-card text-center" >
+                <p style={{ color: 'var(--ash)', fontFamily: 'var(--font-body)', fontSize: 'var(--text-body-sm)' }}>
                   No misses to analyze — perfect putting session.
                 </p>
               </div>

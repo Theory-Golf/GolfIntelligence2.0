@@ -315,9 +315,9 @@ export default function ApproachAimOptimizer() {
           { id: 'comp',  label: 'Competitive Am',  badge: '14% lat · 9% dep' },
         ].map(s => (
           <button
-            key={s.id}
-            className={`aao-skill-btn${skill === s.id ? ' is-active' : ''}`}
-            onClick={() => setSkillState(s.id)}
+ key={s.id}
+ className={`aao-skill-btn${skill === s.id ? ' is-active' : ''}`}
+ onClick={() => setSkillState(s.id)}
           >
             {s.label}
             <span className="aao-skill-badge">{s.badge}</span>
@@ -356,9 +356,9 @@ export default function ApproachAimOptimizer() {
             <div className="aao-slider-row">
               <span className="aao-ctrl-name">Distance</span>
               <input
-                type="range" min={60} max={220} step={1} value={dist}
-                onChange={e => setDist(+e.target.value)}
-                className="aao-slider"
+ type="range" min={60} max={220} step={1} value={dist}
+ onChange={e => setDist(+e.target.value)}
+ className="aao-slider"
               />
               <span className="aao-ctrl-val">{dist} yd</span>
             </div>
@@ -370,9 +370,9 @@ export default function ApproachAimOptimizer() {
             <div className="aao-slider-row">
               <span className="aao-ctrl-name">Rotation</span>
               <input
-                type="range" min={-40} max={40} step={1} value={tiltDeg}
-                onChange={e => setTiltDeg(+e.target.value)}
-                className="aao-slider"
+ type="range" min={-40} max={40} step={1} value={tiltDeg}
+ onChange={e => setTiltDeg(+e.target.value)}
+ className="aao-slider"
               />
               <span className="aao-ctrl-val">{tiltDeg}°</span>
             </div>
@@ -386,7 +386,7 @@ export default function ApproachAimOptimizer() {
               <span className="aao-num-label">Width</span>
               <div className="aao-num-wrap">
                 <input className="wyc-input aao-num-input" type="number" min={10} max={60} value={gw}
-                  onChange={e => setGw(Math.max(10, Math.min(60, +e.target.value || 10)))} />
+ onChange={e => setGw(Math.max(10, Math.min(60, +e.target.value || 10)))} />
                 <span className="aao-unit">yd</span>
               </div>
             </div>
@@ -394,7 +394,7 @@ export default function ApproachAimOptimizer() {
               <span className="aao-num-label">Depth</span>
               <div className="aao-num-wrap">
                 <input className="wyc-input aao-num-input" type="number" min={10} max={60} value={gd}
-                  onChange={e => setGd(Math.max(10, Math.min(60, +e.target.value || 10)))} />
+ onChange={e => setGd(Math.max(10, Math.min(60, +e.target.value || 10)))} />
                 <span className="aao-unit">yd</span>
               </div>
             </div>
@@ -412,9 +412,9 @@ export default function ApproachAimOptimizer() {
                 { key: 'water-right',  icon: '💧', label: 'Water',  sub: 'pin side (+1)', type: 'water' },
               ].map(h => (
                 <button
-                  key={h.key}
-                  className={`aao-haz-btn${hazards.has(h.key) ? ` is-${h.type}` : ''}`}
-                  onClick={() => toggleHazard(h.key)}
+ key={h.key}
+ className={`aao-haz-btn${hazards.has(h.key) ? ` is-${h.type}` : ''}`}
+ onClick={() => toggleHazard(h.key)}
                 >
                   {h.icon} {h.label}<br />
                   <span className="aao-haz-sub">{h.sub}</span>
@@ -430,7 +430,7 @@ export default function ApproachAimOptimizer() {
               <span className="aao-num-label">From front</span>
               <div className="aao-num-wrap">
                 <input className={`wyc-input aao-num-input${pinFrontWarn ? ' aao-input-warn' : ''}`} type="number" min={0} max={60} value={pinFront}
-                  onChange={e => setPinFront(Math.max(0, +e.target.value || 0))} />
+ onChange={e => setPinFront(Math.max(0, +e.target.value || 0))} />
                 <span className="aao-unit">yd</span>
               </div>
             </div>
@@ -440,7 +440,7 @@ export default function ApproachAimOptimizer() {
               <span className="aao-num-label">From edge</span>
               <div className="aao-num-wrap">
                 <input className={`wyc-input aao-num-input${pinEdgeWarn ? ' aao-input-warn' : ''}`} type="number" min={0} max={60} value={pinEdge}
-                  onChange={e => setPinEdge(Math.max(0, +e.target.value || 0))} />
+ onChange={e => setPinEdge(Math.max(0, +e.target.value || 0))} />
                 <span className="aao-unit">yd</span>
               </div>
             </div>
@@ -467,9 +467,9 @@ export default function ApproachAimOptimizer() {
                 { v:  4, label: 'Big\nDraw' },
               ].map(s => (
                 <button
-                  key={s.v}
-                  className={`aao-shape-btn${sliderBias === s.v ? ' is-active' : ''}`}
-                  onClick={() => setSliderBias(s.v)}
+ key={s.v}
+ className={`aao-shape-btn${sliderBias === s.v ? ' is-active' : ''}`}
+ onClick={() => setSliderBias(s.v)}
                 >
                   {s.label.split('\n').map((line, i) => <span key={i} style={i > 0 ? { display: 'block' } : {}}>{line}</span>)}
                 </button>
@@ -488,7 +488,7 @@ export default function ApproachAimOptimizer() {
       {/* Stats */}
       <div className="aao-stats">
         <div className="aao-stat">
-          <div className="aao-stat-val" style={{ color: 'var(--under)' }}>{stats ? Math.round(stats.gir * 100) + '%' : '—'}</div>
+          <div className="aao-stat-val text-under" >{stats ? Math.round(stats.gir * 100) + '%' : '—'}</div>
           <div className="aao-stat-lbl">GIR Probability</div>
         </div>
         <div className="aao-stat">

@@ -69,52 +69,52 @@ export function PuttingView({ metrics, lagMetrics, filteredShots }: { metrics: P
   return (
     <div className="content">
       {/* Section Heading */}
-      <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>Putting Performance</h4>
+      <h4 className="mb-4 text-ash">Putting Performance</h4>
 
       {/* Hero Cards - 5 metrics in a grid */}
-      <div className="grid-cards-5" style={{ gap: '16px' }}>
+      <div className="grid-cards-5 gap-4" >
 
         {/* Card 1: Total SG Putting */}
         <div className="card-hero is-flagship">
-          <div className="flex justify-between items-center" style={{ marginBottom: '16px' }}>
+          <div className="flex justify-between items-center mb-4" >
             <div className="label" style={{ color: 'var(--scarlet)' }}>Total SG Putting</div>
             <div style={{ width: '6px', height: '6px', background: 'var(--scarlet)', borderRadius: '50%' }}></div>
           </div>
           <div className="value-hero" style={{ color: getStrokeGainedColor(totalSGPutting) }}>
             {formatStrokesGained(totalSGPutting)}
           </div>
-          <div className="flex justify-between" style={{ marginTop: '16px' }}>
+          <div className="flex justify-between mt-4" >
             <div>
-              <div className="label" style={{ color: 'var(--ash)', fontSize: '11px' }}>SG / Putt</div>
-              <div className="value-stat" style={{ color: getStrokeGainedColor(avgSGPutting), fontSize: '12px' }}>
+              <div className="label text-ash" >SG / Putt</div>
+              <div className="value-stat" style={{ color: getStrokeGainedColor(avgSGPutting), fontSize: 'var(--text-label)' }}>
                 {formatStrokesGained(avgSGPutting)}
               </div>
             </div>
-            <div style={{ textAlign: 'right' }}>
-              <div className="label" style={{ color: 'var(--ash)', fontSize: '11px' }}>Total Putts</div>
-              <div className="value-stat" style={{ fontSize: '12px' }}>{totalPutts}</div>
+            <div className="text-right">
+              <div className="label text-ash" >Total Putts</div>
+              <div className="value-stat text-label" >{totalPutts}</div>
             </div>
           </div>
         </div>
 
         {/* Card 2: Make % 0-4 ft */}
         <div className="card-hero">
-          <div className="flex justify-between items-center" style={{ marginBottom: '16px' }}>
-            <div className="label" style={{ color: 'var(--ash)' }}>Make % 0-4 ft</div>
+          <div className="flex justify-between items-center mb-4" >
+            <div className="label text-ash" >Make % 0-4 ft</div>
           </div>
           <div className="value-hero" style={{ color: getMakePctColor(makePct0to4Ft, benchmarkMakePct0to4Ft) }}>
             {makePct0to4Ft.toFixed(0)}%
           </div>
-          <div className="flex justify-between" style={{ marginTop: '16px', padding: '8px 0', borderTop: '1px solid var(--shadow)' }}>
+          <div className="flex justify-between" style={{ marginTop: 'var(--spacing-4)', padding: 'var(--spacing-2) 0', borderTop: '1px solid var(--shadow)' }}>
             <div>
-              <div className="label" style={{ color: 'var(--ash)', fontSize: '11px' }}>Made</div>
-              <div className="value-stat" style={{ fontSize: '12px' }}>
+              <div className="label text-ash" >Made</div>
+              <div className="value-stat text-label" >
                 {made0to4Ft} / {total0to4Ft}
               </div>
             </div>
-            <div style={{ textAlign: 'right' }}>
-              <div className="label" style={{ color: 'var(--ash)', fontSize: '11px' }}>Benchmark</div>
-              <div className="value-stat" style={{ fontSize: '12px' }}>
+            <div className="text-right">
+              <div className="label text-ash" >Benchmark</div>
+              <div className="value-stat text-label" >
                 {total0to4Ft > 0 ? `${benchmarkMakePct0to4Ft.toFixed(0)}%` : '-'}
               </div>
             </div>
@@ -123,36 +123,36 @@ export function PuttingView({ metrics, lagMetrics, filteredShots }: { metrics: P
 
         {/* Card 3: Total SG 5-12 ft */}
         <div className="card-hero">
-          <div className="flex justify-between items-center" style={{ marginBottom: '16px' }}>
-            <div className="label" style={{ color: 'var(--ash)' }}>SG 5-12 ft</div>
+          <div className="flex justify-between items-center mb-4" >
+            <div className="label text-ash" >SG 5-12 ft</div>
           </div>
           <div className="value-hero" style={{ color: getStrokeGainedColor(totalSG5to12Ft) }}>
             {formatStrokesGained(totalSG5to12Ft)}
           </div>
-          <div className="flex justify-between" style={{ marginTop: '16px' }}>
+          <div className="flex justify-between mt-4" >
             <div>
-              <div className="label" style={{ color: 'var(--ash)', fontSize: '11px' }}>SG / Putt</div>
-              <div className="value-stat" style={{ color: getStrokeGainedColor(avgSG5to12Ft), fontSize: '12px' }}>
+              <div className="label text-ash" >SG / Putt</div>
+              <div className="value-stat" style={{ color: getStrokeGainedColor(avgSG5to12Ft), fontSize: 'var(--text-label)' }}>
                 {formatStrokesGained(avgSG5to12Ft)}
               </div>
             </div>
-            <div style={{ textAlign: 'right' }}>
-              <div className="label" style={{ color: 'var(--ash)', fontSize: '11px' }}>Putts</div>
-              <div className="value-stat" style={{ fontSize: '12px' }}>{total5to12Ft}</div>
+            <div className="text-right">
+              <div className="label text-ash" >Putts</div>
+              <div className="value-stat text-label" >{total5to12Ft}</div>
             </div>
           </div>
         </div>
 
         {/* Card 4: Poor Lag */}
         <div className="card-hero">
-          <div className="flex justify-between items-center" style={{ marginBottom: '16px' }}>
-            <div className="label" style={{ color: 'var(--ash)' }}>Poor Lag</div>
+          <div className="flex justify-between items-center mb-4" >
+            <div className="label text-ash" >Poor Lag</div>
           </div>
           <div className="value-hero" style={{ color: poorLagCount > 0 ? 'var(--double)' : 'var(--under)' }}>
             {poorLagCount}
           </div>
-          <div style={{ marginTop: '16px', padding: '8px 0', borderTop: '1px solid var(--shadow)' }}>
-            <div className="label" style={{ color: 'var(--ash)', fontSize: '12px' }}>Total Lag Putts</div>
+          <div style={{ marginTop: 'var(--spacing-4)', padding: 'var(--spacing-2) 0', borderTop: '1px solid var(--shadow)' }}>
+            <div className="label text-ash" >Total Lag Putts</div>
             <div className="value-stat">
               {totalLagPutts}
             </div>
@@ -161,14 +161,14 @@ export function PuttingView({ metrics, lagMetrics, filteredShots }: { metrics: P
 
         {/* Card 5: Speed Rating */}
         <div className="card-hero">
-          <div className="flex justify-between items-center" style={{ marginBottom: '16px' }}>
-            <div className="label" style={{ color: 'var(--ash)' }}>Speed Rating</div>
+          <div className="flex justify-between items-center mb-4" >
+            <div className="label text-ash" >Speed Rating</div>
           </div>
           <div className="value-hero" style={{ color: speedRating !== null ? getSpeedRatingColor(speedRating) : 'var(--ash)' }}>
             {speedRating !== null ? `${speedRating.toFixed(0)}%` : '-'}
           </div>
-          <div style={{ marginTop: '16px', padding: '8px 0', borderTop: '1px solid var(--shadow)' }}>
-            <div className="label" style={{ color: 'var(--ash)', fontSize: '12px' }}>Long of misses</div>
+          <div style={{ marginTop: 'var(--spacing-4)', padding: 'var(--spacing-2) 0', borderTop: '1px solid var(--shadow)' }}>
+            <div className="label text-ash" >Long of misses</div>
             <div className="value-stat">
               {longPutts} / {classifiedLongShort}
             </div>
@@ -178,7 +178,7 @@ export function PuttingView({ metrics, lagMetrics, filteredShots }: { metrics: P
       </div>
 
       {/* Legend for metrics */}
-      <div style={{ marginTop: '24px', display: 'flex', gap: '32px', fontSize: '12px', color: 'var(--ash)' }}>
+      <div className="mt-6 flex gap-8 text-label text-ash">
         <div>
           <strong>Make %:</strong> Colored against the selected benchmark&rsquo;s expected make rate at each distance
         </div>
@@ -192,18 +192,18 @@ export function PuttingView({ metrics, lagMetrics, filteredShots }: { metrics: P
 
       {/* Putting By Distance Table */}
       {puttingByDistance.length > 0 && (
-        <div style={{ marginTop: '32px' }}>
-          <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>Putting by Distance</h4>
+        <div className="mt-8">
+          <h4 className="mb-4 text-ash">Putting by Distance</h4>
           <div style={{ background: 'var(--shadow)', borderRadius: '4px', overflow: 'hidden' }}>
             <div className="gi-table-scroll">
-              <table style={{ minWidth: '640px', width: '100%', borderCollapse: 'collapse', fontSize: '13px', tableLayout: 'fixed' }}>
+              <table style={{ minWidth: '640px', width: '100%', borderCollapse: 'collapse', fontSize: 'var(--text-caption)', tableLayout: 'fixed' }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--pitch)' }}>
-                    <th style={{ padding: '10px 12px', textAlign: 'left', color: 'var(--ash)', fontWeight: 600, background: 'var(--obsidian)', width: '140px' }}>
+                    <th style={{ padding: 'var(--spacing-2-5) var(--spacing-3)', textAlign: 'left', color: 'var(--ash)', fontWeight: 600, background: 'var(--obsidian)', width: '140px' }}>
                       Distance (ft)
                     </th>
                     {puttingByDistance.map(bucket => (
-                      <th key={bucket.label} style={{ padding: '10px 8px', textAlign: 'center', color: 'var(--ash)', fontWeight: 600, background: 'var(--obsidian)', minWidth: '70px' }}>
+                      <th key={bucket.label} style={{ padding: 'var(--spacing-2-5) var(--spacing-2)', textAlign: 'center', color: 'var(--ash)', fontWeight: 600, background: 'var(--obsidian)', minWidth: '70px' }}>
                         {bucket.label}
                       </th>
                     ))}
@@ -212,36 +212,36 @@ export function PuttingView({ metrics, lagMetrics, filteredShots }: { metrics: P
                 <tbody>
                   {/* Row 1: # of Putts */}
                   <tr style={{ borderBottom: '1px solid var(--pitch)' }}>
-                    <td style={{ padding: '8px 12px', color: 'var(--chalk)', fontWeight: 500, background: 'var(--obsidian)' }}>
+                    <td style={{ padding: 'var(--spacing-2) var(--spacing-3)', color: 'var(--chalk)', fontWeight: 500, background: 'var(--obsidian)' }}>
                       # of Putts
                     </td>
                     {puttingByDistance.map(bucket => (
-                      <td key={bucket.label} style={{ padding: '8px 8px', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>
+                      <td key={bucket.label} style={{ padding: 'var(--spacing-2) var(--spacing-2)', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>
                         {bucket.totalPutts > 0 ? bucket.totalPutts : ''}
                       </td>
                     ))}
                   </tr>
                   {/* Row 2: Total Strokes Gained */}
                   <tr style={{ borderBottom: '1px solid var(--pitch)' }}>
-                    <td style={{ padding: '8px 12px', color: 'var(--chalk)', fontWeight: 500, background: 'var(--obsidian)' }}>
+                    <td style={{ padding: 'var(--spacing-2) var(--spacing-3)', color: 'var(--chalk)', fontWeight: 500, background: 'var(--obsidian)' }}>
                       Total SG
                     </td>
                     {puttingByDistance.map(bucket => (
-                      <td key={bucket.label} style={{ padding: '8px 8px', textAlign: 'center', color: getStrokeGainedColor(bucket.totalStrokesGained), fontFamily: 'var(--font-mono)' }}>
+                      <td key={bucket.label} style={{ padding: 'var(--spacing-2) var(--spacing-2)', textAlign: 'center', color: getStrokeGainedColor(bucket.totalStrokesGained), fontFamily: 'var(--font-mono)' }}>
                         {bucket.totalPutts > 0 ? formatStrokesGained(bucket.totalStrokesGained) : ''}
                       </td>
                     ))}
                   </tr>
                   {/* Row 3: Make % */}
                   <tr style={{ borderBottom: '1px solid var(--pitch)' }}>
-                    <td style={{ padding: '8px 12px', color: 'var(--chalk)', fontWeight: 500, background: 'var(--obsidian)' }}>
+                    <td style={{ padding: 'var(--spacing-2) var(--spacing-3)', color: 'var(--chalk)', fontWeight: 500, background: 'var(--obsidian)' }}>
                       Make %
                     </td>
                     {puttingByDistance.map(bucket => (
                       <td
-                        key={bucket.label}
-                        title={bucket.totalPutts > 0 ? `Benchmark ${bucket.benchmarkMakePct.toFixed(0)}%` : undefined}
-                        style={{ padding: '8px 8px', textAlign: 'center', color: bucket.totalPutts > 0 ? getMakePctColor(bucket.makePct, bucket.benchmarkMakePct) : 'var(--ash)', fontFamily: 'var(--font-mono)' }}
+ key={bucket.label}
+ title={bucket.totalPutts > 0 ? `Benchmark ${bucket.benchmarkMakePct.toFixed(0)}%` : undefined}
+ style={{ padding: 'var(--spacing-2) var(--spacing-2)', textAlign: 'center', color: bucket.totalPutts > 0 ? getMakePctColor(bucket.makePct, bucket.benchmarkMakePct) : 'var(--ash)', fontFamily: 'var(--font-mono)' }}
                       >
                         {bucket.totalPutts > 0 ? `${bucket.makePct.toFixed(0)}%` : ''}
                       </td>
@@ -249,46 +249,46 @@ export function PuttingView({ metrics, lagMetrics, filteredShots }: { metrics: P
                   </tr>
                   {/* Row 3b: Benchmark Make % */}
                   <tr style={{ borderBottom: '1px solid var(--pitch)' }}>
-                    <td style={{ padding: '8px 12px', color: 'var(--ash)', fontWeight: 400, background: 'var(--obsidian)', fontSize: '12px' }}>
+                    <td style={{ padding: 'var(--spacing-2) var(--spacing-3)', color: 'var(--ash)', fontWeight: 400, background: 'var(--obsidian)', fontSize: 'var(--text-label)' }}>
                       Benchmark Make %
                     </td>
                     {puttingByDistance.map(bucket => (
-                      <td key={bucket.label} style={{ padding: '8px 8px', textAlign: 'center', color: 'var(--ash)', fontFamily: 'var(--font-mono)', fontSize: '12px' }}>
+                      <td key={bucket.label} style={{ padding: 'var(--spacing-2) var(--spacing-2)', textAlign: 'center', color: 'var(--ash)', fontFamily: 'var(--font-mono)', fontSize: 'var(--text-label)' }}>
                         {bucket.totalPutts > 0 ? `${bucket.benchmarkMakePct.toFixed(0)}%` : ''}
                       </td>
                     ))}
                   </tr>
                   {/* Row 4: # of 3 Putts */}
                   <tr style={{ borderBottom: '1px solid var(--pitch)' }}>
-                    <td style={{ padding: '8px 12px', color: 'var(--chalk)', fontWeight: 500, background: 'var(--obsidian)' }}>
+                    <td style={{ padding: 'var(--spacing-2) var(--spacing-3)', color: 'var(--chalk)', fontWeight: 500, background: 'var(--obsidian)' }}>
                       # of 3 Putts
                     </td>
                     {puttingByDistance.map(bucket => (
-                      <td key={bucket.label} style={{ padding: '8px 8px', textAlign: 'center', color: bucket.threePutts > 0 ? 'var(--double)' : 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>
+                      <td key={bucket.label} style={{ padding: 'var(--spacing-2) var(--spacing-2)', textAlign: 'center', color: bucket.threePutts > 0 ? 'var(--double)' : 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>
                         {bucket.threePutts > 0 ? bucket.threePutts : ''}
                       </td>
                     ))}
                   </tr>
                   {/* Row 5: Speed Ratio (% Long) */}
                   <tr style={{ borderBottom: '1px solid var(--pitch)' }}>
-                    <td style={{ padding: '8px 12px', color: 'var(--chalk)', fontWeight: 500, background: 'var(--obsidian)' }}>
+                    <td style={{ padding: 'var(--spacing-2) var(--spacing-3)', color: 'var(--chalk)', fontWeight: 500, background: 'var(--obsidian)' }}>
                       Speed Ratio (% Long of misses)
                     </td>
                     {puttingByDistance.map(bucket => (
-                      <td key={bucket.label} style={{ padding: '8px 8px', textAlign: 'center', color: bucket.speedRatio !== null ? getSpeedRatingColor(bucket.speedRatio) : 'var(--ash)', fontFamily: 'var(--font-mono)' }}>
+                      <td key={bucket.label} style={{ padding: 'var(--spacing-2) var(--spacing-2)', textAlign: 'center', color: bucket.speedRatio !== null ? getSpeedRatingColor(bucket.speedRatio) : 'var(--ash)', fontFamily: 'var(--font-mono)' }}>
                         {bucket.speedRatio !== null ? `${bucket.speedRatio.toFixed(0)}%` : ''}
                       </td>
                     ))}
                   </tr>
                   {/* Row 6: Proximity of Missed Putts - only for 13-60 ft buckets */}
                   <tr style={{ borderBottom: '1px solid var(--pitch)' }}>
-                    <td style={{ padding: '8px 12px', color: 'var(--chalk)', fontWeight: 500, background: 'var(--obsidian)' }}>
+                    <td style={{ padding: 'var(--spacing-2) var(--spacing-3)', color: 'var(--chalk)', fontWeight: 500, background: 'var(--obsidian)' }}>
                       Proximity of Missed Putts
                     </td>
                     {puttingByDistance.map(bucket => {
                       const isLagBucket = bucket.minDistance >= 13;
                       return (
-                        <td key={bucket.label} style={{ padding: '8px 8px', textAlign: 'center', color: isLagBucket && bucket.proximityMissed > 0 ? 'var(--chalk)' : 'var(--ash)', fontFamily: 'var(--font-mono)' }}>
+                        <td key={bucket.label} style={{ padding: 'var(--spacing-2) var(--spacing-2)', textAlign: 'center', color: isLagBucket && bucket.proximityMissed > 0 ? 'var(--chalk)' : 'var(--ash)', fontFamily: 'var(--font-mono)' }}>
                           {isLagBucket && bucket.proximityMissed > 0 ? `${bucket.proximityMissed.toFixed(0)} ft` : ''}
                         </td>
                       );
@@ -296,13 +296,13 @@ export function PuttingView({ metrics, lagMetrics, filteredShots }: { metrics: P
                   </tr>
                   {/* Row 7: Good Lag % - only for 13-60 ft buckets */}
                   <tr style={{ borderBottom: '1px solid var(--pitch)' }}>
-                    <td style={{ padding: '8px 12px', color: 'var(--chalk)', fontWeight: 500, background: 'var(--obsidian)' }}>
+                    <td style={{ padding: 'var(--spacing-2) var(--spacing-3)', color: 'var(--chalk)', fontWeight: 500, background: 'var(--obsidian)' }}>
                       Good Lag % (&le; 3 ft)
                     </td>
                     {puttingByDistance.map(bucket => {
                       const isLagBucket = bucket.minDistance >= 13;
                       return (
-                        <td key={bucket.label} style={{ padding: '8px 8px', textAlign: 'center', color: isLagBucket && bucket.totalPutts > 0 ? getGoodLagColor(bucket.goodLagPct) : 'var(--ash)', fontFamily: 'var(--font-mono)' }}>
+                        <td key={bucket.label} style={{ padding: 'var(--spacing-2) var(--spacing-2)', textAlign: 'center', color: isLagBucket && bucket.totalPutts > 0 ? getGoodLagColor(bucket.goodLagPct) : 'var(--ash)', fontFamily: 'var(--font-mono)' }}>
                           {isLagBucket && bucket.totalPutts > 0 ? `${bucket.goodLagPct.toFixed(0)}%` : ''}
                         </td>
                       );
@@ -310,13 +310,13 @@ export function PuttingView({ metrics, lagMetrics, filteredShots }: { metrics: P
                   </tr>
                   {/* Row 8: Poor Lag % - only for 13-60 ft buckets */}
                   <tr>
-                    <td style={{ padding: '8px 12px', color: 'var(--chalk)', fontWeight: 500, background: 'var(--obsidian)' }}>
+                    <td style={{ padding: 'var(--spacing-2) var(--spacing-3)', color: 'var(--chalk)', fontWeight: 500, background: 'var(--obsidian)' }}>
                       Poor Lag % (&ge; 5 ft)
                     </td>
                     {puttingByDistance.map(bucket => {
                       const isLagBucket = bucket.minDistance >= 13;
                       return (
-                        <td key={bucket.label} style={{ padding: '8px 8px', textAlign: 'center', color: isLagBucket && bucket.totalPutts > 0 ? getPoorLagColor(bucket.poorLagPct) : 'var(--ash)', fontFamily: 'var(--font-mono)' }}>
+                        <td key={bucket.label} style={{ padding: 'var(--spacing-2) var(--spacing-2)', textAlign: 'center', color: isLagBucket && bucket.totalPutts > 0 ? getPoorLagColor(bucket.poorLagPct) : 'var(--ash)', fontFamily: 'var(--font-mono)' }}>
                           {isLagBucket && bucket.totalPutts > 0 ? `${bucket.poorLagPct.toFixed(0)}%` : ''}
                         </td>
                       );
@@ -363,15 +363,13 @@ function LagPuttingSection({ metrics }: { metrics: LagPuttingMetrics }) {
     if (!active || !payload || !payload.length) return null;
     const data = payload[0].payload;
     return (
-      <div style={{
-        background: 'var(--obsidian)',
+      <div style={{ background: 'var(--obsidian)',
         border: '1px solid var(--pitch)',
-        padding: '8px 12px',
+        padding: 'var(--spacing-2) var(--spacing-3)',
         borderRadius: '4px',
-        fontSize: '12px',
-      }}>
-        <div style={{ color: 'var(--chalk)', fontWeight: 600 }}>{data.name} ft</div>
-        <div style={{ color: 'var(--ash)' }}>
+        fontSize: 'var(--text-label)' }}>
+        <div className="text-chalk font-semibold">{data.name} ft</div>
+        <div className="text-ash">
           {data.value} putts ({data.percentage.toFixed(0)}%)
         </div>
       </div>
@@ -387,23 +385,23 @@ function LagPuttingSection({ metrics }: { metrics: LagPuttingMetrics }) {
   };
 
   return (
-    <div style={{ marginTop: '40px' }}>
+    <div className="mt-10">
       {/* Section Heading */}
-      <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>Lag Putting</h4>
+      <h4 className="mb-4 text-ash">Lag Putting</h4>
 
       {/* Card and First Chart Row */}
-      <div className="grid-cards-2" style={{ gap: '16px' }}>
+      <div className="grid-cards-2 gap-4" >
 
         {/* Card: Avg. Leave Distance */}
         <div className="card-hero">
-          <div className="flex justify-between items-center" style={{ marginBottom: '16px' }}>
-            <div className="label" style={{ color: 'var(--ash)' }}>Avg. Leave Distance</div>
+          <div className="flex justify-between items-center mb-4" >
+            <div className="label text-ash" >Avg. Leave Distance</div>
           </div>
           <div className="value-hero" style={{ color: avgLeaveDistance <= 4 ? 'var(--under)' : avgLeaveDistance <= 8 ? 'var(--bogey)' : 'var(--double)' }}>
             {totalLagPutts > 0 ? `${avgLeaveDistance.toFixed(0)} ft` : '-'}
           </div>
-          <div style={{ marginTop: '16px', padding: '8px 0', borderTop: '1px solid var(--shadow)' }}>
-            <div className="label" style={{ color: 'var(--ash)', fontSize: '12px' }}>Total Lag Putts</div>
+          <div style={{ marginTop: 'var(--spacing-4)', padding: 'var(--spacing-2) 0', borderTop: '1px solid var(--shadow)' }}>
+            <div className="label text-ash" >Total Lag Putts</div>
             <div className="value-stat">
               {totalLagPutts}
             </div>
@@ -412,21 +410,21 @@ function LagPuttingSection({ metrics }: { metrics: LagPuttingMetrics }) {
 
         {/* Chart 1: # 3 Putts - First Putt Starting Distance */}
         <div className="card-hero">
-          <div className="flex justify-between items-center" style={{ marginBottom: '16px' }}>
-            <div className="label" style={{ color: 'var(--ash)' }}># 3 Putts: First Putt Starting Distance</div>
+          <div className="flex justify-between items-center mb-4" >
+            <div className="label text-ash" ># 3 Putts: First Putt Starting Distance</div>
           </div>
           {threePuttsData.length > 0 ? (
             <ResponsiveContainer width="100%" height={200}>
               <PieChart>
                 <Pie
-                  data={threePuttsData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius="45%"
-                  outerRadius="72%"
-                  paddingAngle={2}
-                  dataKey="value"
-                  nameKey="name"
+ data={threePuttsData}
+ cx="50%"
+ cy="50%"
+ innerRadius="45%"
+ outerRadius="72%"
+ paddingAngle={2}
+ dataKey="value"
+ nameKey="name"
                 >
                   {threePuttsData.map((_entry, index) => (
                     <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
@@ -434,9 +432,9 @@ function LagPuttingSection({ metrics }: { metrics: LagPuttingMetrics }) {
                 </Pie>
                 <Tooltip content={<DonutTooltip />} />
                 <Legend
-                  verticalAlign="bottom"
-                  height={36}
-                  formatter={(value) => <span style={{ color: 'var(--ash)', fontSize: '11px' }}>{value} ft</span>}
+ verticalAlign="bottom"
+ height={36}
+ formatter={(value) => <span className="text-ash text-label-sm">{value} ft</span>}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -449,23 +447,23 @@ function LagPuttingSection({ metrics }: { metrics: LagPuttingMetrics }) {
       </div>
 
       {/* Chart 2: Leave Distance Distribution */}
-      <div style={{ marginTop: '16px' }}>
+      <div className="mt-4">
         <div className="card-hero">
-          <div className="flex justify-between items-center" style={{ marginBottom: '16px' }}>
-            <div className="label" style={{ color: 'var(--ash)' }}>Leave Distance Distribution - Lag Putts</div>
+          <div className="flex justify-between items-center mb-4" >
+            <div className="label text-ash" >Leave Distance Distribution - Lag Putts</div>
           </div>
           {leaveDistanceData.length > 0 ? (
             <ResponsiveContainer width="100%" height={200}>
               <PieChart>
                 <Pie
-                  data={leaveDistanceData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius="45%"
-                  outerRadius="72%"
-                  paddingAngle={2}
-                  dataKey="value"
-                  nameKey="name"
+ data={leaveDistanceData}
+ cx="50%"
+ cy="50%"
+ innerRadius="45%"
+ outerRadius="72%"
+ paddingAngle={2}
+ dataKey="value"
+ nameKey="name"
                 >
                   {leaveDistanceData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={getLeaveDistanceColor(entry.name)} />
@@ -473,9 +471,9 @@ function LagPuttingSection({ metrics }: { metrics: LagPuttingMetrics }) {
                 </Pie>
                 <Tooltip content={<DonutTooltip />} />
                 <Legend
-                  verticalAlign="bottom"
-                  height={36}
-                  formatter={(value) => <span style={{ color: 'var(--ash)', fontSize: '11px' }}>{value}</span>}
+ verticalAlign="bottom"
+ height={36}
+ formatter={(value) => <span className="text-ash text-label-sm">{value}</span>}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -488,7 +486,7 @@ function LagPuttingSection({ metrics }: { metrics: LagPuttingMetrics }) {
       </div>
 
       {/* Legend for leave distance chart */}
-      <div style={{ marginTop: '16px', display: 'flex', gap: '32px', fontSize: '11px', color: 'var(--ash)' }}>
+      <div className="mt-4 flex gap-8 text-label-sm text-ash">
         <div>
           <strong>Leave Distance:</strong> Lower is better (0-4 ft = green, 5-8 ft = yellow, 9-12 ft = red, 13+ ft = scarlet)
         </div>
@@ -546,51 +544,49 @@ function PuttsTableSection({ shots }: { shots: ProcessedShot[] }) {
   }
 
   return (
-    <div style={{ marginTop: '32px' }}>
+    <div className="mt-8">
       <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        style={{
-          display: 'flex',
+ onClick={() => setIsExpanded(!isExpanded)}
+ style={{ display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           width: '100%',
-          padding: '12px 16px',
+          padding: 'var(--spacing-3) var(--spacing-4)',
           background: 'var(--shadow)',
           border: '1px solid var(--ash)',
           borderRadius: '4px',
           color: 'var(--chalk)',
           cursor: 'pointer',
-          fontSize: '14px',
-        }}
+          fontSize: 'var(--text-body-sm)' }}
       >
-        <span style={{ fontWeight: 600 }}>All Putts</span>
-        <span style={{ fontSize: '12px', color: 'var(--ash)' }}>
+        <span className="font-semibold">All Putts</span>
+        <span className="text-label text-ash">
           {putts.length} putts • {isExpanded ? '▲' : '▼'}
         </span>
       </button>
 
       {isExpanded && (
-        <div style={{ marginTop: '16px' }}>
+        <div className="mt-4">
           {sortedRounds.map(([roundKey, roundPutts]) => {
             const [dateStr, courseStr] = roundKey.split('|');
 
             return (
-              <div key={roundKey} style={{ marginBottom: '16px', padding: '12px', background: 'var(--shadow)', borderRadius: '4px' }}>
-                <div style={{ display: 'flex', gap: '24px', marginBottom: '12px', fontSize: '12px', color: 'var(--chalk)' }}>
+              <div key={roundKey} style={{ marginBottom: 'var(--spacing-4)', padding: 'var(--spacing-3)', background: 'var(--shadow)', borderRadius: '4px' }}>
+                <div className="flex gap-6 mb-3 text-label text-chalk">
                   <span><strong>Date:</strong> {dateStr}</span>
                   <span><strong>Course:</strong> {courseStr}</span>
                   <span><strong>Putts:</strong> {roundPutts.length}</span>
                 </div>
                 <div className="gi-table-scroll">
-                  <table style={{ minWidth: '520px', width: '100%', fontSize: '13px', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+                  <table style={{ minWidth: '520px', width: '100%', fontSize: 'var(--text-caption)', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
                     <thead>
                       <tr style={{ borderBottom: '1px solid var(--ash)' }}>
-                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '9%' }}>Hole</th>
-                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '13%' }}>Start Dist</th>
-                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '13%' }}>End Dist</th>
-                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '13%' }}>Result</th>
-                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '19%' }}>Lag Outcome</th>
-                        <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '13%' }}>SG</th>
+                        <th style={{ textAlign: 'center', padding: 'var(--spacing-1-5)', color: 'var(--ash)', width: '9%' }}>Hole</th>
+                        <th style={{ textAlign: 'center', padding: 'var(--spacing-1-5)', color: 'var(--ash)', width: '13%' }}>Start Dist</th>
+                        <th style={{ textAlign: 'center', padding: 'var(--spacing-1-5)', color: 'var(--ash)', width: '13%' }}>End Dist</th>
+                        <th style={{ textAlign: 'center', padding: 'var(--spacing-1-5)', color: 'var(--ash)', width: '13%' }}>Result</th>
+                        <th style={{ textAlign: 'center', padding: 'var(--spacing-1-5)', color: 'var(--ash)', width: '19%' }}>Lag Outcome</th>
+                        <th style={{ textAlign: 'center', padding: 'var(--spacing-1-5)', color: 'var(--ash)', width: '13%' }}>SG</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -600,25 +596,25 @@ function PuttsTableSection({ shots }: { shots: ProcessedShot[] }) {
                           const lagOutcome = classifyLagOutcome(putt);
                           return (
                           <tr key={idx} style={{ borderBottom: '1px solid var(--dark)' }}>
-                            <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{putt.holeNumber}</td>
-                            <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>
+                            <td className="p-1.5 text-center text-chalk">{putt.holeNumber}</td>
+                            <td style={{ padding: 'var(--spacing-1-5)', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>
                               {putt.startingDistance}
                             </td>
-                            <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>
+                            <td style={{ padding: 'var(--spacing-1-5)', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>
                               {putt.endingDistance}
                             </td>
                             <td style={{
-                              padding: '6px',
+                              padding: 'var(--spacing-1-5)',
                               textAlign: 'center',
                               color: putt.endingDistance === 0 ? 'var(--under)' : putt.puttLongShort === 'Long' ? 'var(--double)' : 'var(--chalk)',
                               fontWeight: putt.endingDistance === 0 ? 600 : 400
                             }}>
                               {putt.endingDistance === 0 ? 'Made' : (putt.puttLongShort || '-')}
                             </td>
-                            <td style={{ padding: '6px', textAlign: 'center', color: LAG_OUTCOME_COLORS[lagOutcome ?? 'none'] }}>
+                            <td style={{ padding: 'var(--spacing-1-5)', textAlign: 'center', color: LAG_OUTCOME_COLORS[lagOutcome ?? 'none'] }}>
                               {LAG_OUTCOME_LABELS[lagOutcome ?? 'none']}
                             </td>
-                            <td style={{ padding: '6px', textAlign: 'center', color: getShotSGColor(putt.calculatedStrokesGained), fontFamily: 'var(--font-mono)' }}>
+                            <td style={{ padding: 'var(--spacing-1-5)', textAlign: 'center', color: getShotSGColor(putt.calculatedStrokesGained), fontFamily: 'var(--font-mono)' }}>
                               {formatStrokesGained(putt.calculatedStrokesGained)}
                             </td>
                           </tr>

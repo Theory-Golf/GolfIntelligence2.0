@@ -23,7 +23,7 @@ function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: 
     <div style={{
       background: 'var(--shadow)',
       border: '1px solid var(--pitch)',
-      padding: '10px 14px',
+      padding: 'var(--spacing-2-5) var(--spacing-3-5)',
       fontFamily: 'var(--font-mono)',
       fontSize: 11,
     }}>

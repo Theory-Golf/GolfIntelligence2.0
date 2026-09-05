@@ -356,7 +356,7 @@ export default function WedgeStandard({ onScreenChange }: WedgeStandardProps = {
         <button className="ws-secondary-btn" onClick={() => setScreen('history')}>
           {ICONS.chart}
           Session History
-          <span className="ws-btn-arrow" style={{ color: 'var(--ash)', fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.10em' }}>
+          <span className="ws-btn-arrow" style={{ color: 'var(--ash)', fontFamily: 'var(--font-mono)', fontSize: 'var(--text-label-sm)', letterSpacing: '0.10em' }}>
             {history.length}
           </span>
         </button>
@@ -390,10 +390,10 @@ export default function WedgeStandard({ onScreenChange }: WedgeStandardProps = {
             <div className="ws-wedge-header">
               <div className="ws-wedge-badge">{w.name}</div>
               <input
-                type="text"
-                className="ws-wedge-name-input"
-                value={w.name}
-                onChange={(e) => {
+ type="text"
+ className="ws-wedge-name-input"
+ value={w.name}
+ onChange={(e) => {
                   const u = [...wedges]; u[i] = { ...u[i], name: e.target.value }; setWedges(u);
                 }}
               />
@@ -403,10 +403,10 @@ export default function WedgeStandard({ onScreenChange }: WedgeStandardProps = {
                 <div key={k} className="ws-dist-field">
                   <label>{lbl}</label>
                   <input
-                    type="number"
-                    className="ws-dist-input"
-                    value={w[k]}
-                    onChange={(e) => {
+ type="number"
+ className="ws-dist-input"
+ value={w[k]}
+ onChange={(e) => {
                       const u = [...wedges]; u[i] = { ...u[i], [k]: parseInt(e.target.value) || 0 }; setWedges(u);
                     }}
                   />
@@ -443,17 +443,17 @@ export default function WedgeStandard({ onScreenChange }: WedgeStandardProps = {
             {creativeTargets.map((t, i) => (
               <div key={i} className="ws-target-chip">
                 <input
-                  type="number"
-                  className="ws-target-chip-input"
-                  value={t}
-                  onChange={(e) => {
+ type="number"
+ className="ws-target-chip-input"
+ value={t}
+ onChange={(e) => {
                     const u = [...creativeTargets]; u[i] = parseInt(e.target.value) || 0; setCreativeTargets(u);
                   }}
                 />
                 {creativeTargets.length > 1 && (
                   <button
-                    className="ws-target-chip-remove"
-                    onClick={() => setCreativeTargets(creativeTargets.filter((_, j) => j !== i))}
+ className="ws-target-chip-remove"
+ onClick={() => setCreativeTargets(creativeTargets.filter((_, j) => j !== i))}
                   >
                     {ICONS.x}
                   </button>
@@ -481,8 +481,8 @@ export default function WedgeStandard({ onScreenChange }: WedgeStandardProps = {
         </div>
 
         <button
-          className="ws-primary-btn"
-          onClick={() => {
+ className="ws-primary-btn"
+ onClick={() => {
             storage.set('wm-creative', { targets: creativeTargets, rounds: creativeRounds });
             setPracticeMode('creative');
             startSession();
@@ -565,7 +565,7 @@ export default function WedgeStandard({ onScreenChange }: WedgeStandardProps = {
                         ].map(({ label, value, cls }) => (
                           <div key={label} className="ws-history-detail-cell">
                             <div className={`ws-history-detail-val${cls ? ` ${cls}` : ''}`}>{value}</div>
-                            <div className="ws-stat-label" style={{ textAlign: 'center' }}>{label}</div>
+                            <div className="ws-stat-label text-center" >{label}</div>
                           </div>
                         ))}
                       </div>
@@ -573,8 +573,8 @@ export default function WedgeStandard({ onScreenChange }: WedgeStandardProps = {
                         {s.shots.map((sh, idx) => (
                           <div key={idx} className="ws-history-shot-row">
                             <span style={{ color: 'var(--ash)', width: 24 }}>#{idx + 1}</span>
-                            <span style={{ color: 'var(--chalk)' }}>{sh.target}y → {sh.actual}y</span>
-                            <span style={{ color: 'var(--ash)' }}>{sh.proximity}y</span>
+                            <span className="text-chalk">{sh.target}y → {sh.actual}y</span>
+                            <span className="text-ash">{sh.proximity}y</span>
                             <span className={sh.rating.cls} style={{ fontWeight: 500 }}>{sh.points}</span>
                           </div>
                         ))}
@@ -630,13 +630,13 @@ export default function WedgeStandard({ onScreenChange }: WedgeStandardProps = {
             <div className="ws-card">
               <label className="ws-input-label">Actual Carry</label>
               <input
-                type="number"
-                inputMode="decimal"
-                className="ws-number-input"
-                placeholder="yards"
-                value={actualDistance}
-                onChange={(e) => setActualDistance(e.target.value)}
-                autoComplete="off"
+ type="number"
+ inputMode="decimal"
+ className="ws-number-input"
+ placeholder="yards"
+ value={actualDistance}
+ onChange={(e) => setActualDistance(e.target.value)}
+ autoComplete="off"
               />
             </div>
 
@@ -644,13 +644,13 @@ export default function WedgeStandard({ onScreenChange }: WedgeStandardProps = {
             <div className="ws-card">
               <label className="ws-input-label">Offline Distance</label>
               <input
-                type="number"
-                inputMode="decimal"
-                className="ws-number-input"
-                placeholder="0 = center"
-                value={dispersionAmount}
-                onChange={(e) => { setDispersionAmount(e.target.value); if (!parseFloat(e.target.value)) setDispersionDir(null); }}
-                autoComplete="off"
+ type="number"
+ inputMode="decimal"
+ className="ws-number-input"
+ placeholder="0 = center"
+ value={dispersionAmount}
+ onChange={(e) => { setDispersionAmount(e.target.value); if (!parseFloat(e.target.value)) setDispersionDir(null); }}
+ autoComplete="off"
               />
 
               <div className="ws-direction-grid">
@@ -659,10 +659,10 @@ export default function WedgeStandard({ onScreenChange }: WedgeStandardProps = {
                   { dir: 'right', label: 'Right', icon: ICONS.arrowRight },
                 ].map(({ dir, label, icon }) => (
                   <button
-                    key={dir}
-                    className={`ws-dir-btn${dispersionDir === dir ? ' is-selected' : ''}`}
-                    disabled={dispNum === 0}
-                    onClick={() => setDispersionDir(dir)}
+ key={dir}
+ className={`ws-dir-btn${dispersionDir === dir ? ' is-selected' : ''}`}
+ disabled={dispNum === 0}
+ onClick={() => setDispersionDir(dir)}
                   >
                     {icon} {label}
                   </button>
@@ -722,8 +722,8 @@ export default function WedgeStandard({ onScreenChange }: WedgeStandardProps = {
                   <div className="ws-scatter-grid-v" />
                   <div className="ws-scatter-pin" />
                   <div
-                    className="ws-scatter-ball"
-                    style={{
+ className="ws-scatter-ball"
+ style={{
                       left: `calc(50% + ${(lastShot?.dispersionDir === 'left' ? -1 : 1) * Math.min(lastShot?.dispersion || 0, 20) * 2.5}px)`,
                       top:  `calc(50% - ${Math.min(Math.abs(lastShot?.distanceMiss || 0), 20) * (lastShot?.distanceMiss > 0 ? -1 : 1) * 2.5}px)`,
                     }}
@@ -814,7 +814,7 @@ export default function WedgeStandard({ onScreenChange }: WedgeStandardProps = {
             {sessionShots.map((s, i) => (
               <div key={i} className="ws-breakdown-row">
                 <span style={{ color: 'var(--ash)', width: 28 }}>#{i + 1}</span>
-                <span style={{ color: 'var(--chalk)' }}>{s.target}y → {s.actual}y</span>
+                <span className="text-chalk">{s.target}y → {s.actual}y</span>
                 <span style={{ color: 'var(--ash)', width: 48, textAlign: 'right' }}>{s.proximity}y</span>
                 <span className={s.rating.cls} style={{ fontWeight: 500, width: 36, textAlign: 'right' }}>{s.points}</span>
               </div>

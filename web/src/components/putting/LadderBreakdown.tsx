@@ -25,8 +25,8 @@ export function LadderGroupBreakdown({ putts }: { putts: PuttLog[] | undefined }
       <div className="lp-breakdown-head">
         <span>Group</span>
         <span>Putts</span>
-        <span style={{ textAlign: 'right' }}>Made</span>
-        <span style={{ textAlign: 'right' }}>Rate</span>
+        <span className="text-right">Made</span>
+        <span className="text-right">Rate</span>
       </div>
       {groups.map((g) => (
         <div className="lp-breakdown-row" key={g.group}>
