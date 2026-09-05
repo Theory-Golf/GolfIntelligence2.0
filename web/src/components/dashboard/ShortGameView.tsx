@@ -115,7 +115,7 @@ function ShortGameLeaveDistributionSection({ filteredShots }: { filteredShots: P
     <div style={{ marginTop: '32px' }}>
       <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>Leave Distribution by Starting Lie</h4>
       <p style={{ fontSize: '12px', color: 'var(--ash)', marginBottom: '16px' }}>Where short game shots finish on the green, broken down by starting lie ({leaveDistribution.totalShortGameShots} total shots)</p>
-      <div style={{ background: 'var(--charcoal)', padding: '16px', borderRadius: '4px' }}>
+      <div style={{ background: 'var(--shadow)', padding: '16px', borderRadius: '4px' }}>
         <ResponsiveContainer width="100%" height={isNarrow ? 260 : 340}>
           <BarChart data={leaveDistribution.buckets} margin={isNarrow ? { top: 12, right: 8, left: 0, bottom: 8 } : { top: 20, right: 30, left: 20, bottom: 50 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--ash)" opacity={0.3} />
@@ -151,7 +151,7 @@ function ShortGameTableSection({ filteredShots }: { filteredShots: ProcessedShot
 
   return (
     <div style={{ marginTop: '32px' }}>
-      <button onClick={() => setIsExpanded(!isExpanded)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '12px 16px', background: 'var(--charcoal)', border: '1px solid var(--ash)', borderRadius: '4px', color: 'var(--chalk)', cursor: 'pointer', fontSize: '14px' }}>
+      <button onClick={() => setIsExpanded(!isExpanded)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '12px 16px', background: 'var(--shadow)', border: '1px solid var(--ash)', borderRadius: '4px', color: 'var(--chalk)', cursor: 'pointer', fontSize: '14px' }}>
         <span style={{ fontWeight: 600 }}>All Short Game Shots</span>
         <span style={{ fontSize: '12px', color: 'var(--ash)' }}>{shortGameShots.length} short game shots • {isExpanded ? '▲' : '▼'}</span>
       </button>
@@ -160,7 +160,7 @@ function ShortGameTableSection({ filteredShots }: { filteredShots: ProcessedShot
           {sortedRounds.map(([roundKey, roundShots]) => {
             const [dateStr, courseStr] = roundKey.split('|');
             return (
-              <div key={roundKey} style={{ marginBottom: '16px', padding: '12px', background: 'var(--charcoal)', borderRadius: '4px' }}>
+              <div key={roundKey} style={{ marginBottom: '16px', padding: '12px', background: 'var(--shadow)', borderRadius: '4px' }}>
                 <div style={{ display: 'flex', gap: '24px', marginBottom: '12px', fontSize: '12px', color: 'var(--chalk)' }}>
                   <span><strong>Date:</strong> {dateStr}</span>
                   <span><strong>Course:</strong> {courseStr}</span>
@@ -440,7 +440,7 @@ export function ShortGameView({ metrics, shortGameHeatMapData, filteredShots }: 
           <div className="value-hero" style={{ color: getProximityColor(within8FeetFairwayPct) }}>
             {within8FeetFairwayPct.toFixed(0)}%
           </div>
-          <div style={{ marginTop: '16px', padding: '8px 0', borderTop: '1px solid var(--charcoal)' }}>
+          <div style={{ marginTop: '16px', padding: '8px 0', borderTop: '1px solid var(--shadow)' }}>
             <div className="label" style={{ color: 'var(--ash)', fontSize: '12px' }}>
               {within8FeetFairwayCount} / {totalShortGameFairway} shots
             </div>
@@ -455,7 +455,7 @@ export function ShortGameView({ metrics, shortGameHeatMapData, filteredShots }: 
           <div className="value-hero" style={{ color: getProximityColor(within8FeetRoughPct) }}>
             {within8FeetRoughPct.toFixed(0)}%
           </div>
-          <div style={{ marginTop: '16px', padding: '8px 0', borderTop: '1px solid var(--charcoal)' }}>
+          <div style={{ marginTop: '16px', padding: '8px 0', borderTop: '1px solid var(--shadow)' }}>
             <div className="label" style={{ color: 'var(--ash)', fontSize: '12px' }}>
               {within8FeetRoughCount} / {totalShortGameRough} shots
             </div>
@@ -470,7 +470,7 @@ export function ShortGameView({ metrics, shortGameHeatMapData, filteredShots }: 
           <div className="value-hero" style={{ color: getProximityColor(within8FeetSandPct) }}>
             {within8FeetSandPct.toFixed(0)}%
           </div>
-          <div style={{ marginTop: '16px', padding: '8px 0', borderTop: '1px solid var(--charcoal)' }}>
+          <div style={{ marginTop: '16px', padding: '8px 0', borderTop: '1px solid var(--shadow)' }}>
             <div className="label" style={{ color: 'var(--ash)', fontSize: '12px' }}>
               {within8FeetSandCount} / {totalShortGameSand} shots
             </div>

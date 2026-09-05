@@ -28,7 +28,7 @@ function RootCauseChart({ title, rootCause, fill, isNarrow }: {
   return (
     <div>
       <h5 style={{ marginBottom: '12px', color: 'var(--ash)', fontSize: '14px' }}>{title}</h5>
-      <div style={{ background: 'var(--charcoal)', padding: '16px', borderRadius: '4px' }}>
+      <div style={{ background: 'var(--shadow)', padding: '16px', borderRadius: '4px' }}>
         {/* 7 categories need ~40px each, or recharts drops ticks to fit */}
         <ResponsiveContainer width="100%" height={isNarrow ? 280 : 320}>
           <BarChart data={data} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
@@ -238,7 +238,7 @@ export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: {
           {/* Donut Chart - Hole Outcome Distribution */}
           <div>
             <h5 style={{ marginBottom: '12px', color: 'var(--ash)', fontSize: '14px' }}>Outcome Distribution</h5>
-            <div style={{ background: 'var(--charcoal)', padding: '16px', borderRadius: '4px' }}>
+            <div style={{ background: 'var(--shadow)', padding: '16px', borderRadius: '4px' }}>
               <p style={{ fontSize: '11px', color: 'var(--ash)', marginBottom: '16px' }}>
                 Distribution of scores vs par across {totalHoles} holes
               </p>
@@ -260,7 +260,7 @@ export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: {
                       <Cell
                         key={`cell-${index}`}
                         fill={OUTCOME_COLORS[entry.name as HoleOutcome] || '#6B7280'}
-                        stroke="var(--charcoal)"
+                        stroke="var(--shadow)"
                         strokeWidth={2}
                       />
                     ))}
@@ -301,7 +301,7 @@ export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: {
           {/* Bogey Rate Stacked Bar Chart */}
           <div>
             <h5 style={{ marginBottom: '12px', color: 'var(--ash)', fontSize: '14px' }}>Bogey & Double Bogey+ Rate by Par</h5>
-            <div style={{ background: 'var(--charcoal)', padding: '16px', borderRadius: '4px' }}>
+            <div style={{ background: 'var(--shadow)', padding: '16px', borderRadius: '4px' }}>
               <ResponsiveContainer width="100%" height={isNarrow ? 220 : 280}>
                 <BarChart data={bogeyRates} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--dark)" />
@@ -363,7 +363,7 @@ export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: {
             </div>
 
             {/* Bottom Info */}
-            <div style={{ marginTop: '16px', padding: '8px 0', borderTop: '1px solid var(--charcoal)' }}>
+            <div style={{ marginTop: '16px', padding: '8px 0', borderTop: '1px solid var(--shadow)' }}>
               <div className="label" style={{ color: 'var(--ash)', fontSize: '12px' }}>GIR with putt ≤ 20 ft</div>
             </div>
           </div>
@@ -383,7 +383,7 @@ export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: {
             </div>
 
             {/* Bottom Info */}
-            <div style={{ marginTop: '16px', padding: '8px 0', borderTop: '1px solid var(--charcoal)' }}>
+            <div style={{ marginTop: '16px', padding: '8px 0', borderTop: '1px solid var(--shadow)' }}>
               <div className="label" style={{ color: 'var(--ash)', fontSize: '12px' }}>Birdies made</div>
             </div>
           </div>
@@ -403,7 +403,7 @@ export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: {
             </div>
 
             {/* Bottom Info */}
-            <div className="flex justify-between" style={{ marginTop: '16px', padding: '8px 0', borderTop: '1px solid var(--charcoal)' }}>
+            <div className="flex justify-between" style={{ marginTop: '16px', padding: '8px 0', borderTop: '1px solid var(--shadow)' }}>
               <div>
                 <div className="label" style={{ color: 'var(--ash)', fontSize: '11px' }}>Made</div>
                 <div className="value-stat">{birdieOpportunities.conversions}</div>

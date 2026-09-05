@@ -125,7 +125,7 @@ export function StrokesGainedTrendChart({ filteredShots }: StrokesGainedTrendCha
       <div style={{ marginTop: '32px' }}>
         <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>Strokes Gained Trend</h4>
         <div style={{
-          background: 'var(--charcoal)',
+          background: 'var(--shadow)',
           padding: '32px',
           borderRadius: '4px',
           textAlign: 'center',
@@ -158,7 +158,7 @@ export function StrokesGainedTrendChart({ filteredShots }: StrokesGainedTrendCha
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value as SGShotCategory)}
             style={{
-              background: 'var(--charcoal)',
+              background: 'var(--shadow)',
               border: '1px solid var(--ash)',
               borderRadius: '4px',
               color: 'var(--chalk)',
@@ -185,7 +185,7 @@ export function StrokesGainedTrendChart({ filteredShots }: StrokesGainedTrendCha
             value={movingAverageWindow}
             onChange={(e) => setMovingAverageWindow(Number(e.target.value))}
             style={{
-              background: 'var(--charcoal)',
+              background: 'var(--shadow)',
               border: '1px solid var(--ash)',
               borderRadius: '4px',
               color: 'var(--chalk)',
@@ -219,7 +219,7 @@ export function StrokesGainedTrendChart({ filteredShots }: StrokesGainedTrendCha
       </div>
 
       {/* Chart */}
-      <div style={{ background: 'var(--charcoal)', padding: '16px', borderRadius: '4px' }}>
+      <div style={{ background: 'var(--shadow)', padding: '16px', borderRadius: '4px' }}>
         <ResponsiveContainer width="100%" height={isNarrow ? 260 : 350}>
           <ComposedChart data={chartData} margin={isNarrow ? { top: 12, right: 8, left: 0, bottom: 8 } : { top: 20, right: 30, left: 20, bottom: 50 }}>
             <CartesianGrid strokeDasharray="3 3" stroke={COLORS.grid} opacity={0.3} />

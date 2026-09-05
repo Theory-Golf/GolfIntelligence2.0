@@ -6,7 +6,7 @@
 .lpt-wrapper {
   max-width: 576px;
   margin: 0 auto;
-  padding: 0 24px 10px;
+  padding: 0 var(--spacing-6) var(--spacing-2-5);
 }
 
 /* ── TOP NAV ───────────────────────────────────────────────────── */
@@ -14,19 +14,20 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: var(--spacing-2-5);
   min-height: 44px;
 }
 
 .lpt-back-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
+  gap: var(--spacing-1-5);
+  padding: var(--spacing-2) var(--spacing-3);
   min-height: 44px;
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.12em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--ash);
   background: transparent;
@@ -42,15 +43,16 @@
 
 .lpt-nav-shot {
   font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.12em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--foreground);
 }
 
 .lpt-running {
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: var(--text-caption);
   letter-spacing: 0.08em;
   color: var(--foreground);
   font-weight: 500;
@@ -62,7 +64,7 @@
 .lpt-progress-track {
   height: 2px;
   background: var(--border-color);
-  margin-bottom: 14px;
+  margin-bottom: var(--spacing-3-5);
   overflow: hidden;
 }
 
@@ -76,17 +78,18 @@
 .lpt-card {
   background: var(--card);
   border: 1px solid var(--border-color);
-  padding: 16px;
-  margin-bottom: 12px;
+  padding: var(--spacing-4);
+  margin-bottom: var(--spacing-3);
 }
 
 .lpt-card-eyebrow {
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.28em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--ash);
-  margin-bottom: 6px;
+  margin-bottom: var(--spacing-1-5);
   text-align: center;
 }
 
@@ -96,46 +99,47 @@
   font-weight: 800;
   letter-spacing: -0.01em;
   text-align: center;
-  margin: 0 0 16px;
+  margin: 0 0 var(--spacing-4);
   color: var(--foreground);
   text-transform: uppercase;
 }
 
 .lpt-card-copy {
   font-family: var(--font-body, sans-serif);
-  font-size: 14px;
+  font-size: var(--text-body-sm);
   line-height: 1.55;
   color: var(--ash);
   text-align: center;
-  margin: 0 0 24px;
+  margin: 0 0 var(--spacing-6);
 }
 
 /* ── RULES LIST ────────────────────────────────────────────────── */
 .lpt-rules {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-bottom: 24px;
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-6);
 }
 
 .lpt-rule {
   display: flex;
-  gap: 12px;
+  gap: var(--spacing-3);
   align-items: flex-start;
-  padding: 10px 12px;
+  padding: var(--spacing-2-5) var(--spacing-3);
   border: 1px solid var(--border-color);
 }
 
 .lpt-rule-key {
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.12em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   color: var(--primary);
   min-width: 24px;
 }
 
 .lpt-rule-text {
-  font-size: 13px;
+  font-size: var(--text-caption);
   line-height: 1.45;
   color: var(--foreground);
 }
@@ -144,22 +148,22 @@
 .lpt-table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 24px;
+  margin-bottom: var(--spacing-6);
 }
 
 .lpt-table th,
 .lpt-table td {
-  padding: 8px 10px;
+  padding: var(--spacing-2) var(--spacing-2-5);
   border-bottom: 1px solid var(--border-color);
-  font-size: 12px;
+  font-size: var(--text-label-sm);
   text-align: left;
   color: var(--foreground);
 }
 
 .lpt-table th {
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.14em;
+  font-size: var(--text-label);
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--ash);
   font-weight: 500;
@@ -168,10 +172,10 @@
 /* ── PRIMARY BUTTON ────────────────────────────────────────────── */
 .lpt-primary-btn {
   width: 100%;
-  padding: 12px;
+  padding: var(--spacing-3);
   min-height: 44px;
   font-family: var(--font-display);
-  font-size: 14px;
+  font-size: var(--text-body-sm);
   font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -195,14 +199,14 @@
 
 /* ── DISTANCE DISPLAY ──────────────────────────────────────────── */
 .lpt-card-distance {
-  padding: 11px 24px;
+  padding: 11px var(--spacing-6);
 }
 
 .lpt-distance-display {
   display: flex;
   align-items: baseline;
   justify-content: center;
-  gap: 8px;
+  gap: var(--spacing-2);
 }
 
 .lpt-distance-number {
@@ -216,17 +220,18 @@
 
 .lpt-distance-unit {
   font-family: var(--font-mono);
-  font-size: 16px;
+  font-size: var(--text-body);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--ash);
 }
 
 .lpt-distance-paces {
-  margin-top: 4px;
+  margin-top: var(--spacing-1);
   text-align: center;
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--text-label);
+  font-weight: 500;
   color: var(--ash);
 }
 
@@ -234,7 +239,7 @@
 .lpt-bucket-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 4px;
+  gap: var(--spacing-1);
 }
 
 .lpt-bucket-btn {
@@ -243,7 +248,7 @@
   align-items: center;
   justify-content: center;
   gap: 1px;
-  padding: 5px 4px;
+  padding: 5px var(--spacing-1);
   min-height: 34px;
   background: transparent;
   border: 1px solid var(--border-color);
@@ -262,15 +267,17 @@
 
 .lpt-bucket-label {
   font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.08em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--foreground);
 }
 
 .lpt-bucket-score {
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: var(--text-label);
+  font-weight: 500;
   color: var(--ash);
 }
 
@@ -278,16 +285,17 @@
 .lpt-dir-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-top: 6px;
+  gap: var(--spacing-2);
+  margin-top: var(--spacing-1-5);
 }
 
 .lpt-dir-btn {
-  padding: 8px;
+  padding: var(--spacing-2);
   min-height: 36px;
   font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.12em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   background: transparent;
   border: 1px solid var(--border-color);
@@ -308,7 +316,7 @@
 /* ── RESULTS ───────────────────────────────────────────────────── */
 .lpt-card-result {
   text-align: center;
-  padding: 32px 24px;
+  padding: var(--spacing-8) var(--spacing-6);
 }
 
 .lpt-result-score {
@@ -318,20 +326,21 @@
   letter-spacing: -0.03em;
   color: var(--foreground);
   line-height: 1;
-  margin-bottom: 8px;
+  margin-bottom: var(--spacing-2);
 }
 
 .lpt-result-tier {
   font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.14em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--primary);
 }
 
 /* ── SCALE / BENCHMARK BAR ─────────────────────────────────────── */
 .lpt-scale {
-  padding: 56px 4px 88px;
+  padding: var(--spacing-14) var(--spacing-1) var(--spacing-22);
 }
 
 .lpt-scale-track {
@@ -353,15 +362,16 @@
   width: 1px;
   height: 10px;
   background: var(--ash);
-  margin-top: -4px;
+  margin-top: -var(--spacing-1);
 }
 
 .lpt-scale-mark-label {
   position: absolute;
   top: 14px;
   font-family: var(--font-mono);
-  font-size: 8.5px;
-  letter-spacing: 0.08em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--ash);
   white-space: nowrap;
@@ -373,7 +383,8 @@
   position: absolute;
   top: 52px;
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: var(--text-label);
+  font-weight: 500;
   color: var(--ash);
 }
 
@@ -389,11 +400,11 @@
 
 .lpt-scale-pin-label {
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.12em;
+  font-size: var(--text-label);
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--primary);
-  margin-bottom: 4px;
+  margin-bottom: var(--spacing-1);
   font-weight: 600;
 }
 
@@ -419,14 +430,14 @@
 .lpt-summary-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
+  gap: var(--spacing-2);
 }
 
 .lpt-summary-cell {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 12px 4px;
+  padding: var(--spacing-3) var(--spacing-1);
   border: 1px solid var(--border-color);
 }
 
@@ -440,11 +451,12 @@
 
 .lpt-summary-lab {
   font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.1em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--ash);
-  margin-top: 4px;
+  margin-top: var(--spacing-1);
 }
 
 /* ── PUTT LIST ─────────────────────────────────────────────────── */
@@ -457,17 +469,18 @@
 .lpt-puttlist-row {
   display: grid;
   grid-template-columns: 32px 1fr 1.4fr 48px;
-  gap: 8px;
-  padding: 8px 0;
-  font-size: 12px;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) 0;
+  font-size: var(--text-label-sm);
   color: var(--foreground);
   border-bottom: 1px solid var(--border-color);
 }
 
 .lpt-puttlist-head {
   font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.14em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--ash);
 }
@@ -495,10 +508,10 @@
 .lpt-history-row {
   display: grid;
   grid-template-columns: 1fr 60px 1fr;
-  gap: 8px;
-  padding: 10px 0;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2-5) 0;
   border-bottom: 1px solid var(--border-color);
-  font-size: 12px;
+  font-size: var(--text-label-sm);
   color: var(--foreground);
 }
 
@@ -519,15 +532,16 @@
 
 .lpt-history-tier {
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.1em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--ash);
   text-align: right;
 }
 
 /* ── RESPONSIVE ────────────────────────────────────────────────── */
-@media (max-width: 380px) {
+@media (max-width: 479.98px) {
   .lpt-summary-grid { grid-template-columns: repeat(2, 1fr); }
 }
 

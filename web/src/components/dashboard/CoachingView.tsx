@@ -202,7 +202,7 @@ export function CoachingView({ metrics }: { metrics: CoachTableMetrics }) {
       </div>
 
       {/* Table */}
-      <div style={{ background: 'var(--charcoal)', borderRadius: '4px', overflow: 'hidden' }}>
+      <div style={{ background: 'var(--shadow)', borderRadius: '4px', overflow: 'hidden' }}>
         <div className="gi-table-scroll" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
           <table className="gi-sticky-col gi-sticky-col-zebra" style={{ minWidth: '1400px', width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
             <thead>
@@ -219,7 +219,7 @@ export function CoachingView({ metrics }: { metrics: CoachTableMetrics }) {
                       cursor: column.isPlayer ? 'default' : 'pointer',
                       whiteSpace: 'nowrap',
                       userSelect: 'none',
-                      borderRight: '1px solid var(--charcoal)',
+                      borderRight: '1px solid var(--shadow)',
                     }}
                   >
                     {column.label}
@@ -236,7 +236,7 @@ export function CoachingView({ metrics }: { metrics: CoachTableMetrics }) {
                   key={player.player}
                   style={{
                     borderBottom: '1px solid var(--pitch)',
-                    background: idx % 2 === 0 ? 'var(--charcoal)' : 'var(--obsidian)',
+                    background: idx % 2 === 0 ? 'var(--shadow)' : 'var(--obsidian)',
                   }}
                 >
                   {columns.map(column => {

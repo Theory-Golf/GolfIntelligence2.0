@@ -237,7 +237,7 @@ function SGTrendChart({ sessions, height = 100 }: { sessions: SavedSession[]; he
           y={yScale(v) + 4}
           textAnchor="end"
           fontSize="8"
-          fill="var(--color-muted)"
+          fill="var(--ash)"
           fontFamily="var(--font-mono)"
         >
           {v > 0 ? `+${v.toFixed(1)}` : v.toFixed(1)}
@@ -248,7 +248,7 @@ function SGTrendChart({ sessions, height = 100 }: { sessions: SavedSession[]; he
       <line
         x1={PAD.left} y1={zeroY}
         x2={W - PAD.right} y2={zeroY}
-        stroke="var(--color-border)"
+        stroke="var(--border-color)"
         strokeWidth="1"
         strokeDasharray="4 3"
       />
@@ -257,7 +257,7 @@ function SGTrendChart({ sessions, height = 100 }: { sessions: SavedSession[]; he
       <polyline
         points={points}
         fill="none"
-        stroke="var(--color-muted)"
+        stroke="var(--ash)"
         strokeWidth="1.5"
         strokeLinejoin="round"
       />
@@ -281,7 +281,7 @@ function SGTrendChart({ sessions, height = 100 }: { sessions: SavedSession[]; he
           y={H - 2}
           textAnchor="middle"
           fontSize="8"
-          fill="var(--color-muted)"
+          fill="var(--ash)"
           fontFamily="var(--font-mono)"
         >
           {i + 1}
@@ -1079,7 +1079,7 @@ export default function RoundSimulation({ onScreenChange }: RoundSimulationProps
                         <div key={label} className="rs-compare-row">
                           <span className="rs-metric-name">{label}</span>
                           <span className={todayCls}>{today}</span>
-                          <span className={avgCls} style={{ color: avgCls ? undefined : 'var(--color-muted)' }}>{avg}</span>
+                          <span className={avgCls} style={{ color: avgCls ? undefined : 'var(--ash)' }}>{avg}</span>
                           <span className={`rs-trend-indicator ${trend.cls}`}>
                             {trend.symbol} {trend.symbol !== '—' ? (trend.cls === 'rs-sg-positive' ? 'Up' : 'Down') : 'Stable'}
                           </span>
@@ -1094,7 +1094,7 @@ export default function RoundSimulation({ onScreenChange }: RoundSimulationProps
               </>
             ) : (
               <div className="rs-card" style={{ textAlign: 'center' }}>
-                <p style={{ color: 'var(--color-muted)', fontFamily: 'var(--font-body)', fontSize: '14px' }}>
+                <p style={{ color: 'var(--ash)', fontFamily: 'var(--font-body)', fontSize: '14px' }}>
                   No misses to analyze — perfect putting session.
                 </p>
               </div>

@@ -121,17 +121,54 @@
   --text-label-sm--letter-spacing: 0.12em;
   --text-label-sm--font-weight: 500;
 
-  /* Spacing. Was declared and used exactly twice, against 637 raw px
-     declarations in CSS and ~543 more inline. Now the only source. */
-  --spacing-xs: 4px;
-  --spacing-sm: 8px;
-  --spacing-md: 16px;
-  --spacing-lg: 24px;
-  --spacing-xl: 32px;
-  --spacing-xxl: 48px;
+  /* Spacing. Was declared and used exactly twice, against 601 raw px
+     declarations in CSS and ~543 more inline.
 
-  /* Breakpoints. Replaces eleven ad-hoc values (380/400/480/500/560/
-     640/700/720/767/768/1024) that disagreed with Tailwind's own. */
+     The scale matches the 2px grid the design already uses — measured,
+     not invented: 8px x140, 12px x87, 16px x86, 10px x75, 24px x60.
+     Snapping those to a coarser 4/8/16/24 rhythm would have moved dense
+     dashboard layouts for no readability gain, so the scale bends to the
+     design rather than the other way round. Numeric names line up with
+     Tailwind's own scale (--spacing-2 == p-2 == 8px) so CSS and utilities
+     cannot disagree.
+
+     Values below 4px are hairlines and optical nudges, not rhythm; they
+     stay raw and the formatting guard permits them. */
+  --spacing-1: 4px;
+  --spacing-1-5: 6px;
+  --spacing-2: 8px;
+  --spacing-2-5: 10px;
+  --spacing-3: 12px;
+  --spacing-3-5: 14px;
+  --spacing-4: 16px;
+  --spacing-4-5: 18px;
+  --spacing-5: 20px;
+  --spacing-5-5: 22px;
+  --spacing-6: 24px;
+  --spacing-7: 28px;
+  --spacing-8: 32px;
+  --spacing-10: 40px;
+  --spacing-12: 48px;
+  --spacing-14: 56px;
+  --spacing-16: 64px;
+  --spacing-20: 80px;
+  --spacing-22: 88px;
+
+  /* No xs/sm/md/lg/xl aliases here, deliberately. Tailwind resolves
+     max-w-*, w-* and h-* against the spacing namespace when there is no
+     --container-* match, so a --spacing-lg would silently turn every
+     max-w-lg on the site into 24px. The numeric scale above is the only
+     safe naming. */
+
+  /* Breakpoints. Replaces eleven ad-hoc values (380/400/420/480/500/560/
+     640/700/720/767/768/1024) that disagreed with Tailwind's own.
+
+     The xs tier is kept deliberately: 380/400/420px queries were
+     small-phone escape hatches, and folding them into sm (640px) would
+     have applied phone tweaks to every tablet. Everything else collapses
+     to Tailwind's tiers, so a max-width query is always
+     "below <tier>" and never a bespoke number. */
+  --breakpoint-xs: 480px;
   --breakpoint-sm: 640px;
   --breakpoint-md: 768px;
   --breakpoint-lg: 1024px;
@@ -139,16 +176,25 @@
 }
 
 /* Layer scale. Replaces 2/3/39/40/200/290/300/310 plus z-10..z-50.
-   Gaps are deliberate: insert between without renumbering.
-   Use as z-[var(--z-modal)] in TSX, z-index: var(--z-modal) in CSS. */
+   The order here is the order the app actually needs, straddling the
+   site Navbar: the dashboard's own header and tab strip must sit BELOW
+   it, the filter drawer stack above it. Gaps allow insertion without
+   renumbering. Use z-[var(--z-drawer)] in TSX, z-index: var(--z-drawer)
+   in CSS.
+
+   Intra-component stacking (a sticky table column beating its own
+   siblings inside an existing stacking context) stays a bare 1/2/3 and
+   is exempt — those are local, not part of this scale. */
 :root {
   --z-base: 0;
   --z-raised: 10;
-  --z-dropdown: 100;
-  --z-sticky: 200;
-  --z-overlay: 300;
-  --z-modal: 400;
-  --z-toast: 500;
+  --z-nav-tabs: 30;      /* dashboard tab strip, sticky */
+  --z-dash-header: 40;   /* dashboard header, sticky, below site nav */
+  --z-site-nav: 50;      /* the site Navbar */
+  --z-sidebar: 200;      /* desktop filter sidebar */
+  --z-backdrop: 290;     /* mobile drawer backdrop */
+  --z-drawer: 300;       /* mobile filter drawer */
+  --z-fab: 310;          /* drawer trigger, above the drawer */
 }
 
 /* ── 3. SEMANTIC — DARK (default) ────────────────────────────── */
@@ -385,7 +431,7 @@
     color: var(--ash);
     display: flex;
     align-items: center;
-    gap: var(--spacing-md);
+    gap: var(--spacing-4);
   }
 
   .section-label::after {

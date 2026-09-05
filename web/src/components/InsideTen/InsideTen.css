@@ -6,7 +6,7 @@
 .it-wrapper {
   max-width: 576px;
   margin: 0 auto;
-  padding: 0 24px 80px;
+  padding: 0 var(--spacing-6) var(--spacing-20);
 }
 
 /* ── TOP NAV ───────────────────────────────────────────────────── */
@@ -14,19 +14,20 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: var(--spacing-4);
   min-height: 44px;
 }
 
 .it-back-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
+  gap: var(--spacing-1-5);
+  padding: var(--spacing-2) var(--spacing-3);
   min-height: 44px;
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.12em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--ash);
   background: transparent;
@@ -42,8 +43,9 @@
 
 .it-nav-label {
   font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.12em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--chalk);
 }
@@ -52,26 +54,28 @@
 .it-card {
   background: var(--shadow);
   border: 1px solid var(--pitch);
-  padding: 24px;
-  margin-bottom: 12px;
+  padding: var(--spacing-6);
+  margin-bottom: var(--spacing-3);
 }
 
 .it-card-eyebrow {
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.28em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--ash);
-  margin-bottom: 16px;
+  margin-bottom: var(--spacing-4);
 }
 
 .it-card-eyebrow-center {
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.18em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--ash);
-  margin-bottom: 16px;
+  margin-bottom: var(--spacing-4);
   text-align: center;
 }
 
@@ -79,64 +83,67 @@
 .it-storage-warn {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  margin-bottom: 16px;
+  gap: var(--spacing-2-5);
+  padding: var(--spacing-2-5) var(--spacing-3-5);
+  margin-bottom: var(--spacing-4);
   background: color-mix(in srgb, var(--bogey) 8%, transparent);
   border: 1px solid color-mix(in srgb, var(--bogey) 30%, transparent);
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.1em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--bogey);
 }
 
 /* ── HOME: HERO ────────────────────────────────────────────────── */
 .it-hero {
-  padding: 0 0 8px;
-  margin-bottom: 12px;
+  padding: 0 0 var(--spacing-2);
+  margin-bottom: var(--spacing-3);
 }
 
 .it-hero-subtitle {
   font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.14em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--ash);
-  margin-bottom: 24px;
+  margin-bottom: var(--spacing-6);
 }
 
 /* ── HOME: DRILL SECTION ───────────────────────────────────────── */
 .it-section-label {
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.18em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--ash);
-  margin-bottom: 14px;
-  padding-bottom: 10px;
+  margin-bottom: var(--spacing-3-5);
+  padding-bottom: var(--spacing-2-5);
   border-bottom: 1px solid var(--pitch);
 }
 
 .it-ladder-table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 20px;
+  margin-bottom: var(--spacing-5);
 }
 
 .it-ladder-table th,
 .it-ladder-table td {
-  padding: 8px 10px;
+  padding: var(--spacing-2) var(--spacing-2-5);
   border-bottom: 1px solid var(--pitch);
-  font-size: 12px;
+  font-size: var(--text-label-sm);
   text-align: center;
   color: var(--chalk);
 }
 
 .it-ladder-table th {
   font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.16em;
+  font-size: var(--text-label);
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--ash);
   font-weight: 500;
@@ -145,43 +152,46 @@
 .it-ladder-table td:first-child {
   text-align: left;
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.1em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   color: var(--ash);
 }
 
 .it-ladder-table td span {
   display: inline-block;
-  padding: 2px 8px;
+  padding: 2px var(--spacing-2);
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: var(--text-label);
+  font-weight: 500;
 }
 
 .it-rules {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--spacing-2-5);
 }
 
 .it-rule {
   display: flex;
-  gap: 12px;
+  gap: var(--spacing-3);
   align-items: flex-start;
-  padding: 10px 12px;
+  padding: var(--spacing-2-5) var(--spacing-3);
   border: 1px solid var(--pitch);
 }
 
 .it-rule-key {
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.12em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   color: var(--scarlet);
   min-width: 24px;
   flex-shrink: 0;
 }
 
 .it-rule-text {
-  font-size: 13px;
+  font-size: var(--text-caption);
   line-height: 1.45;
   color: var(--chalk);
   font-family: var(--font-body);
@@ -191,35 +201,36 @@
 .it-tier-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: var(--spacing-2);
 }
 
 .it-tier-item {
-  padding: 14px;
+  padding: var(--spacing-3-5);
   border: 1px solid var(--pitch);
   border-left-width: 3px;
 }
 
 .it-tier-label {
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.14em;
+  font-size: var(--text-label);
+  letter-spacing: .14em;
   text-transform: uppercase;
   font-weight: 600;
-  margin-bottom: 4px;
+  margin-bottom: var(--spacing-1);
 }
 
 .it-tier-range {
   font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.08em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   color: var(--ash);
-  margin-bottom: 6px;
+  margin-bottom: var(--spacing-1-5);
 }
 
 .it-tier-copy {
   font-family: var(--font-body);
-  font-size: 11px;
+  font-size: var(--text-label-sm);
   line-height: 1.4;
   color: var(--ash);
 }
@@ -227,7 +238,7 @@
 /* ── HOME: WHY IT MATTERS ──────────────────────────────────────── */
 .it-body-text {
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: var(--text-caption);
   line-height: 1.65;
   color: var(--cement);
 }
@@ -243,8 +254,8 @@
   display: grid;
   grid-template-columns: 80px 1fr 90px 80px;
   align-items: center;
-  gap: 8px;
-  padding: 10px 0;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2-5) 0;
   border-bottom: 1px solid var(--pitch);
 }
 
@@ -254,8 +265,9 @@
 
 .it-recent-date {
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.08em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   color: var(--ash);
 }
 
@@ -268,7 +280,7 @@
 }
 
 .it-recent-score span {
-  font-size: 12px;
+  font-size: var(--text-label-sm);
   font-weight: 400;
   color: var(--ash);
   letter-spacing: 0;
@@ -276,16 +288,18 @@
 
 .it-recent-sg {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: var(--text-label);
+  font-weight: 500;
   text-align: right;
 }
 
 .it-recent-tier-badge {
   display: inline-block;
-  padding: 3px 8px;
+  padding: 3px var(--spacing-2);
   font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.12em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   border: 1px solid currentColor;
   text-align: center;
@@ -293,10 +307,11 @@
 
 .it-view-history-link {
   display: block;
-  margin-top: 14px;
+  margin-top: var(--spacing-3-5);
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.14em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--ash);
   text-decoration: none;
@@ -311,11 +326,11 @@
 /* ── PRIMARY / SECONDARY BUTTONS ───────────────────────────────── */
 .it-primary-btn {
   width: 100%;
-  padding: 16px;
+  padding: var(--spacing-4);
   min-height: 52px;
-  margin-top: 8px;
+  margin-top: var(--spacing-2);
   font-family: var(--font-display);
-  font-size: 14px;
+  font-size: var(--text-body-sm);
   font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -341,9 +356,9 @@
   width: 100%;
   padding: 15px;
   min-height: 48px;
-  margin-top: 8px;
+  margin-top: var(--spacing-2);
   font-family: var(--font-display);
-  font-size: 14px;
+  font-size: var(--text-body-sm);
   font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -363,8 +378,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 20px;
-  padding: 16px 0 8px;
+  gap: var(--spacing-5);
+  padding: var(--spacing-4) 0 var(--spacing-2);
 }
 
 .it-stepper-btn {
@@ -409,10 +424,11 @@
 
 .it-score-denom {
   font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.1em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   color: var(--ash);
-  margin-top: 4px;
+  margin-top: var(--spacing-1);
   text-transform: uppercase;
 }
 
@@ -421,25 +437,27 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-top: 4px;
+  padding-top: var(--spacing-1);
 }
 
 .it-date-label {
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.14em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--ash);
 }
 
 .it-date-input {
   font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.08em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   color: var(--chalk);
   background: transparent;
   border: 1px solid var(--pitch);
-  padding: 8px 10px;
+  padding: var(--spacing-2) var(--spacing-2-5);
   min-height: 36px;
   cursor: pointer;
   outline: none;
@@ -453,7 +471,7 @@
 
 /* ── RESULT: SCORE DISPLAY ─────────────────────────────────────── */
 .it-result-hero {
-  padding: 32px 24px 24px;
+  padding: var(--spacing-8) var(--spacing-6) var(--spacing-6);
   text-align: center;
 }
 
@@ -476,35 +494,36 @@
 
 .it-result-sg {
   font-family: var(--font-mono);
-  font-size: 14px;
+  font-size: var(--text-body-sm);
   letter-spacing: 0.06em;
   color: var(--cement);
-  margin-top: 10px;
+  margin-top: var(--spacing-2-5);
 }
 
 .it-result-sg-note {
   font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.1em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--ash);
-  margin-top: 6px;
+  margin-top: var(--spacing-1-5);
 }
 
 /* ── RESULT: TIER BADGE ────────────────────────────────────────── */
 .it-tier-badge-wrap {
-  padding: 20px 24px;
+  padding: var(--spacing-5) var(--spacing-6);
   border-top: 1px solid var(--pitch);
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: var(--spacing-3-5);
 }
 
 .it-tier-badge {
-  padding: 5px 14px;
+  padding: 5px var(--spacing-3-5);
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.14em;
+  font-size: var(--text-label);
+  letter-spacing: .14em;
   text-transform: uppercase;
   font-weight: 600;
   border: 1px solid currentColor;
@@ -513,7 +532,7 @@
 
 .it-tier-badge-copy {
   font-family: var(--font-body);
-  font-size: 12px;
+  font-size: var(--text-label-sm);
   line-height: 1.4;
   color: var(--cement);
 }
@@ -525,22 +544,23 @@
   gap: 1px;
   background: var(--pitch);
   border: 1px solid var(--pitch);
-  margin-bottom: 12px;
+  margin-bottom: var(--spacing-3);
 }
 
 .it-delta-cell {
   background: var(--shadow);
-  padding: 16px 12px;
+  padding: var(--spacing-4) var(--spacing-3);
   text-align: center;
 }
 
 .it-delta-label {
   font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.12em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--ash);
-  margin-bottom: 8px;
+  margin-bottom: var(--spacing-2);
 }
 
 .it-delta-value {
@@ -569,18 +589,19 @@
 
 .it-delta-sub {
   font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.08em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   color: var(--ash);
-  margin-top: 4px;
+  margin-top: var(--spacing-1);
 }
 
 /* ── RESULT: CTA ROW ───────────────────────────────────────────── */
 .it-cta-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-top: 8px;
+  gap: var(--spacing-2);
+  margin-top: var(--spacing-2);
 }
 
 .it-cta-row .it-primary-btn,
@@ -592,8 +613,8 @@
 .it-stat-row {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
-  margin-bottom: 12px;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-3);
 }
 
 @media (min-width: 480px) {
@@ -605,16 +626,17 @@
 .it-stat-card {
   background: var(--shadow);
   border: 1px solid var(--pitch);
-  padding: 16px;
+  padding: var(--spacing-4);
 }
 
 .it-stat-label {
   font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.14em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--ash);
-  margin-bottom: 10px;
+  margin-bottom: var(--spacing-2-5);
 }
 
 .it-stat-value {
@@ -628,54 +650,57 @@
 
 .it-stat-sub {
   font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.08em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   color: var(--ash);
-  margin-top: 6px;
+  margin-top: var(--spacing-1-5);
 }
 
 /* ── HISTORY: CHART CONTAINER ──────────────────────────────────── */
 .it-chart-card {
   background: var(--shadow);
   border: 1px solid var(--pitch);
-  padding: 24px 8px 16px 8px;
-  margin-bottom: 12px;
+  padding: var(--spacing-6) var(--spacing-2) var(--spacing-4) var(--spacing-2);
+  margin-bottom: var(--spacing-3);
 }
 
 .it-chart-card-header {
-  padding: 0 16px 16px;
+  padding: 0 var(--spacing-4) var(--spacing-4);
 }
 
 .it-chart-note {
   font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.1em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--ash);
-  margin-top: 8px;
+  margin-top: var(--spacing-2);
 }
 
 /* ── HISTORY: EMPTY STATE ──────────────────────────────────────── */
 .it-empty-state {
-  padding: 40px 24px;
+  padding: var(--spacing-10) var(--spacing-6);
   text-align: center;
   background: var(--shadow);
   border: 1px solid var(--pitch);
-  margin-bottom: 12px;
+  margin-bottom: var(--spacing-3);
 }
 
 .it-empty-icon {
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.18em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--ash);
-  margin-bottom: 12px;
+  margin-bottom: var(--spacing-3);
 }
 
 .it-empty-text {
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: var(--text-caption);
   color: var(--cement);
   line-height: 1.55;
 }
@@ -685,17 +710,18 @@
 .it-log-row {
   display: grid;
   grid-template-columns: 80px 60px 70px 80px 44px;
-  gap: 8px;
+  gap: var(--spacing-2);
   align-items: center;
   padding: 9px 0;
   border-bottom: 1px solid var(--pitch);
-  font-size: 12px;
+  font-size: var(--text-label-sm);
 }
 
 .it-log-head {
   font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.14em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--ash);
   border-bottom-width: 1px;
@@ -711,7 +737,8 @@
 
 .it-log-date {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: var(--text-label);
+  font-weight: 500;
   color: var(--ash);
 }
 
@@ -724,7 +751,8 @@
 
 .it-log-sg {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: var(--text-label);
+  font-weight: 500;
   text-align: right;
 }
 
@@ -732,8 +760,9 @@
   display: inline-block;
   padding: 2px 7px;
   font-family: var(--font-mono);
-  font-size: 8px;
-  letter-spacing: 0.1em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   border: 1px solid currentColor;
 }
@@ -749,7 +778,7 @@
   color: var(--ash);
   cursor: pointer;
   transition: color var(--transition-fast), border-color var(--transition-fast);
-  font-size: 14px;
+  font-size: var(--text-body-sm);
   margin-left: auto;
 }
 
@@ -762,7 +791,7 @@
 .it-hub-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 12px;
+  gap: var(--spacing-3);
 }
 
 @media (min-width: 480px) {
@@ -775,7 +804,7 @@
   display: block;
   background: var(--shadow);
   border: 1px solid var(--pitch);
-  padding: 24px;
+  padding: var(--spacing-6);
   text-decoration: none;
   transition: border-color var(--transition-fast);
   cursor: pointer;
@@ -795,7 +824,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 10px;
+  margin-bottom: var(--spacing-2-5);
 }
 
 .it-hub-drill-name {
@@ -809,8 +838,9 @@
 
 .it-hub-drill-badge {
   font-family: var(--font-mono);
-  font-size: 8px;
-  letter-spacing: 0.14em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--ash);
   border: 1px solid var(--pitch);
@@ -824,16 +854,17 @@
 
 .it-hub-drill-desc {
   font-family: var(--font-body);
-  font-size: 12px;
+  font-size: var(--text-label-sm);
   line-height: 1.5;
   color: var(--cement);
-  margin-bottom: 14px;
+  margin-bottom: var(--spacing-3-5);
 }
 
 .it-hub-drill-meta {
   font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.12em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--ash);
 }
@@ -844,7 +875,7 @@
 .it-ladder-scroll {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  margin-bottom: 20px;
+  margin-bottom: var(--spacing-5);
 }
 
 .it-ladder-scroll .it-ladder-table {
@@ -852,10 +883,10 @@
   min-width: 280px;
 }
 
-@media (max-width: 420px) {
+@media (max-width: 479.98px) {
   .it-ladder-table th,
   .it-ladder-table td {
-    padding: 8px 6px;
-    font-size: 11px;
+    padding: var(--spacing-2) var(--spacing-1-5);
+    font-size: var(--text-label-sm);
   }
 }

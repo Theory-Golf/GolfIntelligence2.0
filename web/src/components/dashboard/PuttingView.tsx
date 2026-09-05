@@ -105,7 +105,7 @@ export function PuttingView({ metrics, lagMetrics, filteredShots }: { metrics: P
           <div className="value-hero" style={{ color: getMakePctColor(makePct0to4Ft, benchmarkMakePct0to4Ft) }}>
             {makePct0to4Ft.toFixed(0)}%
           </div>
-          <div className="flex justify-between" style={{ marginTop: '16px', padding: '8px 0', borderTop: '1px solid var(--charcoal)' }}>
+          <div className="flex justify-between" style={{ marginTop: '16px', padding: '8px 0', borderTop: '1px solid var(--shadow)' }}>
             <div>
               <div className="label" style={{ color: 'var(--ash)', fontSize: '11px' }}>Made</div>
               <div className="value-stat" style={{ fontSize: '12px' }}>
@@ -151,7 +151,7 @@ export function PuttingView({ metrics, lagMetrics, filteredShots }: { metrics: P
           <div className="value-hero" style={{ color: poorLagCount > 0 ? 'var(--double)' : 'var(--under)' }}>
             {poorLagCount}
           </div>
-          <div style={{ marginTop: '16px', padding: '8px 0', borderTop: '1px solid var(--charcoal)' }}>
+          <div style={{ marginTop: '16px', padding: '8px 0', borderTop: '1px solid var(--shadow)' }}>
             <div className="label" style={{ color: 'var(--ash)', fontSize: '12px' }}>Total Lag Putts</div>
             <div className="value-stat">
               {totalLagPutts}
@@ -167,7 +167,7 @@ export function PuttingView({ metrics, lagMetrics, filteredShots }: { metrics: P
           <div className="value-hero" style={{ color: speedRating !== null ? getSpeedRatingColor(speedRating) : 'var(--ash)' }}>
             {speedRating !== null ? `${speedRating.toFixed(0)}%` : '-'}
           </div>
-          <div style={{ marginTop: '16px', padding: '8px 0', borderTop: '1px solid var(--charcoal)' }}>
+          <div style={{ marginTop: '16px', padding: '8px 0', borderTop: '1px solid var(--shadow)' }}>
             <div className="label" style={{ color: 'var(--ash)', fontSize: '12px' }}>Long of misses</div>
             <div className="value-stat">
               {longPutts} / {classifiedLongShort}
@@ -194,7 +194,7 @@ export function PuttingView({ metrics, lagMetrics, filteredShots }: { metrics: P
       {puttingByDistance.length > 0 && (
         <div style={{ marginTop: '32px' }}>
           <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>Putting by Distance</h4>
-          <div style={{ background: 'var(--charcoal)', borderRadius: '4px', overflow: 'hidden' }}>
+          <div style={{ background: 'var(--shadow)', borderRadius: '4px', overflow: 'hidden' }}>
             <div className="gi-table-scroll">
               <table style={{ minWidth: '640px', width: '100%', borderCollapse: 'collapse', fontSize: '13px', tableLayout: 'fixed' }}>
                 <thead>
@@ -402,7 +402,7 @@ function LagPuttingSection({ metrics }: { metrics: LagPuttingMetrics }) {
           <div className="value-hero" style={{ color: avgLeaveDistance <= 4 ? 'var(--under)' : avgLeaveDistance <= 8 ? 'var(--bogey)' : 'var(--double)' }}>
             {totalLagPutts > 0 ? `${avgLeaveDistance.toFixed(0)} ft` : '-'}
           </div>
-          <div style={{ marginTop: '16px', padding: '8px 0', borderTop: '1px solid var(--charcoal)' }}>
+          <div style={{ marginTop: '16px', padding: '8px 0', borderTop: '1px solid var(--shadow)' }}>
             <div className="label" style={{ color: 'var(--ash)', fontSize: '12px' }}>Total Lag Putts</div>
             <div className="value-stat">
               {totalLagPutts}
@@ -555,7 +555,7 @@ function PuttsTableSection({ shots }: { shots: ProcessedShot[] }) {
           justifyContent: 'space-between',
           width: '100%',
           padding: '12px 16px',
-          background: 'var(--charcoal)',
+          background: 'var(--shadow)',
           border: '1px solid var(--ash)',
           borderRadius: '4px',
           color: 'var(--chalk)',
@@ -575,7 +575,7 @@ function PuttsTableSection({ shots }: { shots: ProcessedShot[] }) {
             const [dateStr, courseStr] = roundKey.split('|');
 
             return (
-              <div key={roundKey} style={{ marginBottom: '16px', padding: '12px', background: 'var(--charcoal)', borderRadius: '4px' }}>
+              <div key={roundKey} style={{ marginBottom: '16px', padding: '12px', background: 'var(--shadow)', borderRadius: '4px' }}>
                 <div style={{ display: 'flex', gap: '24px', marginBottom: '12px', fontSize: '12px', color: 'var(--chalk)' }}>
                   <span><strong>Date:</strong> {dateStr}</span>
                   <span><strong>Course:</strong> {courseStr}</span>

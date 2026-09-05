@@ -356,7 +356,7 @@ export default function WedgeStandard({ onScreenChange }: WedgeStandardProps = {
         <button className="ws-secondary-btn" onClick={() => setScreen('history')}>
           {ICONS.chart}
           Session History
-          <span className="ws-btn-arrow" style={{ color: 'var(--color-muted)', fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.10em' }}>
+          <span className="ws-btn-arrow" style={{ color: 'var(--ash)', fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.10em' }}>
             {history.length}
           </span>
         </button>
@@ -522,7 +522,7 @@ export default function WedgeStandard({ onScreenChange }: WedgeStandardProps = {
               { label: 'Best Avg',   value: lifetimeStats.bestSession || '—', highlight: true },
             ].map(({ label, value, highlight }) => (
               <div key={label}>
-                <div className="ws-stat-value" style={{ fontSize: 24, color: highlight ? 'var(--bogey)' : 'var(--color-text)' }}>{value}</div>
+                <div className="ws-stat-value" style={{ fontSize: 24, color: highlight ? 'var(--bogey)' : 'var(--chalk)' }}>{value}</div>
                 <div className="ws-stat-label">{label}</div>
               </div>
             ))}
@@ -572,9 +572,9 @@ export default function WedgeStandard({ onScreenChange }: WedgeStandardProps = {
                       <div className="ws-history-shot-list">
                         {s.shots.map((sh, idx) => (
                           <div key={idx} className="ws-history-shot-row">
-                            <span style={{ color: 'var(--color-muted)', width: 24 }}>#{idx + 1}</span>
-                            <span style={{ color: 'var(--color-text)' }}>{sh.target}y → {sh.actual}y</span>
-                            <span style={{ color: 'var(--color-muted)' }}>{sh.proximity}y</span>
+                            <span style={{ color: 'var(--ash)', width: 24 }}>#{idx + 1}</span>
+                            <span style={{ color: 'var(--chalk)' }}>{sh.target}y → {sh.actual}y</span>
+                            <span style={{ color: 'var(--ash)' }}>{sh.proximity}y</span>
                             <span className={sh.rating.cls} style={{ fontWeight: 500 }}>{sh.points}</span>
                           </div>
                         ))}
@@ -762,7 +762,7 @@ export default function WedgeStandard({ onScreenChange }: WedgeStandardProps = {
     return (
       <div className="ws-wrapper">
         <div className="ws-results-header">
-          <div style={{ color: leveledUp ? 'var(--bogey)' : 'var(--color-accent)', marginBottom: 12 }}>
+          <div style={{ color: leveledUp ? 'var(--bogey)' : 'var(--primary)', marginBottom: 12 }}>
             {leveledUp ? ICONS.trophy : ICONS.target}
           </div>
           {leveledUp && <div className="ws-levelup-badge">Level Up!</div>}
@@ -813,9 +813,9 @@ export default function WedgeStandard({ onScreenChange }: WedgeStandardProps = {
           <div className="ws-breakdown-list">
             {sessionShots.map((s, i) => (
               <div key={i} className="ws-breakdown-row">
-                <span style={{ color: 'var(--color-muted)', width: 28 }}>#{i + 1}</span>
-                <span style={{ color: 'var(--color-text)' }}>{s.target}y → {s.actual}y</span>
-                <span style={{ color: 'var(--color-muted)', width: 48, textAlign: 'right' }}>{s.proximity}y</span>
+                <span style={{ color: 'var(--ash)', width: 28 }}>#{i + 1}</span>
+                <span style={{ color: 'var(--chalk)' }}>{s.target}y → {s.actual}y</span>
+                <span style={{ color: 'var(--ash)', width: 48, textAlign: 'right' }}>{s.proximity}y</span>
                 <span className={s.rating.cls} style={{ fontWeight: 500, width: 36, textAlign: 'right' }}>{s.points}</span>
               </div>
             ))}

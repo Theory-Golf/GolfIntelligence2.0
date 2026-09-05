@@ -142,7 +142,7 @@ function HeroCardWithSubValues({
 
       {/* Middle row (optional) */}
       {middleLabel && middleValue && (
-        <div style={{ marginTop: '12px', padding: '8px 0', borderTop: '1px solid var(--charcoal)', borderBottom: '1px solid var(--charcoal)' }}>
+        <div style={{ marginTop: '12px', padding: '8px 0', borderTop: '1px solid var(--shadow)', borderBottom: '1px solid var(--shadow)' }}>
           <div className="label" style={{ color: 'var(--ash)', fontSize: '12px' }}>{middleLabel}</div>
           <div className="value-stat" style={{ color: getStrokeGainedColor(parseFloat(middleValue)) }}>
             {middleValue}
@@ -358,7 +358,7 @@ function RootCauseByFailTypeSection({ rootCauseByFailType, totalFails }: { rootC
           justifyContent: 'space-between',
           width: '100%',
           padding: '12px 16px',
-          background: 'var(--charcoal)',
+          background: 'var(--shadow)',
           border: '1px solid var(--ash)',
           borderRadius: '4px',
           color: 'var(--chalk)',
@@ -426,7 +426,7 @@ function RootCauseByFailTypeSection({ rootCauseByFailType, totalFails }: { rootC
             }
 
             return (
-              <div key={failType.key} style={{ marginBottom: '20px', padding: '12px', background: 'var(--charcoal)', borderRadius: '4px' }}>
+              <div key={failType.key} style={{ marginBottom: '20px', padding: '12px', background: 'var(--shadow)', borderRadius: '4px' }}>
                 <h5 style={{ marginBottom: '12px', color: 'var(--chalk)', fontSize: '13px', fontWeight: 600 }}>
                   {failType.label} ({data.totalCount})
                 </h5>
@@ -494,7 +494,7 @@ function Tiger5FailDetailsSection({ failDetails }: { failDetails: Tiger5FailDeta
           justifyContent: 'space-between',
           width: '100%',
           padding: '12px 16px',
-          background: 'var(--charcoal)',
+          background: 'var(--shadow)',
           border: '1px solid var(--ash)',
           borderRadius: '4px',
           color: 'var(--chalk)',
@@ -518,7 +518,7 @@ function Tiger5FailDetailsSection({ failDetails }: { failDetails: Tiger5FailDeta
                   {failType.label} ({failType.details.length})
                 </h5>
                 {failType.details.map((detail, idx) => (
-                  <div key={idx} style={{ marginBottom: '16px', padding: '12px', background: 'var(--charcoal)', borderRadius: '4px' }}>
+                  <div key={idx} style={{ marginBottom: '16px', padding: '12px', background: 'var(--shadow)', borderRadius: '4px' }}>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 16px', marginBottom: '12px', fontSize: '12px', color: 'var(--chalk)' }}>
                       <span><strong>Date:</strong> {detail.date}</span>
                       <span><strong>Course:</strong> {detail.course}</span>
@@ -540,7 +540,7 @@ function Tiger5FailDetailsSection({ failDetails }: { failDetails: Tiger5FailDeta
                         </thead>
                         <tbody>
                           {detail.shots.map((shot, shotIdx) => (
-                            <tr key={shotIdx} style={{ borderBottom: '1px solid var(--charcoal)' }}>
+                            <tr key={shotIdx} style={{ borderBottom: '1px solid var(--shadow)' }}>
                               <td style={{ padding: '4px' }}>{shot.shotNumber}</td>
                               <td style={{ padding: '4px' }}>{shot.startingLie}</td>
                               <td style={{ padding: '4px' }}>{shot.startingDistance}</td>
@@ -593,7 +593,7 @@ function Tiger5TrendSection({ trendData }: { trendData: Tiger5TrendDataPoint[] }
   return (
     <div style={{ marginTop: '24px' }}>
       <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>Tiger 5 Trend</h4>
-      <div style={{ background: 'var(--charcoal)', padding: '16px', borderRadius: '4px' }}>
+      <div style={{ background: 'var(--shadow)', padding: '16px', borderRadius: '4px' }}>
         <ResponsiveContainer width="100%" height={isNarrow ? 240 : 300}>
           <ComposedChart data={formattedData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--ash)" opacity={0.3} />
@@ -690,7 +690,7 @@ function PotentialScoreSection({
       <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>What If: Tiger 5 Fails Reduced by 50%?</h4>
 
       {/* Chart */}
-      <div style={{ background: 'var(--charcoal)', padding: '16px', borderRadius: '4px' }}>
+      <div style={{ background: 'var(--shadow)', padding: '16px', borderRadius: '4px' }}>
         <ResponsiveContainer width="100%" height={isNarrow ? 240 : 300}>
           <ComposedChart data={potentialData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--ash)" opacity={0.3} />

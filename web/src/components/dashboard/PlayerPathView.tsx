@@ -258,7 +258,7 @@ function SegmentSection({
       >
         <span
           style={{
-            fontFamily: 'var(--font-heading)',
+            fontFamily: 'var(--font-display)',
             fontWeight: 700,
             fontSize: '15px',
             letterSpacing: '0.1em',

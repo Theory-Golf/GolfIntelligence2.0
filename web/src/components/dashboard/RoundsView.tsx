@@ -73,7 +73,7 @@ export function RoundsView({ roundSummaries, filteredShots }: { roundSummaries: 
           No rounds match the current filters.
         </div>
       ) : (
-        <div style={{ background: 'var(--charcoal)', borderRadius: '4px', overflow: 'hidden' }}>
+        <div style={{ background: 'var(--shadow)', borderRadius: '4px', overflow: 'hidden' }}>
           <div className="gi-table-scroll">
             <table style={{ minWidth: '800px', width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
               <thead>
@@ -92,7 +92,7 @@ export function RoundsView({ roundSummaries, filteredShots }: { roundSummaries: 
               <tbody>
                 {summaries.map((round, idx) => {
                   const isExpanded = expandedRoundId === round.roundId;
-                  const rowBackground = idx % 2 === 0 ? 'var(--charcoal)' : 'var(--obsidian)';
+                  const rowBackground = idx % 2 === 0 ? 'var(--shadow)' : 'var(--obsidian)';
                   return (
                     <RoundRow
                       key={round.roundId}

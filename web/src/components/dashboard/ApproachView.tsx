@@ -218,7 +218,7 @@ function ApproachBucketCard({ bucket }: { bucket: ApproachDistanceBucket }) {
 type SGFilter = 'all' | 'negative' | 'positive';
 
 const FILTER_CONTROL_STYLE: CSSProperties = {
-  background: 'var(--charcoal)',
+  background: 'var(--shadow)',
   border: '1px solid var(--ash)',
   borderRadius: '4px',
   color: 'var(--chalk)',
@@ -299,7 +299,7 @@ function ApproachTableSection({ shots }: { shots: ProcessedShot[] }) {
           justifyContent: 'space-between',
           width: '100%',
           padding: '12px 16px',
-          background: 'var(--charcoal)',
+          background: 'var(--shadow)',
           border: '1px solid var(--ash)',
           borderRadius: '4px',
           color: 'var(--chalk)',
@@ -327,7 +327,7 @@ function ApproachTableSection({ shots }: { shots: ProcessedShot[] }) {
               gap: '16px',
               marginBottom: '16px',
               padding: '12px',
-              background: 'var(--charcoal)',
+              background: 'var(--shadow)',
               borderRadius: '4px',
             }}
           >
@@ -412,7 +412,7 @@ function ApproachTableSection({ shots }: { shots: ProcessedShot[] }) {
           </div>
 
           {sortedRounds.length === 0 ? (
-            <div style={{ padding: '16px', background: 'var(--charcoal)', borderRadius: '4px', fontSize: '13px', color: 'var(--ash)' }}>
+            <div style={{ padding: '16px', background: 'var(--shadow)', borderRadius: '4px', fontSize: '13px', color: 'var(--ash)' }}>
               No approach shots match these filters.
             </div>
           ) : (
@@ -420,7 +420,7 @@ function ApproachTableSection({ shots }: { shots: ProcessedShot[] }) {
               const [dateStr, courseStr] = roundKey.split('|');
 
               return (
-                <div key={roundKey} style={{ marginBottom: '16px', padding: '12px', background: 'var(--charcoal)', borderRadius: '4px' }}>
+                <div key={roundKey} style={{ marginBottom: '16px', padding: '12px', background: 'var(--shadow)', borderRadius: '4px' }}>
                   <div style={{ display: 'flex', gap: '24px', marginBottom: '12px', fontSize: '12px', color: 'var(--chalk)' }}>
                     <span><strong>Date:</strong> {dateStr}</span>
                     <span><strong>Course:</strong> {courseStr}</span>
@@ -594,7 +594,7 @@ function ApproachEndingLieSection({ filteredShots }: { filteredShots: ProcessedS
 
       <div className="grid-pair" style={{ gap: '24px' }}>
         {/* Chart 1: Ending Lie as % of Total Approach Shots */}
-        <div style={{ background: 'var(--charcoal)', padding: '16px', borderRadius: '4px' }}>
+        <div style={{ background: 'var(--shadow)', padding: '16px', borderRadius: '4px' }}>
           <h5 style={{ marginBottom: '8px', color: 'var(--chalk)', fontSize: '14px', fontWeight: 600 }}>
             Ending Lie % of Total Shots
           </h5>
@@ -636,7 +636,7 @@ function ApproachEndingLieSection({ filteredShots }: { filteredShots: ProcessedS
         </div>
 
         {/* Chart 2: Total SG by Ending Lie */}
-        <div style={{ background: 'var(--charcoal)', padding: '16px', borderRadius: '4px' }}>
+        <div style={{ background: 'var(--shadow)', padding: '16px', borderRadius: '4px' }}>
           <h5 style={{ marginBottom: '8px', color: 'var(--chalk)', fontSize: '14px', fontWeight: 600 }}>
             Total SG by Ending Lie
           </h5>

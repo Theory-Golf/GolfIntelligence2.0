@@ -263,7 +263,7 @@ export function DrivingView({ metrics, analysis, filteredShots }: { metrics: Dri
           <div className="value-hero" style={{ color: getPenaltyRateColor(penaltyRate) }}>
             {penaltyRate.toFixed(0)}%
           </div>
-          <div style={{ marginTop: '16px', padding: '8px 0', borderTop: '1px solid var(--charcoal)' }}>
+          <div style={{ marginTop: '16px', padding: '8px 0', borderTop: '1px solid var(--shadow)' }}>
             <div className="label" style={{ color: 'var(--ash)', fontSize: '12px' }}>SG Penalties</div>
             <div className="value-stat" style={{ color: getStrokeGainedColor(sgPenalties) }}>
               {formatStrokesGained(sgPenalties)}
@@ -279,7 +279,7 @@ export function DrivingView({ metrics, analysis, filteredShots }: { metrics: Dri
           <div className="value-hero" style={{ color: 'var(--chalk)' }}>
             {drivingDistance75th.toFixed(0)} <span style={{ fontSize: '18px' }}>yds</span>
           </div>
-          <div style={{ marginTop: '16px', padding: '8px 0', borderTop: '1px solid var(--charcoal)' }}>
+          <div style={{ marginTop: '16px', padding: '8px 0', borderTop: '1px solid var(--shadow)' }}>
             <div className="label" style={{ color: 'var(--ash)', fontSize: '12px' }}>Total Drives</div>
             <div className="value-stat">{totalDrives}</div>
           </div>
@@ -475,7 +475,7 @@ function DrivingAnalysisSection({ analysis, totalDrives }: { analysis: DrivingAn
       <div className="grid-pair" style={{ gap: '24px' }}>
         {/* Donut Chart - Drive Ending Locations */}
         {endingLocations.length > 0 && (
-          <div style={{ background: 'var(--charcoal)', padding: '16px', borderRadius: '4px' }}>
+          <div style={{ background: 'var(--shadow)', padding: '16px', borderRadius: '4px' }}>
             <h5 style={{ marginBottom: '12px', color: 'var(--chalk)', fontSize: '14px', fontWeight: 600 }}>
               Drive Ending Locations
             </h5>
@@ -500,7 +500,7 @@ function DrivingAnalysisSection({ analysis, totalDrives }: { analysis: DrivingAn
                     <Cell
                       key={`cell-${index}`}
                       fill={LOCATION_COLORS[entry.name] || '#6B7280'}
-                      stroke="var(--charcoal)"
+                      stroke="var(--shadow)"
                       strokeWidth={2}
                     />
                   ))}
@@ -530,7 +530,7 @@ function DrivingAnalysisSection({ analysis, totalDrives }: { analysis: DrivingAn
 
         {/* Horizontal Bar Chart - SG by Ending Location */}
         {endingLocations.length > 0 && (
-          <div style={{ background: 'var(--charcoal)', padding: '16px', borderRadius: '4px' }}>
+          <div style={{ background: 'var(--shadow)', padding: '16px', borderRadius: '4px' }}>
             <h5 style={{ marginBottom: '12px', color: 'var(--chalk)', fontSize: '14px', fontWeight: 600 }}>
               SG by Ending Location
             </h5>
@@ -621,7 +621,7 @@ function DrivesTableSection({ shots }: { shots: ProcessedShot[] }) {
           justifyContent: 'space-between',
           width: '100%',
           padding: '12px 16px',
-          background: 'var(--charcoal)',
+          background: 'var(--shadow)',
           border: '1px solid var(--ash)',
           borderRadius: '4px',
           color: 'var(--chalk)',
@@ -641,7 +641,7 @@ function DrivesTableSection({ shots }: { shots: ProcessedShot[] }) {
             const [dateStr, courseStr] = roundKey.split('|');
 
             return (
-              <div key={roundKey} style={{ marginBottom: '16px', padding: '12px', background: 'var(--charcoal)', borderRadius: '4px' }}>
+              <div key={roundKey} style={{ marginBottom: '16px', padding: '12px', background: 'var(--shadow)', borderRadius: '4px' }}>
                 <div style={{ display: 'flex', gap: '24px', marginBottom: '12px', fontSize: '12px', color: 'var(--chalk)' }}>
                   <span><strong>Date:</strong> {dateStr}</span>
                   <span><strong>Course:</strong> {courseStr}</span>
