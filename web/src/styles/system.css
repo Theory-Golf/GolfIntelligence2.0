@@ -1,0 +1,427 @@
+/* ================================================================
+   THEORY GOLF — FORMATTING SYSTEM
+   ----------------------------------------------------------------
+   THE single source of truth for type, colour, spacing, breakpoints
+   and layering, shared by the marketing routes and the dashboard.
+
+   If you are about to write a font-size, a hex colour, a px margin,
+   a breakpoint or a z-index anywhere else in this codebase: don't.
+   Add or reuse a token here instead. `npm run lint` enforces this
+   (see scripts/check-formatting.mjs).
+
+   Order matters — Tailwind resolves @theme top-down:
+     1. Primitives      raw values, no meaning attached
+     2. Scales          type / spacing / breakpoints / layers
+     3. Semantic        theme-aware roles (dark default, light opt-in)
+     4. Theme bridge    exposes the semantic layer as Tailwind utilities
+     5. Roles           named type + component classes
+
+   Colour values in §3 are not hand-picked. Every text token clears
+   WCAG AA (4.5:1) against every surface it can legitimately sit on —
+   chrome text is solved to 5.0 for headroom because it carries ~400
+   call sites. Re-check with scripts/check-contrast.mjs after editing.
+   ================================================================ */
+
+/* ── 1. PRIMITIVES ───────────────────────────────────────────── */
+@theme {
+  --font-display: 'Barlow Condensed', sans-serif;
+  --font-body: 'Barlow', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+
+  /* Scarlet accent — brand constant, identical in both themes.
+     --scarlet is the FILL colour (buttons, rules, bars). For scarlet
+     TEXT use --scarlet-text / .text-scarlet-text: #E8202A is only
+     3.71:1 on a card and fails as body text. */
+  --color-scarlet: #E8202A;
+  --color-scarlet-dim: #9B1520;
+  --color-scarlet-glow: #FF3D47;
+  --color-scarlet-tint: #1F0507;
+
+  /* Ethos paper segment colours (Driving / Approach / Short Game / Putting) */
+  --color-seg-drive: #E040A0;
+  --color-seg-approach: #D4A800;
+  --color-seg-shortgame: #00B870;
+  --color-seg-putting: #3D8EF0;
+
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+}
+
+/* ── 2. SCALES ───────────────────────────────────────────────── */
+@theme {
+  /* Type roles. One token carries size + leading + tracking + weight,
+     so `text-label` in TSX and var(--text-label) in CSS cannot drift.
+
+     These twelve replace ~660 independent decisions. In particular
+     --text-label replaces seventeen near-identical variants of
+     "small uppercase mono label" that differed only by tracking
+     (9/10/11px crossed with .06/.08/.1/.12/.14/.15/.18/.2/.28em).
+
+     FLOOR IS 11px. Nothing in the product renders smaller. The only
+     exemptions are the print stylesheets for the physical yardage
+     cards, which are opted out explicitly and commented as such. */
+
+  --text-hero: clamp(52px, 9vw, 112px);
+  --text-hero--line-height: 0.88;
+  --text-hero--letter-spacing: -0.04em;
+  --text-hero--font-weight: 800;
+
+  --text-display: clamp(36px, 5.5vw, 72px);
+  --text-display--line-height: 0.9;
+  --text-display--letter-spacing: -0.03em;
+  --text-display--font-weight: 800;
+
+  --text-title: clamp(22px, 3vw, 36px);
+  --text-title--line-height: 1;
+  --text-title--letter-spacing: -0.02em;
+  --text-title--font-weight: 800;
+
+  --text-heading: clamp(18px, 2.5vw, 24px);
+  --text-heading--line-height: 1.15;
+  --text-heading--letter-spacing: 0.02em;
+  --text-heading--font-weight: 700;
+
+  --text-subhead: 15px;
+  --text-subhead--line-height: 1.3;
+  --text-subhead--letter-spacing: 0.12em;
+  --text-subhead--font-weight: 700;
+
+  --text-body: 16px;
+  --text-body--line-height: 1.6;
+  --text-body--font-weight: 400;
+
+  --text-body-sm: 14px;
+  --text-body-sm--line-height: 1.55;
+  --text-body-sm--font-weight: 400;
+
+  --text-caption: 13px;
+  --text-caption--line-height: 1.5;
+  --text-caption--font-weight: 400;
+
+  /* Numeric readouts. Tabular figures so columns of numbers line up. */
+  --text-data-lg: clamp(28px, 4vw, 44px);
+  --text-data-lg--line-height: 1;
+  --text-data-lg--font-weight: 700;
+
+  --text-data: 15px;
+  --text-data--line-height: 1.4;
+  --text-data--font-weight: 400;
+
+  /* The workhorse. Was 9px/0.22em/300 in --ash: unreadable. */
+  --text-label: 12px;
+  --text-label--line-height: 1.4;
+  --text-label--letter-spacing: 0.14em;
+  --text-label--font-weight: 500;
+
+  /* Only where space is genuinely constrained. Still above the floor. */
+  --text-label-sm: 11px;
+  --text-label-sm--line-height: 1.35;
+  --text-label-sm--letter-spacing: 0.12em;
+  --text-label-sm--font-weight: 500;
+
+  /* Spacing. Was declared and used exactly twice, against 637 raw px
+     declarations in CSS and ~543 more inline. Now the only source. */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-xxl: 48px;
+
+  /* Breakpoints. Replaces eleven ad-hoc values (380/400/480/500/560/
+     640/700/720/767/768/1024) that disagreed with Tailwind's own. */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+}
+
+/* Layer scale. Replaces 2/3/39/40/200/290/300/310 plus z-10..z-50.
+   Gaps are deliberate: insert between without renumbering.
+   Use as z-[var(--z-modal)] in TSX, z-index: var(--z-modal) in CSS. */
+:root {
+  --z-base: 0;
+  --z-raised: 10;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-overlay: 300;
+  --z-modal: 400;
+  --z-toast: 500;
+}
+
+/* ── 3. SEMANTIC — DARK (default) ────────────────────────────── */
+:root {
+  /* Foundation surfaces */
+  --court: #0C0C0C;
+  --obsidian: #141414;
+  --shadow: #1E1E1E;
+  --pitch: #2A2A2A;
+  --surface: #141414;
+
+  /* Text. --ash was #8A8580: 3.93:1 on --pitch, a fail, across ~400
+     call sites. #9D9994 is 5.07:1 against the worst surface. */
+  --chalk: #F2F0EE;
+  --cement: #C4BFB8;
+  --ash: #9D9994;
+
+  /* Scarlet as TEXT. #E8202A is 3.71:1 on a card — fill only. */
+  --scarlet-text: #EE585F;
+
+  /* shadcn semantics */
+  --background: #0C0C0C;
+  --foreground: #F2F0EE;
+  --card: #1E1E1E;
+  --card-foreground: #F2F0EE;
+  --primary: #E8202A;
+  --primary-foreground: #FFFFFF;
+  --secondary: #2A2A2A;
+  --secondary-foreground: #C4BFB8;
+  --muted: #141414;
+  --muted-foreground: #9D9994;
+  --accent: #1F0507;
+  --accent-foreground: #FF3D47;
+  --border-color: #2A2A2A;
+  --input: #2A2A2A;
+  --ring: #E8202A;
+  --destructive: #E8202A;
+
+  /* Golf scoring */
+  --under: #00C07A;
+  --even: #9D9994;
+  --bogey: #F59520;
+  --double: #EE585F;
+
+  /* Strokes gained */
+  --sg-strong: #00C07A;
+  --sg-gain: #52D9A0;
+  --sg-neutral: #C4BFB8;
+  --sg-loss: #F59520;
+  --sg-weak: #EE585F;
+
+  /* Chart categorical. c2 lifted #A855F7 -> #AC5EF7 for the 4.5 text
+     bar (Recharts legends render label text in the series colour). */
+  --c1: #3D8EF0;
+  --c2: #AC5EF7;
+  --c3: #06C8E0;
+  --c4: #D4F000;
+  --c5: #F03DAA;
+  --c1-fill: rgba(61, 142, 240, .15);
+  --c2-fill: rgba(172, 94, 247, .15);
+  --c3-fill: rgba(6, 200, 224, .15);
+  --c4-fill: rgba(212, 240, 0, .15);
+  --c5-fill: rgba(240, 61, 170, .15);
+
+  /* Scarlet, theme-local aliases */
+  --scarlet: #E8202A;
+  --scarlet-dim: #9B1520;
+  --scarlet-glow: #FF3D47;
+  --scarlet-tint: #1F0507;
+
+  --grad-court: linear-gradient(160deg, #1E1E1E 0%, #0C0C0C 100%);
+  --grad-scarlet: linear-gradient(135deg, #9B1520 0%, #E8202A 60%, #FF3D47 100%);
+  --grad-cement: linear-gradient(135deg, #2A2A2A 0%, #1E1E1E 100%);
+
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+  --transition-slow: 400ms ease;
+  --transition-medium: 250ms ease;
+}
+
+/* ── 3b. SEMANTIC — LIGHT ────────────────────────────────────── */
+[data-theme="light"] {
+  --court: #F5F3F0;
+  --obsidian: #FFFFFF;
+  --shadow: #FAFAF9;
+  --pitch: #E0DDD9;
+  --surface: #FFFFFF;
+
+  --chalk: #1A1A1A;
+  --cement: #4A4745;
+  --ash: #5D5A55;          /* was #6B6762 — 4.15:1, failed on --pitch */
+
+  --scarlet-text: #C8181F;
+
+  --background: #F5F3F0;
+  --foreground: #1A1A1A;
+  --card: #FAFAF9;
+  --card-foreground: #1A1A1A;
+  --primary: #C8181F;
+  --primary-foreground: #FFFFFF;
+  --secondary: #E0DDD9;
+  --secondary-foreground: #4A4745;
+  --muted: #FFFFFF;
+  --muted-foreground: #5D5A55;
+  --accent: #FDE8E9;
+  --accent-foreground: #C8181F;
+  --border-color: #E0DDD9;
+  --input: #E0DDD9;
+  --ring: #C8181F;
+  --destructive: #C8181F;
+
+  /* Each of these failed on a light card and/or its own pill tint. */
+  --under: #007C52;        /* was #00885A — 4.06:1 */
+  --even: #5D5A55;
+  --bogey: #9B600D;        /* was #C47A10 — 3.09:1 */
+  --double: #C8181F;
+
+  --sg-strong: #007C52;
+  --sg-gain: #157E55;      /* was #1A9E6A — 3.09:1 */
+  --sg-neutral: #5D5A55;
+  --sg-loss: #9B600D;
+  --sg-weak: #C8181F;
+
+  --c1: #2771BF;           /* was #2B7ED4 — 3.76:1 */
+  --c2: #9333EA;
+  --c3: #037B8A;           /* was #0498AA — 3.12:1 */
+  --c4: #6A7400;           /* was #8B9900 — 2.85:1, also failed 3:1 non-text */
+  --c5: #C0158A;
+  --c1-fill: rgba(39, 113, 191, .10);
+  --c2-fill: rgba(147, 51, 234, .10);
+  --c3-fill: rgba(3, 123, 138, .10);
+  --c4-fill: rgba(106, 116, 0, .10);
+  --c5-fill: rgba(192, 21, 138, .10);
+
+  --scarlet: #C8181F;
+  --scarlet-dim: #9B1520;
+  --scarlet-glow: #E8202A;
+  --scarlet-tint: #FDE8E9;
+
+  --grad-court: linear-gradient(160deg, #FFFFFF 0%, #F5F3F0 100%);
+  --grad-scarlet: linear-gradient(135deg, #9B1520 0%, #C8181F 60%, #E8202A 100%);
+  --grad-cement: linear-gradient(135deg, #F0EDE9 0%, #E8E5E1 100%);
+}
+
+/* ── 4. THEME BRIDGE — semantic layer as Tailwind utilities ──── */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border-color);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-destructive: var(--destructive);
+
+  --color-court: var(--court);
+  --color-obsidian: var(--obsidian);
+  --color-shadow: var(--shadow);
+  --color-pitch: var(--pitch);
+  --color-cement: var(--cement);
+  --color-ash: var(--ash);
+  --color-chalk: var(--chalk);
+  --color-surface: var(--surface);
+  --color-scarlet-text: var(--scarlet-text);
+
+  --color-under: var(--under);
+  --color-even: var(--even);
+  --color-bogey: var(--bogey);
+  --color-double: var(--double);
+  --color-sg-strong: var(--sg-strong);
+  --color-sg-gain: var(--sg-gain);
+  --color-sg-neutral: var(--sg-neutral);
+  --color-sg-loss: var(--sg-loss);
+  --color-sg-weak: var(--sg-weak);
+  --color-c1: var(--c1);
+  --color-c2: var(--c2);
+  --color-c3: var(--c3);
+  --color-c4: var(--c4);
+  --color-c5: var(--c5);
+}
+
+/* ── 5. ROLES ────────────────────────────────────────────────── */
+@layer components {
+  /* Type roles as classes, for CSS files and repeated markup.
+     Identical to the text-* utilities — same tokens, one definition. */
+  .t-hero    { font-family: var(--font-display); font-size: var(--text-hero);
+               line-height: .88; letter-spacing: -.04em; font-weight: 800; }
+  .t-display { font-family: var(--font-display); font-size: var(--text-display);
+               line-height: .9; letter-spacing: -.03em; font-weight: 800; }
+  .t-title   { font-family: var(--font-display); font-size: var(--text-title);
+               line-height: 1; letter-spacing: -.02em; font-weight: 800; }
+  .t-heading { font-family: var(--font-display); font-size: var(--text-heading);
+               line-height: 1.15; letter-spacing: .02em; font-weight: 700; }
+  .t-subhead { font-family: var(--font-display); font-size: var(--text-subhead);
+               line-height: 1.3; letter-spacing: .12em; font-weight: 700;
+               text-transform: uppercase; }
+  .t-body    { font-family: var(--font-body); font-size: var(--text-body); line-height: 1.6; }
+  .t-body-sm { font-family: var(--font-body); font-size: var(--text-body-sm); line-height: 1.55; }
+  .t-caption { font-family: var(--font-body); font-size: var(--text-caption); line-height: 1.5; }
+  .t-data-lg { font-family: var(--font-display); font-size: var(--text-data-lg);
+               line-height: 1; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .t-data    { font-family: var(--font-mono); font-size: var(--text-data);
+               line-height: 1.4; font-variant-numeric: tabular-nums; }
+  .t-label   { font-family: var(--font-mono); font-size: var(--text-label);
+               line-height: 1.4; letter-spacing: .14em; font-weight: 500;
+               text-transform: uppercase; }
+  .t-label-sm{ font-family: var(--font-mono); font-size: var(--text-label-sm);
+               line-height: 1.35; letter-spacing: .12em; font-weight: 500;
+               text-transform: uppercase; }
+
+  /* Marketing chrome */
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--scarlet-text);
+  }
+
+  .section-label {
+    font-family: var(--font-display);
+    font-size: var(--text-label);
+    font-weight: 600;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--ash);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border-color);
+  }
+
+  /* Data value colours */
+  .val-under { color: var(--under); }
+  .val-even { color: var(--even); }
+  .val-bogey { color: var(--bogey); }
+  .val-double { color: var(--double); }
+  .val-sg-strong { color: var(--sg-strong); }
+  .val-sg-gain { color: var(--sg-gain); }
+  .val-sg-neutral { color: var(--sg-neutral); }
+  .val-sg-loss { color: var(--sg-loss); }
+  .val-sg-weak { color: var(--sg-weak); }
+
+  .pill {
+    display: inline-block;
+    background: var(--accent);
+    color: var(--accent-foreground);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-label);
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+  }
+
+  .themed {
+    transition:
+      background-color var(--transition-base),
+      color var(--transition-base),
+      border-color var(--transition-base);
+  }
+}

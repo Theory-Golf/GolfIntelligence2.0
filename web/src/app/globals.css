@@ -1,260 +1,17 @@
-/* ── Google Fonts ────────────────────────────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800;1,700&family=DM+Mono:wght@300;400&family=Barlow:wght@300;400;500&display=swap');
+/* ================================================================
+   ENTRY POINT
+   Formatting lives in styles/system.css — the single source of truth
+   for type, colour, spacing, breakpoints and layering. This file
+   wires it up and defines the base element layer. Add tokens there,
+   not here.
+   ================================================================ */
+
+/* DM Mono 500 backs --text-label; Barlow 400 backs body copy. */
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800;1,700&family=DM+Mono:wght@300;400;500&family=Barlow:wght@300;400;500&display=swap');
 
 @import "tailwindcss";
+@import "../styles/system.css";
 @import "../styles/tools.css";
-
-/* ================================================================
-   TAILWIND v4 THEME — Theory Golf Design System
-   All design tokens are registered here as Tailwind utilities.
-   Dynamic theme values (dark/light) use @theme inline + CSS vars.
-   ================================================================ */
-
-/* ── Static Tokens (don't change with theme) ─────────────────── */
-@theme {
-  /* Fonts */
-  --font-display: 'Barlow Condensed', sans-serif;
-  --font-body: 'Barlow', sans-serif;
-  --font-mono: 'DM Mono', monospace;
-
-  /* Scarlet accent palette (static) */
-  --color-scarlet: #E8202A;
-  --color-scarlet-dim: #9B1520;
-  --color-scarlet-glow: #FF3D47;
-  --color-scarlet-tint: #1F0507;
-
-  /* Data semantic (golf scoring) */
-  --color-under: #00C07A;
-  --color-even: #8A8580;
-  --color-bogey: #F59520;
-  --color-double: #E8202A;
-
-  /* Strokes gained */
-  --color-sg-strong: #00C07A;
-  --color-sg-gain: #52D9A0;
-  --color-sg-neutral: #C4BFB8;
-  --color-sg-loss: #F59520;
-  --color-sg-weak: #E8202A;
-
-  /* Chart categorical */
-  --color-c1: #3D8EF0;
-  --color-c2: #A855F7;
-  --color-c3: #06C8E0;
-  --color-c4: #D4F000;
-  --color-c5: #F03DAA;
-
-  /* Ethos paper segment colors (Driving / Approach / Short Game / Putting) */
-  --color-seg-drive: #E040A0;
-  --color-seg-approach: #D4A800;
-  --color-seg-shortgame: #00B870;
-  --color-seg-putting: #3D8EF0;
-
-  /* Radius */
-  --radius-sm: 2px;
-  --radius-md: 4px;
-  --radius-lg: 8px;
-  --radius-xl: 12px;
-}
-
-/* ── Dynamic Theme Tokens (change with dark/light) ───────────── */
-@theme inline {
-  /* shadcn-compatible semantic colors */
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-border: var(--border-color);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-destructive: var(--destructive);
-
-  /* Theory Golf foundation colors (theme-aware) */
-  --color-court: var(--court);
-  --color-obsidian: var(--obsidian);
-  --color-shadow: var(--shadow);
-  --color-pitch: var(--pitch);
-  --color-cement: var(--cement);
-  --color-ash: var(--ash);
-  --color-chalk: var(--chalk);
-
-  /* Surface alias */
-  --color-surface: var(--surface);
-}
-
-/* ================================================================
-   DARK THEME (default)
-   ================================================================ */
-:root {
-  /* Foundation greys */
-  --court: #0C0C0C;
-  --obsidian: #141414;
-  --shadow: #1E1E1E;
-  --pitch: #2A2A2A;
-  --cement: #C4BFB8;
-  --ash: #8A8580;
-  --chalk: #F2F0EE;
-  --surface: #141414;
-
-  /* shadcn semantic mapping */
-  --background: #0C0C0C;
-  --foreground: #F2F0EE;
-  --card: #1E1E1E;
-  --card-foreground: #F2F0EE;
-  --primary: #E8202A;
-  --primary-foreground: #FFFFFF;
-  --secondary: #2A2A2A;
-  --secondary-foreground: #C4BFB8;
-  --muted: #141414;
-  --muted-foreground: #8A8580;
-  --accent: #1F0507;
-  --accent-foreground: #FF3D47;
-  --border-color: #2A2A2A;
-  --input: #2A2A2A;
-  --ring: #E8202A;
-  --destructive: #E8202A;
-
-  /* Legacy aliases (backward compat with existing dashboard CSS) */
-  --color-bg: var(--court);
-  --color-text: var(--chalk);
-  --color-accent-hover: #9B1520;
-  --color-accent-pop: #FF3D47;
-  --color-accent-wash: #1F0507;
-  --color-secondary-text: var(--cement);
-
-  /* Scarlet (legacy refs) */
-  --scarlet: #E8202A;
-  --scarlet-dim: #9B1520;
-  --scarlet-glow: #FF3D47;
-  --scarlet-tint: #1F0507;
-
-  /* Data semantic (legacy refs) */
-  --under: #00C07A;
-  --even: #8A8580;
-  --bogey: #F59520;
-  --double: #E8202A;
-
-  /* Strokes gained (legacy refs) */
-  --sg-strong: #00C07A;
-  --sg-gain: #52D9A0;
-  --sg-neutral: #C4BFB8;
-  --sg-loss: #F59520;
-  --sg-weak: #E8202A;
-
-  /* Chart categorical (legacy refs) */
-  --c1: #3D8EF0;
-  --c2: #A855F7;
-  --c3: #06C8E0;
-  --c4: #D4F000;
-  --c5: #F03DAA;
-  --c1-fill: rgba(61, 142, 240, .15);
-  --c2-fill: rgba(168, 85, 247, .15);
-  --c3-fill: rgba(6, 200, 224, .15);
-  --c4-fill: rgba(212, 240, 0, .15);
-  --c5-fill: rgba(240, 61, 170, .15);
-
-  /* Gradients */
-  --grad-court: linear-gradient(160deg, #1E1E1E 0%, #0C0C0C 100%);
-  --grad-scarlet: linear-gradient(135deg, #9B1520 0%, #E8202A 60%, #FF3D47 100%);
-  --grad-cement: linear-gradient(135deg, #2A2A2A 0%, #1E1E1E 100%);
-
-  /* Typography (legacy refs) */
-  --font-heading: 'Barlow Condensed', sans-serif;
-
-  /* Spacing (used by dashboard.css) */
-  --space-xs: 4px;
-  --space-sm: 8px;
-  --space-md: 16px;
-  --space-lg: 24px;
-  --space-xl: 32px;
-  --space-xxl: 48px;
-
-  /* Transitions */
-  --transition-fast: 150ms ease;
-  --transition-base: 250ms ease;
-  --transition-slow: 400ms ease;
-  --transition-medium: 250ms ease;
-
-  /* Charcoal alias */
-  --charcoal: var(--shadow);
-}
-
-/* ================================================================
-   LIGHT THEME
-   Activated by: <html data-theme="light">
-   ================================================================ */
-[data-theme="light"] {
-  --court: #F5F3F0;
-  --obsidian: #FFFFFF;
-  --shadow: #FAFAF9;
-  --pitch: #E0DDD9;
-  --cement: #4A4745;
-  --ash: #6B6762;
-  --chalk: #1A1A1A;
-  --surface: #FFFFFF;
-
-  --background: #F5F3F0;
-  --foreground: #1A1A1A;
-  --card: #FAFAF9;
-  --card-foreground: #1A1A1A;
-  --primary: #C8181F;
-  --primary-foreground: #FFFFFF;
-  --secondary: #E0DDD9;
-  --secondary-foreground: #4A4745;
-  --muted: #FFFFFF;
-  --muted-foreground: #6B6762;
-  --accent: #FDE8E9;
-  --accent-foreground: #C8181F;
-  --border-color: #E0DDD9;
-  --input: #E0DDD9;
-  --ring: #C8181F;
-  --destructive: #C8181F;
-
-  --color-bg: var(--court);
-  --color-text: var(--chalk);
-  --color-accent-hover: #9B1520;
-  --color-accent-pop: #E8202A;
-  --color-accent-wash: #FDE8E9;
-  --color-secondary-text: var(--cement);
-
-  --scarlet: #C8181F;
-  --scarlet-dim: #9B1520;
-  --scarlet-glow: #E8202A;
-  --scarlet-tint: #FDE8E9;
-
-  --under: #00885A;
-  --even: #6B6762;
-  --bogey: #C47A10;
-  --double: #C8181F;
-
-  --sg-strong: #00885A;
-  --sg-gain: #1A9E6A;
-  --sg-neutral: #6B6762;
-  --sg-loss: #C47A10;
-  --sg-weak: #C8181F;
-
-  --c1: #2B7ED4;
-  --c2: #9333EA;
-  --c3: #0498AA;
-  --c4: #8B9900;
-  --c5: #C0158A;
-  --c1-fill: rgba(43, 126, 212, .10);
-  --c2-fill: rgba(147, 51, 234, .10);
-  --c3-fill: rgba(4, 152, 170, .10);
-  --c4-fill: rgba(139, 153, 0, .10);
-  --c5-fill: rgba(192, 21, 138, .10);
-
-  --grad-court: linear-gradient(160deg, #FFFFFF 0%, #F5F3F0 100%);
-  --grad-scarlet: linear-gradient(135deg, #9B1520 0%, #C8181F 60%, #E8202A 100%);
-  --grad-cement: linear-gradient(135deg, #F0EDE9 0%, #E8E5E1 100%);
-}
 
 /* ================================================================
    BASE LAYER
@@ -274,7 +31,9 @@
     background-color: var(--background);
     color: var(--foreground);
     font-family: var(--font-body);
-    font-weight: 300;
+    /* Was 300. Barlow Light on a near-black ground is the single
+       biggest legibility cost in the product. */
+    font-weight: 400;
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -292,71 +51,6 @@
 }
 
 /* ================================================================
-   COMPONENT LAYER — Reusable patterns
-   ================================================================ */
-@layer components {
-  /* Themed transition helper */
-  .themed {
-    transition:
-      background-color var(--transition-base),
-      color var(--transition-base),
-      border-color var(--transition-base);
-  }
-
-  /* Typography utilities */
-  .eyebrow {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    letter-spacing: .3em;
-    text-transform: uppercase;
-    color: var(--primary);
-  }
-
-  .section-label {
-    font-family: theme(--font-display);
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: .35em;
-    text-transform: uppercase;
-    color: var(--ash);
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-
-  .section-label::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border-color);
-  }
-
-  /* Data value colors */
-  .val-under { color: var(--under); }
-  .val-even { color: var(--even); }
-  .val-bogey { color: var(--bogey); }
-  .val-double { color: var(--double); }
-  .val-sg-strong { color: var(--sg-strong); }
-  .val-sg-gain { color: var(--sg-gain); }
-  .val-sg-neutral { color: var(--sg-neutral); }
-  .val-sg-loss { color: var(--sg-loss); }
-  .val-sg-weak { color: var(--sg-weak); }
-
-  /* Accent pill / badge */
-  .pill {
-    display: inline-block;
-    background: var(--accent);
-    color: var(--accent-foreground);
-    font-family: theme(--font-display);
-    font-weight: 700;
-    font-size: 10px;
-    letter-spacing: .15em;
-    text-transform: uppercase;
-    padding: 3px 10px;
-  }
-}
-
-/* ================================================================
    TOUCH
    Suppress double-tap-to-zoom (and the click delay that comes with
    it) on every control. Without this a mis-registering tap invites a
@@ -369,27 +63,44 @@ button,
 }
 
 /* ================================================================
-   LEGACY COMPATIBILITY — Dashboard & tool CSS variable aliases
-   These map the old --color-* names to the new system so existing
-   dashboard.css and component CSS files continue to work.
-   Uses var() references so values resolve correctly in both themes.
+   LAYOUT CONSTANTS
    ================================================================ */
 :root {
+  /* The navbar (61px) plus PlayerPath's own section rail (44px). Every
+     anchor target on /player-path offsets by this so a jump lands the
+     heading below the rail rather than behind it. One number, one place —
+     change the rail's height and the anchors follow. */
+  --pp-chrome-h: 106px; /* 61px navbar + 44px rail + its 1px bottom border */
+}
+
+/* ================================================================
+   LEGACY BRIDGE — TEMPORARY
+   Old names still referenced by dashboard.css, tools.css and the
+   component stylesheets. Each is a var() alias onto system.css, so
+   there is still only one source of truth for the VALUE. These get
+   deleted as their call sites are renamed; nothing new may use them.
+   ================================================================ */
+:root {
+  --color-bg: var(--court);
+  --color-text: var(--chalk);
+  --color-accent-hover: var(--scarlet-dim);
+  --color-accent-pop: var(--scarlet-glow);
+  --color-accent-wash: var(--scarlet-tint);
+  --color-secondary-text: var(--cement);
   --color-surface: var(--surface);
   --color-card: var(--card);
   --color-border: var(--border-color);
   --color-muted: var(--ash);
   --color-accent: var(--primary);
   --color-secondary: var(--cement);
-}
 
-/* ================================================================
-   PLAYERPATH STICKY CHROME
-   The navbar (61px) plus PlayerPath's own section rail (44px). Every
-   anchor target on /player-path offsets by this so a jump lands the
-   heading below the rail rather than behind it. One number, one place —
-   change the rail's height and the anchors follow.
-   ================================================================ */
-:root {
-  --pp-chrome-h: 106px; /* 61px navbar + 44px rail + its 1px bottom border */
+  --font-heading: var(--font-display);
+  --charcoal: var(--shadow);
+
+  --space-xs: var(--spacing-xs);
+  --space-sm: var(--spacing-sm);
+  --space-md: var(--spacing-md);
+  --space-lg: var(--spacing-lg);
+  --space-xl: var(--spacing-xl);
+  --space-xxl: var(--spacing-xxl);
 }
