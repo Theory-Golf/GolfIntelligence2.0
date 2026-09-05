@@ -325,7 +325,7 @@ export function PracticePlanSection({
       )}
       {plan.coachLed && (
         <div className="ppv-coach" style={{ marginTop: plan.cards.length > 0 ? '10px' : 0 }}>
-          <div className="ppv-game-name text-ash" >
+          <div className="ppv-game-name" style={{ color: 'var(--ash)' }}>
             {PILLAR_LABELS[plan.coachLed.segment]} · no game for this yet
           </div>
           <div className="ppv-game-why">{plan.coachLed.why}</div>

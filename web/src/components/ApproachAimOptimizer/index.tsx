@@ -488,7 +488,7 @@ export default function ApproachAimOptimizer() {
       {/* Stats */}
       <div className="aao-stats">
         <div className="aao-stat">
-          <div className="aao-stat-val text-under" >{stats ? Math.round(stats.gir * 100) + '%' : '—'}</div>
+          <div className="aao-stat-val" style={{ color: 'var(--under)' }}>{stats ? Math.round(stats.gir * 100) + '%' : '—'}</div>
           <div className="aao-stat-lbl">GIR Probability</div>
         </div>
         <div className="aao-stat">

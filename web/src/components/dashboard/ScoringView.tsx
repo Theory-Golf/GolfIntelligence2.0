@@ -155,8 +155,8 @@ export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: {
  className="card-hero"
  style={{ borderLeft: `4px solid ${card.color}` }}
           >
-            <div className="flex justify-between items-center mb-4" >
-              <div className="label text-ash text-body-sm" >{card.label}</div>
+            <div className="flex justify-between items-center mb-4 gap-3" >
+              <div className="label text-ash"  style={{ fontSize: 'var(--text-body-sm)' }}>{card.label}</div>
               <div className="text-label text-ash">{card.data.totalHoles} holes</div>
             </div>
 
@@ -166,7 +166,7 @@ export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: {
             </div>
 
             {/* Bottom row: Total SG and Avg vs Par */}
-            <div className="flex justify-between mt-4" >
+            <div className="flex justify-between mt-4 gap-3" >
               <div>
                 <div className="label text-ash" >Total SG</div>
                 <div className="value-stat" style={{ color: getStrokeGainedColor(card.data.totalStrokesGained) }}>
@@ -205,7 +205,7 @@ export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: {
               </div>
               <div className="mt-2">
                 <div className="label text-ash" >Count</div>
-                <div className="value-stat text-label" >{card.count} / {card.total}</div>
+                <div className="value-stat"  style={{ fontSize: 'var(--text-label)' }}>{card.count} / {card.total}</div>
               </div>
               <div className="label mt-2 text-ash" >
                 {card.higherIsBetter ? 'Higher is better' : 'Lower is better'}
@@ -221,7 +221,7 @@ export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: {
             </div>
             <div className="mt-2">
               <div className="label text-ash" >Drives</div>
-              <div className="value-stat text-label" >{driveAfterT5FailCount}</div>
+              <div className="value-stat"  style={{ fontSize: 'var(--text-label)' }}>{driveAfterT5FailCount}</div>
             </div>
             <div className="label mt-2 text-ash" >
               vs Avg: <span style={{ color: driveAfterT5FailVsBenchmark >= 0 ? 'var(--under)' : 'var(--scarlet)' }}>
@@ -353,8 +353,8 @@ export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: {
  className="card-hero"
  style={{ borderLeft: '4px solid var(--c1)' }}
           >
-            <div className="flex justify-between items-center mb-4" >
-              <div className="label text-ash text-body-sm" >Opportunities</div>
+            <div className="flex justify-between items-center mb-4 gap-3" >
+              <div className="label text-ash"  style={{ fontSize: 'var(--text-body-sm)' }}>Opportunities</div>
             </div>
 
             {/* Main Value */}
@@ -373,8 +373,8 @@ export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: {
  className="card-hero"
  style={{ borderLeft: '4px solid var(--sg-gain)' }}
           >
-            <div className="flex justify-between items-center mb-4" >
-              <div className="label text-ash text-body-sm" >Conversions</div>
+            <div className="flex justify-between items-center mb-4 gap-3" >
+              <div className="label text-ash"  style={{ fontSize: 'var(--text-body-sm)' }}>Conversions</div>
             </div>
 
             {/* Main Value */}
@@ -393,8 +393,8 @@ export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: {
  className="card-hero"
  style={{ borderLeft: '4px solid var(--bogey)' }}
           >
-            <div className="flex justify-between items-center mb-4" >
-              <div className="label text-ash text-body-sm" >Conversion %</div>
+            <div className="flex justify-between items-center mb-4 gap-3" >
+              <div className="label text-ash"  style={{ fontSize: 'var(--text-body-sm)' }}>Conversion %</div>
             </div>
 
             {/* Main Value */}
@@ -403,7 +403,7 @@ export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: {
             </div>
 
             {/* Bottom Info */}
-            <div className="flex justify-between" style={{ marginTop: 'var(--spacing-4)', padding: 'var(--spacing-2) 0', borderTop: '1px solid var(--shadow)' }}>
+            <div className="flex justify-between gap-3" style={{ marginTop: 'var(--spacing-4)', padding: 'var(--spacing-2) 0', borderTop: '1px solid var(--shadow)' }}>
               <div>
                 <div className="label text-ash" >Made</div>
                 <div className="value-stat">{birdieOpportunities.conversions}</div>

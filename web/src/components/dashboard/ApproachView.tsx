@@ -58,14 +58,14 @@ export function ApproachView({ metrics, approachByDistance, approachFromRough, a
 
         {/* Card 1: Total SG Approach */}
         <div className="card-hero is-flagship">
-          <div className="flex justify-between items-center mb-4" >
+          <div className="flex justify-between items-center mb-4 gap-3" >
             <div className="label" style={{ color: 'var(--scarlet)' }}>Total SG Approach</div>
             <div style={{ width: '6px', height: '6px', background: 'var(--scarlet)', borderRadius: '50%' }}></div>
           </div>
           <div className="value-hero" style={{ color: getStrokeGainedColor(approachSG) }}>
             {formatStrokesGained(approachSG)}
           </div>
-          <div className="flex justify-between mt-4" >
+          <div className="flex justify-between mt-4 gap-3" >
             <div>
               <div className="label text-ash" >SG / Shot</div>
               <div className="value-stat" style={{ color: getStrokeGainedColor(avgApproachSG) }}>
@@ -81,13 +81,13 @@ export function ApproachView({ metrics, approachByDistance, approachFromRough, a
 
         {/* Card 2: Green Hit % */}
         <div className="card-hero">
-          <div className="flex justify-between items-center mb-4" >
+          <div className="flex justify-between items-center mb-4 gap-3" >
             <div className="label text-ash" >Green Hit %</div>
           </div>
           <div className="value-hero" style={{ color: getGreenHitPctColor(greenHitPct) }}>
             {greenHitPct.toFixed(0)}%
           </div>
-          <div className="flex justify-between mt-4" >
+          <div className="flex justify-between mt-4 gap-3" >
             <div>
               <div className="label text-ash" >Fairway</div>
               <div className="value-stat" style={{ color: getGreenHitPctColor(greenHitPctFairway) }}>
@@ -105,13 +105,13 @@ export function ApproachView({ metrics, approachByDistance, approachFromRough, a
 
         {/* Card 3: Proximity < 150 */}
         <div className="card-hero">
-          <div className="flex justify-between items-center mb-4" >
+          <div className="flex justify-between items-center mb-4 gap-3" >
             <div className="label text-ash" >Proximity &lt; 150yds</div>
           </div>
           <div className="value-hero" style={{ color: getProximityColor(proximityUnder150) }}>
             {proximityUnder150.toFixed(0)} <span style={{ fontSize: '18px' }}>ft</span>
           </div>
-          <div className="flex justify-between mt-4" >
+          <div className="flex justify-between mt-4 gap-3" >
             <div>
               <div className="label text-ash" >Prox. on Green</div>
               <div className="value-stat" style={{ color: getProximityColor(proximityUnder150OnGreen) }}>
@@ -168,7 +168,7 @@ function ApproachBucketCard({ bucket }: { bucket: ApproachDistanceBucket }) {
 
   return (
     <div className="card">
-      <div className="flex justify-between items-center mb-2" >
+      <div className="flex justify-between items-center mb-2 gap-3" >
         <div className="label" style={{ color: 'var(--scarlet)' }}>{bucket.label}</div>
       </div>
       <div className="label text-ash mb-3" >
@@ -186,7 +186,7 @@ function ApproachBucketCard({ bucket }: { bucket: ApproachDistanceBucket }) {
         SG ({bucket.totalShots} {bucket.totalShots === 1 ? 'shot' : 'shots'})
       </div>
 
-      <div className="flex justify-between">
+      <div className="flex justify-between gap-3">
         <div>
           <div className="label text-ash" >Green %</div>
           <div

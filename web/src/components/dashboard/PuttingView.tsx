@@ -76,14 +76,14 @@ export function PuttingView({ metrics, lagMetrics, filteredShots }: { metrics: P
 
         {/* Card 1: Total SG Putting */}
         <div className="card-hero is-flagship">
-          <div className="flex justify-between items-center mb-4" >
+          <div className="flex justify-between items-center mb-4 gap-3" >
             <div className="label" style={{ color: 'var(--scarlet)' }}>Total SG Putting</div>
             <div style={{ width: '6px', height: '6px', background: 'var(--scarlet)', borderRadius: '50%' }}></div>
           </div>
           <div className="value-hero" style={{ color: getStrokeGainedColor(totalSGPutting) }}>
             {formatStrokesGained(totalSGPutting)}
           </div>
-          <div className="flex justify-between mt-4" >
+          <div className="flex justify-between mt-4 gap-3" >
             <div>
               <div className="label text-ash" >SG / Putt</div>
               <div className="value-stat" style={{ color: getStrokeGainedColor(avgSGPutting), fontSize: 'var(--text-label)' }}>
@@ -92,29 +92,29 @@ export function PuttingView({ metrics, lagMetrics, filteredShots }: { metrics: P
             </div>
             <div className="text-right">
               <div className="label text-ash" >Total Putts</div>
-              <div className="value-stat text-label" >{totalPutts}</div>
+              <div className="value-stat"  style={{ fontSize: 'var(--text-label)' }}>{totalPutts}</div>
             </div>
           </div>
         </div>
 
         {/* Card 2: Make % 0-4 ft */}
         <div className="card-hero">
-          <div className="flex justify-between items-center mb-4" >
+          <div className="flex justify-between items-center mb-4 gap-3" >
             <div className="label text-ash" >Make % 0-4 ft</div>
           </div>
           <div className="value-hero" style={{ color: getMakePctColor(makePct0to4Ft, benchmarkMakePct0to4Ft) }}>
             {makePct0to4Ft.toFixed(0)}%
           </div>
-          <div className="flex justify-between" style={{ marginTop: 'var(--spacing-4)', padding: 'var(--spacing-2) 0', borderTop: '1px solid var(--shadow)' }}>
+          <div className="flex justify-between gap-3" style={{ marginTop: 'var(--spacing-4)', padding: 'var(--spacing-2) 0', borderTop: '1px solid var(--shadow)' }}>
             <div>
               <div className="label text-ash" >Made</div>
-              <div className="value-stat text-label" >
+              <div className="value-stat"  style={{ fontSize: 'var(--text-label)' }}>
                 {made0to4Ft} / {total0to4Ft}
               </div>
             </div>
             <div className="text-right">
               <div className="label text-ash" >Benchmark</div>
-              <div className="value-stat text-label" >
+              <div className="value-stat"  style={{ fontSize: 'var(--text-label)' }}>
                 {total0to4Ft > 0 ? `${benchmarkMakePct0to4Ft.toFixed(0)}%` : '-'}
               </div>
             </div>
@@ -123,13 +123,13 @@ export function PuttingView({ metrics, lagMetrics, filteredShots }: { metrics: P
 
         {/* Card 3: Total SG 5-12 ft */}
         <div className="card-hero">
-          <div className="flex justify-between items-center mb-4" >
+          <div className="flex justify-between items-center mb-4 gap-3" >
             <div className="label text-ash" >SG 5-12 ft</div>
           </div>
           <div className="value-hero" style={{ color: getStrokeGainedColor(totalSG5to12Ft) }}>
             {formatStrokesGained(totalSG5to12Ft)}
           </div>
-          <div className="flex justify-between mt-4" >
+          <div className="flex justify-between mt-4 gap-3" >
             <div>
               <div className="label text-ash" >SG / Putt</div>
               <div className="value-stat" style={{ color: getStrokeGainedColor(avgSG5to12Ft), fontSize: 'var(--text-label)' }}>
@@ -138,14 +138,14 @@ export function PuttingView({ metrics, lagMetrics, filteredShots }: { metrics: P
             </div>
             <div className="text-right">
               <div className="label text-ash" >Putts</div>
-              <div className="value-stat text-label" >{total5to12Ft}</div>
+              <div className="value-stat"  style={{ fontSize: 'var(--text-label)' }}>{total5to12Ft}</div>
             </div>
           </div>
         </div>
 
         {/* Card 4: Poor Lag */}
         <div className="card-hero">
-          <div className="flex justify-between items-center mb-4" >
+          <div className="flex justify-between items-center mb-4 gap-3" >
             <div className="label text-ash" >Poor Lag</div>
           </div>
           <div className="value-hero" style={{ color: poorLagCount > 0 ? 'var(--double)' : 'var(--under)' }}>
@@ -161,7 +161,7 @@ export function PuttingView({ metrics, lagMetrics, filteredShots }: { metrics: P
 
         {/* Card 5: Speed Rating */}
         <div className="card-hero">
-          <div className="flex justify-between items-center mb-4" >
+          <div className="flex justify-between items-center mb-4 gap-3" >
             <div className="label text-ash" >Speed Rating</div>
           </div>
           <div className="value-hero" style={{ color: speedRating !== null ? getSpeedRatingColor(speedRating) : 'var(--ash)' }}>
@@ -394,7 +394,7 @@ function LagPuttingSection({ metrics }: { metrics: LagPuttingMetrics }) {
 
         {/* Card: Avg. Leave Distance */}
         <div className="card-hero">
-          <div className="flex justify-between items-center mb-4" >
+          <div className="flex justify-between items-center mb-4 gap-3" >
             <div className="label text-ash" >Avg. Leave Distance</div>
           </div>
           <div className="value-hero" style={{ color: avgLeaveDistance <= 4 ? 'var(--under)' : avgLeaveDistance <= 8 ? 'var(--bogey)' : 'var(--double)' }}>

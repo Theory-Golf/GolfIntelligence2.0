@@ -411,14 +411,14 @@ export function ShortGameView({ metrics, shortGameHeatMapData, filteredShots }: 
 
         {/* Card 1: Total SG - Short Game */}
         <div className="card-hero is-flagship">
-          <div className="flex justify-between items-center mb-4" >
+          <div className="flex justify-between items-center mb-4 gap-3" >
             <div className="label" style={{ color: 'var(--scarlet)' }}>Total SG</div>
             <div style={{ width: '6px', height: '6px', background: 'var(--scarlet)', borderRadius: '50%' }}></div>
           </div>
           <div className="value-hero" style={{ color: getStrokeGainedColor(shortGameSG) }}>
             {formatStrokesGained(shortGameSG)}
           </div>
-          <div className="flex justify-between mt-4" >
+          <div className="flex justify-between mt-4 gap-3" >
             <div>
               <div className="label text-ash" >SG / Shot</div>
               <div className="value-stat" style={{ color: getStrokeGainedColor(avgShortGameSG) }}>
@@ -434,7 +434,7 @@ export function ShortGameView({ metrics, shortGameHeatMapData, filteredShots }: 
 
         {/* Card 2: <= 8ft from Fairway */}
         <div className="card-hero">
-          <div className="flex justify-between items-center mb-4" >
+          <div className="flex justify-between items-center mb-4 gap-3" >
             <div className="label text-ash" >&lt;= 8ft Fairway</div>
           </div>
           <div className="value-hero" style={{ color: getProximityColor(within8FeetFairwayPct) }}>
@@ -449,7 +449,7 @@ export function ShortGameView({ metrics, shortGameHeatMapData, filteredShots }: 
 
         {/* Card 3: <= 8ft from Rough */}
         <div className="card-hero">
-          <div className="flex justify-between items-center mb-4" >
+          <div className="flex justify-between items-center mb-4 gap-3" >
             <div className="label text-ash" >&lt;= 8ft Rough</div>
           </div>
           <div className="value-hero" style={{ color: getProximityColor(within8FeetRoughPct) }}>
@@ -464,7 +464,7 @@ export function ShortGameView({ metrics, shortGameHeatMapData, filteredShots }: 
 
         {/* Card 4: <= 8ft from Sand */}
         <div className="card-hero">
-          <div className="flex justify-between items-center mb-4" >
+          <div className="flex justify-between items-center mb-4 gap-3" >
             <div className="label text-ash" >&lt;= 8ft Sand</div>
           </div>
           <div className="value-hero" style={{ color: getProximityColor(within8FeetSandPct) }}>

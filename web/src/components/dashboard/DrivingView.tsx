@@ -256,7 +256,7 @@ export function DrivingView({ metrics, analysis, filteredShots }: { metrics: Dri
 
         {/* Card 1: Penalty Rate */}
         <div className="card-hero is-flagship">
-          <div className="flex justify-between items-center mb-4" >
+          <div className="flex justify-between items-center mb-4 gap-3" >
             <div className="label" style={{ color: 'var(--scarlet)' }}>Penalty Rate</div>
             <div style={{ width: '6px', height: '6px', background: 'var(--scarlet)', borderRadius: '50%' }}></div>
           </div>
@@ -273,10 +273,10 @@ export function DrivingView({ metrics, analysis, filteredShots }: { metrics: Dri
 
         {/* Card 2: Driving Distance (75th percentile) */}
         <div className="card-hero">
-          <div className="flex justify-between items-center mb-4" >
+          <div className="flex justify-between items-center mb-4 gap-3" >
             <div className="label text-ash" >Distance (75th %)</div>
           </div>
-          <div className="value-hero text-chalk" >
+          <div className="value-hero" >
             {drivingDistance75th.toFixed(0)} <span style={{ fontSize: '18px' }}>yds</span>
           </div>
           <div style={{ marginTop: 'var(--spacing-4)', padding: 'var(--spacing-2) 0', borderTop: '1px solid var(--shadow)' }}>
@@ -287,13 +287,13 @@ export function DrivingView({ metrics, analysis, filteredShots }: { metrics: Dri
 
         {/* Card 3: Total SG - Driving */}
         <div className="card-hero">
-          <div className="flex justify-between items-center mb-4" >
+          <div className="flex justify-between items-center mb-4 gap-3" >
             <div className="label text-ash" >SG - Driving</div>
           </div>
           <div className="value-hero" style={{ color: getStrokeGainedColor(drivingSG) }}>
             {formatStrokesGained(drivingSG)}
           </div>
-          <div className="flex justify-between mt-4" >
+          <div className="flex justify-between mt-4 gap-3" >
             <div>
               <div className="label text-ash" >SG / Drive</div>
               <div className="value-stat" style={{ color: getStrokeGainedColor(avgDrivingSG) }}>
@@ -309,7 +309,7 @@ export function DrivingView({ metrics, analysis, filteredShots }: { metrics: Dri
 
         {/* Card 4: Fairway Hit % */}
         <div className="card-hero">
-          <div className="flex justify-between items-center mb-4" >
+          <div className="flex justify-between items-center mb-4 gap-3" >
             <div className="label text-ash" >
               {driveFilter === 'all' ? 'Fairway %' : driveFilter === 'driver' ? 'Fairway % (Driver)' : 'Fairway % (Non Driver)'}
             </div>
@@ -318,7 +318,7 @@ export function DrivingView({ metrics, analysis, filteredShots }: { metrics: Dri
             {fairwayPct.toFixed(0)}%
           </div>
           {driveFilter === 'all' && (
-            <div className="flex justify-between mt-4" >
+            <div className="flex justify-between mt-4 gap-3" >
               <div>
                 <div className="label text-ash" >Driver</div>
                 <div className="value-stat" style={{ color: getFairwayPctColor(fairwayPctDriver) }}>
@@ -337,7 +337,7 @@ export function DrivingView({ metrics, analysis, filteredShots }: { metrics: Dri
 
         {/* Card 5: Miss Bias */}
         <div className="card-hero">
-          <div className="flex justify-between items-center mb-4" >
+          <div className="flex justify-between items-center mb-4 gap-3" >
             <div className="label text-ash" >Miss Bias</div>
           </div>
           <div
@@ -346,14 +346,14 @@ export function DrivingView({ metrics, analysis, filteredShots }: { metrics: Dri
           >
             {missRecordedCount > 0 ? `${missLeftPct.toFixed(0)}% / ${missRightPct.toFixed(0)}%` : '—'}
           </div>
-          <div className="flex justify-between mt-4" >
+          <div className="flex justify-between mt-4 gap-3" >
             <div>
               <div className="label text-ash" >Left / Right</div>
-              <div className="value-stat text-label" >Target 50% / 50%</div>
+              <div className="value-stat"  style={{ fontSize: 'var(--text-label)' }}>Target 50% / 50%</div>
             </div>
             <div className="text-right">
               <div className="label text-ash" >Misses</div>
-              <div className="value-stat text-label" >{missRecordedCount}</div>
+              <div className="value-stat"  style={{ fontSize: 'var(--text-label)' }}>{missRecordedCount}</div>
             </div>
           </div>
         </div>
@@ -756,12 +756,12 @@ function ProblemDriveGroup({
       <div style={{ border: '1px solid var(--pitch)', borderRadius: '4px', overflow: 'hidden' }}>
         {/* Parent - full width hero */}
         <div className="card-hero is-flagship" style={{ borderBottom: '1px solid var(--pitch)' }}>
-          <div className="flex justify-between items-center mb-4" >
+          <div className="flex justify-between items-center mb-4 gap-3" >
             <div className="label" style={{ color: 'var(--scarlet)' }}>{parentLabel}</div>
             <div style={{ width: '6px', height: '6px', background: 'var(--scarlet)', borderRadius: '50%' }}></div>
           </div>
-          <div className="value-hero text-chalk" >{parentValue}</div>
-          <div className="flex justify-between mt-4" >
+          <div className="value-hero" >{parentValue}</div>
+          <div className="flex justify-between mt-4 gap-3" >
             <div>
               <div className="label text-ash" >% of Drives</div>
               <div className="value-stat" style={{ fontSize: '18px' }}>{parentPct.toFixed(0)}%</div>
@@ -785,7 +785,7 @@ function ProblemDriveGroup({
               <div className="value-stat">{child.value}</div>
               <div className="mt-2">
                 <div className="label text-ash" >% of Drives</div>
-                <div className="value-stat text-label" >{child.pct.toFixed(0)}%</div>
+                <div className="value-stat"  style={{ fontSize: 'var(--text-label)' }}>{child.pct.toFixed(0)}%</div>
               </div>
               <div className="mt-2">
                 <div className="label text-ash" >Total SG</div>
@@ -815,7 +815,7 @@ function ProblemDriveGroup({
               <div className="value-stat" style={{ fontSize: '20px' }}>{missDirection.leftPct.toFixed(0)}%</div>
               <div className="mt-2">
                 <div className="label text-ash" >Count</div>
-                <div className="value-stat text-label" >{missDirection.leftCount}</div>
+                <div className="value-stat"  style={{ fontSize: 'var(--text-label)' }}>{missDirection.leftCount}</div>
               </div>
             </div>
             <div className="card-stat" style={{ borderLeft: '3px solid var(--c5)' }}>
@@ -823,7 +823,7 @@ function ProblemDriveGroup({
               <div className="value-stat" style={{ fontSize: '20px' }}>{missDirection.rightPct.toFixed(0)}%</div>
               <div className="mt-2">
                 <div className="label text-ash" >Count</div>
-                <div className="value-stat text-label" >{missDirection.rightCount}</div>
+                <div className="value-stat"  style={{ fontSize: 'var(--text-label)' }}>{missDirection.rightCount}</div>
               </div>
             </div>
           </div>

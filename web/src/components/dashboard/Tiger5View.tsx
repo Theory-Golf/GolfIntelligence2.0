@@ -128,7 +128,7 @@ function HeroCardWithSubValues({
 }) {
   return (
     <div className={`card-hero ${isFlagship ? 'is-flagship' : ''}`}>
-      <div className="flex justify-between items-center mb-4" >
+      <div className="flex justify-between items-center mb-4 gap-3" >
         <div className="label" style={{ color: isFlagship ? 'var(--scarlet)' : 'var(--ash)' }}>
           {label}
         </div>
@@ -136,7 +136,7 @@ function HeroCardWithSubValues({
           <div style={{ width: '6px', height: '6px', background: 'var(--scarlet)', borderRadius: '50%' }}></div>
         )}
       </div>
-      <div className="value-hero text-chalk" >
+      <div className="value-hero" >
         {value}
       </div>
 
@@ -152,7 +152,7 @@ function HeroCardWithSubValues({
 
       {/* Bottom row (optional) */}
       {(bottomLeftLabel || bottomRightLabel) && (
-        <div className="flex justify-between mt-4" >
+        <div className="flex justify-between mt-4 gap-3" >
           <div>
             <div className="label text-ash" >{bottomLeftLabel}</div>
             <div className="value-stat">{bottomLeftValue}</div>
@@ -312,10 +312,10 @@ function StatCardWithSG({
         {label}
       </div>
       <div className="value-stat" style={{ color: valueColor }}>{value}</div>
-      <div className="mt-3 flex justify-between">
+      <div className="mt-3 flex justify-between gap-3">
         <div>
           <div className="label text-ash" >% of Fails</div>
-          <div className="value-stat text-label" >{percentage.toFixed(0)}%</div>
+          <div className="value-stat"  style={{ fontSize: 'var(--text-label)' }}>{percentage.toFixed(0)}%</div>
         </div>
         <div className="text-right">
           <div className="label text-ash" >Total SG</div>
@@ -730,7 +730,7 @@ function PotentialScoreSection({
 
         <div className="card-stat" style={{ borderLeft: '3px solid var(--chalk)' }}>
           <div className="label text-ash mb-2" >Potential Average</div>
-          <div className="value-stat text-chalk" >{avgPotentialScore.toFixed(1)}</div>
+          <div className="value-stat" >{avgPotentialScore.toFixed(1)}</div>
           <div className="label mt-2 text-ash" >
             If Tiger 5 fails reduced by 50%
           </div>
@@ -738,7 +738,7 @@ function PotentialScoreSection({
 
         <div className="card-stat" style={{ borderLeft: '3px solid var(--chalk)' }}>
           <div className="label text-ash mb-2" >Total Strokes Saved</div>
-          <div className="value-stat text-chalk" >{totalStrokesSaved.toFixed(1)}</div>
+          <div className="value-stat" >{totalStrokesSaved.toFixed(1)}</div>
           <div className="label mt-2 text-ash" >
             Across all rounds
           </div>
@@ -820,7 +820,7 @@ function RootCauseSection({ rootCause, totalFailHoles }: { rootCause: RootCauseM
               <div className="value-stat">{card.value}</div>
               <div className="mt-2">
                 <div className="label text-ash" >% of Fails</div>
-                <div className="value-stat text-label-sm" >{percentage.toFixed(0)}%</div>
+                <div className="value-stat"  style={{ fontSize: 'var(--text-label-sm)' }}>{percentage.toFixed(0)}%</div>
               </div>
               <div className="mt-2">
                 <div className="label text-ash" >Total SG</div>

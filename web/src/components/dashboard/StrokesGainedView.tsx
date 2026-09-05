@@ -174,14 +174,14 @@ export function StrokesGainedView({ metrics, filteredShots }: { metrics: Tiger5M
       {/* Hero Card - Total SG */}
       <div className="grid" style={{ gridTemplateColumns: '1fr', gap: 'var(--spacing-4)', maxWidth: '400px' }}>
         <div className="card-hero is-flagship">
-          <div className="flex justify-between items-center mb-4" >
+          <div className="flex justify-between items-center mb-4 gap-3" >
             <div className="label" style={{ color: 'var(--scarlet)' }}>Total SG</div>
             <div style={{ width: '6px', height: '6px', background: 'var(--scarlet)', borderRadius: '50%' }}></div>
           </div>
           <div className="value-hero" style={{ color: getStrokeGainedColor(totalStrokesGained) }}>
             {formatStrokesGained(totalStrokesGained)}
           </div>
-          <div className="flex justify-between mt-4" >
+          <div className="flex justify-between mt-4 gap-3" >
             <div>
               <div className="label text-ash" >SG / Hole</div>
               <div className="value-stat" style={{ color: getStrokeGainedColor(sgPerHole) }}>
@@ -220,7 +220,7 @@ export function StrokesGainedView({ metrics, filteredShots }: { metrics: Tiger5M
               >
                 {formatStrokesGained(cat.strokesGained)}
               </div>
-              <div className="flex justify-between mt-3" >
+              <div className="flex justify-between mt-3 gap-3" >
                 <div>
                   <div className="label text-ash" >SG / Shot</div>
                   <div
@@ -232,7 +232,7 @@ export function StrokesGainedView({ metrics, filteredShots }: { metrics: Tiger5M
                 </div>
                 <div className="text-right">
                   <div className="label text-ash" >Shots</div>
-                  <div className="value-stat text-label" >{cat.totalShots}</div>
+                  <div className="value-stat"  style={{ fontSize: 'var(--text-label)' }}>{cat.totalShots}</div>
                 </div>
               </div>
             </div>
@@ -279,7 +279,7 @@ export function StrokesGainedView({ metrics, filteredShots }: { metrics: Tiger5M
                 >
                   {formatStrokesGained(separator.strokesGained)}
                 </div>
-                <div className="flex justify-between mt-3" >
+                <div className="flex justify-between mt-3 gap-3" >
                   <div>
                     <div className="label text-ash" >SG / Shot</div>
                     <div
@@ -291,7 +291,7 @@ export function StrokesGainedView({ metrics, filteredShots }: { metrics: Tiger5M
                   </div>
                   <div className="text-right">
                     <div className="label text-ash" >Shots</div>
-                    <div className="value-stat text-label" >{separator.totalShots}</div>
+                    <div className="value-stat"  style={{ fontSize: 'var(--text-label)' }}>{separator.totalShots}</div>
                   </div>
                 </div>
               </div>
