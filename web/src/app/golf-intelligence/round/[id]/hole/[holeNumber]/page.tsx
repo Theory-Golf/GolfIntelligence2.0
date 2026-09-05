@@ -28,7 +28,7 @@ const PAR_CHOICES = [3, 4, 5] as const;
 const CLUB_CATEGORIES: ClubCategory[] = ['Driver', 'Non-driver'];
 const MISS_DIRECTIONS: MissDirection[] = ['Left', 'Right'];
 const PUTT_DIRECTIONS: PuttDirection[] = ['Long', 'Short'];
-const COLOR_AMBER = '#F09020';
+const COLOR_AMBER = 'var(--bogey)';
 
 function unitFor(lie: Lie): 'YDS' | 'FT' {
   return lie === 'Green' ? 'FT' : 'YDS';

@@ -56,28 +56,28 @@ export const TIER_CONFIG: Record<TierName, {
     copy: 'Above Tour baseline. Conversion-grade putting.',
     range: '13–18  ·  SG ≥ +1.0',
     color: 'var(--sg-strong)',
-    hexColor: '#00C07A',
+    hexColor: 'var(--under)',
   },
   tour: {
     label: 'Tour',
     copy: 'Tour baseline. SG-neutral inside ten.',
     range: '11–12  ·  SG −1.0 to +1.0',
     color: 'var(--sg-gain)',
-    hexColor: '#52D9A0',
+    hexColor: 'var(--sg-gain)',
   },
   competitive: {
     label: 'Competitive',
     copy: 'Below baseline. Tighten speed control on the 7–10 ft band.',
     range: '9–10   ·  SG −3.0 to −1.0',
     color: 'var(--bogey)',
-    hexColor: '#F59520',
+    hexColor: 'var(--bogey)',
   },
   developing: {
     label: 'Developing',
     copy: 'Repeat the drill — focus on speed first, line second.',
     range: '0–8    ·  SG ≤ −3.0',
     color: 'var(--double)',
-    hexColor: '#E8202A',
+    hexColor: 'var(--scarlet)',
   },
 };
 

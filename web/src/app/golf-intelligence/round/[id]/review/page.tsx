@@ -9,9 +9,9 @@ import {
   type HoleEntry,
 } from '@/lib/golf/roundSession';
 
-const COLOR_UNDER = '#00B870';
+const COLOR_UNDER = 'var(--seg-shortgame)';
 const COLOR_PAR = 'var(--chalk)';
-const COLOR_BOGEY = '#F09020';
+const COLOR_BOGEY = 'var(--bogey)';
 const COLOR_DOUBLE = 'var(--scarlet)';
 
 function scoreColor(rel: number): string {

@@ -789,13 +789,13 @@ function RootCauseSection({ rootCause, totalFailHoles }: { rootCause: RootCauseM
       label: 'Short Game',
       value: rootCause.shortGame,
       sgValue: rootCause.shortGameSG,
-      color: '#FF8C00'  // Orange
+      color: 'var(--bogey)'  // Orange
     },
     {
       label: 'Recovery',
       value: rootCause.recovery,
       sgValue: rootCause.recoverySG,
-      color: '#10B981'  // Emerald
+      color: 'var(--under)'  // Emerald
     },
   ];
 

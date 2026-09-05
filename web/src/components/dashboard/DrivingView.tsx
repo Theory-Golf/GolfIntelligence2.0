@@ -386,11 +386,11 @@ function DrivingAnalysisSection({ analysis, totalDrives }: { analysis: DrivingAn
     'Recovery': 'var(--c3)',      // Aqua
     'Sand': 'var(--c4)',          // Volt
     'Green': 'var(--c5)',         // Magenta
-    'Tee': '#FF8C00',           // Orange
-    'Out of Bounds': '#EF4444', // Red
+    'Tee': 'var(--bogey)',           // Orange
+    'Out of Bounds': 'var(--double)', // Red
     'Water': 'var(--c1)',         // Royal Blue (same as Fairway for water)
     'Penalty Area': 'var(--c2)',  // Court Purple (same as Rough)
-    'Other': '#6B7280',         // Gray
+    'Other': 'var(--ash)',         // Gray
   };
 
   // Format data for donut chart
@@ -499,7 +499,7 @@ function DrivingAnalysisSection({ analysis, totalDrives }: { analysis: DrivingAn
                   {donutData.map((entry, index) => (
                     <Cell
  key={`cell-${index}`}
- fill={LOCATION_COLORS[entry.name] || '#6B7280'}
+ fill={LOCATION_COLORS[entry.name] || 'var(--ash)'}
  stroke="var(--shadow)"
  strokeWidth={2}
                     />
@@ -810,7 +810,7 @@ function ProblemDriveGroup({
         </div>
         {missDirection.recordedCount > 0 ? (
           <div className="grid-tiles-2 gap-3" >
-            <div className="card-stat" style={{ borderLeft: '3px solid #3D8EF0' }}>
+            <div className="card-stat" style={{ borderLeft: '3px solid var(--c1)' }}>
               <div className="label text-ash mb-2" >Left</div>
               <div className="value-stat" style={{ fontSize: '20px' }}>{missDirection.leftPct.toFixed(0)}%</div>
               <div className="mt-2">
@@ -818,7 +818,7 @@ function ProblemDriveGroup({
                 <div className="value-stat text-label" >{missDirection.leftCount}</div>
               </div>
             </div>
-            <div className="card-stat" style={{ borderLeft: '3px solid #F03DAA' }}>
+            <div className="card-stat" style={{ borderLeft: '3px solid var(--c5)' }}>
               <div className="label text-ash mb-2" >Right</div>
               <div className="value-stat" style={{ fontSize: '20px' }}>{missDirection.rightPct.toFixed(0)}%</div>
               <div className="mt-2">

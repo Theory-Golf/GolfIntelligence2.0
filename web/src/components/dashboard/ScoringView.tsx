@@ -81,7 +81,7 @@ export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: {
   // Colors for hole outcomes - using semantic scoring colors
   const OUTCOME_COLORS: Record<HoleOutcome, string> = {
     'Eagle': 'var(--under)',       // Green/Under par
-    'Birdie': '#52D9A0',      // Mint/Gain
+    'Birdie': 'var(--sg-gain)',      // Mint/Gain
     'Par': 'var(--ash)',         // Gray/Even
     'Bogey': 'var(--bogey)',        // Amber/Bogey
     'Double Bogey+': 'var(--scarlet)', // Red/Over par
@@ -259,7 +259,7 @@ export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: {
                     {donutData.map((entry, index) => (
                       <Cell
  key={`cell-${index}`}
- fill={OUTCOME_COLORS[entry.name as HoleOutcome] || '#6B7280'}
+ fill={OUTCOME_COLORS[entry.name as HoleOutcome] || 'var(--ash)'}
  stroke="var(--shadow)"
  strokeWidth={2}
                       />
@@ -312,8 +312,8 @@ export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: {
  labelStyle={{ color: 'var(--chalk)' }}
  formatter={((value: number, name: string) => [`${value.toFixed(0)}%`, name === 'bogeyRate' ? 'Bogey' : 'Double Bogey+']) as never}
                   />
-                  <Bar dataKey="bogeyRate" stackId="a" fill="#F59520" name="Bogey" radius={[4, 0, 0, 4]} />
-                  <Bar dataKey="doubleBogeyPlusRate" stackId="a" fill="#E8202A" name="Double Bogey+" radius={[0, 4, 4, 0]} />
+                  <Bar dataKey="bogeyRate" stackId="a" fill="var(--bogey)" name="Bogey" radius={[4, 0, 0, 4]} />
+                  <Bar dataKey="doubleBogeyPlusRate" stackId="a" fill="var(--scarlet)" name="Double Bogey+" radius={[0, 4, 4, 0]} />
                   <Legend
  formatter={(value) => <span className="text-ash text-label-sm">{value}</span>}
                   />
@@ -331,13 +331,13 @@ export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: {
         <RootCauseChart
  title={`Bogey Root Cause (${totalBogeys} holes)`}
  rootCause={bogeyRootCause}
- fill="#F59520"
+ fill="var(--bogey)"
  isNarrow={isNarrow}
         />
         <RootCauseChart
  title={`Double Bogey+ Root Cause (${totalDoubleBogeyPlus} holes)`}
  rootCause={doubleBogeyPlusRootCause}
- fill="#E8202A"
+ fill="var(--scarlet)"
  isNarrow={isNarrow}
         />
       </div>
@@ -351,7 +351,7 @@ export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: {
           {/* Card 1: Opportunities */}
           <div
  className="card-hero"
- style={{ borderLeft: '4px solid #3D8EF0' }}
+ style={{ borderLeft: '4px solid var(--c1)' }}
           >
             <div className="flex justify-between items-center mb-4" >
               <div className="label text-ash text-body-sm" >Opportunities</div>
@@ -371,7 +371,7 @@ export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: {
           {/* Card 2: Conversions */}
           <div
  className="card-hero"
- style={{ borderLeft: '4px solid #52D9A0' }}
+ style={{ borderLeft: '4px solid var(--sg-gain)' }}
           >
             <div className="flex justify-between items-center mb-4" >
               <div className="label text-ash text-body-sm" >Conversions</div>
@@ -391,7 +391,7 @@ export function ScoringView({ metrics, birdieAndBogeyMetrics, mentalMetrics }: {
           {/* Card 3: Conversion % */}
           <div
  className="card-hero"
- style={{ borderLeft: '4px solid #F59520' }}
+ style={{ borderLeft: '4px solid var(--bogey)' }}
           >
             <div className="flex justify-between items-center mb-4" >
               <div className="label text-ash text-body-sm" >Conversion %</div>

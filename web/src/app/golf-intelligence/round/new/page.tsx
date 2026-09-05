@@ -161,7 +161,7 @@ function roundTypeBtnClass(selected: boolean): string {
 
 function roundNumBtnClass(selected: boolean): string {
   return (
-    'flex-1 py-2.5 rounded-md border font-display text-[15px] font-bold transition-colors ' +
+    'flex-1 py-2.5 rounded-md border font-display text-data font-bold transition-colors ' +
     (selected
       ? 'border-scarlet bg-scarlet-tint text-chalk'
       : 'border-border bg-shadow text-ash')

@@ -58,7 +58,7 @@ export default function HomePage() {
               what changes next — is intelligence.
             </p>
           </div>
-          <p className="font-body text-[15px] text-muted-foreground leading-relaxed">
+          <p className="font-body text-data text-muted-foreground leading-relaxed">
             Most programs have more data than they know what to do with.
             They don&apos;t have a system that turns that data into a clear
             decision after every round. Theory Golf changes that — three

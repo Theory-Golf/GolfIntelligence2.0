@@ -9,7 +9,7 @@ import { useMediaQuery, MOBILE_QUERY } from '@/lib/useMediaQuery';
 
 // Colors for starting lie - shared convention with other lie-based charts in the app
 const STARTING_LIE_COLORS: Record<Lie, string> = {
-  'Fairway': '#10B981',    // Emerald
+  'Fairway': 'var(--under)',    // Emerald
   'Rough': 'var(--c2)',      // Court Purple
   'Sand': 'var(--c4)',       // Volt
   'Recovery': 'var(--c3)',   // Aqua

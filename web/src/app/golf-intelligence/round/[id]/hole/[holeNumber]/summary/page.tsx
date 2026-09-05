@@ -13,9 +13,9 @@ import { ScoreHeader } from '@/components/golf/ScoreHeader';
 import { LIE_ABBREVIATIONS, LIE_COLORS } from '@/lib/golf/utils/lieColors';
 import type { ShotRow } from '@/lib/golf/db/types';
 
-const COLOR_UNDER = '#00B870';
-const COLOR_EVEN = '#B8B2AA';
-const COLOR_BOGEY = '#F09020';
+const COLOR_UNDER = 'var(--seg-shortgame)';
+const COLOR_EVEN = 'var(--cement)';
+const COLOR_BOGEY = 'var(--bogey)';
 const COLOR_DOUBLE = 'var(--scarlet)';
 
 function scoreWord(rel: number): string {
