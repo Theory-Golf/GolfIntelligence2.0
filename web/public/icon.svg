@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <rect width="100" height="100" fill="rgb(12,12,12)"/>
+  <clipPath id="b"><rect width="100" height="100"/></clipPath>
+  <line clip-path="url(#b)" x1="-116.41" y1="170.61" x2="216.41" y2="-51.27" stroke="rgb(232,32,42)" stroke-width="8.88"/>
+  <g fill="rgb(12,12,12)"><rect x="28.4" y="21.4" width="43.2" height="16.2"/><rect x="40.8" y="21.4" width="18.4" height="56.2"/></g>
+  <g fill="rgb(242,240,238)"><rect x="31" y="24" width="38" height="11"/><rect x="43.4" y="24" width="13.2" height="51"/></g>
+</svg>
