@@ -9,6 +9,7 @@
     "lint": "next lint && npm run check:formatting && npm run check:contrast",
     "test": "vitest run",
     "test:watch": "vitest",
+    "gen:icons": "node scripts/generate-icons.mjs",
     "verify:practice-sync": "node scripts/verify-practice-sync.mjs",
     "check:formatting": "node scripts/check-formatting.mjs",
     "check:contrast": "node scripts/check-contrast.mjs"
