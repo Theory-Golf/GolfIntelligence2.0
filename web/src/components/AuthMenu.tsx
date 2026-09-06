@@ -39,7 +39,7 @@ export default function AuthMenu({ className }: { className?: string }) {
   }
 
   const linkClasses = cn(
-    'font-mono text-[11px] tracking-[0.12em] uppercase no-underline whitespace-nowrap transition-colors text-muted-foreground hover:text-primary',
+    'font-mono text-label tracking-[0.12em] uppercase no-underline whitespace-nowrap transition-colors text-muted-foreground hover:text-primary',
     className
   );
 

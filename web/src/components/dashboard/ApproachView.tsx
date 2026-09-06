@@ -51,29 +51,29 @@ export function ApproachView({ metrics, approachByDistance, approachFromRough, a
   return (
     <div className="content">
       {/* Section Heading */}
-      <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>Approach Performance</h4>
+      <h4 className="mb-4 text-ash">Approach Performance</h4>
 
       {/* Hero Cards - 3 metrics */}
-      <div className="grid-cards-3" style={{ gap: '16px' }}>
+      <div className="grid-cards-3 gap-4" >
 
         {/* Card 1: Total SG Approach */}
         <div className="card-hero is-flagship">
-          <div className="flex justify-between items-center" style={{ marginBottom: '16px' }}>
+          <div className="flex justify-between items-center mb-4 gap-3" >
             <div className="label" style={{ color: 'var(--scarlet)' }}>Total SG Approach</div>
             <div style={{ width: '6px', height: '6px', background: 'var(--scarlet)', borderRadius: '50%' }}></div>
           </div>
           <div className="value-hero" style={{ color: getStrokeGainedColor(approachSG) }}>
             {formatStrokesGained(approachSG)}
           </div>
-          <div className="flex justify-between" style={{ marginTop: '16px' }}>
+          <div className="flex justify-between mt-4 gap-3" >
             <div>
-              <div className="label" style={{ color: 'var(--ash)', fontSize: '11px' }}>SG / Shot</div>
+              <div className="label text-ash" >SG / Shot</div>
               <div className="value-stat" style={{ color: getStrokeGainedColor(avgApproachSG) }}>
                 {formatStrokesGained(avgApproachSG)}
               </div>
             </div>
-            <div style={{ textAlign: 'right' }}>
-              <div className="label" style={{ color: 'var(--ash)', fontSize: '11px' }}>+ Approach</div>
+            <div className="text-right">
+              <div className="label text-ash" >+ Approach</div>
               <div className="value-stat">{positiveSGPct.toFixed(0)}%</div>
             </div>
           </div>
@@ -81,21 +81,21 @@ export function ApproachView({ metrics, approachByDistance, approachFromRough, a
 
         {/* Card 2: Green Hit % */}
         <div className="card-hero">
-          <div className="flex justify-between items-center" style={{ marginBottom: '16px' }}>
-            <div className="label" style={{ color: 'var(--ash)' }}>Green Hit %</div>
+          <div className="flex justify-between items-center mb-4 gap-3" >
+            <div className="label text-ash" >Green Hit %</div>
           </div>
           <div className="value-hero" style={{ color: getGreenHitPctColor(greenHitPct) }}>
             {greenHitPct.toFixed(0)}%
           </div>
-          <div className="flex justify-between" style={{ marginTop: '16px' }}>
+          <div className="flex justify-between mt-4 gap-3" >
             <div>
-              <div className="label" style={{ color: 'var(--ash)', fontSize: '11px' }}>Fairway</div>
+              <div className="label text-ash" >Fairway</div>
               <div className="value-stat" style={{ color: getGreenHitPctColor(greenHitPctFairway) }}>
                 {greenHitPctFairway.toFixed(0)}%
               </div>
             </div>
-            <div style={{ textAlign: 'right' }}>
-              <div className="label" style={{ color: 'var(--ash)', fontSize: '11px' }}>Rough</div>
+            <div className="text-right">
+              <div className="label text-ash" >Rough</div>
               <div className="value-stat" style={{ color: getGreenHitPctColor(greenHitPctRough) }}>
                 {greenHitPctRough.toFixed(0)}%
               </div>
@@ -105,21 +105,21 @@ export function ApproachView({ metrics, approachByDistance, approachFromRough, a
 
         {/* Card 3: Proximity < 150 */}
         <div className="card-hero">
-          <div className="flex justify-between items-center" style={{ marginBottom: '16px' }}>
-            <div className="label" style={{ color: 'var(--ash)' }}>Proximity &lt; 150yds</div>
+          <div className="flex justify-between items-center mb-4 gap-3" >
+            <div className="label text-ash" >Proximity &lt; 150yds</div>
           </div>
           <div className="value-hero" style={{ color: getProximityColor(proximityUnder150) }}>
             {proximityUnder150.toFixed(0)} <span style={{ fontSize: '18px' }}>ft</span>
           </div>
-          <div className="flex justify-between" style={{ marginTop: '16px' }}>
+          <div className="flex justify-between mt-4 gap-3" >
             <div>
-              <div className="label" style={{ color: 'var(--ash)', fontSize: '11px' }}>Prox. on Green</div>
+              <div className="label text-ash" >Prox. on Green</div>
               <div className="value-stat" style={{ color: getProximityColor(proximityUnder150OnGreen) }}>
                 {proximityUnder150OnGreen.toFixed(0)} ft
               </div>
             </div>
-            <div style={{ textAlign: 'right' }}>
-              <div className="label" style={{ color: 'var(--ash)', fontSize: '11px' }}>Within 20ft</div>
+            <div className="text-right">
+              <div className="label text-ash" >Within 20ft</div>
               <div className="value-stat" style={{ color: getGreenHitPctColor(within20FeetPct) }}>
                 {within20FeetPct.toFixed(0)}%
               </div>
@@ -130,16 +130,16 @@ export function ApproachView({ metrics, approachByDistance, approachFromRough, a
       </div>
 
       {/* Approach by Distance Section - all four buckets always shown */}
-      <h4 style={{ marginTop: '32px', marginBottom: '16px', color: 'var(--ash)' }}>Approach (Fairway and Tee): Approach Skill</h4>
-      <div className="grid-cards-4" style={{ gap: '16px' }}>
+      <h4 className="mt-8 mb-4 text-ash">Approach (Fairway and Tee): Approach Skill</h4>
+      <div className="grid-cards-4 gap-4" >
         {approachByDistance.map((bucket) => (
           <ApproachBucketCard key={bucket.label} bucket={bucket} />
         ))}
       </div>
 
       {/* Approach from Rough Section - all four buckets always shown */}
-      <h4 style={{ marginTop: '32px', marginBottom: '16px', color: 'var(--ash)' }}>Approach from Rough: Rough Skill</h4>
-      <div className="grid-cards-4" style={{ gap: '16px' }}>
+      <h4 className="mt-8 mb-4 text-ash">Approach from Rough: Rough Skill</h4>
+      <div className="grid-cards-4 gap-4" >
         {approachFromRough.map((bucket) => (
           <ApproachBucketCard key={bucket.label} bucket={bucket} />
         ))}
@@ -168,39 +168,39 @@ function ApproachBucketCard({ bucket }: { bucket: ApproachDistanceBucket }) {
 
   return (
     <div className="card">
-      <div className="flex justify-between items-center" style={{ marginBottom: '8px' }}>
+      <div className="flex justify-between items-center mb-2 gap-3" >
         <div className="label" style={{ color: 'var(--scarlet)' }}>{bucket.label}</div>
       </div>
-      <div className="label" style={{ color: 'var(--ash)', fontSize: '11px', marginBottom: '12px' }}>
+      <div className="label text-ash mb-3" >
         {bucket.description}
       </div>
 
       {/* Main Value: SG */}
       <div
-        className="value-hero"
-        style={{ color: hasShots ? getStrokeGainedColor(bucket.strokesGained) : 'var(--ash)', fontSize: '28px' }}
+ className="value-hero"
+ style={{ color: hasShots ? getStrokeGainedColor(bucket.strokesGained) : 'var(--ash)', fontSize: '28px' }}
       >
         {hasShots ? formatStrokesGained(bucket.strokesGained) : '—'}
       </div>
-      <div className="label" style={{ color: 'var(--ash)', fontSize: '11px', marginBottom: '16px' }}>
+      <div className="label text-ash mb-4" >
         SG ({bucket.totalShots} {bucket.totalShots === 1 ? 'shot' : 'shots'})
       </div>
 
-      <div className="flex justify-between">
+      <div className="flex justify-between gap-3">
         <div>
-          <div className="label" style={{ color: 'var(--ash)', fontSize: '10px' }}>Green %</div>
+          <div className="label text-ash" >Green %</div>
           <div
-            className="value-stat"
-            style={{ color: hasShots ? getGreenHitPctColor(bucket.greenHitPct) : 'var(--ash)', fontSize: '14px' }}
+ className="value-stat"
+ style={{ color: hasShots ? getGreenHitPctColor(bucket.greenHitPct) : 'var(--ash)', fontSize: 'var(--text-body-sm)' }}
           >
             {hasShots ? `${bucket.greenHitPct.toFixed(0)}%` : '—'}
           </div>
         </div>
-        <div style={{ textAlign: 'right' }}>
-          <div className="label" style={{ color: 'var(--ash)', fontSize: '10px' }}>Prox</div>
+        <div className="text-right">
+          <div className="label text-ash" >Prox</div>
           <div
-            className="value-stat"
-            style={{ color: hasShots ? getProximityColor(bucket.proximity) : 'var(--ash)', fontSize: '14px' }}
+ className="value-stat"
+ style={{ color: hasShots ? getProximityColor(bucket.proximity) : 'var(--ash)', fontSize: 'var(--text-body-sm)' }}
           >
             {hasShots ? `${bucket.proximity.toFixed(0)} ft` : '—'}
           </div>
@@ -218,12 +218,12 @@ function ApproachBucketCard({ bucket }: { bucket: ApproachDistanceBucket }) {
 type SGFilter = 'all' | 'negative' | 'positive';
 
 const FILTER_CONTROL_STYLE: CSSProperties = {
-  background: 'var(--charcoal)',
+  background: 'var(--shadow)',
   border: '1px solid var(--ash)',
   borderRadius: '4px',
   color: 'var(--chalk)',
-  fontSize: '12px',
-  padding: '6px 8px',
+  fontSize: 'var(--text-label)',
+  padding: 'var(--spacing-1-5) var(--spacing-2)',
 };
 
 function ApproachTableSection({ shots }: { shots: ProcessedShot[] }) {
@@ -290,25 +290,23 @@ function ApproachTableSection({ shots }: { shots: ProcessedShot[] }) {
   }
 
   return (
-    <div style={{ marginTop: '32px' }}>
+    <div className="mt-8">
       <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        style={{
-          display: 'flex',
+ onClick={() => setIsExpanded(!isExpanded)}
+ style={{ display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           width: '100%',
-          padding: '12px 16px',
-          background: 'var(--charcoal)',
+          padding: 'var(--spacing-3) var(--spacing-4)',
+          background: 'var(--shadow)',
           border: '1px solid var(--ash)',
           borderRadius: '4px',
           color: 'var(--chalk)',
           cursor: 'pointer',
-          fontSize: '14px',
-        }}
+          fontSize: 'var(--text-body-sm)' }}
       >
-        <span style={{ fontWeight: 600 }}>All Approach Shots</span>
-        <span style={{ fontSize: '12px', color: 'var(--ash)' }}>
+        <span className="font-semibold">All Approach Shots</span>
+        <span className="text-label text-ash">
           {isFiltered
             ? `${filteredApproaches.length} of ${approaches.length} approach ${approaches.length === 1 ? 'shot' : 'shots'}`
             : `${approaches.length} approach ${approaches.length === 1 ? 'shot' : 'shots'}`}
@@ -317,29 +315,29 @@ function ApproachTableSection({ shots }: { shots: ProcessedShot[] }) {
       </button>
 
       {isExpanded && (
-        <div style={{ marginTop: '16px' }}>
+        <div className="mt-4">
           {/* Filters */}
           <div
-            style={{
+ style={{
               display: 'flex',
               flexWrap: 'wrap',
               alignItems: 'flex-end',
-              gap: '16px',
-              marginBottom: '16px',
-              padding: '12px',
-              background: 'var(--charcoal)',
+              gap: 'var(--spacing-4)',
+              marginBottom: 'var(--spacing-4)',
+              padding: 'var(--spacing-3)',
+              background: 'var(--shadow)',
               borderRadius: '4px',
             }}
           >
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <label htmlFor="approach-type-filter" style={{ fontSize: '11px', color: 'var(--ash)' }}>
+            <div className="flex flex-col gap-1">
+              <label htmlFor="approach-type-filter" className="text-label-sm text-ash">
                 Approach Type
               </label>
               <select
-                id="approach-type-filter"
-                value={typeFilter}
-                onChange={(e) => setTypeFilter(e.target.value as 'all' | ApproachTypeLabel)}
-                style={FILTER_CONTROL_STYLE}
+ id="approach-type-filter"
+ value={typeFilter}
+ onChange={(e) => setTypeFilter(e.target.value as 'all' | ApproachTypeLabel)}
+ style={FILTER_CONTROL_STYLE}
               >
                 <option value="all">All types</option>
                 {APPROACH_DISTANCE_BUCKETS.map(bucket => (
@@ -350,15 +348,15 @@ function ApproachTableSection({ shots }: { shots: ProcessedShot[] }) {
               </select>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <label htmlFor="approach-sg-filter" style={{ fontSize: '11px', color: 'var(--ash)' }}>
+            <div className="flex flex-col gap-1">
+              <label htmlFor="approach-sg-filter" className="text-label-sm text-ash">
                 Strokes Gained
               </label>
               <select
-                id="approach-sg-filter"
-                value={sgFilter}
-                onChange={(e) => setSgFilter(e.target.value as SGFilter)}
-                style={FILTER_CONTROL_STYLE}
+ id="approach-sg-filter"
+ value={sgFilter}
+ onChange={(e) => setSgFilter(e.target.value as SGFilter)}
+ style={FILTER_CONTROL_STYLE}
               >
                 <option value="all">All shots</option>
                 <option value="negative">Negative SG only</option>
@@ -366,15 +364,15 @@ function ApproachTableSection({ shots }: { shots: ProcessedShot[] }) {
               </select>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <label htmlFor="approach-lie-filter" style={{ fontSize: '11px', color: 'var(--ash)' }}>
+            <div className="flex flex-col gap-1">
+              <label htmlFor="approach-lie-filter" className="text-label-sm text-ash">
                 Starting Lie
               </label>
               <select
-                id="approach-lie-filter"
-                value={lieFilter}
-                onChange={(e) => setLieFilter(e.target.value)}
-                style={FILTER_CONTROL_STYLE}
+ id="approach-lie-filter"
+ value={lieFilter}
+ onChange={(e) => setLieFilter(e.target.value)}
+ style={FILTER_CONTROL_STYLE}
               >
                 <option value="all">All lies</option>
                 {availableLies.map(lie => (
@@ -383,28 +381,25 @@ function ApproachTableSection({ shots }: { shots: ProcessedShot[] }) {
               </select>
             </div>
 
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--ash)', cursor: 'pointer', paddingBottom: '7px' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)', fontSize: 'var(--text-label)', color: 'var(--ash)', cursor: 'pointer', paddingBottom: '7px' }}>
               <input
-                type="checkbox"
-                checked={penaltyOnly}
-                onChange={(e) => setPenaltyOnly(e.target.checked)}
-                style={{ cursor: 'pointer' }}
+ type="checkbox"
+ checked={penaltyOnly}
+ onChange={(e) => setPenaltyOnly(e.target.checked)}
+ className="cursor-pointer"
               />
               Penalty shots only
             </label>
 
             {isFiltered && (
               <button
-                onClick={clearFilters}
-                style={{
-                  background: 'transparent',
+ onClick={clearFilters}
+ style={{ background: 'transparent',
                   border: 'none',
                   color: 'var(--scarlet)',
                   cursor: 'pointer',
-                  fontSize: '12px',
-                  padding: '6px 0',
-                  textDecoration: 'underline',
-                }}
+                  fontSize: 'var(--text-label)', padding: 'var(--spacing-1-5) 0',
+                  textDecoration: 'underline' }}
               >
                 Clear Filters
               </button>
@@ -412,7 +407,7 @@ function ApproachTableSection({ shots }: { shots: ProcessedShot[] }) {
           </div>
 
           {sortedRounds.length === 0 ? (
-            <div style={{ padding: '16px', background: 'var(--charcoal)', borderRadius: '4px', fontSize: '13px', color: 'var(--ash)' }}>
+            <div style={{ padding: 'var(--spacing-4)', background: 'var(--shadow)', borderRadius: '4px', fontSize: 'var(--text-caption)', color: 'var(--ash)' }}>
               No approach shots match these filters.
             </div>
           ) : (
@@ -420,24 +415,24 @@ function ApproachTableSection({ shots }: { shots: ProcessedShot[] }) {
               const [dateStr, courseStr] = roundKey.split('|');
 
               return (
-                <div key={roundKey} style={{ marginBottom: '16px', padding: '12px', background: 'var(--charcoal)', borderRadius: '4px' }}>
-                  <div style={{ display: 'flex', gap: '24px', marginBottom: '12px', fontSize: '12px', color: 'var(--chalk)' }}>
+                <div key={roundKey} style={{ marginBottom: 'var(--spacing-4)', padding: 'var(--spacing-3)', background: 'var(--shadow)', borderRadius: '4px' }}>
+                  <div className="flex gap-6 mb-3 text-label text-chalk">
                     <span><strong>Date:</strong> {dateStr}</span>
                     <span><strong>Course:</strong> {courseStr}</span>
                     <span><strong>Approach Shots:</strong> {roundApproaches.length}</span>
                   </div>
                   <div className="gi-table-scroll">
-                    <table style={{ minWidth: '680px', width: '100%', fontSize: '13px', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+                    <table style={{ minWidth: '680px', width: '100%', fontSize: 'var(--text-caption)', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
                       <thead>
                         <tr style={{ borderBottom: '1px solid var(--ash)' }}>
-                          <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '7%' }}>Hole</th>
-                          <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '11%' }}>Start Dist</th>
-                          <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '20%' }}>Type</th>
-                          <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '11%' }}>Start Lie</th>
-                          <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '11%' }}>End Dist</th>
-                          <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '11%' }}>End Lie</th>
-                          <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '9%' }}>Penalty</th>
-                          <th style={{ textAlign: 'center', padding: '6px', color: 'var(--ash)', width: '20%' }}>SG</th>
+                          <th style={{ textAlign: 'center', padding: 'var(--spacing-1-5)', color: 'var(--ash)', width: '7%' }}>Hole</th>
+                          <th style={{ textAlign: 'center', padding: 'var(--spacing-1-5)', color: 'var(--ash)', width: '11%' }}>Start Dist</th>
+                          <th style={{ textAlign: 'center', padding: 'var(--spacing-1-5)', color: 'var(--ash)', width: '20%' }}>Type</th>
+                          <th style={{ textAlign: 'center', padding: 'var(--spacing-1-5)', color: 'var(--ash)', width: '11%' }}>Start Lie</th>
+                          <th style={{ textAlign: 'center', padding: 'var(--spacing-1-5)', color: 'var(--ash)', width: '11%' }}>End Dist</th>
+                          <th style={{ textAlign: 'center', padding: 'var(--spacing-1-5)', color: 'var(--ash)', width: '11%' }}>End Lie</th>
+                          <th style={{ textAlign: 'center', padding: 'var(--spacing-1-5)', color: 'var(--ash)', width: '9%' }}>Penalty</th>
+                          <th style={{ textAlign: 'center', padding: 'var(--spacing-1-5)', color: 'var(--ash)', width: '20%' }}>SG</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -446,22 +441,22 @@ function ApproachTableSection({ shots }: { shots: ProcessedShot[] }) {
                           .sort((a, b) => a.holeNumber - b.holeNumber)
                           .map((approach, idx) => (
                             <tr key={idx} style={{ borderBottom: '1px solid var(--dark)' }}>
-                              <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{approach.holeNumber}</td>
-                              <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>
+                              <td className="p-1.5 text-center text-chalk">{approach.holeNumber}</td>
+                              <td style={{ padding: 'var(--spacing-1-5)', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>
                                 {approach.startingDistance}
                               </td>
-                              <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>
+                              <td className="p-1.5 text-center text-chalk">
                                 {getApproachType(approach.startingDistance) ?? '—'}
                               </td>
-                              <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{approach.startingLie}</td>
-                              <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>
+                              <td className="p-1.5 text-center text-chalk">{approach.startingLie}</td>
+                              <td style={{ padding: 'var(--spacing-1-5)', textAlign: 'center', color: 'var(--chalk)', fontFamily: 'var(--font-mono)' }}>
                                 {approach.endingDistance}
                               </td>
-                              <td style={{ padding: '6px', textAlign: 'center', color: 'var(--chalk)' }}>{approach.endingLie}</td>
-                              <td style={{ padding: '6px', textAlign: 'center', color: approach.hasPenalty ? 'var(--scarlet)' : 'transparent' }}>
+                              <td className="p-1.5 text-center text-chalk">{approach.endingLie}</td>
+                              <td style={{ padding: 'var(--spacing-1-5)', textAlign: 'center', color: approach.hasPenalty ? 'var(--scarlet)' : 'transparent' }}>
                                 {approach.hasPenalty ? 'Yes' : ''}
                               </td>
-                              <td style={{ padding: '6px', textAlign: 'center', color: getShotSGColor(approach.calculatedStrokesGained), fontFamily: 'var(--font-mono)' }}>
+                              <td style={{ padding: 'var(--spacing-1-5)', textAlign: 'center', color: getShotSGColor(approach.calculatedStrokesGained), fontFamily: 'var(--font-mono)' }}>
                                 {formatStrokesGained(approach.calculatedStrokesGained)}
                               </td>
                             </tr>
@@ -517,14 +512,14 @@ function ApproachEndingLieSection({ filteredShots }: { filteredShots: ProcessedS
 
   // Colors for different ending lies
   const LIE_COLORS: Record<string, string> = {
-    'Green': '#3D8EF0',      // Royal Blue
-    'Fairway': '#10B981',    // Emerald
-    'Rough': '#A855F7',      // Court Purple
-    'Sand': '#D4F000',        // Volt
-    'Recovery': '#06C8E0',   // Aqua
-    'Water': '#3B82F6',      // Blue
-    'Out of Bounds': '#EF4444', // Red
-    'Other': '#6B7280',       // Gray
+    'Green': 'var(--c1)',      // Royal Blue
+    'Fairway': 'var(--under)',    // Emerald
+    'Rough': 'var(--c2)',      // Court Purple
+    'Sand': 'var(--c4)',        // Volt
+    'Recovery': 'var(--c3)',   // Aqua
+    'Water': 'var(--c1)',      // Blue
+    'Out of Bounds': 'var(--double)', // Red
+    'Other': 'var(--ash)',       // Gray
   };
 
   if (endingLieData.length === 0) {
@@ -540,17 +535,17 @@ function ApproachEndingLieSection({ filteredShots }: { filteredShots: ProcessedS
         background: 'var(--court)',
         border: '1px solid var(--scarlet)',
         borderRadius: '4px',
-        padding: '12px',
+        padding: 'var(--spacing-3)',
         boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
       }}>
-        <div style={{ color: 'var(--chalk)', fontWeight: 600, marginBottom: '8px' }}>
+        <div className="text-chalk font-semibold mb-2">
           {data.lie}
         </div>
-        <div style={{ fontSize: '12px', color: 'var(--cement)', marginBottom: '4px' }}>
-          Count: <span style={{ color: 'var(--chalk)' }}>{data.count}</span>
+        <div className="text-label text-cement mb-1">
+          Count: <span className="text-chalk">{data.count}</span>
         </div>
-        <div style={{ fontSize: '12px', color: 'var(--cement)' }}>
-          Percentage: <span style={{ color: 'var(--chalk)' }}>{data.percentage.toFixed(0)}%</span>
+        <div className="text-label text-cement">
+          Percentage: <span className="text-chalk">{data.percentage.toFixed(0)}%</span>
         </div>
       </div>
     );
@@ -565,67 +560,67 @@ function ApproachEndingLieSection({ filteredShots }: { filteredShots: ProcessedS
         background: 'var(--court)',
         border: '1px solid var(--scarlet)',
         borderRadius: '4px',
-        padding: '12px',
+        padding: 'var(--spacing-3)',
         boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
       }}>
-        <div style={{ color: 'var(--chalk)', fontWeight: 600, marginBottom: '8px' }}>
+        <div className="text-chalk font-semibold mb-2">
           {data.lie}
         </div>
-        <div style={{ fontSize: '12px', color: 'var(--cement)', marginBottom: '4px' }}>
+        <div className="text-label text-cement mb-1">
           Total SG: <span style={{ color: getStrokeGainedColor(data.strokesGained) }}>
             {formatStrokesGained(data.strokesGained)}
           </span>
         </div>
-        <div style={{ fontSize: '12px', color: 'var(--cement)', marginBottom: '4px' }}>
+        <div className="text-label text-cement mb-1">
           Avg SG: <span style={{ color: getStrokeGainedColor(data.avgStrokesGained) }}>
             {formatStrokesGained(data.avgStrokesGained)}
           </span>
         </div>
-        <div style={{ fontSize: '12px', color: 'var(--cement)' }}>
-          Count: <span style={{ color: 'var(--chalk)' }}>{data.count}</span>
+        <div className="text-label text-cement">
+          Count: <span className="text-chalk">{data.count}</span>
         </div>
       </div>
     );
   };
 
   return (
-    <div style={{ marginTop: '32px' }}>
-      <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>Approach Ending Lie</h4>
+    <div className="mt-8">
+      <h4 className="mb-4 text-ash">Approach Ending Lie</h4>
 
-      <div className="grid-pair" style={{ gap: '24px' }}>
+      <div className="grid-pair gap-6" >
         {/* Chart 1: Ending Lie as % of Total Approach Shots */}
-        <div style={{ background: 'var(--charcoal)', padding: '16px', borderRadius: '4px' }}>
-          <h5 style={{ marginBottom: '8px', color: 'var(--chalk)', fontSize: '14px', fontWeight: 600 }}>
+        <div style={{ background: 'var(--shadow)', padding: 'var(--spacing-4)', borderRadius: '4px' }}>
+          <h5 className="mb-2 text-chalk text-body-sm font-semibold">
             Ending Lie % of Total Shots
           </h5>
-          <p style={{ fontSize: '11px', color: 'var(--ash)', marginBottom: '16px' }}>
+          <p className="text-label-sm text-ash mb-4">
             Distribution of where approach shots end up
           </p>
           <ResponsiveContainer width="100%" height={isNarrow ? 220 : 280}>
             <BarChart
-              data={endingLieData}
-              margin={{ top: 10, right: 30, left: 20, bottom: 50 }}
+ data={endingLieData}
+ margin={{ top: 10, right: 30, left: 20, bottom: 50 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="var(--ash)" opacity={0.3} />
               <XAxis
-                dataKey="lie"
-                stroke="var(--ash)"
-                tick={{ fill: 'var(--ash)', fontSize: isNarrow ? 10 : 12 }}
-                angle={isNarrow ? 0 : -45}
-                textAnchor={isNarrow ? 'middle' : 'end'}
-                height={isNarrow ? 24 : 50}
+ dataKey="lie"
+ stroke="var(--ash)"
+ tick={{ fill: 'var(--ash)', fontSize: isNarrow ? 10 : 12 }}
+ angle={isNarrow ? 0 : -45}
+ textAnchor={isNarrow ? 'middle' : 'end'}
+ height={isNarrow ? 24 : 50}
               />
               <YAxis
-                stroke="var(--ash)"
-                tick={{ fill: 'var(--ash)', fontSize: 11 }}
-                tickFormatter={(value) => `${value}%`}
-                domain={[0, 100]}
+ stroke="var(--ash)"
+ tick={{ fill: 'var(--ash)', fontSize: 11 }}
+ tickFormatter={(value) => `${value}%`}
+ domain={[0, 100]}
               />
               <Tooltip content={<PercentageTooltip />} />
               <Bar
-                dataKey="percentage"
-                name="% of Shots"
-                radius={[4, 4, 0, 0]}
+ dataKey="percentage"
+ name="% of Shots"
+ radius={[4, 4, 0, 0]}
               >
                 {endingLieData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={LIE_COLORS[entry.lie] || chartColors[0]} />
@@ -636,37 +631,37 @@ function ApproachEndingLieSection({ filteredShots }: { filteredShots: ProcessedS
         </div>
 
         {/* Chart 2: Total SG by Ending Lie */}
-        <div style={{ background: 'var(--charcoal)', padding: '16px', borderRadius: '4px' }}>
-          <h5 style={{ marginBottom: '8px', color: 'var(--chalk)', fontSize: '14px', fontWeight: 600 }}>
+        <div style={{ background: 'var(--shadow)', padding: 'var(--spacing-4)', borderRadius: '4px' }}>
+          <h5 className="mb-2 text-chalk text-body-sm font-semibold">
             Total SG by Ending Lie
           </h5>
-          <p style={{ fontSize: '11px', color: 'var(--ash)', marginBottom: '16px' }}>
+          <p className="text-label-sm text-ash mb-4">
             Strokes Gained performance by ending location
           </p>
           <ResponsiveContainer width="100%" height={isNarrow ? 220 : 280}>
             <BarChart
-              data={endingLieData}
-              margin={{ top: 10, right: 30, left: 20, bottom: 50 }}
+ data={endingLieData}
+ margin={{ top: 10, right: 30, left: 20, bottom: 50 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="var(--ash)" opacity={0.3} />
               <XAxis
-                dataKey="lie"
-                stroke="var(--ash)"
-                tick={{ fill: 'var(--ash)', fontSize: isNarrow ? 10 : 12 }}
-                angle={isNarrow ? 0 : -45}
-                textAnchor={isNarrow ? 'middle' : 'end'}
-                height={isNarrow ? 24 : 50}
+ dataKey="lie"
+ stroke="var(--ash)"
+ tick={{ fill: 'var(--ash)', fontSize: isNarrow ? 10 : 12 }}
+ angle={isNarrow ? 0 : -45}
+ textAnchor={isNarrow ? 'middle' : 'end'}
+ height={isNarrow ? 24 : 50}
               />
               <YAxis
-                stroke="var(--ash)"
-                tick={{ fill: 'var(--ash)', fontSize: 11 }}
-                tickFormatter={(value) => formatStrokesGained(value)}
+ stroke="var(--ash)"
+ tick={{ fill: 'var(--ash)', fontSize: 11 }}
+ tickFormatter={(value) => formatStrokesGained(value)}
               />
               <Tooltip content={<SGTooltip />} />
               <Bar
-                dataKey="strokesGained"
-                name="Total SG"
-                radius={[4, 4, 0, 0]}
+ dataKey="strokesGained"
+ name="Total SG"
+ radius={[4, 4, 0, 0]}
               >
                 {endingLieData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={LIE_COLORS[entry.lie] || chartColors[0]} />
@@ -723,49 +718,49 @@ function ApproachHeatMapSection({ data }: { data: ApproachHeatMapData }) {
 
   return (
     <>
-      <h4 style={{ marginTop: '32px', marginBottom: '16px', color: 'var(--ash)' }}>Approach Heat Map</h4>
+      <h4 className="mt-8 mb-4 text-ash">Approach Heat Map</h4>
 
       {/* Radio buttons */}
-      <div style={{ marginBottom: '16px', display: 'flex', gap: '24px' }}>
-        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+      <div className="mb-4 flex gap-6">
+        <label className="flex items-center gap-2 cursor-pointer">
           <input
-            type="radio"
-            name="sgDisplayMode"
-            value="total"
-            checked={sgDisplayMode === 'total'}
-            onChange={() => setSgDisplayMode('total')}
-            style={{ cursor: 'pointer' }}
+ type="radio"
+ name="sgDisplayMode"
+ value="total"
+ checked={sgDisplayMode === 'total'}
+ onChange={() => setSgDisplayMode('total')}
+ className="cursor-pointer"
           />
-          <span style={{ color: 'var(--ash)' }}>Total SG</span>
+          <span className="text-ash">Total SG</span>
         </label>
-        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+        <label className="flex items-center gap-2 cursor-pointer">
           <input
-            type="radio"
-            name="sgDisplayMode"
-            value="perRound"
-            checked={sgDisplayMode === 'perRound'}
-            onChange={() => setSgDisplayMode('perRound')}
-            style={{ cursor: 'pointer' }}
+ type="radio"
+ name="sgDisplayMode"
+ value="perRound"
+ checked={sgDisplayMode === 'perRound'}
+ onChange={() => setSgDisplayMode('perRound')}
+ className="cursor-pointer"
           />
-          <span style={{ color: 'var(--ash)' }}>SG per Round</span>
+          <span className="text-ash">SG per Round</span>
         </label>
       </div>
 
       {/* Heat Map Table */}
       <div className="gi-table-scroll">
-        <table className="gi-sticky-col" style={{ minWidth: '700px', width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+        <table className="gi-sticky-col" style={{ minWidth: '700px', width: '100%', borderCollapse: 'collapse', fontSize: 'var(--text-caption)' }}>
           <thead>
             <tr>
-              <th style={{ padding: '12px', textAlign: 'left', color: 'var(--ash)', fontWeight: '600', borderBottom: '1px solid var(--border)' }}>Starting Lie</th>
+              <th style={{ padding: 'var(--spacing-3)', textAlign: 'left', color: 'var(--ash)', fontWeight: '600', borderBottom: '1px solid var(--border)' }}>Starting Lie</th>
               {data.distanceBuckets.map(bucket => (
-                <th key={bucket} style={{ padding: '12px', textAlign: 'center', color: 'var(--ash)', fontWeight: '600', borderBottom: '1px solid var(--border)' }}>
+                <th key={bucket} style={{ padding: 'var(--spacing-3)', textAlign: 'center', color: 'var(--ash)', fontWeight: '600', borderBottom: '1px solid var(--border)' }}>
                   <div>{bucket}</div>
-                  <div style={{ fontSize: '11px', fontWeight: '400', color: 'var(--ash)', marginTop: '2px' }}>
+                  <div style={{ fontSize: 'var(--text-label-sm)', fontWeight: '400', color: 'var(--ash)', marginTop: '2px' }}>
                     {getApproachBucketRange(bucket)}
                   </div>
                 </th>
               ))}
-              <th style={{ padding: '12px', textAlign: 'center', color: 'var(--ash)', fontWeight: '600', borderBottom: '1px solid var(--border)', backgroundColor: 'var(--bg-secondary)' }}>Total</th>
+              <th style={{ padding: 'var(--spacing-3)', textAlign: 'center', color: 'var(--ash)', fontWeight: '600', borderBottom: '1px solid var(--border)', backgroundColor: 'var(--bg-secondary)' }}>Total</th>
             </tr>
           </thead>
           <tbody>
@@ -778,24 +773,24 @@ function ApproachHeatMapSection({ data }: { data: ApproachHeatMapData }) {
 
               return (
                 <tr key={lie}>
-                  <td style={{ padding: '12px', fontWeight: '600', color: 'var(--scarlet)', borderBottom: '1px solid var(--border)' }}>{lie}</td>
+                  <td style={{ padding: 'var(--spacing-3)', fontWeight: '600', color: 'var(--scarlet)', borderBottom: '1px solid var(--border)' }}>{lie}</td>
                   {data.distanceBuckets.map(bucket => {
                     const cell = getCellData(lie, bucket);
                     const hasShots = cell && cell.totalShots > 0;
                     const sgValue = getSgValue(cell);
 
                     return (
-                      <td key={`${lie}-${bucket}`} style={{ padding: '12px 8px', textAlign: 'center', borderBottom: '1px solid var(--border)', backgroundColor: hasShots ? getHeatMapColor(sgValue) : 'transparent', minWidth: '100px' }}>
-                        {hasShots && <div style={{ fontWeight: '600', fontSize: '14px' }}>{cell.totalShots}</div>}
-                        {hasShots && <div style={{ fontSize: '11px', color: getStrokeGainedColor(sgValue), marginTop: '2px' }}>{formatStrokesGained(sgValue)}</div>}
+                      <td key={`${lie}-${bucket}`} style={{ padding: 'var(--spacing-3) var(--spacing-2)', textAlign: 'center', borderBottom: '1px solid var(--border)', backgroundColor: hasShots ? getHeatMapColor(sgValue) : 'transparent', minWidth: '100px' }}>
+                        {hasShots && <div className="font-semibold text-body-sm">{cell.totalShots}</div>}
+                        {hasShots && <div style={{ fontSize: 'var(--text-label-sm)', color: getStrokeGainedColor(sgValue), marginTop: '2px' }}>{formatStrokesGained(sgValue)}</div>}
                       </td>
                     );
                   })}
-                  <td style={{ padding: '12px 8px', textAlign: 'center', borderBottom: '1px solid var(--border)', backgroundColor: 'var(--bg-secondary)', fontWeight: '600' }}>
+                  <td style={{ padding: 'var(--spacing-3) var(--spacing-2)', textAlign: 'center', borderBottom: '1px solid var(--border)', backgroundColor: 'var(--bg-secondary)', fontWeight: '600' }}>
                     {rowTotal.totalShots > 0 && (
                       <>
-                        <div style={{ fontSize: '14px' }}>{rowTotal.totalShots}</div>
-                        <div style={{ fontSize: '11px', color: getStrokeGainedColor(sgDisplayMode === 'total' ? rowTotal.strokesGained : (data.totalRounds > 0 ? rowTotal.strokesGained / data.totalRounds : 0)), marginTop: '2px' }}>
+                        <div className="text-body-sm">{rowTotal.totalShots}</div>
+                        <div style={{ fontSize: 'var(--text-label-sm)', color: getStrokeGainedColor(sgDisplayMode === 'total' ? rowTotal.strokesGained : (data.totalRounds > 0 ? rowTotal.strokesGained / data.totalRounds : 0)), marginTop: '2px' }}>
                           {formatStrokesGained(sgDisplayMode === 'total' ? rowTotal.strokesGained : (data.totalRounds > 0 ? rowTotal.strokesGained / data.totalRounds : 0))}
                         </div>
                       </>
@@ -806,25 +801,25 @@ function ApproachHeatMapSection({ data }: { data: ApproachHeatMapData }) {
             })}
             {/* Grand Total Row */}
             <tr style={{ backgroundColor: 'var(--bg-secondary)' }}>
-              <td style={{ padding: '12px', fontWeight: '700', color: 'var(--ash)', borderBottom: '2px solid var(--border)' }}>Total</td>
+              <td style={{ padding: 'var(--spacing-3)', fontWeight: '700', color: 'var(--ash)', borderBottom: '2px solid var(--border)' }}>Total</td>
               {columnTotals.map(col => {
                 const sgValue = sgDisplayMode === 'total' ? col.strokesGained : (data.totalRounds > 0 ? col.strokesGained / data.totalRounds : 0);
                 return (
-                  <td key={`total-${col.bucket}`} style={{ padding: '12px 8px', textAlign: 'center', borderBottom: '2px solid var(--border)', fontWeight: '600' }}>
+                  <td key={`total-${col.bucket}`} style={{ padding: 'var(--spacing-3) var(--spacing-2)', textAlign: 'center', borderBottom: '2px solid var(--border)', fontWeight: '600' }}>
                     {col.totalShots > 0 && (
                       <>
-                        <div style={{ fontSize: '14px' }}>{col.totalShots}</div>
-                        <div style={{ fontSize: '11px', color: getStrokeGainedColor(sgValue), marginTop: '2px' }}>{formatStrokesGained(sgValue)}</div>
+                        <div className="text-body-sm">{col.totalShots}</div>
+                        <div style={{ fontSize: 'var(--text-label-sm)', color: getStrokeGainedColor(sgValue), marginTop: '2px' }}>{formatStrokesGained(sgValue)}</div>
                       </>
                     )}
                   </td>
                 );
               })}
-              <td style={{ padding: '12px 8px', textAlign: 'center', borderBottom: '2px solid var(--border)', backgroundColor: 'var(--bg-tertiary)', fontWeight: '700' }}>
+              <td style={{ padding: 'var(--spacing-3) var(--spacing-2)', textAlign: 'center', borderBottom: '2px solid var(--border)', backgroundColor: 'var(--bg-tertiary)', fontWeight: '700' }}>
                 {grandTotal.totalShots > 0 && (
                   <>
-                    <div style={{ fontSize: '14px' }}>{grandTotal.totalShots}</div>
-                    <div style={{ fontSize: '11px', color: getStrokeGainedColor(sgDisplayMode === 'total' ? grandTotal.strokesGained : (data.totalRounds > 0 ? grandTotal.strokesGained / data.totalRounds : 0)), marginTop: '2px' }}>
+                    <div className="text-body-sm">{grandTotal.totalShots}</div>
+                    <div style={{ fontSize: 'var(--text-label-sm)', color: getStrokeGainedColor(sgDisplayMode === 'total' ? grandTotal.strokesGained : (data.totalRounds > 0 ? grandTotal.strokesGained / data.totalRounds : 0)), marginTop: '2px' }}>
                       {formatStrokesGained(sgDisplayMode === 'total' ? grandTotal.strokesGained : (data.totalRounds > 0 ? grandTotal.strokesGained / data.totalRounds : 0))}
                     </div>
                   </>
@@ -836,23 +831,23 @@ function ApproachHeatMapSection({ data }: { data: ApproachHeatMapData }) {
       </div>
 
       {/* Legend */}
-      <div style={{ marginTop: '16px', display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
-        <span style={{ color: 'var(--ash)', fontSize: '12px' }}>Color scale:</span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+      <div className="mt-4 flex gap-4 items-center flex-wrap">
+        <span className="text-ash text-label">Color scale:</span>
+        <div className="flex items-center gap-1">
           <div style={{ width: '16px', height: '16px', backgroundColor: 'rgba(239, 68, 68, 0.7)' }}></div>
-          <span style={{ color: 'var(--ash)', fontSize: '11px' }}>Strong negative</span>
+          <span className="text-ash text-label-sm">Strong negative</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+        <div className="flex items-center gap-1">
           <div style={{ width: '16px', height: '16px', backgroundColor: 'rgba(254, 226, 226, 0.3)' }}></div>
-          <span style={{ color: 'var(--ash)', fontSize: '11px' }}>Slight negative</span>
+          <span className="text-ash text-label-sm">Slight negative</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+        <div className="flex items-center gap-1">
           <div style={{ width: '16px', height: '16px', backgroundColor: 'rgba(187, 247, 208, 0.3)' }}></div>
-          <span style={{ color: 'var(--ash)', fontSize: '11px' }}>Slight positive</span>
+          <span className="text-ash text-label-sm">Slight positive</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+        <div className="flex items-center gap-1">
           <div style={{ width: '16px', height: '16px', backgroundColor: 'rgba(34, 197, 94, 0.7)' }}></div>
-          <span style={{ color: 'var(--ash)', fontSize: '11px' }}>Strong positive</span>
+          <span className="text-ash text-label-sm">Strong positive</span>
         </div>
       </div>
     </>

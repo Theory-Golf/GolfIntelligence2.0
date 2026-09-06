@@ -25,7 +25,7 @@ export default async function EthosPaperPage({ params }: PageParams) {
       <div className="max-w-3xl mx-auto">
         <Link
           href="/ethos"
-          className="inline-flex items-center gap-2 font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground no-underline mb-6 hover:text-primary transition-colors"
+          className="inline-flex items-center gap-2 font-mono text-label tracking-[0.2em] uppercase text-muted-foreground no-underline mb-6 hover:text-primary transition-colors"
         >
           <ArrowLeft className="size-3" /> Ethos
         </Link>
@@ -41,7 +41,7 @@ export default async function EthosPaperPage({ params }: PageParams) {
           <a
             href={getPaperPdfUrl(paper.pdf_path)}
             download
-            className="inline-flex items-center gap-2 mt-6 font-mono text-[11px] tracking-[0.15em] uppercase text-foreground border border-border px-4 py-2 no-underline hover:border-primary hover:text-primary transition-colors"
+            className="inline-flex items-center gap-2 mt-6 font-mono text-label tracking-[0.15em] uppercase text-foreground border border-border px-4 py-2 no-underline hover:border-primary hover:text-primary transition-colors"
           >
             <Download className="size-3.5" /> Download PDF
           </a>

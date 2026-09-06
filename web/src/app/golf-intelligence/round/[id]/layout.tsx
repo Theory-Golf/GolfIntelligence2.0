@@ -10,7 +10,7 @@ export default function RoundLayout({ children }: { children: React.ReactNode })
   if (!roundId) {
     return (
       <div className="min-h-svh bg-background text-foreground flex items-center justify-center">
-        <span className="font-mono text-xs text-ash tracking-[0.25em] uppercase">
+        <span className="font-mono text-label text-ash tracking-[0.25em] uppercase">
           Missing round id
         </span>
       </div>

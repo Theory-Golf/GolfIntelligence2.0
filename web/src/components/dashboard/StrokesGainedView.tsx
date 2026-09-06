@@ -169,27 +169,27 @@ export function StrokesGainedView({ metrics, filteredShots }: { metrics: Tiger5M
   return (
     <div className="content">
       {/* Section Heading */}
-      <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>Strokes Gained</h4>
+      <h4 className="mb-4 text-ash">Strokes Gained</h4>
 
       {/* Hero Card - Total SG */}
-      <div className="grid" style={{ gridTemplateColumns: '1fr', gap: '16px', maxWidth: '400px' }}>
+      <div className="grid" style={{ gridTemplateColumns: '1fr', gap: 'var(--spacing-4)', maxWidth: '400px' }}>
         <div className="card-hero is-flagship">
-          <div className="flex justify-between items-center" style={{ marginBottom: '16px' }}>
+          <div className="flex justify-between items-center mb-4 gap-3" >
             <div className="label" style={{ color: 'var(--scarlet)' }}>Total SG</div>
             <div style={{ width: '6px', height: '6px', background: 'var(--scarlet)', borderRadius: '50%' }}></div>
           </div>
           <div className="value-hero" style={{ color: getStrokeGainedColor(totalStrokesGained) }}>
             {formatStrokesGained(totalStrokesGained)}
           </div>
-          <div className="flex justify-between" style={{ marginTop: '16px' }}>
+          <div className="flex justify-between mt-4 gap-3" >
             <div>
-              <div className="label" style={{ color: 'var(--ash)', fontSize: '11px' }}>SG / Hole</div>
+              <div className="label text-ash" >SG / Hole</div>
               <div className="value-stat" style={{ color: getStrokeGainedColor(sgPerHole) }}>
                 {formatStrokesGained(sgPerHole)}
               </div>
             </div>
-            <div style={{ textAlign: 'right' }}>
-              <div className="label" style={{ color: 'var(--ash)', fontSize: '11px' }}>Total Holes</div>
+            <div className="text-right">
+              <div className="label text-ash" >Total Holes</div>
               <div className="value-stat">{totalHoles}</div>
             </div>
           </div>
@@ -197,42 +197,42 @@ export function StrokesGainedView({ metrics, filteredShots }: { metrics: Tiger5M
       </div>
 
       {/* Stat Cards - SG by Shot Type */}
-      <div className="grid-tiles-5" style={{ gap: '12px', marginTop: '24px' }}>
+      <div className="grid-tiles-5 gap-3 mt-6" >
         {statCards.map((card) => {
           const cat = card.category;
           if (!cat || cat.totalShots === 0) return null;
 
           return (
             <div
-              key={card.id}
-              className="card-stat"
-              style={{
+ key={card.id}
+ className="card-stat"
+ style={{
                 borderLeft: card.accentColor ? `3px solid ${card.accentColor}` : '3px solid var(--pitch)',
                 background: card.accentColor ? 'var(--shadow)' : 'var(--shadow)',
               }}
             >
-              <div className="label" style={{ color: 'var(--ash)', marginBottom: '12px' }}>
+              <div className="label text-ash mb-3" >
                 {card.label}
               </div>
               <div
-                className="value-stat"
-                style={{ color: getStrokeGainedColor(cat.strokesGained) }}
+ className="value-stat"
+ style={{ color: getStrokeGainedColor(cat.strokesGained) }}
               >
                 {formatStrokesGained(cat.strokesGained)}
               </div>
-              <div className="flex justify-between" style={{ marginTop: '12px' }}>
+              <div className="flex justify-between mt-3 gap-3" >
                 <div>
-                  <div className="label" style={{ color: 'var(--ash)', fontSize: '10px' }}>SG / Shot</div>
+                  <div className="label text-ash" >SG / Shot</div>
                   <div
-                    className="value-stat"
-                    style={{ color: getStrokeGainedColor(cat.avgStrokesGained), fontSize: '12px' }}
+ className="value-stat"
+ style={{ color: getStrokeGainedColor(cat.avgStrokesGained), fontSize: 'var(--text-label)' }}
                   >
                     {formatStrokesGained(cat.avgStrokesGained)}
                   </div>
                 </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div className="label" style={{ color: 'var(--ash)', fontSize: '10px' }}>Shots</div>
-                  <div className="value-stat" style={{ fontSize: '12px' }}>{cat.totalShots}</div>
+                <div className="text-right">
+                  <div className="label text-ash" >Shots</div>
+                  <div className="value-stat"  style={{ fontSize: 'var(--text-label)' }}>{cat.totalShots}</div>
                 </div>
               </div>
             </div>
@@ -241,57 +241,57 @@ export function StrokesGainedView({ metrics, filteredShots }: { metrics: Tiger5M
       </div>
 
       {/* Legend for accents */}
-      <div style={{ marginTop: '16px', display: 'flex', gap: '24px', fontSize: '11px', color: 'var(--ash)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+      <div className="mt-4 flex gap-6 text-label-sm text-ash">
+        <div className="flex items-center gap-1.5">
           <div style={{ width: '8px', height: '8px', background: 'var(--under)', borderRadius: '2px' }}></div>
           <span>Highest SG</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <div className="flex items-center gap-1.5">
           <div style={{ width: '8px', height: '8px', background: 'var(--scarlet)', borderRadius: '2px' }}></div>
           <span>Lowest SG</span>
         </div>
       </div>
 
       {/* SG Separators Section - Distance-based SG breakdown */}
-      <div style={{ marginTop: '32px' }}>
-        <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>Strokes Gained Separators</h4>
-        <p style={{ fontSize: '12px', color: 'var(--ash)', marginBottom: '16px' }}>
+      <div className="mt-8">
+        <h4 className="mb-4 text-ash">Strokes Gained Separators</h4>
+        <p className="text-label text-ash mb-4">
           SG breakdown by distance categories
         </p>
 
-        <div className="grid-tiles-5" style={{ gap: '12px' }}>
+        <div className="grid-tiles-5 gap-3" >
           {sgSeparators.map((separator) => {
             return (
               <div
-                key={separator.label}
-                className="card-stat"
-                style={{ borderLeft: '3px solid var(--pitch)' }}
+ key={separator.label}
+ className="card-stat"
+ style={{ borderLeft: '3px solid var(--pitch)' }}
               >
-                <div className="label" style={{ color: 'var(--ash)', marginBottom: '4px', fontSize: '12px' }}>
+                <div className="label text-ash mb-1" >
                   {separator.label}
                 </div>
-                <div className="label" style={{ color: 'var(--ash)', marginBottom: '12px', fontSize: '10px' }}>
+                <div className="label text-ash mb-3" >
                   {separator.description}
                 </div>
                 <div
-                  className="value-stat"
-                  style={{ color: getStrokeGainedColor(separator.strokesGained) }}
+ className="value-stat"
+ style={{ color: getStrokeGainedColor(separator.strokesGained) }}
                 >
                   {formatStrokesGained(separator.strokesGained)}
                 </div>
-                <div className="flex justify-between" style={{ marginTop: '12px' }}>
+                <div className="flex justify-between mt-3 gap-3" >
                   <div>
-                    <div className="label" style={{ color: 'var(--ash)', fontSize: '10px' }}>SG / Shot</div>
+                    <div className="label text-ash" >SG / Shot</div>
                     <div
-                      className="value-stat"
-                      style={{ color: getStrokeGainedColor(separator.avgStrokesGained), fontSize: '12px' }}
+ className="value-stat"
+ style={{ color: getStrokeGainedColor(separator.avgStrokesGained), fontSize: 'var(--text-label)' }}
                     >
                       {formatStrokesGained(separator.avgStrokesGained)}
                     </div>
                   </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div className="label" style={{ color: 'var(--ash)', fontSize: '10px' }}>Shots</div>
-                    <div className="value-stat" style={{ fontSize: '12px' }}>{separator.totalShots}</div>
+                  <div className="text-right">
+                    <div className="label text-ash" >Shots</div>
+                    <div className="value-stat"  style={{ fontSize: 'var(--text-label)' }}>{separator.totalShots}</div>
                   </div>
                 </div>
               </div>
@@ -301,47 +301,47 @@ export function StrokesGainedView({ metrics, filteredShots }: { metrics: Tiger5M
       </div>
 
       {/* SG Per Hole By Shot Type Table */}
-      <div style={{ marginTop: '32px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-          <h4 style={{ color: 'var(--ash)' }}>SG by Hole & Shot Type</h4>
-          <div style={{ display: 'flex', gap: '16px' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', color: 'var(--ash)', fontSize: '12px' }}>
+      <div className="mt-8">
+        <div className="flex justify-between items-center mb-4">
+          <h4 className="text-ash">SG by Hole & Shot Type</h4>
+          <div className="flex gap-4">
+            <label className="flex items-center gap-1.5 cursor-pointer text-ash text-label">
               <input
-                type="radio"
-                name="sgDisplayMode"
-                checked={sgDisplayMode === 'total'}
-                onChange={() => setSgDisplayMode('total')}
-                style={{ accentColor: 'var(--scarlet)' }}
+ type="radio"
+ name="sgDisplayMode"
+ checked={sgDisplayMode === 'total'}
+ onChange={() => setSgDisplayMode('total')}
+ style={{ accentColor: 'var(--scarlet)' }}
               />
               Total SG
             </label>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', color: 'var(--ash)', fontSize: '12px' }}>
+            <label className="flex items-center gap-1.5 cursor-pointer text-ash text-label">
               <input
-                type="radio"
-                name="sgDisplayMode"
-                checked={sgDisplayMode === 'average'}
-                onChange={() => setSgDisplayMode('average')}
-                style={{ accentColor: 'var(--scarlet)' }}
+ type="radio"
+ name="sgDisplayMode"
+ checked={sgDisplayMode === 'average'}
+ onChange={() => setSgDisplayMode('average')}
+ style={{ accentColor: 'var(--scarlet)' }}
               />
               Avg SG / Shot
             </label>
           </div>
         </div>
 
-        <div style={{ background: 'var(--charcoal)', borderRadius: '4px', overflow: 'hidden' }}>
+        <div style={{ background: 'var(--shadow)', borderRadius: '4px', overflow: 'hidden' }}>
           <div className="gi-table-scroll">
-            <table style={{ minWidth: '520px', width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+            <table style={{ minWidth: '520px', width: '100%', borderCollapse: 'collapse', fontSize: 'var(--text-caption)' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--pitch)' }}>
-                  <th style={{ padding: '10px 12px', textAlign: 'left', color: 'var(--ash)', fontWeight: 600, background: 'var(--obsidian)', position: 'sticky', left: 0, zIndex: 1 }}>
+                  <th style={{ padding: 'var(--spacing-2-5) var(--spacing-3)', textAlign: 'left', color: 'var(--ash)', fontWeight: 600, background: 'var(--obsidian)', position: 'sticky', left: 0, zIndex: 1 }}>
                     Shot Type
                   </th>
                   {[...Array(18)].map((_, i) => (
-                    <th key={i + 1} style={{ padding: '10px 8px', textAlign: 'center', color: 'var(--ash)', fontWeight: 600, minWidth: '40px' }}>
+                    <th key={i + 1} style={{ padding: 'var(--spacing-2-5) var(--spacing-2)', textAlign: 'center', color: 'var(--ash)', fontWeight: 600, minWidth: '40px' }}>
                       {i + 1}
                     </th>
                   ))}
-                  <th style={{ padding: '10px 12px', textAlign: 'center', color: 'var(--ash)', fontWeight: 600, background: 'var(--obsidian)', minWidth: '50px' }}>
+                  <th style={{ padding: 'var(--spacing-2-5) var(--spacing-3)', textAlign: 'center', color: 'var(--ash)', fontWeight: 600, background: 'var(--obsidian)', minWidth: '50px' }}>
                     Total
                   </th>
                 </tr>
@@ -353,7 +353,7 @@ export function StrokesGainedView({ metrics, filteredShots }: { metrics: Tiger5M
 
                   return (
                     <tr key={shotType} style={{ borderBottom: '1px solid var(--pitch)' }}>
-                      <td style={{ padding: '8px 12px', color: 'var(--chalk)', fontWeight: 500, background: 'var(--obsidian)', position: 'sticky', left: 0, zIndex: 1 }}>
+                      <td style={{ padding: 'var(--spacing-2) var(--spacing-3)', color: 'var(--chalk)', fontWeight: 500, background: 'var(--obsidian)', position: 'sticky', left: 0, zIndex: 1 }}>
                         {shotType}
                       </td>
                       {[...Array(18)].map((_, i) => {
@@ -364,30 +364,25 @@ export function StrokesGainedView({ metrics, filteredShots }: { metrics: Tiger5M
 
                         return (
                           <td
-                            key={holeNum}
-                            style={{
-                              padding: '8px 4px',
+ key={holeNum}
+ style={{ padding: 'var(--spacing-2) var(--spacing-1)',
                               textAlign: 'center',
                               color: hasData ? getStrokeGainedColor(value) : 'var(--ash)',
                               opacity: hasData ? 1 : 0.3,
                               fontFamily: 'var(--font-mono)',
-                              fontSize: '10px'
-                            }}
+                              fontSize: 'var(--text-label-sm)' }}
                           >
                             {hasData ? formatStrokesGained(value) : '-'}
                           </td>
                         );
                       })}
                       <td
-                        style={{
-                          padding: '8px 12px',
+ style={{ padding: 'var(--spacing-2) var(--spacing-3)',
                           textAlign: 'center',
                           color: getStrokeGainedColor(sgDisplayMode === 'total' ? totals.totalSG : totals.avgSG),
                           fontFamily: 'var(--font-mono)',
-                          fontSize: '10px',
-                          fontWeight: 600,
-                          background: 'var(--obsidian)'
-                        }}
+                          fontSize: 'var(--text-label-sm)', fontWeight: 600,
+                          background: 'var(--obsidian)' }}
                       >
                         {formatStrokesGained(sgDisplayMode === 'total' ? totals.totalSG : totals.avgSG)}
                       </td>
@@ -397,7 +392,7 @@ export function StrokesGainedView({ metrics, filteredShots }: { metrics: Tiger5M
 
                 {/* Total Row - sums across all shot types for each hole */}
                 <tr style={{ borderTop: '2px solid var(--pitch)', background: 'var(--obsidian)' }}>
-                  <td style={{ padding: '10px 12px', color: 'var(--chalk)', fontWeight: 700, position: 'sticky', left: 0, zIndex: 1 }}>
+                  <td style={{ padding: 'var(--spacing-2-5) var(--spacing-3)', color: 'var(--chalk)', fontWeight: 700, position: 'sticky', left: 0, zIndex: 1 }}>
                     Total
                   </td>
                   {[...Array(18)].map((_, i) => {
@@ -408,29 +403,23 @@ export function StrokesGainedView({ metrics, filteredShots }: { metrics: Tiger5M
 
                     return (
                       <td
-                        key={holeNum}
-                        style={{
-                          padding: '10px 4px',
+ key={holeNum}
+ style={{ padding: 'var(--spacing-2-5) var(--spacing-1)',
                           textAlign: 'center',
                           color: hasData ? getStrokeGainedColor(value) : 'var(--ash)',
                           fontFamily: 'var(--font-mono)',
-                          fontSize: '10px',
-                          fontWeight: 600
-                        }}
+                          fontSize: 'var(--text-label-sm)', fontWeight: 600 }}
                       >
                         {hasData ? formatStrokesGained(value) : '-'}
                       </td>
                     );
                   })}
                   <td
-                    style={{
-                      padding: '10px 12px',
+ style={{ padding: 'var(--spacing-2-5) var(--spacing-3)',
                       textAlign: 'center',
                       color: getStrokeGainedColor(sgDisplayMode === 'total' ? totalStrokesGained : metrics.avgStrokesGained),
                       fontFamily: 'var(--font-mono)',
-                      fontSize: '10px',
-                      fontWeight: 700
-                    }}
+                      fontSize: 'var(--text-label-sm)', fontWeight: 700 }}
                   >
                     {formatStrokesGained(sgDisplayMode === 'total' ? totalStrokesGained : metrics.avgStrokesGained)}
                   </td>

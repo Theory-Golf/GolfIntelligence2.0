@@ -124,9 +124,9 @@ function ThresholdMeter({ driver }: { driver: DriverResult }) {
       <div className="pp-meter-bar">
         {meter.segments.map(seg => (
           <i
-            key={seg.tier}
-            className={`pp-seg-${seg.tier}`}
-            style={{ width: `${Math.max(0, seg.width)}%` }}
+ key={seg.tier}
+ className={`pp-seg-${seg.tier}`}
+ style={{ width: `${Math.max(0, seg.width)}%` }}
           />
         ))}
         <span className="pp-marker" style={{ left: `${meter.markerPct}%` }} />
@@ -146,8 +146,8 @@ function DriverFooter({ driver }: { driver: DriverResult }) {
       <span>
         {driver.sampleSize} shots · {driver.rounds} {driver.rounds === 1 ? 'round' : 'rounds'}
       </span>
-      {driver.lowSample && <span style={{ color: 'var(--bogey)' }}>Low sample</span>}
-      {driver.provisional && <span style={{ color: 'var(--ash)' }}>Provisional threshold</span>}
+      {driver.lowSample && <span className="text-bogey">Low sample</span>}
+      {driver.provisional && <span className="text-ash">Provisional threshold</span>}
       {driver.scoreToParDelta !== null && (
         <span title="Average score to par on holes where this fired, against holes where it did not. Observational context only.">
           {formatSG(driver.scoreToParDelta)} to par on affected holes
@@ -162,8 +162,8 @@ function PrimaryCard({ driver, rank }: { driver: DriverResult; rank: number }) {
 
   return (
     <div
-      className="pp-card"
-      style={{ ['--pp-pillar' as string]: PILLAR_COLORS[driver.pillar] }}
+ className="pp-card"
+ style={{ ['--pp-pillar' as string]: PILLAR_COLORS[driver.pillar] }}
     >
       <div className="pp-card-top">
         <span>
@@ -177,7 +177,7 @@ function PrimaryCard({ driver, rank }: { driver: DriverResult; rank: number }) {
 
       <div className="pp-metric">
         {formatMetric(driver)}
-        {threshold && <span style={{ color: 'var(--ash)' }}> vs {threshold}</span>}
+        {threshold && <span className="text-ash"> vs {threshold}</span>}
       </div>
 
       <ThresholdMeter driver={driver} />
@@ -197,15 +197,15 @@ function PrimaryCard({ driver, rank }: { driver: DriverResult; rank: number }) {
 function MonitorRow({ driver }: { driver: DriverResult }) {
   return (
     <div
-      className="pp-monitor"
-      style={{ ['--pp-pillar' as string]: PILLAR_COLORS[driver.pillar] }}
+ className="pp-monitor"
+ style={{ ['--pp-pillar' as string]: PILLAR_COLORS[driver.pillar] }}
     >
-      <strong style={{ color: 'var(--chalk)' }}>{driver.code}</strong>
+      <strong className="text-chalk">{driver.code}</strong>
       <span>{driver.name}</span>
       <span>{formatMetric(driver)}</span>
       <TierBadge tier={driver.tier} />
       <span style={{ color: 'var(--scarlet)' }}>{formatSG(driver.impactSG)} SG/rd</span>
-      {driver.lowSample && <span style={{ color: 'var(--bogey)' }}>Low sample</span>}
+      {driver.lowSample && <span className="text-bogey">Low sample</span>}
     </div>
   );
 }
@@ -217,7 +217,7 @@ function CausalChain({ pillarState }: { pillarState: Record<Pillar, Tier> }) {
         <div key={pillar} className="pp-chain-step">
           {i > 0 && <span className="pp-chain-arrow">→</span>}
           <span className="pp-chain-dot" style={{ background: PILLAR_COLORS[pillar] }} />
-          <span style={{ color: 'var(--chalk)' }}>{PILLAR_LABELS[pillar]}</span>
+          <span className="text-chalk">{PILLAR_LABELS[pillar]}</span>
           <TierBadge tier={pillarState[pillar]} />
         </div>
       ))}
@@ -236,20 +236,20 @@ function SegmentSection({
   if (drivers.length === 0) return null;
 
   return (
-    <div style={{ marginBottom: '12px' }}>
+    <div className="mb-3">
       <button
-        onClick={() => setOpen(v => !v)}
-        aria-expanded={open}
-        style={{
+ onClick={() => setOpen(v => !v)}
+ aria-expanded={open}
+ style={{
           width: '100%',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          gap: '10px',
+          gap: 'var(--spacing-2-5)',
           background: 'var(--shadow)',
           border: 0,
           borderLeft: `3px solid ${PILLAR_COLORS[pillar]}`,
-          padding: '12px 16px',
+          padding: 'var(--spacing-3) var(--spacing-4)',
           cursor: 'pointer',
           color: 'var(--chalk)',
           font: 'inherit',
@@ -257,45 +257,42 @@ function SegmentSection({
         }}
       >
         <span
-          style={{
-            fontFamily: 'var(--font-heading)',
+ style={{
+            fontFamily: 'var(--font-display)',
             fontWeight: 700,
-            fontSize: '15px',
+            fontSize: 'var(--text-data)',
             letterSpacing: '0.1em',
             textTransform: 'uppercase',
           }}
         >
           {PILLAR_LABELS[pillar]}
-          <span style={{ color: 'var(--ash)', marginLeft: '10px', fontWeight: 400 }}>
+          <span className="text-ash ml-2.5 font-normal">
             {drivers.length}
           </span>
         </span>
-        <span style={{ color: 'var(--ash)', fontSize: '11px' }}>{open ? '▲' : '▼'}</span>
+        <span className="text-ash text-label-sm">{open ? '▲' : '▼'}</span>
       </button>
 
       {open && (
-        <div style={{ padding: '4px 16px 8px', background: 'var(--obsidian)' }}>
+        <div style={{ padding: 'var(--spacing-1) var(--spacing-4) var(--spacing-2)', background: 'var(--obsidian)' }}>
           {drivers.map(driver => (
             <div key={driver.code} className="pp-row">
               <span className="pp-row-code">{driver.code}</span>
               <span>
-                <span style={{ color: 'var(--chalk)', fontSize: '13px' }}>{driver.name}</span>
+                <span className="text-chalk text-caption">{driver.name}</span>
                 {driver.lowSample && (
                   <span
-                    style={{
-                      color: 'var(--bogey)',
+ style={{ color: 'var(--bogey)',
                       fontFamily: 'var(--font-mono)',
-                      fontSize: '9.5px',
-                      marginLeft: '8px',
-                      letterSpacing: '0.1em',
-                    }}
+                      fontSize: 'var(--text-label-sm)', marginLeft: 'var(--spacing-2)',
+                      letterSpacing: '0.1em' }}
                   >
                     LOW SAMPLE
                   </span>
                 )}
               </span>
               <span className="pp-row-figures">
-                <span style={{ color: 'var(--cement)' }}>{formatMetric(driver)}</span>
+                <span className="text-cement">{formatMetric(driver)}</span>
                 <TierBadge tier={driver.tier} />
                 <span style={{ minWidth: '68px', textAlign: 'right' }}>
                   {driver.contextual ? '—' : `${formatSG(driver.impactSG)} SG/rd`}
@@ -321,8 +318,8 @@ export function PlayerPathView({
   if (totalRounds === 0) {
     return (
       <div className="content">
-        <h4 style={{ marginBottom: '8px', color: 'var(--ash)' }}>Player Path</h4>
-        <p style={{ color: 'var(--ash)', fontSize: '13px' }}>
+        <h4 className="mb-2 text-ash">Player Path</h4>
+        <p className="text-ash text-caption">
           No rounds in the current filter. Adjust the filters or add a round to see performance
           drivers.
         </p>
@@ -341,12 +338,12 @@ export function PlayerPathView({
 
   return (
     <div className="content">
-      <h4 style={{ marginBottom: '18px', color: 'var(--ash)' }}>Player Path</h4>
+      <h4 className="mb-4.5 text-ash">Player Path</h4>
 
       <div className="ppv">
         <SegmentStrip
-          readings={diagnosis.all}
-          lead={explained}
+ readings={diagnosis.all}
+ lead={explained}
           totalT5Holes={diagnosis.totalT5Holes}
         />
         <Verdict diagnosis={diagnosis} benchmarkLabel={BENCHMARK_TIER_LABELS[benchmark.tier]} />
@@ -356,7 +353,7 @@ export function PlayerPathView({
       </div>
 
       <AdvancedAnalysis>
-        <p style={{ fontSize: '12px', color: 'var(--ash)', margin: '14px 0 18px' }}>
+        <p style={{ fontSize: 'var(--text-label)', color: 'var(--ash)', margin: 'var(--spacing-3-5) 0 var(--spacing-4-5)' }}>
           Ranked by strokes gained against {BENCHMARK_TIER_LABELS[benchmark.tier]} over{' '}
           {totalRounds} {totalRounds === 1 ? 'round' : 'rounds'}. Drivers costing less than{' '}
           {MATERIALITY_SG_PER_ROUND.toFixed(1)} strokes per round are tracked below rather than
@@ -365,27 +362,24 @@ export function PlayerPathView({
 
         {primary.length > 0 ? (
           <>
-            <div className="grid-cards-3" style={{ gap: '16px', marginBottom: '20px' }}>
+            <div className="grid-cards-3 gap-4 mb-5" >
               {primary.map((driver, i) => (
                 <PrimaryCard key={driver.code} driver={driver} rank={i + 1} />
               ))}
             </div>
 
             {monitoring.length > 0 && (
-              <div style={{ marginBottom: '24px' }}>
+              <div className="mb-6">
                 <div
-                  style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: '9.5px',
-                    letterSpacing: '0.2em',
+ style={{ fontFamily: 'var(--font-mono)',
+                    fontSize: 'var(--text-label-sm)', letterSpacing: '0.2em',
                     textTransform: 'uppercase',
                     color: 'var(--ash)',
-                    marginBottom: '8px',
-                  }}
+                    marginBottom: 'var(--spacing-2)' }}
                 >
                   Monitoring
                 </div>
-                <div style={{ display: 'grid', gap: '8px' }}>
+                <div className="grid gap-2">
                   {monitoring.map(driver => (
                     <MonitorRow key={driver.code} driver={driver} />
                   ))}
@@ -395,32 +389,29 @@ export function PlayerPathView({
           </>
         ) : (
           <div
-            style={{
+ style={{
               background: 'var(--shadow)',
-              padding: '24px',
-              marginBottom: '24px',
+              padding: 'var(--spacing-6)',
+              marginBottom: 'var(--spacing-6)',
               color: 'var(--ash)',
             }}
           >
-            <p style={{ color: 'var(--chalk)', marginBottom: '6px' }}>
+            <p className="text-chalk mb-1.5">
               No driver is costing more than {MATERIALITY_SG_PER_ROUND.toFixed(1)} strokes per round.
             </p>
-            <p style={{ fontSize: '12px' }}>
+            <p className="text-label">
               Every driver is still measured — see the segment detail below.
             </p>
           </div>
         )}
 
-        <div style={{ marginBottom: '24px' }}>
+        <div className="mb-6">
           <div
-            style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: '9.5px',
-              letterSpacing: '0.2em',
+ style={{ fontFamily: 'var(--font-mono)',
+              fontSize: 'var(--text-label-sm)', letterSpacing: '0.2em',
               textTransform: 'uppercase',
               color: 'var(--ash)',
-              marginBottom: '8px',
-            }}
+              marginBottom: 'var(--spacing-2)' }}
           >
             Causal chain
           </div>
@@ -428,14 +419,11 @@ export function PlayerPathView({
         </div>
 
         <div
-          style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: '9.5px',
-            letterSpacing: '0.2em',
+ style={{ fontFamily: 'var(--font-mono)',
+            fontSize: 'var(--text-label-sm)', letterSpacing: '0.2em',
             textTransform: 'uppercase',
             color: 'var(--ash)',
-            marginBottom: '8px',
-          }}
+            marginBottom: 'var(--spacing-2)' }}
         >
           All drivers
         </div>

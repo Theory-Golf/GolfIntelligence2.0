@@ -29,12 +29,12 @@ export default function ResumeSessionBar() {
   return (
     <div className="border-b border-primary/40 bg-accent/40">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-6 py-3">
-        <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary">
+        <span className="font-mono text-label uppercase tracking-[0.2em] text-primary">
           Session in progress
         </span>
         <Link
           href="/player-path#plan"
-          className="inline-flex min-h-[44px] items-center font-mono text-[11px] uppercase tracking-[0.15em] text-foreground no-underline transition-colors hover:text-primary"
+          className="inline-flex min-h-[44px] items-center font-mono text-label uppercase tracking-[0.15em] text-foreground no-underline transition-colors hover:text-primary"
         >
           ← Back to the plan
         </Link>

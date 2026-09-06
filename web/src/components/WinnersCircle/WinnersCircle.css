@@ -6,7 +6,7 @@
 .wc-wrapper {
   max-width: 576px;
   margin: 0 auto;
-  padding: 0 24px 80px;
+  padding: 0 var(--spacing-6) var(--spacing-20);
 }
 
 /* ── TOP NAV ───────────────────────────────────────────────────── */
@@ -14,7 +14,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: var(--spacing-4);
   min-height: 44px;
 }
 
@@ -22,12 +22,13 @@
 .wc-ghost-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
+  gap: var(--spacing-1-5);
+  padding: var(--spacing-2) var(--spacing-3);
   min-height: 44px;
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.12em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--ash);
   background: transparent;
@@ -44,8 +45,9 @@
 
 .wc-nav-label {
   font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.12em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--chalk);
 }
@@ -54,24 +56,25 @@
 .wc-card {
   background: var(--shadow);
   border: 1px solid var(--pitch);
-  padding: 24px;
-  margin-bottom: 12px;
+  padding: var(--spacing-6);
+  margin-bottom: var(--spacing-3);
 }
 
 .wc-section-label {
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.18em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--ash);
-  margin-bottom: 14px;
-  padding-bottom: 10px;
+  margin-bottom: var(--spacing-3-5);
+  padding-bottom: var(--spacing-2-5);
   border-bottom: 1px solid var(--pitch);
 }
 
 .wc-body-text {
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: var(--text-caption);
   line-height: 1.65;
   color: var(--cement);
 }
@@ -80,59 +83,62 @@
 .wc-storage-warn {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  margin-bottom: 16px;
+  gap: var(--spacing-2-5);
+  padding: var(--spacing-2-5) var(--spacing-3-5);
+  margin-bottom: var(--spacing-4);
   background: color-mix(in srgb, var(--bogey) 8%, transparent);
   border: 1px solid color-mix(in srgb, var(--bogey) 30%, transparent);
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.1em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--bogey);
 }
 
 /* ── HOME: HERO ────────────────────────────────────────────────── */
 .wc-hero {
-  padding: 0 0 8px;
-  margin-bottom: 12px;
+  padding: 0 0 var(--spacing-2);
+  margin-bottom: var(--spacing-3);
 }
 
 .wc-hero-subtitle {
   font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.14em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--ash);
-  margin-bottom: 24px;
+  margin-bottom: var(--spacing-6);
 }
 
 /* ── HOME: RULES ───────────────────────────────────────────────── */
 .wc-rules {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--spacing-2-5);
 }
 
 .wc-rule {
   display: flex;
-  gap: 12px;
+  gap: var(--spacing-3);
   align-items: flex-start;
-  padding: 10px 12px;
+  padding: var(--spacing-2-5) var(--spacing-3);
   border: 1px solid var(--pitch);
 }
 
 .wc-rule-key {
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.12em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   color: var(--scarlet);
   min-width: 24px;
   flex-shrink: 0;
 }
 
 .wc-rule-text {
-  font-size: 13px;
+  font-size: var(--text-caption);
   line-height: 1.45;
   color: var(--chalk);
   font-family: var(--font-body);
@@ -141,7 +147,7 @@
 /* ── HOME: THE STANDARD ────────────────────────────────────────── */
 .wc-standard-line {
   display: flex;
-  gap: 18px;
+  gap: var(--spacing-4-5);
   align-items: flex-start;
 }
 
@@ -157,7 +163,7 @@
 
 .wc-standard-copy {
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: var(--text-caption);
   line-height: 1.65;
   color: var(--cement);
 }
@@ -172,8 +178,8 @@
   display: grid;
   grid-template-columns: 64px 1fr 76px 88px;
   align-items: center;
-  gap: 8px;
-  padding: 10px 0;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2-5) 0;
   border-bottom: 1px solid var(--pitch);
 }
 
@@ -183,8 +189,9 @@
 
 .wc-recent-date {
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.08em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   color: var(--ash);
 }
 
@@ -197,7 +204,7 @@
 }
 
 .wc-recent-score span {
-  font-size: 12px;
+  font-size: var(--text-label-sm);
   font-weight: 400;
   color: var(--ash);
   letter-spacing: 0;
@@ -205,18 +212,20 @@
 
 .wc-recent-dist {
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.06em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   color: var(--ash);
   text-align: right;
 }
 
 .wc-recent-badge {
   display: inline-block;
-  padding: 3px 8px;
+  padding: 3px var(--spacing-2);
   font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.12em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   border: 1px solid currentColor;
   text-align: center;
@@ -229,10 +238,11 @@
 
 .wc-view-history-link {
   display: block;
-  margin-top: 14px;
+  margin-top: var(--spacing-3-5);
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.14em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--ash);
   text-decoration: none;
@@ -245,10 +255,11 @@
 }
 
 .wc-credit {
-  margin-top: 24px;
+  margin-top: var(--spacing-6);
   font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.1em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--ash);
   text-align: center;
@@ -257,11 +268,11 @@
 /* ── BUTTONS ───────────────────────────────────────────────────── */
 .wc-primary-btn {
   width: 100%;
-  padding: 16px;
+  padding: var(--spacing-4);
   min-height: 52px;
-  margin-top: 8px;
+  margin-top: var(--spacing-2);
   font-family: var(--font-display);
-  font-size: 14px;
+  font-size: var(--text-body-sm);
   font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -286,9 +297,9 @@
   width: 100%;
   padding: 15px;
   min-height: 48px;
-  margin-top: 8px;
+  margin-top: var(--spacing-2);
   font-family: var(--font-display);
-  font-size: 14px;
+  font-size: var(--text-body-sm);
   font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -306,16 +317,17 @@
 /* ── PLAY: DISTANCE ────────────────────────────────────────────── */
 .wc-play-card {
   text-align: center;
-  padding: 28px 24px 24px;
+  padding: var(--spacing-7) var(--spacing-6) var(--spacing-6);
 }
 
 .wc-distance-eyebrow {
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.18em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--ash);
-  margin-bottom: 12px;
+  margin-bottom: var(--spacing-3);
 }
 
 .wc-distance {
@@ -333,7 +345,7 @@
   font-weight: 400;
   color: var(--ash);
   letter-spacing: 0.04em;
-  margin-left: 6px;
+  margin-left: var(--spacing-1-5);
 }
 
 @keyframes wc-distance-in {
@@ -345,8 +357,8 @@
 .wc-tee-row {
   display: flex;
   justify-content: center;
-  gap: 16px;
-  padding: 24px 0 8px;
+  gap: var(--spacing-4);
+  padding: var(--spacing-6) 0 var(--spacing-2);
 }
 
 .wc-tee {
@@ -398,9 +410,9 @@
   display: flex;
   align-items: baseline;
   justify-content: center;
-  gap: 10px;
-  margin-top: 20px;
-  padding-top: 16px;
+  gap: var(--spacing-2-5);
+  margin-top: var(--spacing-5);
+  padding-top: var(--spacing-4);
   border-top: 1px solid var(--pitch);
 }
 
@@ -415,8 +427,9 @@
 
 .wc-makes-label {
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.12em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--ash);
 }
@@ -425,15 +438,15 @@
 .wc-btn-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-top: 8px;
+  gap: var(--spacing-2);
+  margin-top: var(--spacing-2);
 }
 
 .wc-made-btn {
-  padding: 22px 16px;
+  padding: var(--spacing-5-5) var(--spacing-4);
   min-height: 68px;
   font-family: var(--font-display);
-  font-size: 16px;
+  font-size: var(--text-body);
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -449,10 +462,10 @@
 }
 
 .wc-missed-btn {
-  padding: 22px 16px;
+  padding: var(--spacing-5-5) var(--spacing-4);
   min-height: 68px;
   font-family: var(--font-display);
-  font-size: 16px;
+  font-size: var(--text-body);
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -470,13 +483,14 @@
 .wc-undo-btn {
   display: block;
   width: 100%;
-  margin-top: 12px;
-  padding: 10px;
+  margin-top: var(--spacing-3);
+  padding: var(--spacing-2-5);
   background: transparent;
   border: none;
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.16em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--ash);
   cursor: pointer;
@@ -494,7 +508,7 @@
 
 /* ── RESULT ────────────────────────────────────────────────────── */
 .wc-result-hero {
-  padding: 32px 24px 24px;
+  padding: var(--spacing-8) var(--spacing-6) var(--spacing-6);
   text-align: center;
 }
 
@@ -509,37 +523,39 @@
 
 .wc-result-score-label {
   font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.18em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--cement);
-  margin-top: 10px;
+  margin-top: var(--spacing-2-5);
 }
 
 .wc-result-note {
   font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.1em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--ash);
-  margin-top: 6px;
+  margin-top: var(--spacing-1-5);
 }
 
 .wc-result-badge-wrap {
-  padding: 20px 24px;
+  padding: var(--spacing-5) var(--spacing-6);
   border-top: 1px solid var(--pitch);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
+  gap: var(--spacing-3-5);
   flex-wrap: wrap;
 }
 
 .wc-badge-cleared {
-  padding: 6px 14px;
+  padding: var(--spacing-1-5) var(--spacing-3-5);
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.14em;
+  font-size: var(--text-label);
+  letter-spacing: .14em;
   text-transform: uppercase;
   font-weight: 600;
   color: var(--primary-foreground);
@@ -547,10 +563,11 @@
 }
 
 .wc-badge-pending {
-  padding: 6px 14px;
+  padding: var(--spacing-1-5) var(--spacing-3-5);
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.14em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--ash);
   border: 1px solid var(--pitch);
@@ -558,8 +575,9 @@
 
 .wc-result-dist {
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.1em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--cement);
 }
@@ -569,11 +587,11 @@
 .wc-round-row {
   display: grid;
   grid-template-columns: 1fr 60px 60px 60px;
-  gap: 8px;
+  gap: var(--spacing-2);
   align-items: center;
   padding: 9px 0;
   border-bottom: 1px solid var(--pitch);
-  font-size: 12px;
+  font-size: var(--text-label-sm);
   text-align: center;
 }
 
@@ -584,15 +602,17 @@
 
 .wc-round-head {
   font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.14em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--ash);
 }
 
 .wc-round-row {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--text-label);
+  font-weight: 500;
   color: var(--chalk);
 }
 
@@ -602,7 +622,7 @@
 
 .wc-round-dist {
   font-family: var(--font-display);
-  font-size: 16px;
+  font-size: var(--text-body);
   font-weight: 700;
   letter-spacing: -0.01em;
 }
@@ -619,16 +639,16 @@
 .wc-cta-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-top: 8px;
+  gap: var(--spacing-2);
+  margin-top: var(--spacing-2);
 }
 
 /* ── HISTORY: SUMMARY CARDS ────────────────────────────────────── */
 .wc-stat-row {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
-  margin-bottom: 12px;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-3);
 }
 
 @media (min-width: 480px) {
@@ -640,16 +660,17 @@
 .wc-stat-card {
   background: var(--shadow);
   border: 1px solid var(--pitch);
-  padding: 16px;
+  padding: var(--spacing-4);
 }
 
 .wc-stat-label {
   font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.14em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--ash);
-  margin-bottom: 10px;
+  margin-bottom: var(--spacing-2-5);
 }
 
 .wc-stat-value {
@@ -663,54 +684,57 @@
 
 .wc-stat-sub {
   font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.08em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   color: var(--ash);
-  margin-top: 6px;
+  margin-top: var(--spacing-1-5);
 }
 
 /* ── HISTORY: CHART ────────────────────────────────────────────── */
 .wc-chart-card {
   background: var(--shadow);
   border: 1px solid var(--pitch);
-  padding: 24px 8px 16px 8px;
-  margin-bottom: 12px;
+  padding: var(--spacing-6) var(--spacing-2) var(--spacing-4) var(--spacing-2);
+  margin-bottom: var(--spacing-3);
 }
 
 .wc-chart-card-header {
-  padding: 0 16px 16px;
+  padding: 0 var(--spacing-4) var(--spacing-4);
 }
 
 .wc-chart-note {
   font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.1em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--ash);
-  margin-top: 8px;
+  margin-top: var(--spacing-2);
 }
 
 /* ── HISTORY: EMPTY STATE ──────────────────────────────────────── */
 .wc-empty-state {
-  padding: 40px 24px;
+  padding: var(--spacing-10) var(--spacing-6);
   text-align: center;
   background: var(--shadow);
   border: 1px solid var(--pitch);
-  margin-bottom: 12px;
+  margin-bottom: var(--spacing-3);
 }
 
 .wc-empty-icon {
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.18em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--ash);
-  margin-bottom: 12px;
+  margin-bottom: var(--spacing-3);
 }
 
 .wc-empty-text {
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: var(--text-caption);
   color: var(--cement);
   line-height: 1.55;
 }
@@ -720,17 +744,18 @@
 .wc-log-row {
   display: grid;
   grid-template-columns: 80px 64px 64px 1fr 44px;
-  gap: 8px;
+  gap: var(--spacing-2);
   align-items: center;
   padding: 9px 0;
   border-bottom: 1px solid var(--pitch);
-  font-size: 12px;
+  font-size: var(--text-label-sm);
 }
 
 .wc-log-head {
   font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.14em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--ash);
 }
@@ -745,7 +770,8 @@
 
 .wc-log-date {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: var(--text-label);
+  font-weight: 500;
   color: var(--ash);
 }
 
@@ -758,7 +784,8 @@
 
 .wc-log-dist {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: var(--text-label);
+  font-weight: 500;
   color: var(--cement);
 }
 
@@ -767,8 +794,9 @@
   justify-self: start;
   padding: 2px 7px;
   font-family: var(--font-mono);
-  font-size: 8px;
-  letter-spacing: 0.1em;
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: .14em;
   text-transform: uppercase;
   border: 1px solid currentColor;
   color: var(--ash);

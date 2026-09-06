@@ -102,36 +102,36 @@ export default function InsideTwenty({ onScreenChange }: InsideTwentyProps = {})
   if (screen === 'home') {
     return (
       <HomeScreen
-        sessions={sessions}
-        storageAvailable={storageAvailable}
-        onStart={handleStartSession}
-        onQuickEntry={handleQuickEntry}
+ sessions={sessions}
+ storageAvailable={storageAvailable}
+ onStart={handleStartSession}
+ onQuickEntry={handleQuickEntry}
       />
     );
   }
   if (screen === 'play') {
     return (
       <LadderPlay
-        navLabel="Inside Twenty"
-        groups={GROUPS}
-        results={results}
-        benchmarkScore={TOUR_BASELINE_SCORE}
-        benchmarkLabel="the Tour benchmark"
-        onPutt={handlePutt}
-        onUndo={() => setResults(r => r.slice(0, -1))}
-        onQuit={() => setScreen('home')}
+ navLabel="Inside Twenty"
+ groups={GROUPS}
+ results={results}
+ benchmarkScore={TOUR_BASELINE_SCORE}
+ benchmarkLabel="the Tour benchmark"
+ onPutt={handlePutt}
+ onUndo={() => setResults(r => r.slice(0, -1))}
+ onQuit={() => setScreen('home')}
       />
     );
   }
   if (screen === 'quick') {
     return (
       <QuickEntryScreen
-        score={score}
-        date={sessionDate}
-        onScoreChange={setScore}
-        onDateChange={setSessionDate}
-        onSave={() => saveSession(buildSession(score, sessionDate))}
-        onBack={() => setScreen('home')}
+ score={score}
+ date={sessionDate}
+ onScoreChange={setScore}
+ onDateChange={setSessionDate}
+ onSave={() => saveSession(buildSession(score, sessionDate))}
+ onBack={() => setScreen('home')}
       />
     );
   }
@@ -343,10 +343,10 @@ function QuickEntryScreen({ score, date, onScoreChange, onDateChange, onSave, on
         <p className="it-card-eyebrow-center">Putts Made (out of 18)</p>
         <div className="it-score-stepper">
           <button
-            className="it-stepper-btn"
-            onClick={() => onScoreChange(Math.max(0, score - 1))}
-            disabled={score <= 0}
-            aria-label="Decrease score"
+ className="it-stepper-btn"
+ onClick={() => onScoreChange(Math.max(0, score - 1))}
+ disabled={score <= 0}
+ aria-label="Decrease score"
           >
             −
           </button>
@@ -355,15 +355,15 @@ function QuickEntryScreen({ score, date, onScoreChange, onDateChange, onSave, on
             <span className="it-score-denom">out of 18</span>
           </div>
           <button
-            className="it-stepper-btn"
-            onClick={() => onScoreChange(Math.min(18, score + 1))}
-            disabled={score >= 18}
-            aria-label="Increase score"
+ className="it-stepper-btn"
+ onClick={() => onScoreChange(Math.min(18, score + 1))}
+ disabled={score >= 18}
+ aria-label="Increase score"
           >
             +
           </button>
         </div>
-        <p className="lp-note" style={{ textAlign: 'center' }}>
+        <p className="lp-note text-center" >
           A total-only session has no distance detail. Log putt by putt to see
           which distances the misses came from.
         </p>
@@ -374,11 +374,11 @@ function QuickEntryScreen({ score, date, onScoreChange, onDateChange, onSave, on
         <div className="it-date-row">
           <span className="it-date-label">Session Date</span>
           <input
-            type="date"
-            className="it-date-input"
-            value={date}
-            max={maxDate}
-            onChange={e => onDateChange(e.target.value)}
+ type="date"
+ className="it-date-input"
+ value={date}
+ max={maxDate}
+ onChange={e => onDateChange(e.target.value)}
           />
         </div>
       </div>
@@ -483,17 +483,17 @@ function ResultScreen({ result, onDone, onNew }: {
       {/* ── Putt-level breakdowns (putt-by-putt sessions only) ── */}
       <LadderGroupBreakdown putts={session.putts} />
       <DistanceProfile
-        putts={session.putts}
-        title="This Session By Distance"
-        note="9 through 15 ft carry three putts each — the ends of the ladder are sampled once or twice."
+ putts={session.putts}
+ title="This Session By Distance"
+ note="9 through 15 ft carry three putts each — the ends of the ladder are sampled once or twice."
       />
 
       {/* ── CTAs ── */}
       <div className="it-cta-row">
         <Link
-          href="/player-path/putting/inside-twenty/history"
-          className="it-primary-btn"
-          style={{ textAlign: 'center', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+ href="/player-path/putting/inside-twenty/history"
+ className="it-primary-btn"
+ style={{ textAlign: 'center', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
         >
           View History
         </Link>

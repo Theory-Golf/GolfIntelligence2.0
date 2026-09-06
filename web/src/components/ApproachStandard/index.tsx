@@ -326,7 +326,7 @@ const resultClasses = {
 
 function TierBadge({ children }) {
   return (
-    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-accent border border-primary/40 font-mono text-[9px] tracking-[0.2em] uppercase text-primary whitespace-nowrap">
+    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-accent border border-primary/40 font-mono text-label tracking-[0.2em] uppercase text-primary whitespace-nowrap">
       {children}
     </span>
   );
@@ -364,12 +364,12 @@ function TierSelection({ onSelect }) {
             >
               <div className="flex justify-between items-start gap-4">
                 <div className="flex items-baseline gap-2">
-                  <span className={`font-mono text-[10px] tracking-[0.18em] uppercase ${active ? 'text-primary' : 'text-muted-foreground'}`}>Tier {tier.id}</span>
+                  <span className={`font-mono text-label tracking-[0.18em] uppercase ${active ? 'text-primary' : 'text-muted-foreground'}`}>Tier {tier.id}</span>
                   <span className={`font-display text-xl font-bold uppercase tracking-tight ${active ? 'text-primary' : 'text-foreground'}`}>{tier.name}</span>
                 </div>
-                <span className={`font-mono text-[11px] ${active ? 'text-primary' : 'text-muted-foreground'}`}>±{ring} yd</span>
+                <span className={`font-mono text-label ${active ? 'text-primary' : 'text-muted-foreground'}`}>±{ring} yd</span>
               </div>
-              <p className="font-body text-xs text-muted-foreground mt-1">{tier.handicap}</p>
+              <p className="font-body text-caption text-muted-foreground mt-1">{tier.handicap}</p>
               <p className="font-body text-sm text-muted-foreground mt-1.5">{tier.desc}</p>
             </button>
           );
@@ -454,14 +454,14 @@ function DrillSetup({ player, sessions, patterns, showShapePrompt, onDismissProm
           <p className="font-body text-sm text-foreground leading-relaxed">
             You&apos;ve passed your last two sessions at <span className="font-semibold">{tier.name}</span> with Shot Shape mode off. That&apos;s a good signal — your accuracy is repeatable at this distance.
           </p>
-          <p className="font-body text-xs text-muted-foreground leading-relaxed mt-2.5">
+          <p className="font-body text-caption text-muted-foreground leading-relaxed mt-2.5">
             Adding Shot Shape mode now will make practice feel harder, but contextual interference research shows that performance feeling worse during practice is the mechanism that produces better transfer to the course. The brain learns more when each shot requires a fresh decision.
           </p>
           <div className="flex gap-2 mt-4">
-            <PrimaryButton className="flex-1 !py-3 !text-xs" onClick={() => { setShapeMode(true); onAcceptPrompt(); }}>
+            <PrimaryButton className="flex-1 !py-3 !text-caption" onClick={() => { setShapeMode(true); onAcceptPrompt(); }}>
               Try Shape Mode
             </PrimaryButton>
-            <SecondaryButton className="flex-1 !py-[11px] !text-xs" onClick={onDismissPrompt}>
+            <SecondaryButton className="flex-1 !py-[11px] !text-caption" onClick={onDismissPrompt}>
               Not yet
             </SecondaryButton>
           </div>
@@ -483,13 +483,13 @@ function DrillSetup({ player, sessions, patterns, showShapePrompt, onDismissProm
                   ${active ? 'bg-accent border border-primary' : 'bg-surface border border-border hover:border-cement'}`}
               >
                 <div className={`font-display text-2xl font-bold leading-none ${active ? 'text-primary' : 'text-foreground'}`}>{count}</div>
-                <div className={`font-body text-[11px] mt-1.5 ${active ? 'text-primary/80' : 'text-muted-foreground'}`}>{label}</div>
+                <div className={`font-body text-label-sm mt-1.5 ${active ? 'text-primary/80' : 'text-muted-foreground'}`}>{label}</div>
               </button>
             );
           })}
         </div>
         {shotCount === 5 && (
-          <p className="font-body text-xs text-bogey mt-2.5 flex items-center gap-2">
+          <p className="font-body text-caption text-bogey mt-2.5 flex items-center gap-2">
             <span className="size-1 rounded-full bg-bogey inline-block" />
             Quick check sessions don&apos;t count toward streaks
           </p>
@@ -525,7 +525,7 @@ function DrillSetup({ player, sessions, patterns, showShapePrompt, onDismissProm
             onTouchStart={(e) => { e.preventDefault(); setDraggingHandle('max'); }} />
         </div>
 
-        <div className="flex justify-between font-mono text-[9px] tracking-[0.15em] text-muted-foreground/60">
+        <div className="flex justify-between font-mono text-label tracking-[0.15em] text-muted-foreground/60">
           {[125, 150, 175, 200, 210].map(n => <span key={n}>{n}</span>)}
         </div>
       </div>
@@ -544,12 +544,12 @@ function DrillSetup({ player, sessions, patterns, showShapePrompt, onDismissProm
             <div className={`font-display text-base font-bold uppercase tracking-tight ${shapeMode ? 'text-primary' : 'text-foreground'}`}>
               {shapeMode ? 'On' : 'Off'}
               {shapeMode && ciAvailable && (
-                <span className="font-mono text-[10px] tracking-[0.15em] text-primary ml-2 font-normal">
+                <span className="font-mono text-label tracking-[0.15em] text-primary ml-2 font-normal">
                   ~{Math.round(activationRate * 100)}% OF SHOTS
                 </span>
               )}
             </div>
-            <p className="font-body text-[11px] text-muted-foreground mt-0.5 leading-relaxed">
+            <p className="font-body text-label-sm text-muted-foreground mt-0.5 leading-relaxed">
               {ciAvailable ? shapeModeDesc : 'Available at Tier 3 and above'}
             </p>
           </div>
@@ -582,7 +582,7 @@ function DrillSetup({ player, sessions, patterns, showShapePrompt, onDismissProm
         >
           View history
           {warningPatterns.length > 0 && (
-            <span className="ml-2.5 px-2 py-0.5 bg-primary text-primary-foreground font-mono text-[10px] tracking-[0.05em]">
+            <span className="ml-2.5 px-2 py-0.5 bg-primary text-primary-foreground font-mono text-label tracking-[0.05em]">
               {warningPatterns.length} pattern{warningPatterns.length === 1 ? '' : 's'}
             </span>
           )}
@@ -643,7 +643,7 @@ function ShotCard({ session, onLogShot, onAbort }) {
           <div className="absolute left-0 h-full bg-primary transition-[width] duration-300" style={{ width: `${currentPct}%` }} />
           <div className="absolute h-full bg-primary/30" style={{ left: `${currentPct}%`, width: `${projectedMaxPct - currentPct}%` }} />
         </div>
-        <div className="flex justify-between font-mono text-[8px] tracking-[0.15em] uppercase text-muted-foreground">
+        <div className="flex justify-between font-mono text-label tracking-[0.15em] uppercase text-muted-foreground">
           <span>Fail: 0–{thresholds.pass - 1}</span>
           <span>Pass: {thresholds.pass}–{thresholds.elite - 1}</span>
           <span>Elite: {thresholds.elite}+</span>
@@ -681,7 +681,7 @@ function ShotCard({ session, onLogShot, onAbort }) {
 
         <div className="mt-5 px-4 py-3 bg-accent border border-primary/20 text-left">
           <Mono className="block text-primary mb-1">Estimate</Mono>
-          <p className="font-body text-xs text-muted-foreground leading-relaxed">
+          <p className="font-body text-caption text-muted-foreground leading-relaxed">
             Carry between <span className="text-foreground font-medium">{currentYd - carry}–{currentYd + carry} yd</span>
             <br />
             Lateral within <span className="text-foreground font-medium">~{ring} yards left or right of pin</span>
@@ -721,7 +721,7 @@ function ShotCard({ session, onLogShot, onAbort }) {
             <div
               key={i}
               className={`rounded-full flex items-center justify-center font-mono font-semibold
-                ${total === 15 ? 'size-[22px] text-[9px]' : 'size-[26px] text-[10px]'}
+                ${total === 15 ? 'size-[22px] text-label' : 'size-[26px] text-label'}
                 ${cls} ${isCurrent ? 'outline-2 outline-primary outline-offset-2' : ''}`}
             >
               {i + 1}
@@ -827,7 +827,7 @@ function SessionResult({ session, movement, streakStatus, onAnother, onHistory }
             {banner.type === 'promote' ? '↑' : '↓'} {banner.title}
           </Mono>
           <p className="font-display text-lg font-bold uppercase tracking-tight text-foreground mt-2">{banner.text}</p>
-          <p className="font-body text-xs text-muted-foreground mt-1">{banner.sub}</p>
+          <p className="font-body text-caption text-muted-foreground mt-1">{banner.sub}</p>
         </div>
       )}
 
@@ -850,7 +850,7 @@ function SessionResult({ session, movement, streakStatus, onAnother, onHistory }
         )}
       </div>
 
-      <div className="flex justify-between font-mono text-[10px] tracking-[0.1em] uppercase text-muted-foreground">
+      <div className="flex justify-between font-mono text-label tracking-[0.1em] uppercase text-muted-foreground">
         <span>{session.shotCount} shots</span>
         <span>{session.range[0]}–{session.range[1]} yd</span>
         {session.shotCount === 5 && <span className="text-bogey">Quick check</span>}
@@ -884,7 +884,7 @@ function SessionHistory({ player, sessions, patterns, onBack, onApplyPrescriptio
         <button
           type="button"
           onClick={onBack}
-          className="inline-flex items-center gap-2 font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground hover:text-primary transition-colors mb-4"
+          className="inline-flex items-center gap-2 font-mono text-label tracking-[0.2em] uppercase text-muted-foreground hover:text-primary transition-colors mb-4"
         >
           <ArrowLeft className="size-3" /> Back
         </button>
@@ -900,9 +900,9 @@ function SessionHistory({ player, sessions, patterns, onBack, onApplyPrescriptio
           { label: 'Pass rate', value: `${passRate}%`, sub: 'All time', valueClass: 'text-foreground' },
         ].map(({ label, value, sub, valueClass }) => (
           <div key={label} className="bg-surface border border-border p-3.5">
-            <Mono className="block mb-1.5 text-[9px]">{label}</Mono>
+            <Mono className="block mb-1.5 text-label-sm">{label}</Mono>
             <div className={`font-display text-2xl font-bold leading-none ${valueClass}`}>{value}</div>
-            <p className="font-body text-[11px] text-muted-foreground mt-1">{sub}</p>
+            <p className="font-body text-label-sm text-muted-foreground mt-1">{sub}</p>
           </div>
         ))}
       </div>
@@ -921,16 +921,16 @@ function SessionHistory({ player, sessions, patterns, onBack, onApplyPrescriptio
                     <Mono className={isInfo ? '' : 'text-primary'}>{isInfo ? 'Informational' : 'Prescription'}</Mono>
                   </div>
                   <h3 className="font-display text-lg font-bold uppercase tracking-tight text-foreground mb-1.5">{p.title}</h3>
-                  <p className="font-body text-xs text-muted-foreground leading-relaxed">{p.finding}</p>
+                  <p className="font-body text-caption text-muted-foreground leading-relaxed">{p.finding}</p>
                   {p.prescription && (
-                    <div className="font-body text-xs text-muted-foreground leading-relaxed mt-2.5 pt-2.5 border-t border-border">
+                    <div className="font-body text-caption text-muted-foreground leading-relaxed mt-2.5 pt-2.5 border-t border-border">
                       <Mono className="text-primary mr-2">Next</Mono>
                       {p.prescription}
                       {p.suggestedRange && onApplyPrescription && (
                         <button
                           type="button"
                           onClick={() => onApplyPrescription(p)}
-                          className="block mt-2.5 px-3.5 py-2 border border-primary text-primary font-mono text-[10px] tracking-[0.15em] uppercase hover:bg-primary/10 transition-colors cursor-pointer"
+                          className="block mt-2.5 px-3.5 py-2 border border-primary text-primary font-mono text-label tracking-[0.15em] uppercase hover:bg-primary/10 transition-colors cursor-pointer"
                         >
                           Apply to next session
                         </button>
@@ -963,7 +963,7 @@ function SessionHistory({ player, sessions, patterns, onBack, onApplyPrescriptio
               ))}
             </svg>
           </div>
-          <div className="flex justify-between font-mono text-[9px] tracking-[0.15em] uppercase text-muted-foreground mt-1.5">
+          <div className="flex justify-between font-mono text-label tracking-[0.15em] uppercase text-muted-foreground mt-1.5">
             <span>Oldest</span><span>Newest</span>
           </div>
         </div>
@@ -976,7 +976,7 @@ function SessionHistory({ player, sessions, patterns, onBack, onApplyPrescriptio
             key={f.id}
             type="button"
             onClick={() => setFilter(f.id)}
-            className={`min-h-[44px] px-3 whitespace-nowrap border font-mono text-[10px] tracking-[0.18em] uppercase transition-colors duration-150
+            className={`min-h-[44px] px-3 whitespace-nowrap border font-mono text-label tracking-[0.18em] uppercase transition-colors duration-150
               ${filter === f.id ? 'bg-primary text-primary-foreground border-primary' : 'bg-surface text-muted-foreground border-border hover:border-cement'}`}
           >
             {f.label}
@@ -998,16 +998,16 @@ function SessionHistory({ player, sessions, patterns, onBack, onApplyPrescriptio
               <div className="flex-1 min-w-0">
                 <div className="flex items-baseline gap-2.5">
                   <span className="font-display text-xl font-bold text-foreground">
-                    {ic}<span className="text-xs text-muted-foreground ml-0.5">/{s.shotCount}</span>
+                    {ic}<span className="text-caption text-muted-foreground ml-0.5">/{s.shotCount}</span>
                   </span>
                   <Mono className={cfg.text}>{s.result}</Mono>
                 </div>
-                <p className="font-mono text-[9px] tracking-[0.1em] uppercase text-muted-foreground mt-1">
+                <p className="font-mono text-label tracking-[0.1em] uppercase text-muted-foreground mt-1">
                   T{s.tier} · {s.range[0]}–{s.range[1]} YD · {new Date(s.startedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
                   {s.shapeMode && <span className="text-primary ml-2">· Shape mode</span>}
                 </p>
                 {s.movement && s.movement.movement !== 'NO_CHANGE' && (
-                  <p className={`font-body text-[11px] mt-1 ${s.movement.movement.includes('PROMOTE') ? 'text-sg-strong' : 'text-bogey'}`}>
+                  <p className={`font-body text-label-sm mt-1 ${s.movement.movement.includes('PROMOTE') ? 'text-sg-strong' : 'text-bogey'}`}>
                     {s.movement.movement === 'PROMOTE'         && `↑ Promoted to T${s.movement.toTier}`}
                     {s.movement.movement === 'EXPRESS_PROMOTE' && `↑↑ Express promoted to T${s.movement.toTier}`}
                     {s.movement.movement === 'REGRESS'         && `↓ Regressed to T${s.movement.toTier}`}
@@ -1015,7 +1015,7 @@ function SessionHistory({ player, sessions, patterns, onBack, onApplyPrescriptio
                   </p>
                 )}
               </div>
-              {isQuick && <Mono className="text-bogey text-[8px] shrink-0">Quick</Mono>}
+              {isQuick && <Mono className="text-bogey text-label-sm shrink-0">Quick</Mono>}
             </div>
           );
         })}

@@ -49,28 +49,28 @@ export const TIER_CONFIG: Record<TierName, {
     copy: 'Beating Tour baseline. Championship-grade mid-range putting.',
     range: '11–18  ·  Championship grade',
     color: 'var(--sg-strong)',
-    hexColor: '#00C07A',
+    hexColor: 'var(--under)',
   },
   tour: {
     label: 'Tour',
     copy: 'PGA Tour benchmark. Converting at the level of the best players.',
     range: '9–10   ·  PGA Tour benchmark',
     color: 'var(--sg-gain)',
-    hexColor: '#52D9A0',
+    hexColor: 'var(--sg-gain)',
   },
   competitive: {
     label: 'Competitive',
     copy: 'Solid collegiate / scratch amateur. The conversion habit is forming.',
     range: '7–8    ·  Collegiate / scratch',
     color: 'var(--bogey)',
-    hexColor: '#F59520',
+    hexColor: 'var(--bogey)',
   },
   developing: {
     label: 'Developing',
     copy: 'Repeat the drill — focus on speed first, line second.',
     range: '0–6    ·  Below baseline',
     color: 'var(--double)',
-    hexColor: '#E8202A',
+    hexColor: 'var(--scarlet)',
   },
 };
 

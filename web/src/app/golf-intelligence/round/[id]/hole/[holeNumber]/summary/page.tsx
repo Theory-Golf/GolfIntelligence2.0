@@ -13,10 +13,10 @@ import { ScoreHeader } from '@/components/golf/ScoreHeader';
 import { LIE_ABBREVIATIONS, LIE_COLORS } from '@/lib/golf/utils/lieColors';
 import type { ShotRow } from '@/lib/golf/db/types';
 
-const COLOR_UNDER = '#00B870';
-const COLOR_EVEN = '#B8B2AA';
-const COLOR_BOGEY = '#F09020';
-const COLOR_DOUBLE = '#E8202A';
+const COLOR_UNDER = 'var(--seg-shortgame)';
+const COLOR_EVEN = 'var(--cement)';
+const COLOR_BOGEY = 'var(--bogey)';
+const COLOR_DOUBLE = 'var(--scarlet)';
 
 function scoreWord(rel: number): string {
   if (rel <= -2) return 'EAGLE';
@@ -82,7 +82,7 @@ export default function HoleSummaryPage() {
   if (session.loading || needsRedirect || !hole) {
     return (
       <div className="min-h-svh bg-background text-foreground flex items-center justify-center">
-        <span className="font-mono text-xs text-ash tracking-[0.25em] uppercase">
+        <span className="font-mono text-label text-ash tracking-[0.25em] uppercase">
           Loading…
         </span>
       </div>
@@ -169,7 +169,7 @@ function ReviewMode({
             <span className="font-display font-extrabold text-3xl text-chalk uppercase tracking-tight">
               {hole.holeNumber}
             </span>
-            <span className="font-mono text-[10px] tracking-[0.25em] uppercase text-ash">
+            <span className="font-mono text-label tracking-[0.25em] uppercase text-ash">
               Hole · Complete
             </span>
           </div>
@@ -178,7 +178,7 @@ function ReviewMode({
 
         {/* Score hero */}
         <div className="flex flex-col items-center gap-1 py-4 border-b border-border">
-          <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash">
+          <p className="font-mono text-label tracking-[0.3em] uppercase text-ash">
             Score
           </p>
           <p className="font-display font-extrabold text-chalk leading-none" style={{ fontSize: 96 }}>
@@ -190,7 +190,7 @@ function ReviewMode({
           >
             {fmtRel(rel)} · {scoreWord(rel)}
           </p>
-          <p className="font-mono text-[10px] tracking-[0.25em] uppercase text-ash mt-1">
+          <p className="font-mono text-label tracking-[0.25em] uppercase text-ash mt-1">
             Par {hole.par}
             {startDist !== null && ` · ${startDist} ${startUnit}`}
           </p>
@@ -198,7 +198,7 @@ function ReviewMode({
 
         {/* Shot path */}
         <div>
-          <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash mb-3">
+          <p className="font-mono text-label tracking-[0.3em] uppercase text-ash mb-3">
             Shot path
           </p>
           <div className="flex flex-col">
@@ -213,7 +213,7 @@ function ReviewMode({
                   lastHoled={isHoled(s) && i === hole.shots.length - 1}
                 />
                 {conditionalLabel(s) && (
-                  <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-ash">
+                  <span className="font-mono text-label tracking-[0.2em] uppercase text-ash">
                     {conditionalLabel(s)}
                   </span>
                 )}
@@ -226,7 +226,7 @@ function ReviewMode({
         <button
           type="button"
           onClick={onEdit}
-          className="flex items-center gap-2 font-mono text-[11px] tracking-[0.2em] uppercase text-ash hover:text-chalk self-start"
+          className="flex items-center gap-2 font-mono text-label tracking-[0.2em] uppercase text-ash hover:text-chalk self-start"
         >
           <span className="inline-block w-3 h-3 border border-ash rounded-sm" />
           Edit shots
@@ -258,7 +258,7 @@ function ShotPathRow({
   lastHoled: boolean;
 }) {
   return (
-    <div className="flex items-center gap-3 font-mono text-[13px]">
+    <div className="flex items-center gap-3 font-mono text-caption">
       <span className="text-ash w-4">{index}</span>
       <span style={{ color: LIE_COLORS[shot.starting_lie] }}>
         {shot.starting_distance}
@@ -274,7 +274,7 @@ function ShotPathRow({
         </span>
       )}
       {shot.has_penalty && (
-        <span className="text-scarlet text-[10px] tracking-[0.15em]">+PEN</span>
+        <span className="text-scarlet text-label-sm tracking-[0.15em]">+PEN</span>
       )}
     </div>
   );
@@ -330,14 +330,14 @@ function EditMode({
             <span className="font-display font-extrabold text-3xl text-chalk uppercase tracking-tight">
               Hole {hole.holeNumber}
             </span>
-            <span className="font-mono text-[10px] tracking-[0.25em] uppercase text-scarlet">
+            <span className="font-mono text-label tracking-[0.25em] uppercase text-scarlet">
               Editing
             </span>
           </div>
           <ScoreHeader front={score.front} back={score.back} total={score.total} />
         </header>
 
-        <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash">
+        <p className="font-mono text-label tracking-[0.3em] uppercase text-ash">
           Shots · Pencil to edit · + to insert · × to delete
         </p>
 
@@ -350,7 +350,7 @@ function EditMode({
                 key={s.id}
                 className="flex items-center justify-between border border-border rounded-md px-3 py-3 bg-shadow"
               >
-                <div className="flex items-center gap-3 font-mono text-[13px]">
+                <div className="flex items-center gap-3 font-mono text-caption">
                   <span className="text-ash w-4">
                     {strokeNumberForShot(hole.shots, s.shot_number)}
                   </span>
@@ -368,7 +368,7 @@ function EditMode({
                     </span>
                   )}
                   {s.has_penalty && (
-                    <span className="text-scarlet text-[10px] tracking-[0.15em]">
+                    <span className="text-scarlet text-label-sm tracking-[0.15em]">
                       +PEN
                     </span>
                   )}

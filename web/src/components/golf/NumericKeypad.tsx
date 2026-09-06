@@ -90,7 +90,7 @@ function NumericKeypadImpl({
           {...keyHandlers('clear', pressClear)}
           className={keyClass(
             'clear',
-            'font-mono text-[11px] tracking-[0.2em] uppercase text-ash',
+            'font-mono text-label tracking-[0.2em] uppercase text-ash',
             true,
           )}
         >

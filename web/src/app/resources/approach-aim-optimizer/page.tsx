@@ -13,7 +13,7 @@ export default function ApproachAimOptimizerPage() {
     <>
       <section className="px-6 pt-16 pb-8">
         <div className="max-w-3xl mx-auto">
-          <Link href="/resources" className="inline-flex items-center gap-2 font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground no-underline mb-6 hover:text-primary transition-colors">
+          <Link href="/resources" className="inline-flex items-center gap-2 font-mono text-label tracking-[0.2em] uppercase text-muted-foreground no-underline mb-6 hover:text-primary transition-colors">
             <ArrowLeft className="size-3" /> Resources
           </Link>
           <p className="eyebrow mb-4">Tool</p>

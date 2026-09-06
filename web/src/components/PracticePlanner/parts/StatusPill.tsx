@@ -20,7 +20,7 @@ export default function StatusPill({
 }) {
   return (
     <span
-      className={`inline-flex items-center justify-center border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.18em] ${STYLES[status]}`}
+      className={`inline-flex items-center justify-center border px-2.5 py-1 font-mono text-label uppercase tracking-[0.18em] ${STYLES[status]}`}
     >
       {children}
     </span>

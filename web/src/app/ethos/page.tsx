@@ -61,7 +61,7 @@ export default async function EthosPage() {
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-3">
                       <FileText className="size-4 text-primary" />
-                      <span className="font-mono text-[10px] tracking-[0.25em] uppercase text-primary">
+                      <span className="font-mono text-label tracking-[0.25em] uppercase text-primary">
                         Paper{paper.published_at ? ` · ${formatDate(paper.published_at)}` : ''}
                       </span>
                     </div>

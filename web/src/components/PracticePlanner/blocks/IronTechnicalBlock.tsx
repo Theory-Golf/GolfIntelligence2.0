@@ -54,7 +54,7 @@ export default function IronTechnicalBlock({
           <div key={cp.id}>
             <div className="border border-border bg-card p-4">
               <div className="mb-3 flex items-center justify-between">
-                <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                <div className="font-mono text-label uppercase tracking-[0.18em] text-muted-foreground">
                   Checkpoint {cpIdx + 1} · 5 Swings
                 </div>
                 {isLocked ? (
@@ -67,7 +67,7 @@ export default function IronTechnicalBlock({
               </div>
 
               {isLocked ? (
-                <p className="text-xs text-muted-foreground">
+                <p className="text-caption text-muted-foreground">
                   Pick your practice swing intent above to unlock.
                 </p>
               ) : (
@@ -103,10 +103,10 @@ export default function IronTechnicalBlock({
 
                   {rec && (
                     <div className={`mt-3 border p-3 text-sm ${recToneClasses(rec.tone)}`}>
-                      <div className="mb-1 font-display text-xs font-bold uppercase tracking-wide">
+                      <div className="mb-1 font-display text-label font-bold uppercase tracking-wide">
                         {rec.title}
                       </div>
-                      <p className="text-xs text-muted-foreground">{rec.message}</p>
+                      <p className="text-caption text-muted-foreground">{rec.message}</p>
                     </div>
                   )}
                 </>

@@ -38,7 +38,7 @@ export default function EmptyState({
           }}
         />
       </div>
-      <p className="mt-6 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+      <p className="mt-6 font-mono text-label uppercase tracking-[0.2em] text-muted-foreground">
         Scored assessments from week three · History synced to your player profile
       </p>
     </div>

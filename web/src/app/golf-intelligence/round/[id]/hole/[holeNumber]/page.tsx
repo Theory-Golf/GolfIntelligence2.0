@@ -28,7 +28,7 @@ const PAR_CHOICES = [3, 4, 5] as const;
 const CLUB_CATEGORIES: ClubCategory[] = ['Driver', 'Non-driver'];
 const MISS_DIRECTIONS: MissDirection[] = ['Left', 'Right'];
 const PUTT_DIRECTIONS: PuttDirection[] = ['Long', 'Short'];
-const COLOR_AMBER = '#F09020';
+const COLOR_AMBER = 'var(--bogey)';
 
 function unitFor(lie: Lie): 'YDS' | 'FT' {
   return lie === 'Green' ? 'FT' : 'YDS';
@@ -72,7 +72,7 @@ export default function HolePage() {
   if (session.loading) {
     return (
       <div className="min-h-svh bg-background text-foreground flex items-center justify-center">
-        <span className="font-mono text-xs text-ash tracking-[0.25em] uppercase">
+        <span className="font-mono text-label text-ash tracking-[0.25em] uppercase">
           Loading round…
         </span>
       </div>
@@ -82,7 +82,7 @@ export default function HolePage() {
   if (session.error) {
     return (
       <div className="min-h-svh bg-background text-foreground flex items-center justify-center">
-        <span className="font-mono text-xs text-scarlet tracking-[0.25em] uppercase">
+        <span className="font-mono text-label text-scarlet tracking-[0.25em] uppercase">
           {session.error}
         </span>
       </div>
@@ -170,14 +170,14 @@ function DistanceEntry({
   return (
     <div>
       <div className="flex items-baseline justify-between mb-1">
-        <span className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash">
+        <span className="font-mono text-label tracking-[0.3em] uppercase text-ash">
           {label}
         </span>
         <span className="flex items-baseline gap-1.5">
           <span className="font-mono text-2xl leading-none text-chalk tracking-tight">
             {value || '—'}
           </span>
-          <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-ash">
+          <span className="font-mono text-label tracking-[0.25em] uppercase text-ash">
             {unit}
           </span>
         </span>
@@ -217,14 +217,14 @@ function HeaderImpl({
         {backToReview && (
           <Link
             href={`/golf-intelligence/round/${roundId}/review`}
-            className="font-mono text-[10px] tracking-[0.25em] uppercase text-ash hover:text-chalk whitespace-nowrap border border-border rounded-sm px-2 py-0.5"
+            className="font-mono text-label tracking-[0.25em] uppercase text-ash hover:text-chalk whitespace-nowrap border border-border rounded-sm px-2 py-0.5"
           >
             ← Round review
           </Link>
         )}
         {!online && (
           <span
-            className="font-mono text-[9px] tracking-[0.2em] uppercase px-2 py-0.5 rounded-sm bg-shadow whitespace-nowrap shrink-0"
+            className="font-mono text-label tracking-[0.2em] uppercase px-2 py-0.5 rounded-sm bg-shadow whitespace-nowrap shrink-0"
             style={{ color: COLOR_AMBER }}
             title="Offline · saving locally"
           >
@@ -717,7 +717,7 @@ function ShotEntry({
       >
           {/* Hole par */}
           <div>
-            <p className="font-mono text-[10px] tracking-[0.25em] uppercase text-ash mb-1">
+            <p className="font-mono text-label tracking-[0.25em] uppercase text-ash mb-1">
               Hole par
             </p>
             <div className="grid grid-cols-3 gap-2">
@@ -766,12 +766,12 @@ function ShotEntry({
 
           {/* Starting location */}
           <div className="flex items-center justify-between border border-border bg-shadow rounded-md px-3 py-2">
-            <span className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash">
+            <span className="font-mono text-label tracking-[0.3em] uppercase text-ash">
               Starting from
             </span>
             <span
-              className="font-display font-bold text-[10px] tracking-[0.2em] uppercase px-2 py-1 rounded-sm"
-              style={{ background: LIE_COLORS.Tee, color: '#0C0C0C' }}
+              className="font-display font-bold text-label tracking-[0.2em] uppercase px-2 py-1 rounded-sm"
+              style={{ background: LIE_COLORS.Tee, color: 'var(--court)' }}
             >
               Tee
             </span>
@@ -805,7 +805,7 @@ function ShotEntry({
             onClick={onHoled}
             disabled={!parSet || saving}
             className={
-              'self-end w-auto min-h-9 rounded-md border px-5 py-2 font-display font-bold text-xs tracking-[0.2em] uppercase select-none disabled:opacity-40 ' +
+              'self-end w-auto min-h-9 rounded-md border px-5 py-2 font-display font-bold text-label tracking-[0.2em] uppercase select-none disabled:opacity-40 ' +
               (holedSaving
                 ? 'bg-chalk border-chalk text-pitch'
                 : 'bg-obsidian border-border text-chalk active:bg-pitch active:border-chalk')
@@ -844,7 +844,7 @@ function ShotEntry({
                     type="button"
                     onClick={openSetup}
                     aria-label="Edit hole distance"
-                    className="shrink-0 font-mono text-[10px] tracking-[0.15em] uppercase text-ash hover:text-chalk border border-border rounded-sm px-2 py-1"
+                    className="shrink-0 font-mono text-label tracking-[0.15em] uppercase text-ash hover:text-chalk border border-border rounded-sm px-2 py-1"
                   >
                     ✎ {shotOne.starting_distance} {setupUnit}
                   </button>
@@ -871,7 +871,7 @@ function ShotEntry({
                   lie={startingLie}
                   onEdit={isFreshShot1 ? openSetup : undefined}
                 />
-                <span className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash">
+                <span className="font-mono text-label tracking-[0.3em] uppercase text-ash">
                   Shot {displayShotNumber}
                 </span>
               </div>
@@ -890,7 +890,7 @@ function ShotEntry({
               than taking a row of its own. */}
           <div>
             <div className="flex items-center justify-between mb-0.5">
-              <span className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash">
+              <span className="font-mono text-label tracking-[0.3em] uppercase text-ash">
                 Ending lie
               </span>
               <PenaltyToggle on={form.penalty} onChange={setPenalty} />
@@ -942,22 +942,22 @@ function FromStrip({
 }) {
   const body = (
     <>
-      <span className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash">
+      <span className="font-mono text-label tracking-[0.3em] uppercase text-ash">
         From
       </span>
       <span className="font-display font-extrabold text-2xl text-chalk">
         {distance ?? '—'}
       </span>
-      <span className="font-mono text-[10px] tracking-[0.25em] uppercase text-ash">
+      <span className="font-mono text-label tracking-[0.25em] uppercase text-ash">
         {unit}
       </span>
       <span
-        className="font-display font-bold text-[10px] tracking-[0.2em] uppercase px-2 py-1 rounded-sm"
-        style={{ background: LIE_COLORS[lie], color: '#0C0C0C' }}
+        className="font-display font-bold text-label tracking-[0.2em] uppercase px-2 py-1 rounded-sm"
+        style={{ background: LIE_COLORS[lie], color: 'var(--court)' }}
       >
         {lie}
       </span>
-      {onEdit && <span className="font-mono text-[11px] text-ash">✎</span>}
+      {onEdit && <span className="font-mono text-label text-ash">✎</span>}
     </>
   );
   if (!onEdit) {
@@ -990,7 +990,7 @@ function ChoiceRow<T extends string>({
 }) {
   return (
     <div className="flex items-center gap-3">
-      <span className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash shrink-0 w-20">
+      <span className="font-mono text-label tracking-[0.3em] uppercase text-ash shrink-0 w-20">
         {label}
       </span>
       <div className="grid grid-cols-2 gap-2 flex-1">
@@ -1061,7 +1061,7 @@ function WarningCard({
         >
           {warning.title}
         </p>
-        <p className="font-mono text-[11px] text-cement mt-1 leading-snug">
+        <p className="font-mono text-label text-cement mt-1 leading-snug">
           {warning.body}
         </p>
       </div>
@@ -1098,7 +1098,7 @@ function PenaltyToggle({
       />
       <span
         className={
-          'font-display font-bold text-[11px] tracking-[0.2em] uppercase ' +
+          'font-display font-bold text-label tracking-[0.2em] uppercase ' +
           (on ? 'text-chalk' : 'text-ash')
         }
       >

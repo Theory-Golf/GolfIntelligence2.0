@@ -48,7 +48,7 @@ export default function Navbar() {
                 key={href}
                 href={href}
                 className={cn(
-                  'font-mono text-[11px] tracking-[0.12em] uppercase no-underline whitespace-nowrap transition-colors',
+                  'font-mono text-label tracking-[0.12em] uppercase no-underline whitespace-nowrap transition-colors',
                   isActive ? 'text-primary' : 'text-muted-foreground hover:text-primary'
                 )}
               >
@@ -96,7 +96,7 @@ export default function Navbar() {
                 key={href}
                 href={href}
                 className={cn(
-                  'font-mono text-xs tracking-[0.12em] uppercase no-underline px-7 min-h-[52px] flex items-center border-b border-border transition-colors',
+                  'font-mono text-label tracking-[0.12em] uppercase no-underline px-7 min-h-[52px] flex items-center border-b border-border transition-colors',
                   isActive
                     ? 'text-primary bg-card'
                     : 'text-muted-foreground hover:text-primary hover:bg-card'

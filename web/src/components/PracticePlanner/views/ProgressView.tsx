@@ -74,7 +74,7 @@ export default function ProgressView({
 
       {sessions.length > 0 && (
         <div className="border border-border bg-card p-4">
-          <div className="mb-3 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+          <div className="mb-3 font-mono text-label uppercase tracking-[0.2em] text-muted-foreground">
             Completed Sessions
           </div>
           <div className="space-y-2">
@@ -90,10 +90,10 @@ export default function ProgressView({
                   <span className="font-display text-sm font-bold uppercase tracking-wide text-foreground">
                     {fmtDate(s.date)}
                   </span>
-                  <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+                  <span className="font-mono text-label uppercase tracking-[0.15em] text-muted-foreground">
                     Wk {s.week} · {s.phase}
                   </span>
-                  <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+                  <span className="font-mono text-label uppercase tracking-[0.15em] text-muted-foreground">
                     {s.plannedShots} shots · {s.blocksCompleted}/{s.blocksTotal} blocks ·{' '}
                     {s.checkpoints.length} checkpoint{s.checkpoints.length === 1 ? '' : 's'}
                   </span>
@@ -101,7 +101,7 @@ export default function ProgressView({
               ))}
           </div>
           {sessions.length > 10 && (
-            <div className="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+            <div className="mt-3 font-mono text-label uppercase tracking-[0.18em] text-muted-foreground">
               + {sessions.length - 10} earlier sessions
             </div>
           )}
@@ -109,14 +109,14 @@ export default function ProgressView({
       )}
 
       <div className="border border-border bg-card p-4">
-        <div className="mb-3 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+        <div className="mb-3 font-mono text-label uppercase tracking-[0.2em] text-muted-foreground">
           Status Definitions
         </div>
         <div className="space-y-2">
           {(['building', 'acquiring', 'stable', 'mastered'] as const).map((k) => (
             <div key={k} className="flex items-start gap-3">
               <StatusPill status={k}>{STATUS[k].label}</StatusPill>
-              <span className="text-xs text-muted-foreground">{STATUS[k].desc}</span>
+              <span className="text-caption text-muted-foreground">{STATUS[k].desc}</span>
             </div>
           ))}
         </div>
@@ -144,7 +144,7 @@ export default function ProgressView({
                     {elData.name || 'Unnamed'}
                   </div>
                   {cue && (
-                    <div className="mt-1 text-xs text-muted-foreground">Cue: “{cue}”</div>
+                    <div className="mt-1 text-caption text-muted-foreground">Cue: “{cue}”</div>
                   )}
                 </div>
                 <StatusPill status={status}>{STATUS[status].label}</StatusPill>
@@ -156,7 +156,7 @@ export default function ProgressView({
                   const total = e.total ?? 5;
                   return (
                     <div key={i} className="flex items-center gap-3 text-sm">
-                      <span className="w-16 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                      <span className="w-16 font-mono text-label uppercase tracking-[0.18em] text-muted-foreground">
                         {fmtDateShort(e.date)}
                       </span>
                       <div className="h-1.5 flex-1 bg-muted">
@@ -173,7 +173,7 @@ export default function ProgressView({
                 })}
               </div>
               {entries.length > 8 && (
-                <div className="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                <div className="mt-3 font-mono text-label uppercase tracking-[0.18em] text-muted-foreground">
                   + {entries.length - 8} earlier entries
                 </div>
               )}
@@ -183,10 +183,10 @@ export default function ProgressView({
       </div>
 
       <div className="border border-border bg-card p-4">
-        <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+        <div className="mb-2 font-mono text-label uppercase tracking-[0.2em] text-muted-foreground">
           Data Management
         </div>
-        <p className="mb-3 text-xs text-muted-foreground">
+        <p className="mb-3 text-caption text-muted-foreground">
           All data is stored locally on this device. Export creates a JSON backup. Import restores
           from a backup file.
         </p>
@@ -220,7 +220,7 @@ export default function ProgressView({
 function Stat({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
   return (
     <div className="border border-border bg-card p-3">
-      <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+      <div className="font-mono text-label uppercase tracking-[0.2em] text-muted-foreground">
         {label}
       </div>
       <div className={`mt-1 font-display text-2xl font-extrabold ${highlight ? 'text-under' : 'text-foreground'}`}>
@@ -244,7 +244,7 @@ function WedgeTrendCard({ data }: { data: { name: string; kind: HistoryEntry['ki
             <div className="font-display text-lg font-bold uppercase tracking-wide text-foreground">
               Distance Wedges
             </div>
-            <div className="mt-1 text-xs text-muted-foreground">
+            <div className="mt-1 text-caption text-muted-foreground">
               Trend analysis appears as data accumulates.
             </div>
           </div>
@@ -298,7 +298,7 @@ function WedgeTrendCard({ data }: { data: { name: string; kind: HistoryEntry['ki
           <div className="font-display text-lg font-bold uppercase tracking-wide text-foreground">
             Distance Wedges · Trend Analysis
           </div>
-          <div className="mt-1 text-xs text-muted-foreground">
+          <div className="mt-1 text-caption text-muted-foreground">
             {totalShots} shot{totalShots !== 1 ? 's' : ''} across {totalSessions} session
             {totalSessions !== 1 ? 's' : ''}
           </div>
@@ -309,7 +309,7 @@ function WedgeTrendCard({ data }: { data: { name: string; kind: HistoryEntry['ki
       </header>
 
       {!hasMeaningfulData && (
-        <p className="mb-3 text-xs text-muted-foreground">
+        <p className="mb-3 text-caption text-muted-foreground">
           Need 5+ sessions or 30+ shots before trend analysis is meaningful. Currently at{' '}
           {totalSessions} session{totalSessions !== 1 ? 's' : ''}, {totalShots} shot
           {totalShots !== 1 ? 's' : ''}.
@@ -318,22 +318,22 @@ function WedgeTrendCard({ data }: { data: { name: string; kind: HistoryEntry['ki
 
       {dirTotal > 0 && (
         <div className="mb-4">
-          <div className="mb-1 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+          <div className="mb-1 font-mono text-label uppercase tracking-[0.2em] text-muted-foreground">
             Direction Tendency · All Time
           </div>
           <div className="flex h-6 w-full overflow-hidden border border-border">
             {dirPct.L > 0 && (
-              <div className="flex items-center justify-center bg-bogey/30 font-mono text-[10px] text-foreground" style={{ flex: dirPct.L }}>
+              <div className="flex items-center justify-center bg-bogey/30 font-mono text-label text-foreground" style={{ flex: dirPct.L }}>
                 {dirPct.L}% L
               </div>
             )}
             {dirPct.O > 0 && (
-              <div className="flex items-center justify-center bg-under/30 font-mono text-[10px] text-foreground" style={{ flex: dirPct.O }}>
+              <div className="flex items-center justify-center bg-under/30 font-mono text-label text-foreground" style={{ flex: dirPct.O }}>
                 {dirPct.O}% On
               </div>
             )}
             {dirPct.R > 0 && (
-              <div className="flex items-center justify-center bg-bogey/30 font-mono text-[10px] text-foreground" style={{ flex: dirPct.R }}>
+              <div className="flex items-center justify-center bg-bogey/30 font-mono text-label text-foreground" style={{ flex: dirPct.R }}>
                 {dirPct.R}% R
               </div>
             )}
@@ -341,7 +341,7 @@ function WedgeTrendCard({ data }: { data: { name: string; kind: HistoryEntry['ki
         </div>
       )}
 
-      <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+      <div className="font-mono text-label uppercase tracking-[0.2em] text-muted-foreground">
         Ball Speed Consistency · By Distance Band
       </div>
       <div className="mt-2 space-y-3">
@@ -366,13 +366,13 @@ function WedgeTrendCard({ data }: { data: { name: string; kind: HistoryEntry['ki
               <div>
                 <div className="font-display text-sm font-bold uppercase tracking-wide text-foreground">
                   {key}
-                  <span className="ml-1 font-mono text-[10px] font-normal text-muted-foreground">y</span>
+                  <span className="ml-1 font-mono text-label font-normal text-muted-foreground">y</span>
                 </div>
-                <div className="font-mono text-[10px] text-muted-foreground">
+                <div className="font-mono text-label text-muted-foreground">
                   {b.shots.length} shot{b.shots.length !== 1 ? 's' : ''}
                 </div>
                 {isWorst && (
-                  <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-primary">
+                  <div className="mt-1 font-mono text-label uppercase tracking-[0.18em] text-primary">
                     Highest Inconsistency
                   </div>
                 )}
@@ -392,7 +392,7 @@ function WedgeTrendCard({ data }: { data: { name: string; kind: HistoryEntry['ki
 function Cell({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+      <div className="font-mono text-label uppercase tracking-[0.18em] text-muted-foreground">
         {label}
       </div>
       <div className="font-display text-sm font-bold text-foreground">{value}</div>

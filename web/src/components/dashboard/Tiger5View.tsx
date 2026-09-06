@@ -35,51 +35,51 @@ export function Tiger5View({ metrics, lastUpdated }: { metrics: Tiger5Metrics; l
   return (
     <div className="content">
       {/* Section Heading */}
-      <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>Tiger 5 Performance</h4>
+      <h4 className="mb-4 text-ash">Tiger 5 Performance</h4>
 
       {/* Hero Cards - Section 1: Tiger 5 Fails, Average Score, Rounds */}
-      <div className="grid-cards-3" style={{ gap: '16px' }}>
+      <div className="grid-cards-3 gap-4" >
         {/* Card 1: Total Tiger 5 Fails */}
         <HeroCardWithSubValues
-          label="Tiger 5 Fails"
-          value={tiger5Fails.totalFails.toString()}
-          bottomLeftLabel="Per Round"
-          bottomLeftValue={tiger5Fails.failsPerRound.toFixed(1)}
-          bottomRightLabel="SG on Fail Holes"
-          bottomRightValue={formatStrokesGained(tiger5Fails.sgOnFailHoles)}
+ label="Tiger 5 Fails"
+ value={tiger5Fails.totalFails.toString()}
+ bottomLeftLabel="Per Round"
+ bottomLeftValue={tiger5Fails.failsPerRound.toFixed(1)}
+ bottomRightLabel="SG on Fail Holes"
+ bottomRightValue={formatStrokesGained(tiger5Fails.sgOnFailHoles)}
           isFlagship
         />
 
         {/* Card 2: Average Score */}
         <HeroCardWithSubValues
-          label="Avg Score"
-          value={avgScore.toFixed(1)}
-          middleLabel="SG / Round"
-          middleValue={formatStrokesGained(avgSGPerRound)}
+ label="Avg Score"
+ value={avgScore.toFixed(1)}
+ middleLabel="SG / Round"
+ middleValue={formatStrokesGained(avgSGPerRound)}
         />
 
         {/* Card 3: Rounds */}
         <HeroCardWithSubValues
-          label="Rounds"
-          value={totalRounds.toString()}
-          bottomLeftLabel="Lowest"
-          bottomLeftValue={lowestRound.toString()}
-          bottomRightLabel="Highest"
-          bottomRightValue={highestRound.toString()}
+ label="Rounds"
+ value={totalRounds.toString()}
+ bottomLeftLabel="Lowest"
+ bottomLeftValue={lowestRound.toString()}
+ bottomRightLabel="Highest"
+ bottomRightValue={highestRound.toString()}
         />
       </div>
 
       {/* Stat Cards - Tiger 5 Fail Breakdown */}
-      <div className="grid-tiles-5" style={{ gap: '12px', marginTop: '24px' }}>
+      <div className="grid-tiles-5 gap-3 mt-6" >
         {getSortedTiger5Cards(tiger5Fails, totalRounds).map((card) => (
           <StatCardWithSG
-            key={card.label}
-            label={card.label}
-            value={card.value.toString()}
-            valueColor={card.valueColor}
-            percentage={card.percentage}
-            sgValue={card.sg}
-            color={card.color}
+ key={card.label}
+ label={card.label}
+ value={card.value.toString()}
+ valueColor={card.valueColor}
+ percentage={card.percentage}
+ sgValue={card.sg}
+ color={card.color}
           />
         ))}
       </div>
@@ -128,7 +128,7 @@ function HeroCardWithSubValues({
 }) {
   return (
     <div className={`card-hero ${isFlagship ? 'is-flagship' : ''}`}>
-      <div className="flex justify-between items-center" style={{ marginBottom: '16px' }}>
+      <div className="flex justify-between items-center mb-4 gap-3" >
         <div className="label" style={{ color: isFlagship ? 'var(--scarlet)' : 'var(--ash)' }}>
           {label}
         </div>
@@ -136,14 +136,14 @@ function HeroCardWithSubValues({
           <div style={{ width: '6px', height: '6px', background: 'var(--scarlet)', borderRadius: '50%' }}></div>
         )}
       </div>
-      <div className="value-hero" style={{ color: 'var(--chalk)' }}>
+      <div className="value-hero" >
         {value}
       </div>
 
       {/* Middle row (optional) */}
       {middleLabel && middleValue && (
-        <div style={{ marginTop: '12px', padding: '8px 0', borderTop: '1px solid var(--charcoal)', borderBottom: '1px solid var(--charcoal)' }}>
-          <div className="label" style={{ color: 'var(--ash)', fontSize: '12px' }}>{middleLabel}</div>
+        <div style={{ marginTop: 'var(--spacing-3)', padding: 'var(--spacing-2) 0', borderTop: '1px solid var(--shadow)', borderBottom: '1px solid var(--shadow)' }}>
+          <div className="label text-ash" >{middleLabel}</div>
           <div className="value-stat" style={{ color: getStrokeGainedColor(parseFloat(middleValue)) }}>
             {middleValue}
           </div>
@@ -152,13 +152,13 @@ function HeroCardWithSubValues({
 
       {/* Bottom row (optional) */}
       {(bottomLeftLabel || bottomRightLabel) && (
-        <div className="flex justify-between" style={{ marginTop: '16px' }}>
+        <div className="flex justify-between mt-4 gap-3" >
           <div>
-            <div className="label" style={{ color: 'var(--ash)', fontSize: '11px' }}>{bottomLeftLabel}</div>
+            <div className="label text-ash" >{bottomLeftLabel}</div>
             <div className="value-stat">{bottomLeftValue}</div>
           </div>
-          <div style={{ textAlign: 'right' }}>
-            <div className="label" style={{ color: 'var(--ash)', fontSize: '11px' }}>{bottomRightLabel}</div>
+          <div className="text-right">
+            <div className="label text-ash" >{bottomRightLabel}</div>
             <div className="value-stat">{bottomRightValue}</div>
           </div>
         </div>
@@ -224,11 +224,11 @@ function getSortedTiger5Cards(fails: Tiger5Fail, totalRounds: number): Tiger5Car
 
   // Chart colors for variety - one unique color per card
   const chartColors = [
-    '#3D8EF0',  // Royal Blue
-    '#A855F7',  // Court Purple
-    '#06C8E0',  // Aqua
-    '#D4F000',  // Volt
-    '#F03DAA',  // Magenta
+    'var(--c1)',  // Royal Blue
+    'var(--c2)',  // Court Purple
+    'var(--c3)',  // Aqua
+    'var(--c4)',  // Volt
+    'var(--c5)',  // Magenta
   ];
 
   const cards: Tiger5CardData[] = [
@@ -308,18 +308,18 @@ function StatCardWithSG({
 }) {
   return (
     <div className="card-stat" style={{ borderLeft: `3px solid ${color}` }}>
-      <div className="label" style={{ color: 'var(--ash)', marginBottom: '12px' }}>
+      <div className="label text-ash mb-3" >
         {label}
       </div>
       <div className="value-stat" style={{ color: valueColor }}>{value}</div>
-      <div style={{ marginTop: '12px', display: 'flex', justifyContent: 'space-between' }}>
+      <div className="mt-3 flex justify-between gap-3">
         <div>
-          <div className="label" style={{ color: 'var(--ash)', fontSize: '10px' }}>% of Fails</div>
-          <div className="value-stat" style={{ fontSize: '12px' }}>{percentage.toFixed(0)}%</div>
+          <div className="label text-ash" >% of Fails</div>
+          <div className="value-stat"  style={{ fontSize: 'var(--text-label)' }}>{percentage.toFixed(0)}%</div>
         </div>
-        <div style={{ textAlign: 'right' }}>
-          <div className="label" style={{ color: 'var(--ash)', fontSize: '10px' }}>Total SG</div>
-          <div className="value-stat" style={{ color: getStrokeGainedColor(sgValue), fontSize: '12px' }}>
+        <div className="text-right">
+          <div className="label text-ash" >Total SG</div>
+          <div className="value-stat" style={{ color: getStrokeGainedColor(sgValue), fontSize: 'var(--text-label)' }}>
             {formatStrokesGained(sgValue)}
           </div>
         </div>
@@ -349,31 +349,29 @@ function RootCauseByFailTypeSection({ rootCauseByFailType, totalFails }: { rootC
   }
 
   return (
-    <div style={{ marginTop: '24px' }}>
+    <div className="mt-6">
       <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        style={{
-          display: 'flex',
+ onClick={() => setIsExpanded(!isExpanded)}
+ style={{ display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           width: '100%',
-          padding: '12px 16px',
-          background: 'var(--charcoal)',
+          padding: 'var(--spacing-3) var(--spacing-4)',
+          background: 'var(--shadow)',
           border: '1px solid var(--ash)',
           borderRadius: '4px',
           color: 'var(--chalk)',
           cursor: 'pointer',
-          fontSize: '14px',
-        }}
+          fontSize: 'var(--text-body-sm)' }}
       >
-        <span style={{ fontWeight: 600 }}>Root Cause by Fail Type</span>
-        <span style={{ fontSize: '12px', color: 'var(--ash)' }}>
+        <span className="font-semibold">Root Cause by Fail Type</span>
+        <span className="text-label text-ash">
           {totalFailsInTypes} fails • {isExpanded ? '▲' : '▼'}
         </span>
       </button>
 
       {isExpanded && (
-        <div style={{ marginTop: '16px' }}>
+        <div className="mt-4">
           {failTypes.map((failType) => {
             if (failType.data.totalCount === 0) return null;
             const data = failType.data;
@@ -426,29 +424,29 @@ function RootCauseByFailTypeSection({ rootCauseByFailType, totalFails }: { rootC
             }
 
             return (
-              <div key={failType.key} style={{ marginBottom: '20px', padding: '12px', background: 'var(--charcoal)', borderRadius: '4px' }}>
-                <h5 style={{ marginBottom: '12px', color: 'var(--chalk)', fontSize: '13px', fontWeight: 600 }}>
+              <div key={failType.key} style={{ marginBottom: 'var(--spacing-5)', padding: 'var(--spacing-3)', background: 'var(--shadow)', borderRadius: '4px' }}>
+                <h5 className="mb-3 text-chalk text-caption font-semibold">
                   {failType.label} ({data.totalCount})
                 </h5>
                 <div className="gi-table-scroll">
-                  <table style={{ minWidth: '500px', width: '100%', fontSize: '13px', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+                  <table style={{ minWidth: '500px', width: '100%', fontSize: 'var(--text-caption)', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
                     <thead>
                       <tr style={{ borderBottom: '1px solid var(--ash)' }}>
-                        <th style={{ textAlign: 'left', padding: '6px', color: 'var(--ash)', width: '35%' }}>Root Cause</th>
-                        <th style={{ textAlign: 'right', padding: '6px', color: 'var(--ash)', width: '15%' }}>Count</th>
-                        <th style={{ textAlign: 'right', padding: '6px', color: 'var(--ash)', width: '20%' }}>% of Fail Type</th>
-                        <th style={{ textAlign: 'right', padding: '6px', color: 'var(--ash)', width: '15%' }}>% of Total</th>
-                        <th style={{ textAlign: 'right', padding: '6px', color: 'var(--ash)', width: '15%' }}>Total SG</th>
+                        <th style={{ textAlign: 'left', padding: 'var(--spacing-1-5)', color: 'var(--ash)', width: '35%' }}>Root Cause</th>
+                        <th style={{ textAlign: 'right', padding: 'var(--spacing-1-5)', color: 'var(--ash)', width: '15%' }}>Count</th>
+                        <th style={{ textAlign: 'right', padding: 'var(--spacing-1-5)', color: 'var(--ash)', width: '20%' }}>% of Fail Type</th>
+                        <th style={{ textAlign: 'right', padding: 'var(--spacing-1-5)', color: 'var(--ash)', width: '15%' }}>% of Total</th>
+                        <th style={{ textAlign: 'right', padding: 'var(--spacing-1-5)', color: 'var(--ash)', width: '15%' }}>Total SG</th>
                       </tr>
                     </thead>
                     <tbody>
                       {rootCauseItems.map((item, idx) => (
                         <tr key={idx} style={{ borderBottom: '1px solid var(--dark)' }}>
-                          <td style={{ padding: '6px', color: 'var(--chalk)' }}>{item.label}</td>
-                          <td style={{ padding: '6px', textAlign: 'right', color: 'var(--chalk)' }}>{item.count}</td>
-                          <td style={{ padding: '6px', textAlign: 'right', color: 'var(--ash)' }}>{item.percentageOfFailType.toFixed(0)}%</td>
-                          <td style={{ padding: '6px', textAlign: 'right', color: 'var(--ash)' }}>{item.percentageOfTotal.toFixed(0)}%</td>
-                          <td style={{ padding: '6px', textAlign: 'right', color: getStrokeGainedColor(item.sgTotal || 0) }}>{formatStrokesGained(item.sgTotal || 0)}</td>
+                          <td className="p-1.5 text-chalk">{item.label}</td>
+                          <td className="p-1.5 text-right text-chalk">{item.count}</td>
+                          <td className="p-1.5 text-right text-ash">{item.percentageOfFailType.toFixed(0)}%</td>
+                          <td className="p-1.5 text-right text-ash">{item.percentageOfTotal.toFixed(0)}%</td>
+                          <td style={{ padding: 'var(--spacing-1-5)', textAlign: 'right', color: getStrokeGainedColor(item.sgTotal || 0) }}>{formatStrokesGained(item.sgTotal || 0)}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -485,69 +483,67 @@ function Tiger5FailDetailsSection({ failDetails }: { failDetails: Tiger5FailDeta
   }
 
   return (
-    <div style={{ marginTop: '24px' }}>
+    <div className="mt-6">
       <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        style={{
-          display: 'flex',
+ onClick={() => setIsExpanded(!isExpanded)}
+ style={{ display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           width: '100%',
-          padding: '12px 16px',
-          background: 'var(--charcoal)',
+          padding: 'var(--spacing-3) var(--spacing-4)',
+          background: 'var(--shadow)',
           border: '1px solid var(--ash)',
           borderRadius: '4px',
           color: 'var(--chalk)',
           cursor: 'pointer',
-          fontSize: '14px',
-        }}
+          fontSize: 'var(--text-body-sm)' }}
       >
-        <span style={{ fontWeight: 600 }}>Tiger 5 Fail Details</span>
-        <span style={{ fontSize: '12px', color: 'var(--ash)' }}>
+        <span className="font-semibold">Tiger 5 Fail Details</span>
+        <span className="text-label text-ash">
           {totalFails} fails • {isExpanded ? '▲' : '▼'}
         </span>
       </button>
 
       {isExpanded && (
-        <div style={{ marginTop: '16px' }}>
+        <div className="mt-4">
           {failTypes.map((failType) => {
             if (failType.details.length === 0) return null;
             return (
-              <div key={failType.key} style={{ marginBottom: '24px' }}>
-                <h5 style={{ marginBottom: '12px', color: 'var(--chalk)', fontSize: '13px', fontWeight: 600 }}>
+              <div key={failType.key} className="mb-6">
+                <h5 className="mb-3 text-chalk text-caption font-semibold">
                   {failType.label} ({failType.details.length})
                 </h5>
                 {failType.details.map((detail, idx) => (
-                  <div key={idx} style={{ marginBottom: '16px', padding: '12px', background: 'var(--charcoal)', borderRadius: '4px' }}>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 16px', marginBottom: '12px', fontSize: '12px', color: 'var(--chalk)' }}>
+                  <div key={idx} style={{ marginBottom: 'var(--spacing-4)', padding: 'var(--spacing-3)', background: 'var(--shadow)', borderRadius: '4px' }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--spacing-1-5) var(--spacing-4)', marginBottom: 'var(--spacing-3)', fontSize: 'var(--text-label)', color: 'var(--chalk)' }}>
                       <span><strong>Date:</strong> {detail.date}</span>
                       <span><strong>Course:</strong> {detail.course}</span>
                       <span><strong>Hole:</strong> {detail.hole} (Par {detail.par})</span>
                       <span><strong>Score:</strong> {detail.score}</span>
                     </div>
                     <div className="gi-table-scroll">
-                      <table style={{ minWidth: '660px', width: '100%', fontSize: '13px', borderCollapse: 'collapse' }}>
+                      <table style={{ minWidth: '660px', width: '100%', fontSize: 'var(--text-caption)', borderCollapse: 'collapse' }}>
                         <thead>
                           <tr style={{ borderBottom: '1px solid var(--ash)' }}>
-                            <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>Shot #</th>
-                            <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>Start Lie</th>
-                            <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>Start Dist</th>
-                            <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>End Lie</th>
-                            <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>End Dist</th>
-                            <th style={{ textAlign: 'left', padding: '4px', color: 'var(--ash)' }}>Penalty</th>
-                            <th style={{ textAlign: 'right', padding: '4px', color: 'var(--ash)' }}>SG</th>
+                            <th className="text-left p-1 text-ash">Shot #</th>
+                            <th className="text-left p-1 text-ash">Start Lie</th>
+                            <th className="text-left p-1 text-ash">Start Dist</th>
+                            <th className="text-left p-1 text-ash">End Lie</th>
+                            <th className="text-left p-1 text-ash">End Dist</th>
+                            <th className="text-left p-1 text-ash">Penalty</th>
+                            <th className="text-right p-1 text-ash">SG</th>
                           </tr>
                         </thead>
                         <tbody>
                           {detail.shots.map((shot, shotIdx) => (
-                            <tr key={shotIdx} style={{ borderBottom: '1px solid var(--charcoal)' }}>
-                              <td style={{ padding: '4px' }}>{shot.shotNumber}</td>
-                              <td style={{ padding: '4px' }}>{shot.startingLie}</td>
-                              <td style={{ padding: '4px' }}>{shot.startingDistance}</td>
-                              <td style={{ padding: '4px' }}>{shot.endingLie}</td>
-                              <td style={{ padding: '4px' }}>{shot.endingDistance}</td>
-                              <td style={{ padding: '4px' }}>{shot.hasPenalty ? 'Yes' : ''}</td>
-                              <td style={{ padding: '4px', textAlign: 'right', color: getShotSGColor(shot.calculatedStrokesGained) }}>
+                            <tr key={shotIdx} style={{ borderBottom: '1px solid var(--shadow)' }}>
+                              <td className="p-1">{shot.shotNumber}</td>
+                              <td className="p-1">{shot.startingLie}</td>
+                              <td className="p-1">{shot.startingDistance}</td>
+                              <td className="p-1">{shot.endingLie}</td>
+                              <td className="p-1">{shot.endingDistance}</td>
+                              <td className="p-1">{shot.hasPenalty ? 'Yes' : ''}</td>
+                              <td style={{ padding: 'var(--spacing-1)', textAlign: 'right', color: getShotSGColor(shot.calculatedStrokesGained) }}>
                                 {formatStrokesGained(shot.calculatedStrokesGained)}
                               </td>
                             </tr>
@@ -577,11 +573,11 @@ function Tiger5TrendSection({ trendData }: { trendData: Tiger5TrendDataPoint[] }
 
   // Colors matching Tiger 5 stat cards
   const COLORS = {
-    threePutts: '#3D8EF0',    // Royal Blue
-    bogeyOnPar5: '#A855F7',   // Court Purple
-    doubleBogey: '#06C8E0',   // Aqua
-    bogeyApproach: '#D4F000', // Volt
-    missedGreen: '#F03DAA',  // Magenta
+    threePutts: 'var(--c1)',    // Royal Blue
+    bogeyOnPar5: 'var(--c2)',   // Court Purple
+    doubleBogey: 'var(--c3)',   // Aqua
+    bogeyApproach: 'var(--c4)', // Volt
+    missedGreen: 'var(--c5)',  // Magenta
   };
 
   // Format x-axis label as "Date - Course"
@@ -591,42 +587,42 @@ function Tiger5TrendSection({ trendData }: { trendData: Tiger5TrendDataPoint[] }
   }));
 
   return (
-    <div style={{ marginTop: '24px' }}>
-      <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>Tiger 5 Trend</h4>
-      <div style={{ background: 'var(--charcoal)', padding: '16px', borderRadius: '4px' }}>
+    <div className="mt-6">
+      <h4 className="mb-4 text-ash">Tiger 5 Trend</h4>
+      <div style={{ background: 'var(--shadow)', padding: 'var(--spacing-4)', borderRadius: '4px' }}>
         <ResponsiveContainer width="100%" height={isNarrow ? 240 : 300}>
           <ComposedChart data={formattedData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--ash)" opacity={0.3} />
             <XAxis
-              dataKey="label"
-              stroke="var(--ash)"
-              tick={{ fill: 'var(--ash)', fontSize: isNarrow ? 10 : 12 }}
-              interval={isNarrow ? 'preserveStartEnd' : 0}
-              minTickGap={isNarrow ? 24 : 0}
-              angle={isNarrow ? 0 : -45}
-              textAnchor={isNarrow ? 'middle' : 'end'}
-              height={isNarrow ? 24 : 60}
+ dataKey="label"
+ stroke="var(--ash)"
+ tick={{ fill: 'var(--ash)', fontSize: isNarrow ? 10 : 12 }}
+ interval={isNarrow ? 'preserveStartEnd' : 0}
+ minTickGap={isNarrow ? 24 : 0}
+ angle={isNarrow ? 0 : -45}
+ textAnchor={isNarrow ? 'middle' : 'end'}
+ height={isNarrow ? 24 : 60}
             />
             <YAxis
-              yAxisId="left"
-              stroke="var(--ash)"
-              tick={{ fill: 'var(--ash)', fontSize: 11 }}
-              label={{ value: 'Tiger 5 Fails', angle: -90, position: 'insideLeft', fill: 'var(--ash)', fontSize: 11 }}
+ yAxisId="left"
+ stroke="var(--ash)"
+ tick={{ fill: 'var(--ash)', fontSize: 11 }}
+ label={{ value: 'Tiger 5 Fails', angle: -90, position: 'insideLeft', fill: 'var(--ash)', fontSize: 11 }}
             />
             <YAxis
-              yAxisId="right"
-              orientation="right"
-              stroke="var(--ash)"
-              tick={{ fill: 'var(--ash)', fontSize: 11 }}
-              domain={[(dataMin: number) => dataMin - 5, (dataMax: number) => dataMax + 5]}
-              label={{ value: 'Score', angle: 90, position: 'insideRight', fill: 'var(--ash)', fontSize: 11 }}
+ yAxisId="right"
+ orientation="right"
+ stroke="var(--ash)"
+ tick={{ fill: 'var(--ash)', fontSize: 11 }}
+ domain={[(dataMin: number) => dataMin - 5, (dataMax: number) => dataMax + 5]}
+ label={{ value: 'Score', angle: 90, position: 'insideRight', fill: 'var(--ash)', fontSize: 11 }}
             />
             <Tooltip
-              contentStyle={{ background: 'var(--court)', border: '1px solid var(--scarlet)', borderRadius: '4px', padding: '12px' }}
-              labelStyle={{ color: 'var(--chalk)', fontWeight: 600, marginBottom: '8px' }}
-              itemStyle={{ color: 'var(--cement)', fontSize: '12px' }}
+ contentStyle={{ background: 'var(--court)', border: '1px solid var(--scarlet)', borderRadius: '4px', padding: 'var(--spacing-3)' }}
+ labelStyle={{ color: 'var(--chalk)', fontWeight: 600, marginBottom: 'var(--spacing-2)' }}
+ itemStyle={{ color: 'var(--cement)', fontSize: 'var(--text-label)' }}
             />
-            <Legend wrapperStyle={{ paddingTop: '10px' }} />
+            <Legend wrapperStyle={{ paddingTop: 'var(--spacing-2-5)' }} />
             <Bar yAxisId="left" dataKey="threePutts" name="3 Putts" stackId="a" fill={COLORS.threePutts} />
             <Bar yAxisId="left" dataKey="bogeyOnPar5" name="Bogey on Par 5" stackId="a" fill={COLORS.bogeyOnPar5} />
             <Bar yAxisId="left" dataKey="doubleBogey" name="Double Bogey" stackId="a" fill={COLORS.doubleBogey} />
@@ -686,36 +682,36 @@ function PotentialScoreSection({
   const totalStrokesSaved = potentialData.reduce((sum, d) => sum + d.strokesSaved, 0);
 
   return (
-    <div style={{ marginTop: '24px' }}>
-      <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>What If: Tiger 5 Fails Reduced by 50%?</h4>
+    <div className="mt-6">
+      <h4 className="mb-4 text-ash">What If: Tiger 5 Fails Reduced by 50%?</h4>
 
       {/* Chart */}
-      <div style={{ background: 'var(--charcoal)', padding: '16px', borderRadius: '4px' }}>
+      <div style={{ background: 'var(--shadow)', padding: 'var(--spacing-4)', borderRadius: '4px' }}>
         <ResponsiveContainer width="100%" height={isNarrow ? 240 : 300}>
           <ComposedChart data={potentialData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--ash)" opacity={0.3} />
             <XAxis
-              dataKey="label"
-              stroke="var(--ash)"
-              tick={{ fill: 'var(--ash)', fontSize: isNarrow ? 10 : 12 }}
-              interval={isNarrow ? 'preserveStartEnd' : 0}
-              minTickGap={isNarrow ? 24 : 0}
-              angle={isNarrow ? 0 : -45}
-              textAnchor={isNarrow ? 'middle' : 'end'}
-              height={isNarrow ? 24 : 60}
+ dataKey="label"
+ stroke="var(--ash)"
+ tick={{ fill: 'var(--ash)', fontSize: isNarrow ? 10 : 12 }}
+ interval={isNarrow ? 'preserveStartEnd' : 0}
+ minTickGap={isNarrow ? 24 : 0}
+ angle={isNarrow ? 0 : -45}
+ textAnchor={isNarrow ? 'middle' : 'end'}
+ height={isNarrow ? 24 : 60}
             />
             <YAxis
-              stroke="var(--ash)"
-              tick={{ fill: 'var(--ash)', fontSize: 11 }}
-              domain={['dataMin - 5', 'dataMax + 5']}
-              label={{ value: 'Score', angle: -90, position: 'insideLeft', fill: 'var(--ash)', fontSize: 11 }}
+ stroke="var(--ash)"
+ tick={{ fill: 'var(--ash)', fontSize: 11 }}
+ domain={['dataMin - 5', 'dataMax + 5']}
+ label={{ value: 'Score', angle: -90, position: 'insideLeft', fill: 'var(--ash)', fontSize: 11 }}
             />
             <Tooltip
-              contentStyle={{ background: 'var(--court)', border: '1px solid var(--scarlet)', borderRadius: '4px', padding: '12px' }}
-              labelStyle={{ color: 'var(--chalk)', fontWeight: 600, marginBottom: '8px' }}
-              itemStyle={{ color: 'var(--cement)', fontSize: '12px' }}
+ contentStyle={{ background: 'var(--court)', border: '1px solid var(--scarlet)', borderRadius: '4px', padding: 'var(--spacing-3)' }}
+ labelStyle={{ color: 'var(--chalk)', fontWeight: 600, marginBottom: 'var(--spacing-2)' }}
+ itemStyle={{ color: 'var(--cement)', fontSize: 'var(--text-label)' }}
             />
-            <Legend wrapperStyle={{ paddingTop: '10px' }} />
+            <Legend wrapperStyle={{ paddingTop: 'var(--spacing-2-5)' }} />
             <Bar dataKey="totalScore" name="Actual Score" fill="var(--pitch)" />
             <Bar dataKey="potentialScore" name="Potential Score" fill="var(--chalk)" />
           </ComposedChart>
@@ -723,27 +719,27 @@ function PotentialScoreSection({
       </div>
 
       {/* Summary Stat Cards */}
-      <div className="grid-tiles-3" style={{ gap: '16px', marginTop: '16px' }}>
+      <div className="grid-tiles-3 gap-4 mt-4" >
         <div className="card-stat" style={{ borderLeft: '3px solid var(--pitch)' }}>
-          <div className="label" style={{ color: 'var(--ash)', marginBottom: '8px' }}>Average Score</div>
+          <div className="label text-ash mb-2" >Average Score</div>
           <div className="value-stat" style={{ color: 'var(--pitch)' }}>{avgActualScore.toFixed(1)}</div>
-          <div className="label" style={{ marginTop: '8px', color: 'var(--ash)', fontSize: '11px' }}>
+          <div className="label mt-2 text-ash" >
             Actual average across {totalRounds} rounds
           </div>
         </div>
 
         <div className="card-stat" style={{ borderLeft: '3px solid var(--chalk)' }}>
-          <div className="label" style={{ color: 'var(--ash)', marginBottom: '8px' }}>Potential Average</div>
-          <div className="value-stat" style={{ color: 'var(--chalk)' }}>{avgPotentialScore.toFixed(1)}</div>
-          <div className="label" style={{ marginTop: '8px', color: 'var(--ash)', fontSize: '11px' }}>
+          <div className="label text-ash mb-2" >Potential Average</div>
+          <div className="value-stat" >{avgPotentialScore.toFixed(1)}</div>
+          <div className="label mt-2 text-ash" >
             If Tiger 5 fails reduced by 50%
           </div>
         </div>
 
         <div className="card-stat" style={{ borderLeft: '3px solid var(--chalk)' }}>
-          <div className="label" style={{ color: 'var(--ash)', marginBottom: '8px' }}>Total Strokes Saved</div>
-          <div className="value-stat" style={{ color: 'var(--chalk)' }}>{totalStrokesSaved.toFixed(1)}</div>
-          <div className="label" style={{ marginTop: '8px', color: 'var(--ash)', fontSize: '11px' }}>
+          <div className="label text-ash mb-2" >Total Strokes Saved</div>
+          <div className="value-stat" >{totalStrokesSaved.toFixed(1)}</div>
+          <div className="label mt-2 text-ash" >
             Across all rounds
           </div>
         </div>
@@ -763,72 +759,72 @@ function RootCauseSection({ rootCause, totalFailHoles }: { rootCause: RootCauseM
       label: 'Penalties',
       value: rootCause.penalties,
       sgValue: rootCause.penaltiesSG,
-      color: '#F03DAA'  // Magenta
+      color: 'var(--c5)'  // Magenta
     },
     {
       label: 'Driving',
       value: rootCause.driving,
       sgValue: rootCause.drivingSG,
-      color: '#A855F7'  // Court Purple
+      color: 'var(--c2)'  // Court Purple
     },
     {
       label: 'Approach',
       value: rootCause.approach,
       sgValue: rootCause.approachSG,
-      color: '#D4F000'  // Volt
+      color: 'var(--c4)'  // Volt
     },
     {
       label: 'Lag Putts (13+)',
       value: rootCause.lagPutts,
       sgValue: rootCause.lagPuttsSG,
-      color: '#06C8E0'  // Aqua
+      color: 'var(--c3)'  // Aqua
     },
     {
       label: 'Makeable Putts (0-12)',
       value: rootCause.makeablePutts,
       sgValue: rootCause.makeablePuttsSG,
-      color: '#3D8EF0'  // Royal Blue
+      color: 'var(--c1)'  // Royal Blue
     },
     {
       label: 'Short Game',
       value: rootCause.shortGame,
       sgValue: rootCause.shortGameSG,
-      color: '#FF8C00'  // Orange
+      color: 'var(--bogey)'  // Orange
     },
     {
       label: 'Recovery',
       value: rootCause.recovery,
       sgValue: rootCause.recoverySG,
-      color: '#10B981'  // Emerald
+      color: 'var(--under)'  // Emerald
     },
   ];
 
   return (
-    <div style={{ marginTop: '24px' }}>
-      <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>Tiger 5: Root Cause</h4>
-      <p style={{ fontSize: '12px', color: 'var(--ash)', marginBottom: '16px' }}>
+    <div className="mt-6">
+      <h4 className="mb-4 text-ash">Tiger 5: Root Cause</h4>
+      <p className="text-label text-ash mb-4">
         Shot with lowest SG on each Tiger 5 fail hole ({totalFailHoles} total fails)
       </p>
-      <div className="grid-tiles-7" style={{ gap: '12px' }}>
+      <div className="grid-tiles-7 gap-3" >
         {rootCauseCards.map((card) => {
           const percentage = totalFailHoles > 0 ? (card.value / totalFailHoles) * 100 : 0;
           return (
             <div
-              key={card.label}
-              className="card-stat"
-              style={{ borderLeft: `3px solid ${card.color}` }}
+ key={card.label}
+ className="card-stat"
+ style={{ borderLeft: `3px solid ${card.color}` }}
             >
-              <div className="label" style={{ color: 'var(--ash)', marginBottom: '8px', fontSize: '11px' }}>
+              <div className="label text-ash mb-2" >
                 {card.label}
               </div>
               <div className="value-stat">{card.value}</div>
-              <div style={{ marginTop: '8px' }}>
-                <div className="label" style={{ color: 'var(--ash)', fontSize: '9px' }}>% of Fails</div>
-                <div className="value-stat" style={{ fontSize: '11px' }}>{percentage.toFixed(0)}%</div>
+              <div className="mt-2">
+                <div className="label text-ash" >% of Fails</div>
+                <div className="value-stat"  style={{ fontSize: 'var(--text-label-sm)' }}>{percentage.toFixed(0)}%</div>
               </div>
-              <div style={{ marginTop: '8px' }}>
-                <div className="label" style={{ color: 'var(--ash)', fontSize: '9px' }}>Total SG</div>
-                <div className="value-stat" style={{ fontSize: '11px', color: getStrokeGainedColor(card.sgValue) }}>
+              <div className="mt-2">
+                <div className="label text-ash" >Total SG</div>
+                <div className="value-stat" style={{ fontSize: 'var(--text-label-sm)', color: getStrokeGainedColor(card.sgValue) }}>
                   {formatStrokesGained(card.sgValue)}
                 </div>
               </div>

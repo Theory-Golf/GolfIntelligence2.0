@@ -148,53 +148,53 @@ export function CoachingView({ metrics }: { metrics: CoachTableMetrics }) {
   return (
     <div className="content">
       {/* Section Heading */}
-      <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>Coach Table</h4>
+      <h4 className="mb-4 text-ash">Coach Table</h4>
 
       {/* Controls */}
-      <div style={{ display: 'flex', gap: '32px', marginBottom: '16px', flexWrap: 'wrap' }}>
+      <div className="flex gap-8 mb-4 flex-wrap">
         {/* Display Mode Radio Buttons */}
-        <div style={{ display: 'flex', gap: '16px' }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', color: displayMode === 'perRound' ? 'var(--chalk)' : 'var(--ash)', fontSize: '13px' }}>
+        <div className="flex gap-4">
+          <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-1-5)', cursor: 'pointer', color: displayMode === 'perRound' ? 'var(--chalk)' : 'var(--ash)', fontSize: 'var(--text-caption)' }}>
             <input
-              type="radio"
-              name="displayMode"
-              checked={displayMode === 'perRound'}
-              onChange={() => setDisplayMode('perRound')}
-              style={{ accentColor: 'var(--scarlet)' }}
+ type="radio"
+ name="displayMode"
+ checked={displayMode === 'perRound'}
+ onChange={() => setDisplayMode('perRound')}
+ style={{ accentColor: 'var(--scarlet)' }}
             />
             Avg / Round
           </label>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', color: displayMode === 'total' ? 'var(--chalk)' : 'var(--ash)', fontSize: '13px' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-1-5)', cursor: 'pointer', color: displayMode === 'total' ? 'var(--chalk)' : 'var(--ash)', fontSize: 'var(--text-caption)' }}>
             <input
-              type="radio"
-              name="displayMode"
-              checked={displayMode === 'total'}
-              onChange={() => setDisplayMode('total')}
-              style={{ accentColor: 'var(--scarlet)' }}
+ type="radio"
+ name="displayMode"
+ checked={displayMode === 'total'}
+ onChange={() => setDisplayMode('total')}
+ style={{ accentColor: 'var(--scarlet)' }}
             />
             Total
           </label>
         </div>
 
         {/* Value Mode Radio Buttons */}
-        <div style={{ display: 'flex', gap: '16px' }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', color: valueMode === 'value' ? 'var(--chalk)' : 'var(--ash)', fontSize: '13px' }}>
+        <div className="flex gap-4">
+          <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-1-5)', cursor: 'pointer', color: valueMode === 'value' ? 'var(--chalk)' : 'var(--ash)', fontSize: 'var(--text-caption)' }}>
             <input
-              type="radio"
-              name="valueMode"
-              checked={valueMode === 'value'}
-              onChange={() => setValueMode('value')}
-              style={{ accentColor: 'var(--scarlet)' }}
+ type="radio"
+ name="valueMode"
+ checked={valueMode === 'value'}
+ onChange={() => setValueMode('value')}
+ style={{ accentColor: 'var(--scarlet)' }}
             />
             Value
           </label>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', color: valueMode === 'rank' ? 'var(--chalk)' : 'var(--ash)', fontSize: '13px' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-1-5)', cursor: 'pointer', color: valueMode === 'rank' ? 'var(--chalk)' : 'var(--ash)', fontSize: 'var(--text-caption)' }}>
             <input
-              type="radio"
-              name="valueMode"
-              checked={valueMode === 'rank'}
-              onChange={() => setValueMode('rank')}
-              style={{ accentColor: 'var(--scarlet)' }}
+ type="radio"
+ name="valueMode"
+ checked={valueMode === 'rank'}
+ onChange={() => setValueMode('rank')}
+ style={{ accentColor: 'var(--scarlet)' }}
             />
             Rank
           </label>
@@ -202,29 +202,29 @@ export function CoachingView({ metrics }: { metrics: CoachTableMetrics }) {
       </div>
 
       {/* Table */}
-      <div style={{ background: 'var(--charcoal)', borderRadius: '4px', overflow: 'hidden' }}>
+      <div style={{ background: 'var(--shadow)', borderRadius: '4px', overflow: 'hidden' }}>
         <div className="gi-table-scroll" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
-          <table className="gi-sticky-col gi-sticky-col-zebra" style={{ minWidth: '1400px', width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+          <table className="gi-sticky-col gi-sticky-col-zebra" style={{ minWidth: '1400px', width: '100%', borderCollapse: 'collapse', fontSize: 'var(--text-caption)' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--pitch)', background: 'var(--obsidian)', position: 'sticky', top: 0, zIndex: 10 }}>
                 {columns.map(column => (
                   <th
-                    key={column.key}
-                    onClick={() => !column.isPlayer && handleSort(column.key)}
-                    style={{
-                      padding: '10px 8px',
+ key={column.key}
+ onClick={() => !column.isPlayer && handleSort(column.key)}
+ style={{
+                      padding: 'var(--spacing-2-5) var(--spacing-2)',
                       textAlign: 'center',
                       color: 'var(--ash)',
                       fontWeight: 600,
                       cursor: column.isPlayer ? 'default' : 'pointer',
                       whiteSpace: 'nowrap',
                       userSelect: 'none',
-                      borderRight: '1px solid var(--charcoal)',
+                      borderRight: '1px solid var(--shadow)',
                     }}
                   >
                     {column.label}
                     {sortColumn === column.key && (
-                      <span style={{ marginLeft: '4px' }}>{sortDirection === 'asc' ? '▲' : '▼'}</span>
+                      <span className="ml-1">{sortDirection === 'asc' ? '▲' : '▼'}</span>
                     )}
                   </th>
                 ))}
@@ -233,19 +233,19 @@ export function CoachingView({ metrics }: { metrics: CoachTableMetrics }) {
             <tbody>
               {sortedPlayers.map((player, idx) => (
                 <tr
-                  key={player.player}
-                  style={{
+ key={player.player}
+ style={{
                     borderBottom: '1px solid var(--pitch)',
-                    background: idx % 2 === 0 ? 'var(--charcoal)' : 'var(--obsidian)',
+                    background: idx % 2 === 0 ? 'var(--shadow)' : 'var(--obsidian)',
                   }}
                 >
                   {columns.map(column => {
                     const value = player[column.key as keyof typeof player];
                     return (
                       <td
-                        key={column.key}
-                        style={{
-                          padding: '8px 6px',
+ key={column.key}
+ style={{
+                          padding: 'var(--spacing-2) var(--spacing-1-5)',
                           textAlign: 'center',
                           color: column.isPlayer ? 'var(--chalk)' : getValueColor(column, value as number),
                           fontFamily: column.isPlayer ? 'var(--font-sans)' : 'var(--font-mono)',
@@ -265,16 +265,16 @@ export function CoachingView({ metrics }: { metrics: CoachTableMetrics }) {
       </div>
 
       {/* Legend */}
-      <div style={{ marginTop: '16px', display: 'flex', gap: '24px', fontSize: '11px', color: 'var(--ash)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+      <div className="mt-4 flex gap-6 text-label-sm text-ash">
+        <div className="flex items-center gap-1.5">
           <div style={{ width: '8px', height: '8px', background: 'var(--under)', borderRadius: '2px' }}></div>
           <span>Good</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <div className="flex items-center gap-1.5">
           <div style={{ width: '8px', height: '8px', background: 'var(--bogey)', borderRadius: '2px' }}></div>
           <span>Average</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <div className="flex items-center gap-1.5">
           <div style={{ width: '8px', height: '8px', background: 'var(--double)', borderRadius: '2px' }}></div>
           <span>Poor</span>
         </div>

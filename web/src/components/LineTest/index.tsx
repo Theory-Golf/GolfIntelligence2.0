@@ -559,11 +559,11 @@ function crossBandDiagnosis(all: SessionResult[]): Insight[] {
 // ── Atoms (Tailwind only) ────────────────────────────────────────────
 
 const Eyebrow = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
-  <p className={`font-mono text-[10px] tracking-[0.28em] uppercase text-primary ${className}`}>{children}</p>
+  <p className={`font-mono text-label tracking-[0.28em] uppercase text-primary ${className}`}>{children}</p>
 );
 
 const Mono = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
-  <span className={`font-mono text-[10px] tracking-[0.18em] uppercase text-muted-foreground ${className}`}>{children}</span>
+  <span className={`font-mono text-label tracking-[0.18em] uppercase text-muted-foreground ${className}`}>{children}</span>
 );
 
 const PrimaryButton = ({
@@ -599,7 +599,7 @@ const BackButton = ({ onClick }: { onClick: () => void }) => (
   <button
     type="button"
     onClick={onClick}
-    className="inline-flex items-center gap-2 font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground hover:text-primary transition-colors self-start"
+    className="inline-flex items-center gap-2 font-mono text-label tracking-[0.2em] uppercase text-muted-foreground hover:text-primary transition-colors self-start"
   >
     <ArrowLeft className="size-3" /> Back
   </button>
@@ -608,7 +608,7 @@ const BackButton = ({ onClick }: { onClick: () => void }) => (
 const Attribution = () => (
   <div className="border-t border-border pt-4">
     <Mono className="block mb-2">Attribution &amp; lineage</Mono>
-    <p className="font-body text-[11px] text-muted-foreground leading-relaxed">
+    <p className="font-body text-label-sm text-muted-foreground leading-relaxed">
       The Line Test is inspired by the dispersion benchmark protocol developed
       by Chris Zambri (USC 2006–2020, Pepperdine 2020–2023; currently head
       coach, U.S. National Development Program / U.S. Junior National Team,
@@ -664,7 +664,7 @@ function HomeScreen({
           <button
             type="button"
             onClick={onHistory}
-            className="font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground hover:text-primary transition-colors text-center mt-1"
+            className="font-mono text-label tracking-[0.2em] uppercase text-muted-foreground hover:text-primary transition-colors text-center mt-1"
           >
             View history
           </button>
@@ -767,7 +767,7 @@ function ProfileScreen({
       <button
         type="button"
         onClick={addRow}
-        className="font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground hover:text-primary transition-colors self-start"
+        className="font-mono text-label tracking-[0.2em] uppercase text-muted-foreground hover:text-primary transition-colors self-start"
       >
         + Add club
       </button>
@@ -845,7 +845,7 @@ function SetupScreen({
                 <div className={`font-display text-base font-bold uppercase tracking-tight ${active ? 'text-primary' : 'text-foreground'}`}>
                   {cfg.label}
                 </div>
-                <p className="font-mono text-[10px] tracking-[0.12em] text-muted-foreground mt-1">
+                <p className="font-mono text-label tracking-[0.12em] text-muted-foreground mt-1">
                   {cfg.range[0]}–{cfg.range[1]} yd
                 </p>
               </button>
@@ -874,7 +874,7 @@ function SetupScreen({
                 <div className={`font-display text-base font-bold uppercase tracking-tight ${active ? 'text-primary' : 'text-foreground'}`}>
                   {o.label}
                 </div>
-                <p className="font-body text-[11px] text-muted-foreground mt-1">{o.sub}</p>
+                <p className="font-body text-label-sm text-muted-foreground mt-1">{o.sub}</p>
               </button>
             );
           })}
@@ -901,7 +901,7 @@ function SetupScreen({
                 <div className={`font-display text-base font-bold uppercase tracking-tight ${active ? 'text-primary' : 'text-foreground'}`}>
                   {o.label}
                 </div>
-                <p className="font-body text-[11px] text-muted-foreground mt-1">{o.sub}</p>
+                <p className="font-body text-label-sm text-muted-foreground mt-1">{o.sub}</p>
               </button>
             );
           })}
@@ -920,7 +920,7 @@ function SetupScreen({
             <button
               type="button"
               onClick={onEditProfile}
-              className="font-mono text-[10px] tracking-[0.2em] uppercase text-primary hover:text-scarlet-glow transition-colors mt-3"
+              className="font-mono text-label tracking-[0.2em] uppercase text-primary hover:text-scarlet-glow transition-colors mt-3"
             >
               Set up carry profile →
             </button>
@@ -945,7 +945,7 @@ function SetupScreen({
                     onChange={(e) =>
                       setOverrides((p) => ({ ...p, [i]: e.target.value }))
                     }
-                    className="bg-surface border border-border text-foreground font-body text-xs px-2 py-1.5 focus:border-primary outline-none"
+                    className="bg-surface border border-border text-foreground font-body text-caption px-2 py-1.5 focus:border-primary outline-none"
                     aria-label={`Substitute club ${i + 1}`}
                   >
                     {profile
@@ -963,7 +963,7 @@ function SetupScreen({
             <button
               type="button"
               onClick={onEditProfile}
-              className="font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground hover:text-primary transition-colors self-start mt-1"
+              className="font-mono text-label tracking-[0.2em] uppercase text-muted-foreground hover:text-primary transition-colors self-start mt-1"
             >
               Edit carry profile
             </button>
@@ -1053,7 +1053,7 @@ function ShotScreen({
           </div>
         </div>
 
-        <p className="font-body text-xs text-muted-foreground text-center">
+        <p className="font-body text-caption text-muted-foreground text-center">
           Confirm this entry, or edit before the next shot.
         </p>
 
@@ -1123,7 +1123,7 @@ function ShotScreen({
                 key={f}
                 type="button"
                 onClick={() => setFromFingers(f)}
-                className="px-2.5 py-1.5 bg-surface border border-border hover:border-primary text-foreground font-mono text-xs transition-colors"
+                className="px-2.5 py-1.5 bg-surface border border-border hover:border-primary text-foreground font-mono text-label transition-colors"
               >
                 {f}f → {fingerYards(club.carry, f)}
               </button>
@@ -1169,7 +1169,7 @@ function ShotScreen({
           })}
         </div>
         {validYards && numYards === 0 && (
-          <p className="font-body text-[11px] text-muted-foreground mt-2">
+          <p className="font-body text-label-sm text-muted-foreground mt-2">
             0 yards offline is logged as center.
           </p>
         )}
@@ -1225,19 +1225,19 @@ function ReferenceBar({ band, score }: { band: BandConfig; score: number }) {
       <div className="flex flex-col gap-1.5">
         {band.anchors.map((a, i) => (
           <div key={i} className="flex justify-between items-center">
-            <span className="font-body text-xs text-muted-foreground">
+            <span className="font-body text-caption text-muted-foreground">
               <span className="inline-block size-2 rounded-full bg-c1 mr-2 align-middle" />
               {a.label}
             </span>
-            <span className="font-mono text-xs text-foreground">{a.value}</span>
+            <span className="font-mono text-label text-foreground">{a.value}</span>
           </div>
         ))}
         <div className="flex justify-between items-center">
-          <span className="font-body text-xs text-foreground">
+          <span className="font-body text-caption text-foreground">
             <span className="inline-block w-[3px] h-3 bg-primary mr-2 align-middle" />
             Your score
           </span>
-          <span className="font-mono text-xs text-primary">{score}</span>
+          <span className="font-mono text-label text-primary">{score}</span>
         </div>
       </div>
     </div>
@@ -1276,11 +1276,11 @@ function ResultScreen({
         <div
           className={`inline-flex items-center gap-2 mt-4 px-4 py-1.5 border rounded-full ${tierBorder[session.tier]}`}
         >
-          <span className={`font-mono text-xs tracking-[0.2em] uppercase ${tierClass[session.tier]}`}>
+          <span className={`font-mono text-label tracking-[0.2em] uppercase ${tierClass[session.tier]}`}>
             {session.tier}
           </span>
         </div>
-        <p className="font-body text-xs text-muted-foreground mt-3 max-w-xs mx-auto">
+        <p className="font-body text-caption text-muted-foreground mt-3 max-w-xs mx-auto">
           {TIER_DESC[session.tier]}
         </p>
         <div className="h-px bg-border my-4" />
@@ -1325,7 +1325,7 @@ function ResultScreen({
           ))}
         </div>
         {missDirCount > 0 && (
-          <p className="font-body text-xs text-muted-foreground mt-3">
+          <p className="font-body text-caption text-muted-foreground mt-3">
             You missed {missDirDominant} {missDirCount} of 20 shots.
           </p>
         )}
@@ -1349,19 +1349,19 @@ function ResultScreen({
                     {c.name}
                   </span>
                   {isBest && (
-                    <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-sg-strong ml-2">
+                    <span className="font-mono text-label tracking-[0.15em] uppercase text-sg-strong ml-2">
                       Most consistent
                     </span>
                   )}
                   {isWorst && (
-                    <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-sg-weak ml-2">
+                    <span className="font-mono text-label tracking-[0.15em] uppercase text-sg-weak ml-2">
                       Least consistent
                     </span>
                   )}
                 </div>
                 <div className="text-right">
                   <div className="font-display text-lg font-bold text-foreground">
-                    {c.total}<span className="text-xs text-muted-foreground ml-0.5">yd</span>
+                    {c.total}<span className="text-caption text-muted-foreground ml-0.5">yd</span>
                   </div>
                   <Mono className="block mt-0.5">avg {c.avg} · max {c.max}</Mono>
                 </div>
@@ -1380,12 +1380,12 @@ function InsightCard({ insight }: { insight: Insight }) {
   return (
     <div className="bg-surface border border-border border-l-[3px] border-l-primary p-4">
       <Mono className="text-primary block mb-2">{insight.title}</Mono>
-      <p className="font-body text-xs text-foreground">{insight.finding}</p>
+      <p className="font-body text-caption text-foreground">{insight.finding}</p>
       {insight.prescription && (
         <>
           <div className="h-px bg-border my-2.5" />
           <Mono className="block mb-1.5">Prescription</Mono>
-          <p className="font-body text-xs text-muted-foreground">{insight.prescription}</p>
+          <p className="font-body text-caption text-muted-foreground">{insight.prescription}</p>
         </>
       )}
     </div>
@@ -1503,7 +1503,7 @@ function HistoryScreen({
                         style={{ height: `${h}%` }}
                         title={`${sc}`}
                       />
-                      <span className="font-mono text-[8px] text-muted-foreground">{sc}</span>
+                      <span className="font-mono text-label text-muted-foreground">{sc}</span>
                     </div>
                   );
                 })}
@@ -1523,7 +1523,7 @@ function HistoryScreen({
                 </div>
                 <div>
                   <Mono className="block">Tier mix</Mono>
-                  <p className="font-body text-xs text-foreground mt-1">
+                  <p className="font-body text-caption text-foreground mt-1">
                     {TIER_ORDER.filter((t) => trends.freq[t]).map((t) => (
                       <span key={t} className={`mr-2 ${tierClass[t]}`}>
                         {t[0]}×{trends.freq[t]}
@@ -1537,7 +1537,7 @@ function HistoryScreen({
                   <div className="h-px bg-border my-1" />
                   <Mono className="block mb-1.5">Tier crossovers</Mono>
                   {trends.crossovers.map((c, i) => (
-                    <p key={i} className="font-body text-xs text-muted-foreground">
+                    <p key={i} className="font-body text-caption text-muted-foreground">
                       {c.date}: {c.from} → <span className={tierClass[c.to]}>{c.to}</span>
                     </p>
                   ))}
@@ -1545,7 +1545,7 @@ function HistoryScreen({
               )}
             </div>
           ) : (
-            <p className="font-body text-xs text-muted-foreground">
+            <p className="font-body text-caption text-muted-foreground">
               Log {3 - bandSessions.length} more session
               {3 - bandSessions.length === 1 ? '' : 's'} in this band to unlock
               trend analysis.
@@ -1562,7 +1562,7 @@ function HistoryScreen({
             </div>
           )}
           {bandSessions.length >= 3 && bandSessions.length < 5 && (
-            <p className="font-body text-xs text-muted-foreground">
+            <p className="font-body text-caption text-muted-foreground">
               Log {5 - bandSessions.length} more session
               {5 - bandSessions.length === 1 ? '' : 's'} in this band to unlock
               pattern detection.
@@ -1592,7 +1592,7 @@ function HistoryScreen({
                     <Mono className={`block ${tierClass[s.tier]}`}>
                       {s.tier}
                     </Mono>
-                    <p className="font-body text-xs text-muted-foreground mt-1">
+                    <p className="font-body text-caption text-muted-foreground mt-1">
                       {fmtDate(s.timestamp)} · {s.mode} · {s.order_mode}
                     </p>
                   </div>

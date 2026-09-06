@@ -755,8 +755,8 @@ export const PILLAR_LABELS: Record<Pillar, string> = {
 
 /** Segment identity colours are fixed by the brand system and never re-tinted. */
 export const PILLAR_COLORS: Record<Pillar, string> = {
-  Driving: '#E040A0',
-  Approach: '#D4A800',
-  ShortGame: '#00B870',
-  Putting: '#3D8EF0',
+  Driving: 'var(--seg-drive)',
+  Approach: 'var(--seg-approach)',
+  ShortGame: 'var(--seg-shortgame)',
+  Putting: 'var(--c1)',
 };

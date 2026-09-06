@@ -19,7 +19,7 @@ export default function Footer() {
         <span className="font-display font-bold text-sm tracking-[0.08em] uppercase text-muted-foreground">
           theory<span className="text-primary">.golf</span>
         </span>
-        <span className="font-mono text-[11px] text-muted-foreground">
+        <span className="font-mono text-label text-muted-foreground">
           &copy; 2025 theory.golf &mdash; All rights reserved
         </span>
       </div>

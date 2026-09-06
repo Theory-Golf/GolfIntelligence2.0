@@ -30,7 +30,7 @@ function ViewLoading() {
   return (
     <div className="loading">
       <div className="loading-spinner"></div>
-      <p style={{ marginTop: '16px' }}>Loading view...</p>
+      <p className="mt-4">Loading view...</p>
     </div>
   );
 }
@@ -121,10 +121,10 @@ export default function Dashboard() {
         <div className="benchmark-selector">
           <label htmlFor="benchmark-gender-select">Benchmark:</label>
           <select
-            id="benchmark-gender-select"
-            value={benchmarkGender}
-            onChange={handleBenchmarkGenderChange}
-            className="benchmark-dropdown"
+ id="benchmark-gender-select"
+ value={benchmarkGender}
+ onChange={handleBenchmarkGenderChange}
+ className="benchmark-dropdown"
           >
             {genderOptions.map(opt => (
               <option key={opt.value} value={opt.value}>
@@ -133,10 +133,10 @@ export default function Dashboard() {
             ))}
           </select>
           <select
-            id="benchmark-tier-select"
-            value={benchmarkTier}
-            onChange={handleBenchmarkTierChange}
-            className="benchmark-dropdown"
+ id="benchmark-tier-select"
+ value={benchmarkTier}
+ onChange={handleBenchmarkTierChange}
+ className="benchmark-dropdown"
           >
             {benchmarkTierOptions.map(opt => (
               <option key={opt.value} value={opt.value}>
@@ -153,15 +153,15 @@ export default function Dashboard() {
       {/* Filter Bar */}
       {!isLoading && !error && processedShots.length > 0 && (
         <FilterBar
-          filters={filters}
-          options={filterOptions}
-          validOptions={cascadingFilterOptions}
-          onFilterChange={setFilters}
-          onClear={clearFilters}
-          isCollapsed={sidebarCollapsed}
-          onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
-          isOpen={filtersOpen}
-          onClose={() => setFiltersOpen(false)}
+ filters={filters}
+ options={filterOptions}
+ validOptions={cascadingFilterOptions}
+ onFilterChange={setFilters}
+ onClear={clearFilters}
+ isCollapsed={sidebarCollapsed}
+ onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+ isOpen={filtersOpen}
+ onClose={() => setFiltersOpen(false)}
         />
       )}
 
@@ -170,11 +170,11 @@ export default function Dashboard() {
           844px viewport. Hidden at >=768px by .filter-fab's guard. */}
       {!isLoading && !error && processedShots.length > 0 && !filtersOpen && (
         <button
-          type="button"
-          className="filter-fab"
-          onClick={() => setFiltersOpen(true)}
-          aria-label="Open filters"
-          aria-expanded={filtersOpen}
+ type="button"
+ className="filter-fab"
+ onClick={() => setFiltersOpen(true)}
+ aria-label="Open filters"
+ aria-expanded={filtersOpen}
         >
           Filters
           {activeFilterCount > 0 && (
@@ -188,14 +188,14 @@ export default function Dashboard() {
         {isLoading && (
           <div className="loading">
             <div className="loading-spinner"></div>
-            <p style={{ marginTop: '16px' }}>Loading golf data...</p>
+            <p className="mt-4">Loading golf data...</p>
           </div>
         )}
 
         {error && (
           <div className="error">
             <p>{error}</p>
-            <p style={{ marginTop: '8px', fontSize: '12px' }}>
+            <p className="mt-2 text-label">
               There was a problem loading your data. Make sure you are signed in, then refresh the page.
             </p>
           </div>
@@ -203,16 +203,16 @@ export default function Dashboard() {
 
         {!isLoading && !error && processedShots.length === 0 && (
           <div className="loading">
-            <p style={{ fontSize: '16px', color: 'var(--chalk)' }}>No rounds yet</p>
-            <p style={{ marginTop: '8px', fontSize: '13px', color: 'var(--ash)' }}>
+            <p className="text-body text-chalk">No rounds yet</p>
+            <p className="mt-2 text-caption text-ash">
               Enter your first round to see your Golf Intelligence dashboard.
             </p>
             <Link
-              href="/golf-intelligence/round/new"
-              style={{
-                marginTop: '16px',
+ href="/golf-intelligence/round/new"
+ style={{
+                marginTop: 'var(--spacing-4)',
                 display: 'inline-block',
-                padding: '10px 20px',
+                padding: 'var(--spacing-2-5) var(--spacing-5)',
                 background: 'var(--scarlet)',
                 color: 'var(--chalk)',
                 borderRadius: '4px',
@@ -257,10 +257,10 @@ export default function Dashboard() {
 
             {activeTab === 'path' && (
               <PlayerPathView
-            driverEngine={driverEngine}
-            benchmark={{ gender: benchmarkGender, tier: benchmarkTier }}
-            diagnosis={segmentDiagnosis}
-            practicePlan={practicePlan}
+ driverEngine={driverEngine}
+ benchmark={{ gender: benchmarkGender, tier: benchmarkTier }}
+ diagnosis={segmentDiagnosis}
+ practicePlan={practicePlan}
           />
             )}
 

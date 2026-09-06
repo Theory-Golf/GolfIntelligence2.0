@@ -17,12 +17,12 @@ export default function PracticeIntentGate({
     return (
       <div className="mt-4 border border-dashed border-border bg-muted/40 p-4">
         <div className="mb-2 flex items-center justify-between">
-          <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+          <span className="font-mono text-label uppercase tracking-[0.2em] text-muted-foreground">
             Between Checkpoints
           </span>
           <StatusPill status="pending">After CP {gate.afterCheckpointIdx + 1}</StatusPill>
         </div>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-caption text-muted-foreground">
           Log the previous checkpoint to set practice intent.
         </p>
       </div>
@@ -32,7 +32,7 @@ export default function PracticeIntentGate({
   if (!gate.intent) {
     return (
       <div className="mt-4 border border-primary/40 bg-accent/40 p-4">
-        <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-primary">
+        <div className="mb-2 font-mono text-label uppercase tracking-[0.2em] text-primary">
           Practice Swings — Set Intent
         </div>
         <p className="mb-3 text-sm text-foreground">
@@ -50,7 +50,7 @@ export default function PracticeIntentGate({
               <span className="font-display text-sm font-semibold uppercase tracking-wide text-foreground">
                 {opt.label}
               </span>
-              <span className="text-xs text-muted-foreground">{opt.desc}</span>
+              <span className="text-caption text-muted-foreground">{opt.desc}</span>
             </button>
           ))}
         </div>
@@ -62,13 +62,13 @@ export default function PracticeIntentGate({
   return (
     <div className="mt-4 border border-border bg-card p-4">
       <div className="mb-2 flex items-center justify-between">
-        <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+        <span className="font-mono text-label uppercase tracking-[0.2em] text-muted-foreground">
           Practice Intent
         </span>
         <button
           type="button"
           onClick={() => onClear(gate.id)}
-          className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary hover:underline"
+          className="font-mono text-label uppercase tracking-[0.18em] text-primary hover:underline"
         >
           Change
         </button>
@@ -77,7 +77,7 @@ export default function PracticeIntentGate({
         <span className="font-display text-sm font-semibold uppercase tracking-wide text-foreground">
           {selected?.label}
         </span>
-        <span className="text-xs text-muted-foreground">{selected?.desc}</span>
+        <span className="text-caption text-muted-foreground">{selected?.desc}</span>
       </div>
     </div>
   );

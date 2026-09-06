@@ -50,9 +50,9 @@ export function SegmentStrip({
       <div className="ppv-strip">
         {readings.map(r => (
           <div
-            key={r.segment}
-            className={`ppv-seg${r === lead ? ' ppv-seg-lead' : ''}`}
-            style={pillarStyle(r)}
+ key={r.segment}
+ className={`ppv-seg${r === lead ? ' ppv-seg-lead' : ''}`}
+ style={pillarStyle(r)}
           >
             <div className="ppv-seg-name">{PILLAR_LABELS[r.segment]}</div>
             <div className="ppv-seg-sg" style={{ color: sgColor(r.sgPerRound) }}>
@@ -139,9 +139,9 @@ function ShotPlot({ shotSGs }: { shotSGs: number[] }) {
       <div className="ppv-plot-row" aria-hidden="true">
         {shotSGs.map((sg, i) => (
           <i
-            key={i}
-            className={sg < LOSS_SHAPE_TUNING.DISASTER_SG ? 'bad' : undefined}
-            style={{ height: `${Math.min(100, Math.max(6, (Math.abs(Math.min(sg, 0)) / scale) * 100))}%` }}
+ key={i}
+ className={sg < LOSS_SHAPE_TUNING.DISASTER_SG ? 'bad' : undefined}
+ style={{ height: `${Math.min(100, Math.max(6, (Math.abs(Math.min(sg, 0)) / scale) * 100))}%` }}
           />
         ))}
       </div>
@@ -195,8 +195,8 @@ export function WhyCard({
         <div className="ppv-stat">
           <div className="ppv-stat-key">Tiger 5 root causes</div>
           <div
-            className="ppv-stat-val"
-            style={{ color: reading.t5Share >= 0.4 ? 'var(--sg-weak)' : 'var(--chalk)' }}
+ className="ppv-stat-val"
+ style={{ color: reading.t5Share >= 0.4 ? 'var(--sg-weak)' : 'var(--chalk)' }}
           >
             {reading.t5Holes} of {diagnosis.totalT5Holes}
           </div>
@@ -289,9 +289,9 @@ function segmentContext(d: SegmentDiagnosisResult, r: SegmentReading): ReactNode
 function GameCard({ card, lastPlayed }: { card: Prescription; lastPlayed?: string }) {
   return (
     <a
-      className={`ppv-game${card.maintenance ? ' ppv-game-upkeep' : ''}`}
-      href={card.route}
-      style={{ ['--pp-pillar' as string]: PILLAR_COLORS[card.segment] }}
+ className={`ppv-game${card.maintenance ? ' ppv-game-upkeep' : ''}`}
+ href={card.route}
+ style={{ ['--pp-pillar' as string]: PILLAR_COLORS[card.segment] }}
     >
       <div className="ppv-game-name">{card.name}</div>
       {card.config && <div className="ppv-game-config">{card.config}</div>}
@@ -342,7 +342,7 @@ export function Monitors({ readings }: { readings: SegmentReading[] }) {
   return (
     <div>
       <div className="ppv-eyebrow">Also watching</div>
-      <div style={{ display: 'grid', gap: '8px' }}>
+      <div className="grid gap-2">
         {readings.map(r => (
           <div key={r.segment} className="ppv-monitor" style={pillarStyle(r)}>
             <span className="ppv-monitor-name">{PILLAR_LABELS[r.segment]}</span>

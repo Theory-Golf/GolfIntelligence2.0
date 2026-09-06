@@ -18,7 +18,7 @@ export function Eyebrow({
   children, className = '',
 }: { children: React.ReactNode; className?: string }) {
   return (
-    <p className={`font-mono text-[10px] tracking-[0.28em] uppercase text-primary ${className}`}>{children}</p>
+    <p className={`font-mono text-label tracking-[0.28em] uppercase text-primary ${className}`}>{children}</p>
   );
 }
 
@@ -26,7 +26,7 @@ export function Mono({
   children, className = '',
 }: { children: React.ReactNode; className?: string }) {
   return (
-    <span className={`font-mono text-[10px] tracking-[0.18em] uppercase text-muted-foreground ${className}`}>{children}</span>
+    <span className={`font-mono text-label tracking-[0.18em] uppercase text-muted-foreground ${className}`}>{children}</span>
   );
 }
 
@@ -70,7 +70,7 @@ export function TextButton({
     <button
       type="button"
       onClick={onClick}
-      className={`font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground hover:text-primary transition-colors cursor-pointer ${className}`}
+      className={`font-mono text-label tracking-[0.2em] uppercase text-muted-foreground hover:text-primary transition-colors cursor-pointer ${className}`}
     >
       {children}
     </button>

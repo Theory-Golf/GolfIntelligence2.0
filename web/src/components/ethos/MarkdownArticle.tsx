@@ -95,7 +95,7 @@ const components: Components = {
   ),
   thead: ({ children }) => <thead className="bg-secondary">{children}</thead>,
   th: ({ children }) => (
-    <th className="text-left font-mono text-[10px] tracking-[0.15em] uppercase text-muted-foreground px-4 py-2 border-b border-border">
+    <th className="text-left font-mono text-label tracking-[0.15em] uppercase text-muted-foreground px-4 py-2 border-b border-border">
       {children}
     </th>
   ),
@@ -120,7 +120,7 @@ const components: Components = {
     if (match) {
       return (
         <pre className="my-6 p-4 bg-card border border-border overflow-x-auto">
-          <code className="font-mono text-xs text-foreground">{raw}</code>
+          <code className="font-mono text-label text-foreground">{raw}</code>
         </pre>
       );
     }

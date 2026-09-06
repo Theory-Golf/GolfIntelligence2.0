@@ -9,10 +9,10 @@ import {
   type HoleEntry,
 } from '@/lib/golf/roundSession';
 
-const COLOR_UNDER = '#00B870';
-const COLOR_PAR = '#F2F0EE';
-const COLOR_BOGEY = '#F09020';
-const COLOR_DOUBLE = '#E8202A';
+const COLOR_UNDER = 'var(--seg-shortgame)';
+const COLOR_PAR = 'var(--chalk)';
+const COLOR_BOGEY = 'var(--bogey)';
+const COLOR_DOUBLE = 'var(--scarlet)';
 
 function scoreColor(rel: number): string {
   if (rel < 0) return COLOR_UNDER;
@@ -61,7 +61,7 @@ export default function RoundReviewPage() {
   if (session.loading) {
     return (
       <div className="min-h-svh bg-background text-foreground flex items-center justify-center">
-        <span className="font-mono text-xs text-ash tracking-[0.25em] uppercase">
+        <span className="font-mono text-label text-ash tracking-[0.25em] uppercase">
           Loading…
         </span>
       </div>
@@ -71,7 +71,7 @@ export default function RoundReviewPage() {
   if (session.error) {
     return (
       <div className="min-h-svh bg-background text-foreground flex items-center justify-center">
-        <span className="font-mono text-xs text-scarlet tracking-[0.25em] uppercase">
+        <span className="font-mono text-label text-scarlet tracking-[0.25em] uppercase">
           {session.error}
         </span>
       </div>
@@ -156,7 +156,7 @@ export default function RoundReviewPage() {
           <button
             type="button"
             onClick={() => setMode(mode === 'editing' ? 'review' : 'editing')}
-            className={`w-12 font-mono text-[11px] tracking-[0.2em] uppercase ${
+            className={`w-12 font-mono text-label tracking-[0.2em] uppercase ${
               mode === 'editing' ? 'text-scarlet' : 'text-ash hover:text-chalk'
             }`}
           >
@@ -166,16 +166,16 @@ export default function RoundReviewPage() {
 
         {/* Context block */}
         <div className="flex flex-col gap-1 pb-3 border-b border-border">
-          <p className="font-mono text-[10px] tracking-[0.25em] uppercase text-ash">
+          <p className="font-mono text-label tracking-[0.25em] uppercase text-ash">
             {state.courseName || '—'}
             {state.roundType ? ` · ${state.roundType.toUpperCase()}` : ''}
           </p>
           {state.tournamentName && (
-            <p className="font-mono text-[10px] tracking-[0.25em] uppercase text-chalk">
+            <p className="font-mono text-label tracking-[0.25em] uppercase text-chalk">
               {state.tournamentName}
             </p>
           )}
-          <p className="font-mono text-[10px] tracking-[0.25em] uppercase text-ash">
+          <p className="font-mono text-label tracking-[0.25em] uppercase text-ash">
             {formatDate(state.roundDate)}
             {' · '}
             {totalYardage !== null ? `${totalYardage}y` : '—'}
@@ -211,7 +211,7 @@ export default function RoundReviewPage() {
 
         {/* Front nine */}
         <section className="flex flex-col">
-          <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash mb-2">
+          <p className="font-mono text-label tracking-[0.3em] uppercase text-ash mb-2">
             Front nine
           </p>
           <div className="flex flex-col divide-y divide-border">
@@ -228,7 +228,7 @@ export default function RoundReviewPage() {
             ))}
           </div>
           {!frontStarted && (
-            <p className="font-mono text-[10px] tracking-[0.25em] uppercase text-ash opacity-60 mt-2">
+            <p className="font-mono text-label tracking-[0.25em] uppercase text-ash opacity-60 mt-2">
               1—9 · remaining holes
             </p>
           )}
@@ -236,7 +236,7 @@ export default function RoundReviewPage() {
 
         {/* Back nine */}
         <section className="flex flex-col">
-          <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash mb-2">
+          <p className="font-mono text-label tracking-[0.3em] uppercase text-ash mb-2">
             Back nine
           </p>
           {backStarted ? (
@@ -254,7 +254,7 @@ export default function RoundReviewPage() {
               ))}
             </div>
           ) : (
-            <p className="font-mono text-[10px] tracking-[0.25em] uppercase text-ash opacity-60">
+            <p className="font-mono text-label tracking-[0.25em] uppercase text-ash opacity-60">
               10—18 · remaining holes
             </p>
           )}
@@ -272,12 +272,12 @@ export default function RoundReviewPage() {
               {submitting ? 'Saving…' : 'Submit round'}
             </button>
             {!roundComplete && (
-              <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-ash text-center">
+              <p className="font-mono text-label tracking-[0.2em] uppercase text-ash text-center">
                 Complete all 18 holes to submit
               </p>
             )}
             {submitNote && (
-              <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-scarlet text-center">
+              <p className="font-mono text-label tracking-[0.2em] uppercase text-scarlet text-center">
                 {submitNote}
               </p>
             )}
@@ -318,7 +318,7 @@ function ScoreColumn({
 }) {
   return (
     <div className="flex flex-col items-center px-2">
-      <span className="font-mono text-[9px] tracking-[0.3em] uppercase text-ash mb-1">
+      <span className="font-mono text-label tracking-[0.3em] uppercase text-ash mb-1">
         {label}
       </span>
       <span
@@ -328,7 +328,7 @@ function ScoreColumn({
         {raw ?? '—'}
       </span>
       <span
-        className="font-mono text-[11px] tracking-[0.15em] mt-1"
+        className="font-mono text-label tracking-[0.15em] mt-1"
         style={{ color: rel !== null ? scoreColor(rel) : COLOR_PAR }}
       >
         {rel !== null ? fmtRel(rel) : '—'}
@@ -393,7 +393,7 @@ function HoleRow({
         <span className="font-display font-extrabold text-xl text-ash w-8">
           {holeNumber}
         </span>
-        <span className="font-mono text-[11px] tracking-[0.15em] uppercase text-ash flex-1">
+        <span className="font-mono text-label tracking-[0.15em] uppercase text-ash flex-1">
           {effectivePar !== null ? `Par ${effectivePar}` : '—'}
         </span>
         <span className="w-12" />
@@ -408,11 +408,11 @@ function HoleRow({
         <span className="font-display font-extrabold text-xl text-chalk w-8">
           {holeNumber}
         </span>
-        <span className="font-mono text-[11px] tracking-[0.15em] uppercase text-ash flex-1">
+        <span className="font-mono text-label tracking-[0.15em] uppercase text-ash flex-1">
           {effectivePar !== null ? `Par ${effectivePar}` : '—'}
           {startDist !== null ? ` · ${startDist}y` : ''}
         </span>
-        <span className="font-mono text-[13px] text-ash">{shotsSoFar}·</span>
+        <span className="font-mono text-caption text-ash">{shotsSoFar}·</span>
         <span className="font-mono text-ash w-4 text-right">›</span>
       </button>
     );
@@ -428,7 +428,7 @@ function HoleRow({
       <span className="font-display font-extrabold text-xl text-chalk w-8">
         {holeNumber}
       </span>
-      <span className="font-mono text-[11px] tracking-[0.15em] uppercase text-ash flex-1">
+      <span className="font-mono text-label tracking-[0.15em] uppercase text-ash flex-1">
         Par {entry.par}
         {startDist !== null ? ` · ${startDist}y` : ''}
       </span>
@@ -439,7 +439,7 @@ function HoleRow({
         {score}
       </span>
       <span
-        className="font-mono text-[11px] tracking-[0.1em] w-8 text-right"
+        className="font-mono text-label tracking-[0.1em] w-8 text-right"
         style={{ color: scoreColor(rel) }}
       >
         {fmtRel(rel)}

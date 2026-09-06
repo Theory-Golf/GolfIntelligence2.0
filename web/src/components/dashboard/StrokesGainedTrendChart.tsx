@@ -32,8 +32,8 @@ const MOVING_AVERAGE_OPTIONS = [
 
 // Chart colors - matching the app theme
 const COLORS = {
-  bar: '#3D8EF0',      // Royal Blue
-  line: '#A855F7',     // Court Purple
+  bar: 'var(--c1)',      // Royal Blue
+  line: 'var(--c2)',     // Court Purple
   grid: 'var(--ash)',
   text: 'var(--ash)',
   tooltipBg: 'var(--court)',
@@ -90,24 +90,21 @@ export function StrokesGainedTrendChart({ filteredShots }: StrokesGainedTrendCha
         background: COLORS.tooltipBg,
         border: '1px solid var(--scarlet)',
         borderRadius: '4px',
-        padding: '12px',
+        padding: 'var(--spacing-3)',
         boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
       }}>
-        <div style={{ color: 'var(--chalk)', fontWeight: 600, marginBottom: '8px' }}>
+        <div className="text-chalk font-semibold mb-2">
           {data.fullLabel}
         </div>
-        <div style={{ fontSize: '12px', color: 'var(--cement)', marginBottom: '4px' }}>
+        <div className="text-label text-cement mb-1">
           Round {data.roundNumber} • {data.shotCount} shots
         </div>
         {payload.map((entry, index) => (
-          <div key={index} style={{
-            display: 'flex',
+          <div key={index} style={{ display: 'flex',
             justifyContent: 'space-between',
-            gap: '16px',
-            fontSize: '12px',
-            color: entry.color,
-            marginTop: '4px'
-          }}>
+            gap: 'var(--spacing-4)',
+            fontSize: 'var(--text-label)', color: entry.color,
+            marginTop: 'var(--spacing-1)' }}>
             <span>{entry.dataKey === 'strokesGained' ? 'Strokes Gained' : 'Moving Average'}:</span>
             <span style={{ fontWeight: 600, color: entry.dataKey === 'strokesGained' ? getStrokeGainedColor(entry.value) : entry.color }}>
               {entry.dataKey === 'movingAverage' && entry.value === null
@@ -122,11 +119,11 @@ export function StrokesGainedTrendChart({ filteredShots }: StrokesGainedTrendCha
 
   if (roundData.length === 0) {
     return (
-      <div style={{ marginTop: '32px' }}>
-        <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>Strokes Gained Trend</h4>
+      <div className="mt-8">
+        <h4 className="mb-4 text-ash">Strokes Gained Trend</h4>
         <div style={{
-          background: 'var(--charcoal)',
-          padding: '32px',
+          background: 'var(--shadow)',
+          padding: 'var(--spacing-8)',
           borderRadius: '4px',
           textAlign: 'center',
           color: 'var(--ash)'
@@ -138,35 +135,26 @@ export function StrokesGainedTrendChart({ filteredShots }: StrokesGainedTrendCha
   }
 
   return (
-    <div style={{ marginTop: '32px' }}>
-      <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>Strokes Gained Trend</h4>
+    <div className="mt-8">
+      <h4 className="mb-4 text-ash">Strokes Gained Trend</h4>
 
       {/* Controls */}
-      <div style={{
-        display: 'flex',
-        gap: '24px',
-        marginBottom: '20px',
-        flexWrap: 'wrap',
-        alignItems: 'center'
-      }}>
+      <div className="flex gap-6 mb-5 flex-wrap items-center">
         {/* Shot Type Selector */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <label style={{ color: 'var(--ash)', fontSize: '12px', fontWeight: 500 }}>
+        <div className="flex items-center gap-2">
+          <label className="text-ash text-label font-medium">
             Shot Type:
           </label>
           <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value as SGShotCategory)}
-            style={{
-              background: 'var(--charcoal)',
+ value={selectedCategory}
+ onChange={(e) => setSelectedCategory(e.target.value as SGShotCategory)}
+ style={{ background: 'var(--shadow)',
               border: '1px solid var(--ash)',
               borderRadius: '4px',
               color: 'var(--chalk)',
-              padding: '6px 12px',
-              fontSize: '12px',
-              cursor: 'pointer',
-              minWidth: '120px',
-            }}
+              padding: 'var(--spacing-1-5) var(--spacing-3)',
+              fontSize: 'var(--text-label)', cursor: 'pointer',
+              minWidth: '120px' }}
           >
             {SHOT_CATEGORIES.map(cat => (
               <option key={cat.value} value={cat.value}>
@@ -177,23 +165,20 @@ export function StrokesGainedTrendChart({ filteredShots }: StrokesGainedTrendCha
         </div>
 
         {/* Moving Average Window Selector */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <label style={{ color: 'var(--ash)', fontSize: '12px', fontWeight: 500 }}>
+        <div className="flex items-center gap-2">
+          <label className="text-ash text-label font-medium">
             Moving Average:
           </label>
           <select
-            value={movingAverageWindow}
-            onChange={(e) => setMovingAverageWindow(Number(e.target.value))}
-            style={{
-              background: 'var(--charcoal)',
+ value={movingAverageWindow}
+ onChange={(e) => setMovingAverageWindow(Number(e.target.value))}
+ style={{ background: 'var(--shadow)',
               border: '1px solid var(--ash)',
               borderRadius: '4px',
               color: 'var(--chalk)',
-              padding: '6px 12px',
-              fontSize: '12px',
-              cursor: 'pointer',
-              minWidth: '100px',
-            }}
+              padding: 'var(--spacing-1-5) var(--spacing-3)',
+              fontSize: 'var(--text-label)', cursor: 'pointer',
+              minWidth: '100px' }}
           >
             {MOVING_AVERAGE_OPTIONS.map(opt => (
               <option key={opt.value} value={opt.value}>
@@ -204,13 +189,13 @@ export function StrokesGainedTrendChart({ filteredShots }: StrokesGainedTrendCha
         </div>
 
         {/* Summary Stats */}
-        <div style={{ marginLeft: isNarrow ? 0 : 'auto', display: 'flex', flexWrap: 'wrap', gap: '8px 24px', fontSize: '12px' }}>
+        <div style={{ marginLeft: isNarrow ? 0 : 'auto', display: 'flex', flexWrap: 'wrap', gap: 'var(--spacing-2) var(--spacing-6)', fontSize: 'var(--text-label)' }}>
           <div>
-            <span style={{ color: 'var(--ash)' }}>Total Rounds: </span>
-            <span style={{ color: 'var(--chalk)', fontWeight: 600 }}>{roundData.length}</span>
+            <span className="text-ash">Total Rounds: </span>
+            <span className="text-chalk font-semibold">{roundData.length}</span>
           </div>
           <div>
-            <span style={{ color: 'var(--ash)' }}>Avg SG/Round: </span>
+            <span className="text-ash">Avg SG/Round: </span>
             <span style={{ color: getStrokeGainedColor(roundData.reduce((sum, r) => sum + r.strokesGained, 0) / roundData.length), fontWeight: 600 }}>
               {formatStrokesGained(roundData.reduce((sum, r) => sum + r.strokesGained, 0) / roundData.length)}
             </span>
@@ -219,27 +204,27 @@ export function StrokesGainedTrendChart({ filteredShots }: StrokesGainedTrendCha
       </div>
 
       {/* Chart */}
-      <div style={{ background: 'var(--charcoal)', padding: '16px', borderRadius: '4px' }}>
+      <div style={{ background: 'var(--shadow)', padding: 'var(--spacing-4)', borderRadius: '4px' }}>
         <ResponsiveContainer width="100%" height={isNarrow ? 260 : 350}>
           <ComposedChart data={chartData} margin={isNarrow ? { top: 12, right: 8, left: 0, bottom: 8 } : { top: 20, right: 30, left: 20, bottom: 50 }}>
             <CartesianGrid strokeDasharray="3 3" stroke={COLORS.grid} opacity={0.3} />
             <XAxis
-              dataKey="label"
-              stroke={COLORS.text}
-              tick={{ fill: COLORS.text, fontSize: isNarrow ? 9 : 12 }}
-              interval={isNarrow ? 'preserveStartEnd' : 0}
-              minTickGap={isNarrow ? 24 : 0}
-              angle={isNarrow ? 0 : -45}
-              textAnchor={isNarrow ? 'middle' : 'end'}
-              height={isNarrow ? 24 : 60}
+ dataKey="label"
+ stroke={COLORS.text}
+ tick={{ fill: COLORS.text, fontSize: isNarrow ? 9 : 12 }}
+ interval={isNarrow ? 'preserveStartEnd' : 0}
+ minTickGap={isNarrow ? 24 : 0}
+ angle={isNarrow ? 0 : -45}
+ textAnchor={isNarrow ? 'middle' : 'end'}
+ height={isNarrow ? 24 : 60}
             />
             <YAxis
-              stroke={COLORS.text}
-              tick={{ fill: COLORS.text, fontSize: isNarrow ? 9 : 12 }}
-              width={isNarrow ? 34 : undefined}
-              domain={yAxisDomain}
-              tickFormatter={(value) => value.toFixed(1)}
-              label={isNarrow ? undefined : {
+ stroke={COLORS.text}
+ tick={{ fill: COLORS.text, fontSize: isNarrow ? 9 : 12 }}
+ width={isNarrow ? 34 : undefined}
+ domain={yAxisDomain}
+ tickFormatter={(value) => value.toFixed(1)}
+ label={isNarrow ? undefined : {
                 value: 'Strokes Gained',
                 angle: -90,
                 position: 'insideLeft',
@@ -250,8 +235,8 @@ export function StrokesGainedTrendChart({ filteredShots }: StrokesGainedTrendCha
             />
             <Tooltip content={<CustomTooltip />} />
             <Legend
-              wrapperStyle={{ paddingTop: '10px' }}
-              formatter={(value) => {
+ wrapperStyle={{ paddingTop: 'var(--spacing-2-5)' }}
+ formatter={(value) => {
                 if (value === 'strokesGained') return 'Strokes Gained';
                 if (value === 'movingAverage') return `${movingAverageWindow}-Round Moving Avg`;
                 return value;
@@ -261,34 +246,34 @@ export function StrokesGainedTrendChart({ filteredShots }: StrokesGainedTrendCha
             <ReferenceLine y={0} stroke="var(--ash)" strokeOpacity={0.5} />
             {/* Bar for actual SG values */}
             <Bar
-              dataKey="strokesGained"
-              name="Strokes Gained"
-              fill={COLORS.bar}
-              maxBarSize={20}
-              radius={[2, 2, 0, 0]}
+ dataKey="strokesGained"
+ name="Strokes Gained"
+ fill={COLORS.bar}
+ maxBarSize={20}
+ radius={[2, 2, 0, 0]}
             />
             {/* Line for moving average */}
             <Line
-              type="monotone"
-              dataKey="movingAverage"
-              name={`${movingAverageWindow}-Round Moving Avg`}
-              stroke={COLORS.line}
-              strokeWidth={3}
-              dot={{ fill: COLORS.line, r: 4 }}
-              activeDot={{ r: 6, fill: COLORS.line }}
-              connectNulls={false}
+ type="monotone"
+ dataKey="movingAverage"
+ name={`${movingAverageWindow}-Round Moving Avg`}
+ stroke={COLORS.line}
+ strokeWidth={3}
+ dot={{ fill: COLORS.line, r: 4 }}
+ activeDot={{ r: 6, fill: COLORS.line }}
+ connectNulls={false}
             />
           </ComposedChart>
         </ResponsiveContainer>
       </div>
 
       {/* Legend explanation */}
-      <div style={{ marginTop: '12px', fontSize: '11px', color: 'var(--ash)', display: 'flex', flexWrap: 'wrap', gap: '8px 24px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+      <div style={{ marginTop: 'var(--spacing-3)', fontSize: 'var(--text-label-sm)', color: 'var(--ash)', display: 'flex', flexWrap: 'wrap', gap: 'var(--spacing-2) var(--spacing-6)' }}>
+        <div className="flex items-center gap-1.5">
           <div style={{ width: '12px', height: '12px', background: COLORS.bar, borderRadius: '2px' }}></div>
           <span>Actual SG per round</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <div className="flex items-center gap-1.5">
           <div style={{ width: '12px', height: '3px', background: COLORS.line, borderRadius: '1px' }}></div>
           <span>{movingAverageWindow}-round moving average trend</span>
         </div>

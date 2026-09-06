@@ -34,7 +34,7 @@ function ShotPathImpl({ shots, activeShotNumber }: ShotPathProps) {
   }
 
   return (
-    <div className="font-mono text-[12px] leading-relaxed flex flex-wrap items-center gap-x-1.5 gap-y-1">
+    <div className="font-mono text-label leading-relaxed flex flex-wrap items-center gap-x-1.5 gap-y-1">
       {tokens.map((t, i) => (
         <span key={`t-${i}`} className="flex items-center gap-1.5">
           {i > 0 && <span className="text-ash">→</span>}

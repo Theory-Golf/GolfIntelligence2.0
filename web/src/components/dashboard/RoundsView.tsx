@@ -7,11 +7,11 @@ import { getStrokeGainedColor, formatStrokesGained } from '@/lib/golf/tokens';
 
 // Same semantic scoring colors as ScoringView's donut chart
 const OUTCOME_COLORS: Record<HoleOutcome, string> = {
-  'Eagle': '#00C07A',
-  'Birdie': '#52D9A0',
-  'Par': '#8A8580',
-  'Bogey': '#F59520',
-  'Double Bogey+': '#E8202A',
+  'Eagle': 'var(--under)',
+  'Birdie': 'var(--sg-gain)',
+  'Par': 'var(--ash)',
+  'Bogey': 'var(--bogey)',
+  'Double Bogey+': 'var(--scarlet)',
 };
 
 function formatToPar(scoreToPar: number): string {
@@ -24,7 +24,7 @@ function formatRoundType(summary: RoundSummary): string {
 }
 
 const thStyle: React.CSSProperties = {
-  padding: '10px 8px',
+  padding: 'var(--spacing-2-5) var(--spacing-2)',
   textAlign: 'center',
   color: 'var(--ash)',
   fontWeight: 600,
@@ -32,7 +32,7 @@ const thStyle: React.CSSProperties = {
 };
 
 const tdStyle: React.CSSProperties = {
-  padding: '8px 6px',
+  padding: 'var(--spacing-2) var(--spacing-1-5)',
   textAlign: 'center',
   color: 'var(--chalk)',
   fontFamily: 'var(--font-mono)',
@@ -66,16 +66,16 @@ export function RoundsView({ roundSummaries, filteredShots }: { roundSummaries: 
 
   return (
     <div className="content">
-      <h4 style={{ marginBottom: '16px', color: 'var(--ash)' }}>Rounds</h4>
+      <h4 className="mb-4 text-ash">Rounds</h4>
 
       {summaries.length === 0 ? (
-        <div className="card" style={{ padding: '24px', color: 'var(--ash)' }}>
+        <div className="card p-6 text-ash" >
           No rounds match the current filters.
         </div>
       ) : (
-        <div style={{ background: 'var(--charcoal)', borderRadius: '4px', overflow: 'hidden' }}>
+        <div style={{ background: 'var(--shadow)', borderRadius: '4px', overflow: 'hidden' }}>
           <div className="gi-table-scroll">
-            <table style={{ minWidth: '800px', width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+            <table style={{ minWidth: '800px', width: '100%', borderCollapse: 'collapse', fontSize: 'var(--text-caption)' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--pitch)', background: 'var(--obsidian)' }}>
                   <th style={{ ...thStyle, textAlign: 'left' }}>Date</th>
@@ -92,17 +92,17 @@ export function RoundsView({ roundSummaries, filteredShots }: { roundSummaries: 
               <tbody>
                 {summaries.map((round, idx) => {
                   const isExpanded = expandedRoundId === round.roundId;
-                  const rowBackground = idx % 2 === 0 ? 'var(--charcoal)' : 'var(--obsidian)';
+                  const rowBackground = idx % 2 === 0 ? 'var(--shadow)' : 'var(--obsidian)';
                   return (
                     <RoundRow
-                      key={round.roundId}
-                      round={round}
-                      showPlayer={showPlayer}
-                      isExpanded={isExpanded}
-                      rowBackground={rowBackground}
-                      columnCount={columnCount}
-                      holeScores={isExpanded ? expandedHoleScores : null}
-                      onToggle={() => setExpandedRoundId(isExpanded ? null : round.roundId)}
+ key={round.roundId}
+ round={round}
+ showPlayer={showPlayer}
+ isExpanded={isExpanded}
+ rowBackground={rowBackground}
+ columnCount={columnCount}
+ holeScores={isExpanded ? expandedHoleScores : null}
+ onToggle={() => setExpandedRoundId(isExpanded ? null : round.roundId)}
                     />
                   );
                 })}
@@ -112,7 +112,7 @@ export function RoundsView({ roundSummaries, filteredShots }: { roundSummaries: 
         </div>
       )}
 
-      <p style={{ marginTop: '12px', fontSize: '11px', color: 'var(--ash)' }}>
+      <p className="mt-3 text-label-sm text-ash">
         Click a round to see its hole-by-hole scorecard. Hole scores include penalty strokes.
       </p>
     </div>
@@ -141,15 +141,15 @@ function RoundRow({
   return (
     <>
       <tr
-        onClick={onToggle}
-        style={{
+ onClick={onToggle}
+ style={{
           borderBottom: '1px solid var(--pitch)',
           background: isExpanded ? 'var(--pitch)' : rowBackground,
           cursor: 'pointer',
         }}
       >
         <td style={{ ...tdStyle, textAlign: 'left', whiteSpace: 'nowrap' }}>
-          <span style={{ marginRight: '8px', color: 'var(--ash)' }}>{isExpanded ? '▾' : '▸'}</span>
+          <span className="mr-2 text-ash">{isExpanded ? '▾' : '▸'}</span>
           {round.date}
         </td>
         {showPlayer && (
@@ -173,36 +173,36 @@ function RoundRow({
 
       {isExpanded && holeScores && (
         <tr style={{ borderBottom: '1px solid var(--pitch)', background: 'var(--obsidian)' }}>
-          <td colSpan={columnCount} style={{ padding: '16px' }}>
+          <td colSpan={columnCount} className="p-4">
             <div className="gi-table-scroll">
-              <table style={{ minWidth: '880px', borderCollapse: 'collapse', fontSize: '13px', margin: '0 auto' }}>
+              <table style={{ minWidth: '880px', borderCollapse: 'collapse', fontSize: 'var(--text-caption)', margin: '0 auto' }}>
                 <thead>
                   <tr>
-                    <th style={{ ...thStyle, textAlign: 'left', padding: '6px 10px' }}>Hole</th>
+                    <th style={{ ...thStyle, textAlign: 'left', padding: 'var(--spacing-1-5) var(--spacing-2-5)' }}>Hole</th>
                     {holeScores.map(h => (
-                      <th key={h.hole} style={{ ...thStyle, padding: '6px 10px' }}>{h.hole}</th>
+                      <th key={h.hole} style={{ ...thStyle, padding: 'var(--spacing-1-5) var(--spacing-2-5)' }}>{h.hole}</th>
                     ))}
-                    <th style={{ ...thStyle, padding: '6px 10px' }}>Total</th>
+                    <th style={{ ...thStyle, padding: 'var(--spacing-1-5) var(--spacing-2-5)' }}>Total</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <td style={{ ...tdStyle, textAlign: 'left', color: 'var(--ash)', padding: '6px 10px' }}>Par</td>
+                    <td style={{ ...tdStyle, textAlign: 'left', color: 'var(--ash)', padding: 'var(--spacing-1-5) var(--spacing-2-5)' }}>Par</td>
                     {holeScores.map(h => (
-                      <td key={h.hole} style={{ ...tdStyle, color: 'var(--ash)', padding: '6px 10px' }}>{h.par}</td>
+                      <td key={h.hole} style={{ ...tdStyle, color: 'var(--ash)', padding: 'var(--spacing-1-5) var(--spacing-2-5)' }}>{h.par}</td>
                     ))}
-                    <td style={{ ...tdStyle, color: 'var(--ash)', padding: '6px 10px' }}>
+                    <td style={{ ...tdStyle, color: 'var(--ash)', padding: 'var(--spacing-1-5) var(--spacing-2-5)' }}>
                       {holeScores.reduce((sum, h) => sum + h.par, 0)}
                     </td>
                   </tr>
                   <tr>
-                    <td style={{ ...tdStyle, textAlign: 'left', color: 'var(--ash)', padding: '6px 10px' }}>Score</td>
+                    <td style={{ ...tdStyle, textAlign: 'left', color: 'var(--ash)', padding: 'var(--spacing-1-5) var(--spacing-2-5)' }}>Score</td>
                     {holeScores.map(h => (
                       <td
-                        key={h.hole}
-                        style={{
+ key={h.hole}
+ style={{
                           ...tdStyle,
-                          padding: '6px 10px',
+                          padding: 'var(--spacing-1-5) var(--spacing-2-5)',
                           fontWeight: 600,
                           color: OUTCOME_COLORS[getHoleOutcome(h.score, h.par)],
                         }}
@@ -210,21 +210,21 @@ function RoundRow({
                         {h.score}
                       </td>
                     ))}
-                    <td style={{ ...tdStyle, fontWeight: 600, padding: '6px 10px' }}>
+                    <td style={{ ...tdStyle, fontWeight: 600, padding: 'var(--spacing-1-5) var(--spacing-2-5)' }}>
                       {holeScores.reduce((sum, h) => sum + h.score, 0)}
                     </td>
                   </tr>
                   <tr>
-                    <td style={{ ...tdStyle, textAlign: 'left', color: 'var(--ash)', padding: '6px 10px' }}>SG</td>
+                    <td style={{ ...tdStyle, textAlign: 'left', color: 'var(--ash)', padding: 'var(--spacing-1-5) var(--spacing-2-5)' }}>SG</td>
                     {holeScores.map(h => {
                       const holeSG = h.shots.reduce((sum, s) => sum + s.calculatedStrokesGained, 0);
                       return (
-                        <td key={h.hole} style={{ ...tdStyle, padding: '6px 10px', color: getStrokeGainedColor(holeSG) }}>
+                        <td key={h.hole} style={{ ...tdStyle, padding: 'var(--spacing-1-5) var(--spacing-2-5)', color: getStrokeGainedColor(holeSG) }}>
                           {formatStrokesGained(holeSG)}
                         </td>
                       );
                     })}
-                    <td style={{ ...tdStyle, padding: '6px 10px', color: getStrokeGainedColor(round.strokesGained) }}>
+                    <td style={{ ...tdStyle, padding: 'var(--spacing-1-5) var(--spacing-2-5)', color: getStrokeGainedColor(round.strokesGained) }}>
                       {formatStrokesGained(round.strokesGained)}
                     </td>
                   </tr>

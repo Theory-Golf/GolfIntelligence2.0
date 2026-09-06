@@ -51,7 +51,7 @@ export default function SetupView({
   return (
     <div className="space-y-8">
       <header className="space-y-3">
-        <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+        <p className="font-mono text-label uppercase tracking-[0.3em] text-muted-foreground">
           Step 01 · Technical Focus
         </p>
         <h3 className="font-display text-3xl font-extrabold uppercase tracking-tight text-foreground sm:text-4xl">
@@ -68,7 +68,7 @@ export default function SetupView({
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="border border-border bg-card p-4">
-          <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+          <div className="mb-2 font-mono text-label uppercase tracking-[0.2em] text-muted-foreground">
             Week Of
           </div>
           <input
@@ -79,13 +79,13 @@ export default function SetupView({
           />
         </div>
         <div className="border border-border bg-card p-4">
-          <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+          <div className="mb-2 font-mono text-label uppercase tracking-[0.2em] text-muted-foreground">
             Mesocycle
           </div>
           <div className="font-display text-2xl font-extrabold uppercase tracking-tight text-foreground">
             Wk {week} · {phase.phase}
           </div>
-          <p className="mt-1 text-xs text-muted-foreground">{phase.desc}</p>
+          <p className="mt-1 text-caption text-muted-foreground">{phase.desc}</p>
         </div>
       </div>
 
@@ -110,7 +110,7 @@ export default function SetupView({
       <div className="flex items-center gap-3">
         <Button onClick={onSave}>Save Week Config</Button>
         {savedAt && (
-          <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-under">
+          <span className="font-mono text-label uppercase tracking-[0.2em] text-under">
             Saved
           </span>
         )}
@@ -153,20 +153,20 @@ function ElementList({
           {elements.map((el, idx) => (
             <div key={el.id} className="border border-border bg-card p-4">
               <div className="mb-3 flex items-center justify-between">
-                <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                <span className="font-mono text-label uppercase tracking-[0.2em] text-muted-foreground">
                   Element {idx + 1}
                 </span>
                 <button
                   type="button"
                   onClick={() => onRemove(el.id)}
-                  className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground hover:text-primary"
+                  className="font-mono text-label uppercase tracking-[0.18em] text-muted-foreground hover:text-primary"
                 >
                   Remove
                 </button>
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
                 <div>
-                  <label className="block font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                  <label className="block font-mono text-label uppercase tracking-[0.2em] text-muted-foreground">
                     Technical Element
                   </label>
                   <input
@@ -178,7 +178,7 @@ function ElementList({
                   />
                 </div>
                 <div>
-                  <label className="block font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                  <label className="block font-mono text-label uppercase tracking-[0.2em] text-muted-foreground">
                     External Focus Cue
                   </label>
                   <input

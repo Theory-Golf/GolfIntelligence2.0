@@ -29,4 +29,14 @@ jobs:
 
       - run: npx tsc --noEmit
 
+      # Keeps styles/system.css the single source of truth for type,
+      # colour, spacing, breakpoints and layering. Fails on a raw value
+      # where a token exists; see scripts/check-formatting.mjs.
+      - run: npm run check:formatting
+
+      # Every text token must clear WCAG AA on every surface it can sit on.
+      - run: npm run check:contrast
+
+      - run: npm test
+
       - run: npm run build
