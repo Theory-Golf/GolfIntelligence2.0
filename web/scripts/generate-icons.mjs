@@ -1,101 +1,68 @@
 /**
- * Generates the Theory Golf app icons from a single vector definition.
+ * Generates the Theory Golf app icons from the shield crest.
  *
- * The mark is the shield monogram reduced to its smallest legible form:
- * a heavy condensed T in cement on the near-black ground, with the
- * scarlet accent slash running behind it. The slash is knocked out
- * around the letterform so the T keeps a clear zone at 60px, which is
- * roughly how big this renders on an iPhone home screen.
+ * Source of truth is assets/crest.png — the crest lifted off its white
+ * paper into straight alpha, so it can be laid on either ground. This
+ * script scales it down, recolours the ink to brand tokens (which also
+ * clears the JPEG chroma fringing the original carried) and writes every
+ * size the browsers and iOS ask for:
  *
- * No image dependencies — PNG/ICO are written by hand so `npm i` stays
- * lean and the icons can be regenerated on any machine:
+ *   npm run gen:icons
  *
- *   node scripts/generate-icons.mjs
- *
- * Outputs land in public/ and are committed. Regenerate and commit if
- * the brand colours or the geometry below change.
+ * No image dependencies — PNG is decoded and encoded by hand, so the
+ * icons can be rebuilt on any machine with just Node. Outputs land in
+ * public/ and are committed; regenerate and commit if anything here
+ * changes.
  */
 
-import { deflateSync } from 'node:zlib';
-import { writeFileSync, mkdirSync } from 'node:fs';
+import { deflateSync, inflateSync } from 'node:zlib';
+import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const PUBLIC_DIR = join(dirname(fileURLToPath(import.meta.url)), '..', 'public');
+const HERE = dirname(fileURLToPath(import.meta.url));
+const PUBLIC_DIR = join(HERE, '..', 'public');
+const CREST = join(HERE, 'assets', 'crest.png');
 
 /* ================================================================
-   BRAND
-   Values mirror --background / --foreground / --primary in
-   src/styles/system.css. iOS masks the icon itself, so the ground is
-   drawn full-bleed and fully opaque — a transparent apple-touch-icon
-   renders black on some iOS versions.
+   THEME
+   The crest is drawn as ink + accent, so switching the icon between
+   the light and dark lockups is a one-line change here. Values mirror
+   src/styles/system.css.
    ================================================================ */
-const GROUND = [0x0c, 0x0c, 0x0c];
-const CEMENT = [0xf2, 0xf0, 0xee];
-const SCARLET = [0xe8, 0x20, 0x2a];
+const THEMES = {
+  light: { ground: [0xf8, 0xf7, 0xf5], ink: [0x0a, 0x0a, 0x0a] },
+  dark: { ground: [0x0c, 0x0c, 0x0c], ink: [0xf2, 0xf0, 0xee] },
+};
+const THEME = THEMES.light;
+const ACCENT = [0xe8, 0x20, 0x2a]; // scarlet — never recoloured per brand
+
+/** Fraction of the icon's height the crest occupies. The rest is clear
+ *  zone, which iOS eats into when it masks the corners. */
+const CREST_HEIGHT = 0.76;
+
+/** A pixel is accent, not ink, once red leads the other channels by this
+ *  much. Everything else — including the blend where the accent meets a
+ *  black stroke — resolves to ink. */
+const REDNESS = 60;
 
 /* ================================================================
-   GEOMETRY — all values are fractions of the canvas, so one
-   definition serves every output size.
+   COLOUR
+   Averaging happens in linear light; doing it in sRGB thickens dark
+   strokes on a light ground and thins light strokes on a dark one.
    ================================================================ */
-const CROSSBAR = { x0: 0.31, x1: 0.69, y0: 0.24, y1: 0.35 };
-const STEM = { x0: 0.434, x1: 0.566, y0: 0.24, y1: 0.75 };
-
-// The slash is the band SLASH_MIN <= x + K*y <= SLASH_MAX. K > 1 tilts
-// it shallower than 45°, which is what buys it enough room to cross the
-// stem cleanly and still clear the underside of the crossbar — at 45°
-// it clips the crossbar's corner and reads as a chipped edge.
-const SLASH_K = 1.5;
-const SLASH_MIN = 1.315;
-const SLASH_MAX = 1.475;
-
-// Clear zone held between the letterform and the slash.
-const GAP = 0.026;
-
-const inRect = (r, x, y) => x >= r.x0 && x <= r.x1 && y >= r.y0 && y <= r.y1;
-const grow = (r, g) => ({ x0: r.x0 - g, x1: r.x1 + g, y0: r.y0 - g, y1: r.y1 + g });
-
-const CROSSBAR_GAP = grow(CROSSBAR, GAP);
-const STEM_GAP = grow(STEM, GAP);
-
-/** Colour of a single sample point in normalised [0,1] canvas space. */
-function sample(x, y) {
-  if (inRect(CROSSBAR, x, y) || inRect(STEM, x, y)) return CEMENT;
-  if (inRect(CROSSBAR_GAP, x, y) || inRect(STEM_GAP, x, y)) return GROUND;
-  const t = x + SLASH_K * y;
-  if (t >= SLASH_MIN && t <= SLASH_MAX) return SCARLET;
-  return GROUND;
+const TO_LINEAR = new Float64Array(256);
+for (let i = 0; i < 256; i++) {
+  const c = i / 255;
+  TO_LINEAR[i] = c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
 }
-
-/** Renders the mark to a raw RGB buffer, 4x4 supersampled for clean edges. */
-function render(size) {
-  const SS = 4;
-  const rgb = Buffer.alloc(size * size * 3);
-  for (let py = 0; py < size; py++) {
-    for (let px = 0; px < size; px++) {
-      let r = 0;
-      let g = 0;
-      let b = 0;
-      for (let j = 0; j < SS; j++) {
-        for (let i = 0; i < SS; i++) {
-          const c = sample((px + (i + 0.5) / SS) / size, (py + (j + 0.5) / SS) / size);
-          r += c[0];
-          g += c[1];
-          b += c[2];
-        }
-      }
-      const o = (py * size + px) * 3;
-      const n = SS * SS;
-      rgb[o] = Math.round(r / n);
-      rgb[o + 1] = Math.round(g / n);
-      rgb[o + 2] = Math.round(b / n);
-    }
-  }
-  return rgb;
-}
+const toSrgb = (v) => {
+  const c = v <= 0.0031308 ? v * 12.92 : 1.055 * v ** (1 / 2.4) - 0.055;
+  return Math.max(0, Math.min(255, Math.round(c * 255)));
+};
 
 /* ================================================================
-   PNG ENCODER
+   PNG
    ================================================================ */
 const CRC_TABLE = (() => {
   const table = new Int32Array(256);
@@ -122,22 +89,87 @@ function chunk(type, data) {
   return Buffer.concat([len, body, crc]);
 }
 
+/**
+ * Decodes the one PNG shape this script consumes: 8-bit RGBA, no
+ * interlacing. That's what assets/crest.png is; anything else throws
+ * rather than decoding to garbage.
+ */
+function decodePng(buf) {
+  if (buf.readUInt32BE(0) !== 0x89504e47) throw new Error('not a PNG');
+  let width = 0;
+  let height = 0;
+  const idat = [];
+  for (let o = 8; o < buf.length; ) {
+    const len = buf.readUInt32BE(o);
+    const type = buf.toString('ascii', o + 4, o + 8);
+    const data = buf.subarray(o + 8, o + 8 + len);
+    if (type === 'IHDR') {
+      width = data.readUInt32BE(0);
+      height = data.readUInt32BE(4);
+      const [depth, colour, , , interlace] = [data[8], data[9], data[10], data[11], data[12]];
+      if (depth !== 8 || colour !== 6 || interlace !== 0) {
+        throw new Error(`unsupported PNG: depth ${depth}, colour type ${colour}`);
+      }
+    } else if (type === 'IDAT') {
+      idat.push(data);
+    } else if (type === 'IEND') {
+      break;
+    }
+    o += 12 + len;
+  }
+
+  const raw = inflateSync(Buffer.concat(idat));
+  const stride = width * 4;
+  const out = Buffer.alloc(stride * height);
+  for (let y = 0; y < height; y++) {
+    const filter = raw[y * (stride + 1)];
+    const line = raw.subarray(y * (stride + 1) + 1, (y + 1) * (stride + 1));
+    for (let x = 0; x < stride; x++) {
+      const a = x >= 4 ? out[y * stride + x - 4] : 0; // left
+      const b = y > 0 ? out[(y - 1) * stride + x] : 0; // up
+      const c = x >= 4 && y > 0 ? out[(y - 1) * stride + x - 4] : 0; // up-left
+      let v = line[x];
+      switch (filter) {
+        case 0:
+          break;
+        case 1:
+          v += a;
+          break;
+        case 2:
+          v += b;
+          break;
+        case 3:
+          v += (a + b) >> 1;
+          break;
+        case 4: {
+          const p = a + b - c;
+          const pa = Math.abs(p - a);
+          const pb = Math.abs(p - b);
+          const pc = Math.abs(p - c);
+          v += pa <= pb && pa <= pc ? a : pb <= pc ? b : c;
+          break;
+        }
+        default:
+          throw new Error(`bad filter ${filter}`);
+      }
+      out[y * stride + x] = v & 0xff;
+    }
+  }
+  return { width, height, data: out };
+}
+
 function encodePng(size, rgb) {
   const ihdr = Buffer.alloc(13);
   ihdr.writeUInt32BE(size, 0);
   ihdr.writeUInt32BE(size, 4);
   ihdr[8] = 8; // bit depth
-  ihdr[9] = 2; // colour type: truecolour
-  // 10..12 stay 0: deflate, adaptive filtering, no interlace.
-
-  // One filter byte (0 = none) per scanline.
+  ihdr[9] = 2; // colour type: truecolour, no alpha — icons are opaque
   const stride = size * 3;
   const raw = Buffer.alloc((stride + 1) * size);
   for (let y = 0; y < size; y++) {
-    raw[y * (stride + 1)] = 0;
+    raw[y * (stride + 1)] = 0; // filter: none
     rgb.copy(raw, y * (stride + 1) + 1, y * stride, (y + 1) * stride);
   }
-
   return Buffer.concat([
     Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
     chunk('IHDR', ihdr),
@@ -146,53 +178,121 @@ function encodePng(size, rgb) {
   ]);
 }
 
-/** ICO wrapping a PNG payload — supported everywhere that matters since Vista. */
-function encodeIco(size, png) {
+/** ICO wrapping PNG payloads — supported everywhere that matters since Vista. */
+function encodeIco(entries) {
   const header = Buffer.alloc(6);
   header.writeUInt16LE(0, 0); // reserved
   header.writeUInt16LE(1, 2); // type: icon
-  header.writeUInt16LE(1, 4); // one image
-  const entry = Buffer.alloc(16);
-  entry[0] = size < 256 ? size : 0;
-  entry[1] = size < 256 ? size : 0;
-  entry.writeUInt16LE(1, 4); // colour planes
-  entry.writeUInt16LE(32, 6); // bits per pixel
-  entry.writeUInt32BE(0, 8);
-  entry.writeUInt32LE(png.length, 8);
-  entry.writeUInt32LE(header.length + entry.length, 12);
-  return Buffer.concat([header, entry, png]);
+  header.writeUInt16LE(entries.length, 4);
+  let offset = header.length + entries.length * 16;
+  const dir = [];
+  for (const { size, png } of entries) {
+    const e = Buffer.alloc(16);
+    e[0] = size < 256 ? size : 0;
+    e[1] = size < 256 ? size : 0;
+    e.writeUInt16LE(1, 4); // colour planes
+    e.writeUInt16LE(32, 6); // bits per pixel
+    e.writeUInt32LE(png.length, 8);
+    e.writeUInt32LE(offset, 12);
+    dir.push(e);
+    offset += png.length;
+  }
+  return Buffer.concat([header, ...dir, ...entries.map((e) => e.png)]);
 }
 
 /* ================================================================
-   SVG — same geometry, for the browser tab at any density.
+   RENDER
    ================================================================ */
-function encodeSvg() {
-  const n = (v) => +(v * 100).toFixed(2);
-  const rect = (r) =>
-    `<rect x="${n(r.x0)}" y="${n(r.y0)}" width="${n(r.x1 - r.x0)}" height="${n(r.y1 - r.y0)}"/>`;
+const source = decodePng(readFileSync(CREST));
 
-  // The band drawn as one stroked centreline: direction (K, -1), width
-  // SLASH_MAX - SLASH_MIN measured along the (1, K) normal. Endpoints run
-  // well past the viewBox and the clip trims them.
-  const len = Math.hypot(1, SLASH_K);
-  const width = (SLASH_MAX - SLASH_MIN) / len;
-  const mid = (SLASH_MIN + SLASH_MAX) / 2;
-  const cx = 0.5;
-  const cy = (mid - cx) / SLASH_K;
-  const reach = 2;
-  const dx = (SLASH_K / len) * reach;
-  const dy = (-1 / len) * reach;
+/**
+ * Recolours the crest to the theme and premultiplies it into linear
+ * light, so the resampler below can just average.
+ */
+function prepare() {
+  const { width, height, data } = source;
+  const n = width * height;
+  const lin = new Float64Array(n * 4); // r, g, b (premultiplied), a
+  for (let i = 0; i < n; i++) {
+    const a = data[i * 4 + 3] / 255;
+    if (a === 0) continue;
+    const r = data[i * 4];
+    const g = data[i * 4 + 1];
+    const b = data[i * 4 + 2];
+    const ink = r - Math.max(g, b) > REDNESS ? ACCENT : THEME.ink;
+    lin[i * 4] = TO_LINEAR[ink[0]] * a;
+    lin[i * 4 + 1] = TO_LINEAR[ink[1]] * a;
+    lin[i * 4 + 2] = TO_LINEAR[ink[2]] * a;
+    lin[i * 4 + 3] = a;
+  }
+  return lin;
+}
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
-  <rect width="100" height="100" fill="rgb(${GROUND})"/>
-  <clipPath id="b"><rect width="100" height="100"/></clipPath>
-  <line clip-path="url(#b)" x1="${n(cx - dx)}" y1="${n(cy - dy)}" x2="${n(cx + dx)}" y2="${n(
-    cy + dy
-  )}" stroke="rgb(${SCARLET})" stroke-width="${n(width)}"/>
-  <g fill="rgb(${GROUND})">${rect(CROSSBAR_GAP)}${rect(STEM_GAP)}</g>
-  <g fill="rgb(${CEMENT})">${rect(CROSSBAR)}${rect(STEM)}</g>
-</svg>
-`;
+const LINEAR = prepare();
+
+/**
+ * Draws the icon at `size`: the crest area-averaged down onto the
+ * theme's ground, centred, at CREST_HEIGHT of the canvas.
+ */
+function render(size) {
+  const { width: sw, height: sh } = source;
+  const dh = Math.round(size * CREST_HEIGHT);
+  const dw = Math.round((dh * sw) / sh);
+  const ox = Math.round((size - dw) / 2);
+  const oy = Math.round((size - dh) / 2);
+
+  const groundLin = THEME.ground.map((c) => TO_LINEAR[c]);
+  const out = Buffer.alloc(size * size * 3);
+  for (let i = 0; i < size * size; i++) {
+    out[i * 3] = THEME.ground[0];
+    out[i * 3 + 1] = THEME.ground[1];
+    out[i * 3 + 2] = THEME.ground[2];
+  }
+
+  // Box filter: every destination pixel averages the source rectangle it
+  // covers, with fractional weights at the edges.
+  const scaleX = sw / dw;
+  const scaleY = sh / dh;
+  for (let dy = 0; dy < dh; dy++) {
+    const sy0 = dy * scaleY;
+    const sy1 = sy0 + scaleY;
+    for (let dx = 0; dx < dw; dx++) {
+      const sx0 = dx * scaleX;
+      const sx1 = sx0 + scaleX;
+      let r = 0;
+      let g = 0;
+      let b = 0;
+      let a = 0;
+      let total = 0;
+      // Clamped: rounding can push the last row's ceil() one past the
+      // edge, and reading off the end yields NaN, not zero.
+      const yEnd = Math.min(sh, Math.ceil(sy1));
+      const xEnd = Math.min(sw, Math.ceil(sx1));
+      for (let y = Math.floor(sy0); y < yEnd; y++) {
+        const wy = Math.min(y + 1, sy1) - Math.max(y, sy0);
+        for (let x = Math.floor(sx0); x < xEnd; x++) {
+          const w = wy * (Math.min(x + 1, sx1) - Math.max(x, sx0));
+          const i = (y * sw + x) * 4;
+          r += LINEAR[i] * w;
+          g += LINEAR[i + 1] * w;
+          b += LINEAR[i + 2] * w;
+          a += LINEAR[i + 3] * w;
+          total += w;
+        }
+      }
+      r /= total;
+      g /= total;
+      b /= total;
+      a /= total;
+
+      // Source over ground; both sides are already premultiplied linear.
+      const o = ((oy + dy) * size + ox + dx) * 3;
+      out[o] = toSrgb(r + groundLin[0] * (1 - a));
+      out[o + 1] = toSrgb(g + groundLin[1] * (1 - a));
+      out[o + 2] = toSrgb(b + groundLin[2] * (1 - a));
+    }
+  }
+  return out;
 }
 
 /* ================================================================
@@ -200,6 +300,7 @@ function encodeSvg() {
    ================================================================ */
 mkdirSync(PUBLIC_DIR, { recursive: true });
 
+const png = (size) => encodePng(size, render(size));
 const write = (name, buf) => {
   writeFileSync(join(PUBLIC_DIR, name), buf);
   console.log(`  ${name}  ${(buf.length / 1024).toFixed(1)} kB`);
@@ -207,8 +308,7 @@ const write = (name, buf) => {
 
 console.log('Theory Golf icons →');
 // 180 is the iOS home-screen size; 192/512 are the PWA manifest sizes.
-write('apple-touch-icon.png', encodePng(180, render(180)));
-write('icon-192.png', encodePng(192, render(192)));
-write('icon-512.png', encodePng(512, render(512)));
-write('favicon.ico', encodeIco(32, encodePng(32, render(32))));
-write('icon.svg', Buffer.from(encodeSvg(), 'utf8'));
+write('apple-touch-icon.png', png(180));
+write('icon-192.png', png(192));
+write('icon-512.png', png(512));
+write('favicon.ico', encodeIco([16, 32, 48].map((size) => ({ size, png: png(size) }))));
