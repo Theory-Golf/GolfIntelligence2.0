@@ -5,13 +5,34 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { createClient } from '@/lib/supabase/client';
+import { describeAuthError, isTransientAuthError } from '@/lib/supabase/authErrors';
 
 const inputClasses =
   'w-full bg-surface border border-border text-foreground font-mono text-sm px-3 py-2.5 min-h-11 outline-none transition-colors focus:border-primary';
 
+// A phone waking up on course wifi routinely loses the first request or two.
+// Three tries over ~2s costs nothing on a good connection and is the
+// difference between signing in and reading "Load failed" on a bad one.
+const MAX_ATTEMPTS = 3;
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Only same-origin paths. `redirectTo` arrives from the query string, so
+ * without this an emailed link could bounce a player straight off the site
+ * with their attention on the sign-in form.
+ */
+function safeRedirect(value: string | null): string {
+  if (!value) return '/golf-intelligence';
+  if (!value.startsWith('/') || value.startsWith('//')) return '/golf-intelligence';
+  return value;
+}
+
 export default function LoginForm() {
   const searchParams = useSearchParams();
-  const redirectTo = searchParams.get('redirectTo') || '/golf-intelligence';
+  const redirectTo = safeRedirect(searchParams.get('redirectTo'));
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -20,22 +41,40 @@ export default function LoginForm() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (loading) return;
     setError('');
     setLoading(true);
 
     const supabase = createClient();
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
 
-    if (signInError) {
-      setError(signInError.message);
-      setLoading(false);
-      return;
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+      let signInError: unknown = null;
+      try {
+        const { error: returned } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        signInError = returned;
+      } catch (thrown) {
+        // A fetch that dies outright rejects instead of resolving; it
+        // classifies the same way, so both paths meet here.
+        signInError = thrown;
+      }
+
+      if (!signInError) {
+        window.location.assign(redirectTo);
+        return;
+      }
+
+      const retryable = isTransientAuthError(signInError);
+      if (!retryable || attempt === MAX_ATTEMPTS) {
+        setError(describeAuthError(signInError));
+        setLoading(false);
+        return;
+      }
+
+      await sleep(attempt * 600);
     }
-
-    window.location.assign(redirectTo);
   }
 
   return (

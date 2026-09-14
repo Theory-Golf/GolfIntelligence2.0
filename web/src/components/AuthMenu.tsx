@@ -15,9 +15,14 @@ export default function AuthMenu({ className }: { className?: string }) {
     const supabase = createClient();
     let active = true;
 
-    supabase.auth.getUser().then(({ data }) => {
+    // getSession reads the session already in the cookie; getUser would put a
+    // network round trip behind a navbar label, and on a dropped connection
+    // it answers "no user" — flipping a signed-in player mid-round to "Sign
+    // In". Nothing here is a security boundary: the middleware gates the
+    // pages and row-level security gates the data.
+    supabase.auth.getSession().then(({ data }) => {
       if (!active) return;
-      setEmail(data.user?.email ?? null);
+      setEmail(data.session?.user?.email ?? null);
       setLoading(false);
     });
 
