@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { createClient } from '@/lib/supabase/client';
+import { describeAuthError } from '@/lib/supabase/authErrors';
 
 const inputClasses =
   'w-full bg-surface border border-border text-foreground font-mono text-sm px-3 py-2.5 min-h-11 outline-none transition-colors focus:border-primary';
@@ -37,7 +38,7 @@ export default function SignupForm() {
     });
 
     if (signUpError) {
-      setError(signUpError.message);
+      setError(describeAuthError(signUpError));
       setLoading(false);
       return;
     }
