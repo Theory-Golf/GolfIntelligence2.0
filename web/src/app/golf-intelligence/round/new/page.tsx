@@ -155,7 +155,7 @@ function roundTypeBtnClass(selected: boolean): string {
     'w-full px-4 py-3 rounded-md border font-display text-caption font-semibold tracking-[0.12em] uppercase text-left transition-colors ' +
     (selected
       ? 'border-scarlet bg-scarlet-tint text-chalk'
-      : 'border-border bg-shadow text-ash')
+      : 'border-control-border bg-control text-ash')
   );
 }
 
@@ -164,7 +164,7 @@ function roundNumBtnClass(selected: boolean): string {
     'flex-1 py-2.5 rounded-md border font-display text-data font-bold transition-colors ' +
     (selected
       ? 'border-scarlet bg-scarlet-tint text-chalk'
-      : 'border-border bg-shadow text-ash')
+      : 'border-control-border bg-control text-ash')
   );
 }
 
@@ -593,7 +593,7 @@ export default function NewRoundPage() {
                         'rounded-sm px-2 py-1 border font-mono text-label tracking-[0.15em] uppercase touch-manipulation ' +
                         (active
                           ? 'border-scarlet bg-scarlet-tint text-chalk'
-                          : 'border-border bg-shadow text-ash')
+                          : 'border-control-border bg-control text-ash')
                       }
                     >
                       {c.displayName}

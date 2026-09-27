@@ -143,7 +143,7 @@ function Shell({
             gesture instead. It has to be a fixed value: the root layout's
             viewport does not set viewportFit: 'cover', so env(safe-area-*)
             resolves to zero here. */}
-        <div className="flex-none pt-2 pb-6 flex flex-col gap-2 border-t border-border">
+        <div className="flex-none pt-2 pb-6 flex flex-col gap-3 border-t border-border">
           {commit}
         </div>
       </div>
@@ -735,13 +735,13 @@ function ShotEntry({
                       'rounded-md py-3 select-none touch-manipulation ' +
                       (selected
                         ? 'border border-scarlet bg-scarlet-tint'
-                        : 'border border-border bg-shadow active:bg-pitch')
+                        : 'border border-control-border bg-control active:bg-pitch')
                     }
                   >
                     <div
                       className={
                         'font-display font-extrabold text-2xl leading-none ' +
-                        (selected ? 'text-scarlet' : 'text-chalk')
+                        (selected ? 'text-scarlet-text' : 'text-chalk')
                       }
                     >
                       {p}
@@ -797,21 +797,21 @@ function ShotEntry({
               fire on a completed tap. A drag that turns into a scroll is
               cancelled by the browser before click, so neither can be
               triggered by reaching in to scroll. */}
-          {/* Deliberately smaller than Save and pushed to the right edge:
-              same-width buttons stacked on one centre line made Holed easy to
-              hit when Save was meant. Still a 36px target. */}
+          {/* Full width and as tall as Save so it is easy to find, but green
+              rather than Save's chalk/court: the colour, and the wider gap in
+              this zone, are what keep a thumb aimed at Save from landing here.
+              lie-green paired with court text is the same light-on-dark /
+              dark-on-light pairing the lie chips use, legible in both themes. */}
           <button
             type="button"
             onClick={onHoled}
             disabled={!parSet || saving}
             className={
-              'self-end w-auto min-h-9 rounded-md border px-5 py-2 font-display font-bold text-label tracking-[0.2em] uppercase select-none disabled:opacity-40 ' +
-              (holedSaving
-                ? 'bg-chalk border-chalk text-pitch'
-                : 'bg-obsidian border-border text-chalk active:bg-pitch active:border-chalk')
+              'w-full rounded-md bg-lie-green text-court py-3 font-display font-bold text-sm tracking-[0.2em] uppercase select-none disabled:opacity-40 ' +
+              (holedSaving ? 'brightness-90' : 'active:brightness-90')
             }
           >
-            {holedSaving ? 'Holed ✓' : 'Holed'}
+            {holedSaving ? 'Holed ✓' : 'Holed ⛳'}
           </button>
           <button
             type="button"
@@ -1007,7 +1007,7 @@ function ChoiceRow<T extends string>({
               'rounded-md border py-2 min-h-11 font-display font-bold text-sm tracking-[0.15em] uppercase select-none touch-manipulation ' +
               (selected === o
                 ? 'border-scarlet bg-scarlet-tint text-chalk'
-                : 'border-border bg-shadow text-ash')
+                : 'border-control-border bg-control text-ash')
             }
           >
             {o}
@@ -1087,7 +1087,7 @@ function PenaltyToggle({
         'flex items-center gap-2 rounded-md border px-3 h-11 select-none ' +
         (on
           ? 'border-scarlet bg-scarlet-tint'
-          : 'border-border bg-shadow')
+          : 'border-control-border bg-control')
       }
     >
       <span

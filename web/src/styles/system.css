@@ -35,7 +35,8 @@
   --color-scarlet: #E8202A;
   --color-scarlet-dim: #9B1520;
   --color-scarlet-glow: #FF3D47;
-  --color-scarlet-tint: #1F0507;
+  /* --color-scarlet-tint is NOT a primitive: it is a background, so it has
+     to flip with the theme. It is bridged in §4 from --scarlet-tint. */
 
   /* Ethos paper segment colours (Driving / Approach / Short Game / Putting) */
   --color-seg-drive: #E040A0;
@@ -229,6 +230,10 @@
   --accent: #1F0507;
   --accent-foreground: #FF3D47;
   --border-color: #2A2A2A;
+  /* Tappable controls on the round-entry screens (keypad, lie grid,
+     choice chips). Dark keeps them on --shadow; see the light block. */
+  --control: #1E1E1E;
+  --control-border: #2A2A2A;
   --input: #2A2A2A;
   --ring: #E8202A;
   --destructive: #E8202A;
@@ -312,6 +317,10 @@
   --accent: #FDE8E9;
   --accent-foreground: #C8181F;
   --border-color: #E0DDD9;
+  /* --shadow (#FAFAF9) on the #F5F3F0 page left keys and chips with no
+     visible edge; controls sit on white with a firmer border instead. */
+  --control: #FFFFFF;
+  --control-border: #CFCAC4;
   --input: #E0DDD9;
   --ring: #C8181F;
   --destructive: #C8181F;
@@ -384,6 +393,9 @@
   --color-chalk: var(--chalk);
   --color-surface: var(--surface);
   --color-scarlet-text: var(--scarlet-text);
+  --color-scarlet-tint: var(--scarlet-tint);
+  --color-control: var(--control);
+  --color-control-border: var(--control-border);
 
   --color-under: var(--under);
   --color-even: var(--even);
