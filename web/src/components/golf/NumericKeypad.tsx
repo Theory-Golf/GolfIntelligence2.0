@@ -65,7 +65,7 @@ function NumericKeypadImpl({
       'rounded-md py-2.5 select-none touch-manipulation ' +
       (pressed
         ? 'bg-pitch border border-chalk scale-95 '
-        : `${muted ? 'bg-obsidian' : 'bg-shadow'} border border-border transition-[background-color,border-color,transform] duration-150 `) +
+        : `${muted ? 'bg-obsidian' : 'bg-control'} border border-control-border transition-[background-color,border-color,transform] duration-150 `) +
       extra
     );
   }

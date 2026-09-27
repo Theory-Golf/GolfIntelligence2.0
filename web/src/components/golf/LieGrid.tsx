@@ -16,13 +16,23 @@ const LIES: Lie[] = ['Tee', 'Fairway', 'Rough', 'Sand', 'Recovery', 'Green'];
 // safe here precisely because every control in this grid is a reversible
 // selection; committing actions (Holed, Save) live outside it and commit on a
 // completed tap instead.
-function lieButtonClass(active: boolean, pressed: boolean): string {
+type LieButtonState = 'idle' | 'pressed' | 'active' | 'activeGreen';
+
+function lieButtonClass(state: LieButtonState): string {
   // py-3 keeps the target at 46px — above the 44px minimum.
   const base =
     'rounded-md py-3 px-3 font-display font-bold text-sm tracking-[0.15em] uppercase select-none touch-manipulation';
-  if (pressed) return `${base} bg-pitch border border-chalk scale-95`;
-  if (active) return `${base} bg-shadow border border-scarlet`;
-  return `${base} bg-shadow border border-border text-ash`;
+  switch (state) {
+    case 'pressed':
+      return `${base} bg-pitch border border-chalk text-chalk scale-95`;
+    case 'active':
+      return `${base} bg-scarlet-tint border border-scarlet text-scarlet-text`;
+    // Colour and border come from the green lie swatch, set inline.
+    case 'activeGreen':
+      return `${base} bg-control border`;
+    default:
+      return `${base} bg-control border border-control-border text-ash`;
+  }
 }
 
 function LieGridImpl({ selected, onChange }: LieGridProps) {
@@ -50,19 +60,24 @@ function LieGridImpl({ selected, onChange }: LieGridProps) {
         const active = selected === lie;
         const pressed = pressedKey === lie;
         // Active green keeps the green swatch; other active lies go scarlet.
-        const color =
-          pressed || !active || lie !== 'Green' ? undefined : LIE_COLORS.Green;
+        const state: LieButtonState = pressed
+          ? 'pressed'
+          : !active
+            ? 'idle'
+            : lie === 'Green'
+              ? 'activeGreen'
+              : 'active';
         return (
           <button
             key={lie}
             type="button"
             {...pressHandlers(lie)}
-            className={
-              active && !pressed && lie !== 'Green'
-                ? `${lieButtonClass(true, false)} text-scarlet`
-                : lieButtonClass(active, pressed)
+            className={lieButtonClass(state)}
+            style={
+              state === 'activeGreen'
+                ? { color: LIE_COLORS.Green, borderColor: LIE_COLORS.Green }
+                : undefined
             }
-            style={color ? { color } : undefined}
           >
             {lie.toUpperCase()}
           </button>
